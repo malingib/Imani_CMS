@@ -118,6 +118,11 @@ const App: React.FC = () => {
     { id: 'ev1', title: 'Sunday Worship Service', description: 'Main service of worship.', date: '2024-05-26', time: '09:00 AM', location: 'Main Sanctuary', attendance: ['1', '2'] },
   ]);
 
+  const handleUpdateAttendance = (eventId: string, memberIds: string[]) => {
+    setEvents(prev => prev.map(e => e.id === eventId ? { ...e, attendance: memberIds } : e));
+    addToast("Roll call updated successfully");
+  };
+
   const renderView = () => {
     if (currentView === 'PRIVACY') return <PrivacyPolicy onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
     if (currentView === 'COMPLIANCE') return <CompliancePortal onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
@@ -152,7 +157,7 @@ const App: React.FC = () => {
           budgets={[]} onSetBudget={() => {}} recurringExpenses={[]} onAddRecurring={() => {}}
         />;
       case 'EVENTS':
-        return <EventsManagement events={events} members={members} onAddEvent={(e) => { setEvents(prev => [...prev, e]); addToast("Event scheduled"); }} onDeleteEvent={(id) => setEvents(prev => prev.filter(e => e.id !== id))} onUpdateAttendance={() => {}} />;
+        return <EventsManagement events={events} members={members} onAddEvent={(e) => { setEvents(prev => [...prev, e]); addToast("Event scheduled"); }} onDeleteEvent={(id) => setEvents(prev => prev.filter(e => e.id !== id))} onUpdateAttendance={handleUpdateAttendance} />;
       case 'COMMUNICATION':
         return <CommunicationCenter members={members} logs={[]} onSendBroadcast={() => addToast("Broadcast sent")} currentUser={currentUser} />;
       case 'REPORTS':
@@ -205,7 +210,7 @@ const App: React.FC = () => {
       />
       
       <main className="flex-1 min-h-screen lg:ml-64 transition-all">
-        <header className="h-20 bg-white border-b border-slate-100 px-6 lg:px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+        <header className="h-20 bg-white border-b border-slate-100 px-6 lg:px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm print:hidden">
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors"><Menu size={24} /></button>
             <div className="hidden sm:block">

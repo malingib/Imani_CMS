@@ -1,17 +1,21 @@
 
 import React, { useState } from 'react';
-// Added Settings2 to the list of imported icons
 import { 
   Users, Wallet, Calendar, Plus, Trash2, 
   ChevronRight, Shield, UserPlus, Info, 
   CheckCircle2, Lock, LayoutGrid, ToggleLeft, ToggleRight,
-  Home, Bell, Globe, Camera, Save, Smartphone, Settings2
+  Home, Bell, Globe, Camera, Save, Smartphone, Settings2,
+  X, Loader2, AlertCircle, RefreshCcw
 } from 'lucide-react';
 import { SystemRole } from '../types';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'ROLES' | 'PREFERENCES'>('PROFILE');
   const [selectedRoleId, setSelectedRoleId] = useState('role-1');
+  const [showCreateRoleModal, setShowCreateRoleModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isTestingWebhook, setIsTestingWebhook] = useState(false);
+
   const [churchInfo, setChurchInfo] = useState({
     name: 'Imani Central Parish',
     address: '123 Harambee Ave, Nairobi',
@@ -34,22 +38,44 @@ const Settings: React.FC = () => {
       memberCount: 3,
       description: 'Manage financial records, tithes, and budgets.',
       custom: true,
-      modules: [
-        {
-          id: 'finance',
-          label: 'Finance & Giving',
-          enabled: true,
-          permissions: [
-            { id: 'view-giving', label: 'View Records', enabled: true },
-            { id: 'mpesa-recon', label: 'M-Pesa Recon', enabled: true, critical: true },
-          ]
-        }
-      ]
+      modules: []
     },
     { id: 'role-2', name: 'Administrator', memberCount: 2, description: 'Full access to all modules.', modules: [] },
   ]);
 
+  const [newRoleData, setNewRoleData] = useState({ name: '', description: '' });
+
   const activeRole = roles.find(r => r.id === selectedRoleId);
+
+  const handleSaveProfile = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+      // Logic for saving profile would go here (already updated state)
+    }, 1500);
+  };
+
+  const handleCreateRole = () => {
+    if (!newRoleData.name) return;
+    const role: SystemRole = {
+      id: `role-${Date.now()}`,
+      name: newRoleData.name,
+      description: newRoleData.description,
+      memberCount: 0,
+      custom: true,
+      modules: []
+    };
+    setRoles([...roles, role]);
+    setNewRoleData({ name: '', description: '' });
+    setShowCreateRoleModal(false);
+  };
+
+  const handleTestWebhook = () => {
+    setIsTestingWebhook(true);
+    setTimeout(() => {
+      setIsTestingWebhook(false);
+    }, 2000);
+  };
 
   return (
     <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 max-w-[1200px] mx-auto">
@@ -58,7 +84,6 @@ const Settings: React.FC = () => {
         <p className="text-slate-500 font-medium">Configure your church profile, user roles, and app preferences.</p>
       </div>
 
-      {/* Responsive Navigation Tabs */}
       <div className="flex overflow-x-auto border-b border-slate-200 no-scrollbar gap-4 lg:gap-8 pb-px">
         <button 
           onClick={() => setActiveTab('PROFILE')}
@@ -120,8 +145,13 @@ const Settings: React.FC = () => {
               </div>
             </div>
             <div className="flex justify-end pt-6 border-t border-slate-50">
-              <button className="flex items-center gap-2 px-10 py-4 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm shadow-xl hover:bg-indigo-700 transition-all">
-                <Save size={20}/> Save Changes
+              <button 
+                onClick={handleSaveProfile}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-10 py-4 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm shadow-xl hover:bg-indigo-700 transition-all disabled:opacity-50"
+              >
+                {isSaving ? <Loader2 className="animate-spin" size={20}/> : <Save size={20}/>}
+                {isSaving ? 'Updating...' : 'Save Changes'}
               </button>
             </div>
           </div>
@@ -140,13 +170,19 @@ const Settings: React.FC = () => {
                   <p className={`text-xs mt-1 font-medium ${selectedRoleId === r.id ? 'text-indigo-100' : 'text-slate-400'}`}>{r.memberCount} active users</p>
                 </button>
               ))}
-              <button className="w-full p-6 border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-black flex items-center justify-center gap-3 hover:bg-slate-50 hover:text-indigo-600 transition-all">
+              <button 
+                onClick={() => setShowCreateRoleModal(true)}
+                className="w-full p-6 border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-black flex items-center justify-center gap-3 hover:bg-slate-50 hover:text-indigo-600 transition-all"
+              >
                 <Plus size={20}/> Create New Role
               </button>
             </div>
             <div className="lg:col-span-8 bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
                <div className="flex items-center justify-between">
-                 <h3 className="text-2xl font-black text-slate-800">{activeRole?.name} Permissions</h3>
+                 <div>
+                   <h3 className="text-2xl font-black text-slate-800">{activeRole?.name} Permissions</h3>
+                   <p className="text-sm text-slate-400 font-medium mt-1">{activeRole?.description}</p>
+                 </div>
                  <Shield className="text-indigo-600" size={32}/>
                </div>
                <div className="space-y-4">
@@ -157,7 +193,7 @@ const Settings: React.FC = () => {
                     </div>
                   ))}
                </div>
-               <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black shadow-lg">Update Permissions</button>
+               <button onClick={handleSaveProfile} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black shadow-lg hover:bg-slate-800 transition-all">Update Permissions</button>
             </div>
           </div>
         )}
@@ -187,13 +223,58 @@ const Settings: React.FC = () => {
                     <p className="text-[10px] font-black uppercase text-indigo-300">Status: <span className="text-emerald-400">Connected</span></p>
                     <p className="text-sm font-medium opacity-80">Receiving instant webhooks from Safaricom Daraja API for Till 908123.</p>
                   </div>
-                  <button className="w-full py-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-600 text-sm hover:bg-slate-100 transition-all">Test Webhook Endpoint</button>
+                  <button 
+                    onClick={handleTestWebhook}
+                    disabled={isTestingWebhook}
+                    className="w-full py-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-600 text-sm hover:bg-slate-100 transition-all flex items-center justify-center gap-2"
+                  >
+                    {isTestingWebhook ? <RefreshCcw className="animate-spin" size={16}/> : <RefreshCcw size={16}/>}
+                    {isTestingWebhook ? 'Awaiting Daraja...' : 'Test Webhook Endpoint'}
+                  </button>
                   <button className="w-full py-4 bg-white border border-rose-100 rounded-xl font-black text-rose-500 text-sm hover:bg-rose-50 transition-all">Disconnect Service</button>
                </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Create Role Modal */}
+      {showCreateRoleModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-3xl font-black text-slate-800">Create Role</h3>
+              <button onClick={() => setShowCreateRoleModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={24}/></button>
+            </div>
+            <div className="space-y-4">
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-slate-400 px-2">Role Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Media Ministry Leader" 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold"
+                    value={newRoleData.name}
+                    onChange={e => setNewRoleData({...newRoleData, name: e.target.value})}
+                  />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-slate-400 px-2">Description</label>
+                  <textarea 
+                    rows={3}
+                    placeholder="Briefly describe responsibilities..." 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold resize-none"
+                    value={newRoleData.description}
+                    onChange={e => setNewRoleData({...newRoleData, description: e.target.value})}
+                  />
+               </div>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => setShowCreateRoleModal(false)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl">Cancel</button>
+              <button onClick={handleCreateRole} className="flex-1 py-4 font-black bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-700 transition-all">Create Role</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

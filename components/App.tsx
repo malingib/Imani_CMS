@@ -130,7 +130,7 @@ const App: React.FC = () => {
 
     switch (currentView) {
       case 'DASHBOARD':
-        return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => setCurrentView('MEMBERS')} onSendSMS={() => setCurrentView('COMMUNICATION')} />;
+        return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => setCurrentView('MEMBERS')} onSendSMS={() => setCurrentView('COMMUNICATION')} onNavigate={setCurrentView} />;
       case 'MY_PORTAL':
         return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} onNavigate={setCurrentView} onUpdateProfile={handleUpdateMember} />;
       case 'MEMBERS':
@@ -165,7 +165,7 @@ const App: React.FC = () => {
       case 'SETTINGS':
         return <Settings />;
       default:
-        return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => {}} onSendSMS={() => {}} />;
+        return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => {}} onSendSMS={() => {}} onNavigate={setCurrentView} />;
     }
   };
 
@@ -180,9 +180,9 @@ const App: React.FC = () => {
       <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center gap-2 pointer-events-none w-full max-w-[90%] sm:max-w-md">
         {toasts.map(toast => (
           <div key={toast.id} className={`w-full flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl shadow-2xl animate-in slide-in-from-top-4 duration-300 pointer-events-auto border ${
-            toast.type === 'success' ? 'bg-emerald-600 border-emerald-500 text-white' : 
-            toast.type === 'error' ? 'bg-brand-primary border-slate-700 text-white' : 
-            'bg-brand-primary border-slate-800 text-white'
+            toast.type === 'success' ? 'bg-brand-primary border-slate-700 text-white' : 
+            toast.type === 'error' ? 'bg-brand-gold border-brand-gold text-white' : 
+            'bg-brand-indigo border-brand-indigo text-white'
           }`}>
             {toast.type === 'success' ? <CheckCircle2 size={18}/> : toast.type === 'error' ? <AlertCircle size={18}/> : <Info size={18}/>}
             <span className="font-bold text-xs sm:text-sm tracking-tight flex-1">{toast.message}</span>
@@ -212,7 +212,6 @@ const App: React.FC = () => {
           <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors"><Menu size={22} /></button>
             
-            {/* Mobile Logo Visibility */}
             <div className="lg:hidden w-10 h-10">
               <ImaniLogoIcon />
             </div>

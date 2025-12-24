@@ -3,7 +3,9 @@ export enum MemberStatus {
   ACTIVE = 'Active',
   INACTIVE = 'Inactive',
   VISITOR = 'Visitor',
-  YOUTH = 'Youth'
+  YOUTH = 'Youth',
+  DECEASED = 'Deceased',
+  ARCHIVED = 'Archived'
 }
 
 export enum MaritalStatus {
@@ -16,7 +18,9 @@ export enum MaritalStatus {
 export enum MembershipType {
   FULL = 'Full Member',
   PROBATION = 'Probation',
-  ASSOCIATE = 'Associate'
+  ASSOCIATE = 'Associate',
+  CLERGY = 'Clergy',
+  NON_COMMUNICANT = 'Non-Communicant'
 }
 
 export enum UserRole {
@@ -52,6 +56,7 @@ export interface Member {
   maritalStatus?: MaritalStatus;
   membershipType?: MembershipType;
   photo?: string;
+  stewardshipScore?: number; // 0-100 based on attendance/giving
 }
 
 export interface Transaction {
@@ -85,7 +90,15 @@ export interface RecurringExpense {
   isActive: boolean;
 }
 
-export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ANNUALLY';
+
+export type ChurchEventType = 
+  | 'WORSHIP' 
+  | 'BIBLE_STUDY' 
+  | 'PRAYER' 
+  | 'OUTREACH' 
+  | 'YOUTH' 
+  | 'OTHER';
 
 export interface ChurchEvent {
   id: string;
@@ -94,6 +107,10 @@ export interface ChurchEvent {
   date: string;
   time: string;
   location: string;
+  type: ChurchEventType;
+  coordinator?: string;
+  contactPerson?: string;
+  rsvpDeadline?: string;
   coordinates?: { lat: number; lng: number };
   attendance: string[];
   recurrence?: RecurrenceType;
@@ -144,7 +161,6 @@ export interface Toast {
   type: 'success' | 'error' | 'info';
 }
 
-// Added missing interface for Dashboard activities
 export interface Activity {
   id: string;
   action: string;
@@ -153,7 +169,6 @@ export interface Activity {
   status: string;
 }
 
-// Added missing interface for Communication logs
 export interface CommunicationLog {
   id: string;
   type: 'SMS' | 'Email' | 'WhatsApp';
@@ -172,7 +187,6 @@ export interface CommunicationLog {
   };
 }
 
-// Added missing interface for Communication templates
 export interface CommunicationTemplate {
   id: string;
   name: string;
@@ -181,7 +195,6 @@ export interface CommunicationTemplate {
   type: 'SMS' | 'Email' | 'WhatsApp';
 }
 
-// Added missing interface for System Roles used in Settings
 export interface SystemRole {
   id: string;
   name: string;

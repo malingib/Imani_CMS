@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { 
   Heart, 
@@ -61,7 +60,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-12">
       {/* Welcome Banner */}
-      <header className="relative bg-brand-solid rounded-[3rem] p-8 lg:p-12 text-white overflow-hidden shadow-2xl">
+      <header className="relative bg-brand-primary rounded-[3rem] p-8 lg:p-12 text-white overflow-hidden shadow-2xl">
         <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start gap-8">
           <div className="max-w-2xl">
             <div className="flex items-center gap-4 mb-6">
@@ -97,7 +96,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
             {!isEditing ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-indigo-400/30 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-brand-indigo/30 flex items-center justify-center">
                     <UserIcon size={18} className="text-white" />
                   </div>
                   <div>
@@ -119,7 +118,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                 />
                 <button 
                   onClick={handleSave}
-                  className="w-full py-2 bg-brand-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2 bg-brand-indigo text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-indigo/80 transition-all flex items-center justify-center gap-2"
                 >
                   <Save size={14}/> Save Changes
                 </button>
@@ -128,19 +127,19 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
           </div>
         </div>
         
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[120%] bg-indigo-600 rounded-full blur-[120px] opacity-10 animate-pulse"></div>
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[120%] bg-brand-indigo rounded-full blur-[120px] opacity-10 animate-pulse"></div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all duration-300">
           <div>
             <div className="flex justify-between items-start mb-6">
-              <div className="p-4 bg-indigo-50 text-brand-primary rounded-2xl">
+              <div className="p-4 bg-brand-indigo/10 text-brand-indigo rounded-2xl">
                 <Wallet size={28} />
               </div>
               <button 
                 onClick={() => onNavigate('MY_GIVING')}
-                className="text-slate-400 hover:text-brand-primary transition-colors"
+                className="text-slate-400 hover:text-brand-indigo transition-colors"
               >
                 <ArrowRight size={24} />
               </button>
@@ -157,20 +156,20 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
         <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
           <div className="flex justify-between items-center mb-8">
             <h3 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-              <Calendar className="text-brand-primary" size={24} /> Upcoming Events
+              <Calendar className="text-brand-indigo" size={24} /> Upcoming Events
             </h3>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {upcomingEvents.map(event => (
-              <div key={event.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-brand-primary/20 hover:bg-white transition-all group relative overflow-hidden">
+              <div key={event.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:border-brand-indigo/20 hover:bg-white transition-all group relative overflow-hidden">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-14 h-14 bg-brand-primary rounded-2xl shadow-lg flex flex-col items-center justify-center font-black leading-none text-white flex-shrink-0">
                     <span className="text-[10px] uppercase opacity-70 mb-1">{new Date(event.date).toLocaleString('default', { month: 'short' })}</span>
                     <span className="text-xl">{new Date(event.date).getDate()}</span>
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-800 leading-tight group-hover:text-brand-primary transition-colors">{event.title}</h4>
+                    <h4 className="font-bold text-slate-800 leading-tight group-hover:text-brand-indigo transition-colors">{event.title}</h4>
                     <p className="text-[10px] text-slate-400 font-black uppercase tracking-tighter mt-1">{event.time}</p>
                   </div>
                 </div>
@@ -178,8 +177,8 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                   onClick={() => handleRegister(event.id)}
                   className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-sm ${
                     registeredEvents.has(event.id) 
-                      ? 'bg-emerald-100 text-emerald-700' 
-                      : 'bg-white text-brand-primary border border-indigo-100 hover:bg-brand-primary hover:text-white'
+                      ? 'bg-brand-emerald/20 text-brand-emerald' 
+                      : 'bg-white text-brand-indigo border border-brand-indigo/20 hover:bg-brand-indigo hover:text-white'
                   }`}
                 >
                   {registeredEvents.has(event.id) ? 'Registered' : 'Register Now'}

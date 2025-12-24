@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
@@ -123,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <p className="text-[10px] sm:text-xs font-bold text-slate-700 truncate">{currentUser.branch || branches[0]}</p>
                 </div>
               </div>
-              {isBranchMenuOpen ? <ChevronUp size={12} className="text-brand-primary" /> : <ChevronDown size={12} className="text-slate-300" />}
+              {isBranchMenuOpen ? <ChevronDown size={12} className="text-brand-primary rotate-180 transition-transform" /> : <ChevronDown size={12} className="text-slate-300 transition-transform" />}
             </button>
 
             {isBranchMenuOpen && (
@@ -158,11 +157,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => setView(item.id as AppView)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 isActive 
-                  ? 'bg-slate-100 text-brand-primary font-bold shadow-sm' 
+                  ? 'bg-brand-primary/5 text-brand-indigo font-bold shadow-sm' 
                   : 'text-slate-500 hover:bg-slate-50'
               }`}
             >
-              <Icon size={18} className={isActive ? 'text-brand-primary' : 'text-slate-400 group-hover:text-brand-primary'} />
+              <Icon size={18} className={isActive ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
               <span className="text-xs sm:text-sm">{item.label}</span>
             </button>
           );
@@ -173,7 +172,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="px-2 sm:px-4 py-1.5 sm:py-2">
           <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 sm:mb-2">Simulation</p>
           <select 
-            className="w-full bg-slate-50 border border-slate-200 rounded-lg text-[9px] sm:text-[10px] font-bold py-1.5 px-2 outline-none appearance-none cursor-pointer focus:border-brand-primary"
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg text-[9px] sm:text-[10px] font-bold py-1.5 px-2 outline-none appearance-none cursor-pointer focus:border-brand-indigo"
             value={currentUser.role}
             onChange={(e) => onRoleSwitch(e.target.value as UserRole)}
           >
@@ -186,10 +185,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         <button 
           onClick={() => setView('SETTINGS')}
           className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-            currentView === 'SETTINGS' ? 'bg-slate-100 text-brand-primary font-bold' : 'text-slate-500 hover:bg-slate-50'
+            currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'
           }`}
         >
-          <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-primary' : 'text-slate-400 group-hover:text-brand-primary'} />
+          <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
           <span className="text-xs sm:text-sm">Global Settings</span>
         </button>
         

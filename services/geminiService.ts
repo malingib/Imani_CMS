@@ -13,6 +13,26 @@ export const generateSermonOutline = async (topic: string, scripture: string) =>
   return response.text;
 };
 
+export const getBibleScriptureAndReflection = async (reference: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `Act as a Bible Scholar and Kenyan Pastor. 
+    Task: Retrieve the text of the following scripture reference: "${reference}".
+    Provide the response in two parts:
+    1. The exact text of the verse(s).
+    2. A brief, 100-word reflection or "Exegesis" focusing on its application for a modern Kenyan congregation (mentioning community, faith, or local values where applicable).
+    
+    Format the output as follows:
+    TEXT: [Verse text here]
+    REFLECTION: [Your reflection here]`,
+    config: {
+      temperature: 0.5,
+    }
+  });
+  return response.text;
+};
+
 export const generateShortInspirationalSermon = async (topic: string) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const response = await ai.models.generateContent({
@@ -27,7 +47,6 @@ export const generateShortInspirationalSermon = async (topic: string) => {
 
 export const generateDailyVerse = async () => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  // Add a unique seed based on time to force variety
   const seed = new Date().getTime();
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
@@ -38,32 +57,48 @@ export const generateDailyVerse = async () => {
     IMPORTANT: Return ONLY in this exact format: "Verse Text | Reference".
     Example: "For I know the plans I have for you... | Jeremiah 29:11"`,
     config: {
-      temperature: 1.0, // Increased temperature for more variety
+      temperature: 1.0,
     }
   });
   return response.text;
 };
 
-export const scoutOutreachLocations = async (query: string, latitude: number, longitude: number) => {
+/**
+ * Scout locations for ministry outreach using Google Maps Grounding.
+ * Uses gemini-2.5-flash as per instructions for Maps tools.
+ */
+export const scoutOutreachLocations = async (query: string, latitude?: number, longitude?: number) => {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: `Find 3 public spaces or community centers near these coordinates for a church outreach event: ${query}`,
-    config: {
-      tools: [{ googleMaps: {} }],
-      toolConfig: {
-        retrievalConfig: {
-          latLng: {
-            latitude,
-            longitude
-          }
+  
+  // Base config for Maps grounding
+  const config: any = {
+    tools: [{ googleMaps: {} }],
+  };
+
+  // Include user location in toolConfig if available
+  if (latitude && longitude) {
+    config.toolConfig = {
+      retrievalConfig: {
+        latLng: {
+          latitude,
+          longitude
         }
       }
-    },
+    };
+  }
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: `As a church outreach coordinator, find specific real-world locations for the following request: "${query}". 
+    Focus on public accessibility, safety, and community visibility in a Kenyan context. 
+    List 3-4 specific venues.`,
+    config,
   });
+
   return {
     text: response.text,
-    places: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
+    // Extracting grounding chunks (maps links)
+    groundingChunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks || []
   };
 };
 

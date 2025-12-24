@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,7 +9,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.cdnfonts.com/css/lufga" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -19,28 +23,39 @@
             colors: {
               brand: {
                 primary: {
-                  DEFAULT: '#1E293B', // The solid dark navy from the screenshot
+                  DEFAULT: '#1E293B', // Warm Navy
                   50: '#F8FAFC',
                   100: '#F1F5F9',
                   200: '#E2E8F0',
+                  300: '#CBD5E1',
+                  400: '#94A3B8',
+                  500: '#64748B',
                   600: '#1E293B',
                   700: '#0F172A',
                   800: '#020617',
+                  900: '#000000',
                 },
-                secondary: {
-                  DEFAULT: '#334155', // Lighter variant of the solid navy
-                  500: '#334155',
-                  600: '#1E293B',
+                indigo: {
+                  DEFAULT: '#4F46E5', // Indigo
+                  50: '#EEF2FF',
+                  100: '#E0E7FF',
+                  500: '#4F46E5',
+                  600: '#4338CA',
+                  700: '#3730A3',
                 },
                 gold: {
-                  DEFAULT: '#FFB800',
+                  DEFAULT: '#FFB800', // Gold
+                  50: '#FFFBEB',
+                  100: '#FEF3C7',
                   500: '#FFB800',
-                  600: '#EAB308',
+                  600: '#D97706',
                 },
-                solid: {
-                  DEFAULT: '#1E293B', // Swatch color
-                  600: '#334155',
-                  900: '#0F172A',
+                emerald: {
+                  DEFAULT: '#10B981', // Emerald
+                  50: '#ECFDF5',
+                  100: '#D1FAE5',
+                  500: '#10B981',
+                  600: '#059669',
                 }
               }
             }
@@ -73,6 +88,16 @@
         background-image: linear-gradient(#ffffff04 1px, transparent 1px), linear-gradient(90deg, #ffffff04 1px, transparent 1px);
         background-size: 40px 40px;
       }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(226, 232, 240, 0.5);
+      }
+      /* Custom cluster colors */
+      .marker-cluster-small { background-color: rgba(79, 70, 229, 0.6); }
+      .marker-cluster-small div { background-color: rgba(79, 70, 229, 0.9); color: white; }
+      .marker-cluster-medium { background-color: rgba(255, 184, 0, 0.6); }
+      .marker-cluster-medium div { background-color: rgba(255, 184, 0, 0.9); color: white; }
     </style>
   <script type="importmap">
 {
@@ -89,6 +114,5 @@
 </head>
   <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

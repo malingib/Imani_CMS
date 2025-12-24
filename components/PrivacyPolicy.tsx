@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Shield, Lock, Eye, FileText, UserCheck, ArrowLeft, Scale, CheckCircle2 } from 'lucide-react';
 
@@ -11,13 +10,13 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
     <div className="max-w-4xl mx-auto py-12 px-6 space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <button 
         onClick={onBack}
-        className="flex items-center gap-2 text-indigo-600 font-bold hover:gap-3 transition-all group mb-8"
+        className="flex items-center gap-2 text-brand-indigo font-bold hover:gap-3 transition-all group mb-8"
       >
         <ArrowLeft size={20} /> Back to Portal
       </button>
 
       <header className="space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-indigo/10 text-brand-indigo rounded-full border border-brand-indigo/20">
           <Scale size={16} />
           <span className="text-[10px] font-black uppercase tracking-widest">Legal & Privacy Framework</span>
         </div>
@@ -29,8 +28,8 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
 
       <div className="grid grid-cols-1 gap-8">
         <section className="bg-white p-8 lg:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-          <div className="flex items-center gap-4 text-indigo-600">
-            <div className="p-3 bg-indigo-50 rounded-2xl"><Eye size={24}/></div>
+          <div className="flex items-center gap-4 text-brand-indigo">
+            <div className="p-3 bg-brand-indigo/10 rounded-2xl"><Eye size={24}/></div>
             <h2 className="text-2xl font-black text-slate-800">What We Collect</h2>
           </div>
           <p className="text-slate-600 leading-relaxed font-medium">
@@ -53,8 +52,8 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
         </section>
 
         <section className="bg-white p-8 lg:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-          <div className="flex items-center gap-4 text-emerald-600">
-            <div className="p-3 bg-emerald-50 rounded-2xl"><Lock size={24}/></div>
+          <div className="flex items-center gap-4 text-brand-emerald">
+            <div className="p-3 bg-brand-emerald/10 rounded-2xl"><Lock size={24}/></div>
             <h2 className="text-2xl font-black text-slate-800">How We Use Your Data</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
@@ -65,7 +64,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
               { title: "Security", desc: "Verifying access to restricted leadership modules." }
             ].map((use, i) => (
               <div key={i} className="flex gap-4 p-4 border border-slate-50 rounded-2xl">
-                <CheckCircle2 className="text-emerald-500 shrink-0" size={18} />
+                <CheckCircle2 className="text-brand-emerald shrink-0" size={18} />
                 <div>
                   <h4 className="font-bold text-slate-800 text-sm">{use.title}</h4>
                   <p className="text-xs text-slate-500 mt-1">{use.desc}</p>
@@ -75,9 +74,9 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
           </div>
         </section>
 
-        <section className="bg-brand-solid p-8 lg:p-10 rounded-[2.5rem] text-white space-y-6 relative overflow-hidden">
+        <section className="bg-brand-primary p-8 lg:p-10 rounded-[2.5rem] text-white space-y-6 relative overflow-hidden">
           <div className="relative z-10">
-            <div className="flex items-center gap-4 text-indigo-300">
+            <div className="flex items-center gap-4 text-brand-indigo/80">
               <div className="p-3 bg-white/10 rounded-2xl"><FileText size={24}/></div>
               <h2 className="text-2xl font-black">Your Data Subject Rights</h2>
             </div>
@@ -92,13 +91,13 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
                 { title: "Right to Information", desc: "Be notified of any breach involving your personal data within 72 hours." }
               ].map((right, i) => (
                 <div key={i} className="p-5 bg-white/5 border border-white/10 rounded-2xl">
-                   <h4 className="font-black text-indigo-300 text-sm mb-1">{right.title}</h4>
+                   <h4 className="font-black text-brand-indigo/80 text-sm mb-1">{right.title}</h4>
                    <p className="text-xs text-indigo-100/60 leading-relaxed">{right.desc}</p>
                 </div>
               ))}
             </div>
           </div>
-          <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-indigo-500 rounded-full blur-[80px] opacity-20"></div>
+          <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-indigo rounded-full blur-[80px] opacity-20"></div>
         </section>
 
         <footer className="text-center py-8 space-y-4">

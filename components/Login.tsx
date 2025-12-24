@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Lock, Mail, ArrowRight, Loader2, 
@@ -24,7 +23,7 @@ const FALLBACK_VERSES = [
   { text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles.", ref: "Isaiah 40:31" }
 ];
 
-const VERSE_INTERVAL = 30000; // Increased to 30 seconds for better readability
+const VERSE_INTERVAL = 30000; 
 
 const ImaniBrandingLogo = () => (
   <div className="flex flex-col items-center justify-center space-y-8">
@@ -57,7 +56,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
 
   const fetchAiVerse = async () => {
     setFade(false);
-    // Longer delay for fade out
     await new Promise(resolve => setTimeout(resolve, 1000));
     try {
       const raw = await generateDailyVerse();
@@ -159,7 +157,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
           {mode !== 'LOGIN' && (
             <button 
               onClick={() => { setMode('LOGIN'); setSuccess(''); setError(''); }}
-              className="absolute top-8 left-8 lg:top-12 lg:left-12 flex items-center gap-2 text-slate-400 hover:text-brand-primary font-bold transition-all text-sm"
+              className="absolute top-8 left-8 lg:top-12 lg:left-12 flex items-center gap-2 text-slate-400 hover:text-brand-indigo font-bold transition-all text-sm"
             >
               <ArrowLeft size={18} /> Back to Sign In
             </button>
@@ -177,15 +175,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
           </div>
 
           {success ? (
-            <div className="p-8 bg-emerald-50 rounded-[2rem] border border-emerald-100 text-center space-y-4 animate-in zoom-in duration-300">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+            <div className="p-8 bg-brand-emerald/10 rounded-[2rem] border border-brand-emerald/20 text-center space-y-4 animate-in zoom-in duration-300">
+              <div className="w-16 h-16 bg-brand-emerald/20 text-brand-emerald rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle2 size={32} />
               </div>
               <h4 className="text-xl font-black text-brand-primary tracking-tight">Success</h4>
               <p className="text-slate-600 font-medium text-sm leading-relaxed">{success}</p>
               <button 
                 onClick={() => { setMode('LOGIN'); setSuccess(''); }}
-                className="w-full py-4 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary-700 transition-all shadow-lg shadow-brand-primary/10"
+                className="w-full py-4 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/10"
               >
                 Return to Login
               </button>
@@ -201,7 +199,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
                       type="text"
                       required
                       placeholder="e.g. John Kamau"
-                      className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-brand-primary focus:ring-2 focus:ring-brand-primary outline-none transition-all"
+                      className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-brand-primary focus:ring-2 focus:ring-brand-indigo outline-none transition-all"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
@@ -217,7 +215,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
                     type="email"
                     required
                     placeholder="e.g. pastor@imani.org"
-                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-brand-primary focus:ring-2 focus:ring-brand-primary outline-none transition-all"
+                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-brand-primary focus:ring-2 focus:ring-brand-indigo outline-none transition-all"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -233,11 +231,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
-                      className="w-full pl-14 pr-14 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-brand-primary focus:ring-2 focus:ring-brand-primary outline-none transition-all"
+                      className="w-full pl-14 pr-14 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-brand-primary focus:ring-2 focus:ring-brand-indigo outline-none transition-all"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-brand-primary transition-colors">
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-brand-indigo transition-colors">
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
@@ -249,7 +247,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
                   <button 
                     type="button" 
                     onClick={() => setMode('RESET')}
-                    className="text-xs font-black text-brand-primary uppercase tracking-widest hover:underline"
+                    className="text-xs font-black text-brand-indigo uppercase tracking-widest hover:underline"
                   >
                     Forgot Password?
                   </button>
@@ -265,7 +263,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-5 bg-brand-primary text-white rounded-full font-black text-lg shadow-xl shadow-brand-primary/20 hover:bg-brand-primary-700 transition-all flex items-center justify-center gap-3 disabled:opacity-70 group mt-4"
+                className="w-full py-5 bg-brand-primary text-white rounded-full font-black text-lg shadow-xl shadow-brand-primary/20 hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-70 group mt-4"
               >
                 {isLoading ? <Loader2 className="animate-spin" /> : (
                   <>
@@ -280,7 +278,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
           {mode === 'LOGIN' && (
             <div className="mt-8 text-center">
               <p className="text-sm text-slate-400 font-medium">
-                New to Imani? <button onClick={() => setMode('SIGNUP')} className="text-brand-primary font-black hover:underline ml-1">Create an Account</button>
+                New to Imani? <button onClick={() => setMode('SIGNUP')} className="text-brand-indigo font-black hover:underline ml-1">Create an Account</button>
               </p>
             </div>
           )}
@@ -321,7 +319,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
         <div className="flex items-center gap-3 text-slate-400">
            <Globe size={16} />
            <p className="text-sm font-bold">
-             Powered by <a href="#" className="text-brand-primary hover:underline font-black">Mobiwave Innovations</a>
+             Powered by <a href="#" className="text-brand-indigo hover:underline font-black">Mobiwave Innovations</a>
            </p>
         </div>
         

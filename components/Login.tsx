@@ -24,6 +24,8 @@ const FALLBACK_VERSES = [
   { text: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles.", ref: "Isaiah 40:31" }
 ];
 
+const VERSE_INTERVAL = 30000; // Increased to 30 seconds for better readability
+
 const ImaniBrandingLogo = () => (
   <div className="flex flex-col items-center justify-center space-y-8">
     <div className="w-48 h-48 md:w-64 md:h-64 drop-shadow-2xl">
@@ -55,7 +57,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
 
   const fetchAiVerse = async () => {
     setFade(false);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Longer delay for fade out
+    await new Promise(resolve => setTimeout(resolve, 1000));
     try {
       const raw = await generateDailyVerse();
       if (raw) {
@@ -73,9 +76,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
 
   useEffect(() => {
     fetchAiVerse();
-    const vInterval = setInterval(fetchAiVerse, 15000);
+    const vInterval = setInterval(fetchAiVerse, VERSE_INTERVAL);
     const pInterval = setInterval(() => {
-      setProgress(prev => (prev >= 100 ? 100 : prev + (100 / (15000 / 100))));
+      setProgress(prev => (prev >= 100 ? 100 : prev + (100 / (VERSE_INTERVAL / 100))));
     }, 100);
     return () => { clearInterval(vInterval); clearInterval(pInterval); };
   }, []);
@@ -127,7 +130,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
           <ImaniBrandingLogo />
           
           <div className="mt-16 w-full max-w-md relative z-10">
-            <div className={`p-8 bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 transition-all duration-500 ${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <div className={`p-8 bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 transition-all duration-1000 ${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <Quote className="text-brand-gold mb-3 opacity-60" size={24} />
               <p className="text-white text-lg font-bold italic leading-relaxed mb-4">"{currentVerse.text}"</p>
               <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">— {currentVerse.ref}</p>
@@ -288,19 +291,19 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
               <div className="flex flex-wrap justify-center gap-3 mb-6">
                 <button 
                   onClick={() => { setEmail('admin@imani.org'); setPassword('admin'); }} 
-                  className="px-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
+                  className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
                 >
                   Admin
                 </button>
                 <button 
                   onClick={() => { setEmail('pastor@imani.org'); setPassword('pastor'); }} 
-                  className="px-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
+                  className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
                 >
                   Pastor
                 </button>
                 <button 
                   onClick={() => { setEmail('member@imani.org'); setPassword('member'); }} 
-                  className="px-10 py-3 bg-white border border-slate-200 rounded-xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
+                  className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
                 >
                   Member
                 </button>

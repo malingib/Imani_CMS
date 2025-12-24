@@ -23,7 +23,8 @@ export enum UserRole {
   ADMIN = 'ADMIN',
   PASTOR = 'PASTOR',
   TREASURER = 'TREASURER',
-  SECRETARY = 'SECRETARY'
+  SECRETARY = 'SECRETARY',
+  MEMBER = 'MEMBER'
 }
 
 export interface User {
@@ -31,6 +32,8 @@ export interface User {
   name: string;
   role: UserRole;
   avatar: string;
+  memberId?: string;
+  branch?: string;
 }
 
 export interface Member {
@@ -40,7 +43,7 @@ export interface Member {
   phone: string;
   email: string;
   location: string;
-  group: string; // Cell group / Fellowship
+  group: string;
   status: MemberStatus;
   joinDate: string;
   birthday?: string;
@@ -48,7 +51,7 @@ export interface Member {
   gender?: 'Male' | 'Female' | 'Other';
   maritalStatus?: MaritalStatus;
   membershipType?: MembershipType;
-  photo?: string; // base64
+  photo?: string;
 }
 
 export interface Transaction {
@@ -61,15 +64,15 @@ export interface Transaction {
   date: string;
   reference: string;
   category: 'Income' | 'Expense';
-  subCategory?: string; // Custom category assigned by user
-  phoneNumber?: string; // For M-Pesa transactions
+  subCategory?: string;
+  phoneNumber?: string;
 }
 
 export interface Budget {
   id: string;
   category: string;
   amount: number;
-  month: string; // YYYY-MM
+  month: string;
 }
 
 export interface RecurringExpense {
@@ -92,9 +95,9 @@ export interface ChurchEvent {
   time: string;
   location: string;
   coordinates?: { lat: number; lng: number };
-  attendance: string[]; // Array of member IDs
+  attendance: string[];
   recurrence?: RecurrenceType;
-  reminderTime?: string; // e.g., "1 hour before"
+  reminderTime?: string;
 }
 
 export interface Sermon {
@@ -104,34 +107,53 @@ export interface Sermon {
   date: string;
   time: string;
   scripture: string;
-  event: string; // Legacy event name string
-  eventId?: string; // ID of the associated event from Events module
-  transcript?: string; // Full text transcript
+  event: string;
+  eventId?: string;
+  transcript?: string;
 }
 
-export interface Permission {
+export interface AppNotification {
   id: string;
-  label: string;
-  enabled: boolean;
-  critical?: boolean;
+  title: string;
+  message: string;
+  time: string;
+  type: 'SYSTEM' | 'MPESA' | 'MEMBER' | 'EVENT';
+  read: boolean;
 }
 
-export interface ModulePermission {
+export type AppView = 
+  | 'DASHBOARD' 
+  | 'MEMBERS' 
+  | 'FINANCE' 
+  | 'GROUPS' 
+  | 'EVENTS' 
+  | 'COMMUNICATION' 
+  | 'REPORTS' 
+  | 'SERMONS' 
+  | 'ANALYTICS' 
+  | 'SETTINGS' 
+  | 'MY_PORTAL' 
+  | 'MY_GIVING' 
+  | 'PRIVACY' 
+  | 'COMPLIANCE' 
+  | 'SECURITY';
+
+export interface Toast {
   id: string;
-  label: string;
-  enabled: boolean;
-  permissions: Permission[];
+  message: string;
+  type: 'success' | 'error' | 'info';
 }
 
-export interface SystemRole {
+// Added missing interface for Dashboard activities
+export interface Activity {
   id: string;
-  name: string;
-  memberCount: number;
-  description: string;
-  custom?: boolean;
-  modules: ModulePermission[];
+  action: string;
+  user: string;
+  date: string;
+  status: string;
 }
 
+// Added missing interface for Communication logs
 export interface CommunicationLog {
   id: string;
   type: 'SMS' | 'Email' | 'WhatsApp';
@@ -141,7 +163,7 @@ export interface CommunicationLog {
   content: string;
   date: string;
   scheduledFor?: string;
-  status: 'Sent' | 'Failed' | 'Scheduled' | 'Draft';
+  status: 'Sent' | 'Scheduled' | 'Failed';
   sender: string;
   deliveryBreakdown?: {
     delivered: number;
@@ -150,20 +172,31 @@ export interface CommunicationLog {
   };
 }
 
-export interface Activity {
-  id: string;
-  action: string;
-  user: string;
-  date: string;
-  status: 'Completed' | 'Verified' | 'Sent' | 'Failed';
-}
-
+// Added missing interface for Communication templates
 export interface CommunicationTemplate {
   id: string;
   name: string;
-  type: 'SMS' | 'Email' | 'WhatsApp';
   subject?: string;
   content: string;
+  type: 'SMS' | 'Email' | 'WhatsApp';
 }
 
-export type AppView = 'DASHBOARD' | 'MEMBERS' | 'FINANCE' | 'GROUPS' | 'EVENTS' | 'COMMUNICATION' | 'REPORTS' | 'SERMONS' | 'ANALYTICS' | 'SETTINGS';
+// Added missing interface for System Roles used in Settings
+export interface SystemRole {
+  id: string;
+  name: string;
+  memberCount: number;
+  description: string;
+  custom?: boolean;
+  modules: {
+    id: string;
+    label: string;
+    enabled: boolean;
+    permissions: {
+      id: string;
+      label: string;
+      enabled: boolean;
+      critical?: boolean;
+    }[];
+  }[];
+}

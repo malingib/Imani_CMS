@@ -1,5 +1,5 @@
 {
-  "name": "Baraka Church Management System",
+  "name": "Imani Church Management System",
   "description": "A comprehensive, AI-powered church management platform tailored for the Kenyan context, featuring M-Pesa integration tracking, member management, and AI sermon assistance.",
   "requestFramePermissions": [
     "camera",

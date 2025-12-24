@@ -1,10 +1,10 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Users, MapPin, TrendingUp, PieChart as PieIcon, 
   UserPlus, UserCheck, Map as MapIcon, Briefcase,
   Activity, Wallet, Calendar, ChartArea, ArrowUpRight,
-  TrendingDown, Info
+  TrendingDown, Info, X, Maximize2, ExternalLink
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, 
@@ -19,8 +19,26 @@ interface DemographicsAnalysisProps {
 
 type AnalyticsTab = 'DEMOGRAPHICS' | 'GROWTH' | 'GIVING' | 'ENGAGEMENT';
 
+// Mock coordinate mapping for Kenyan regions
+const LOCATION_COORDS: Record<string, [number, number]> = {
+  'Nairobi West': [-1.3048, 36.8206],
+  'Kileleshwa': [-1.2828, 36.7865],
+  'Thika Road': [-1.2212, 36.8837],
+  'Nairobi Central': [-1.286389, 36.817223],
+  'Westlands': [-1.2633, 36.8028],
+  'Langata': [-1.3333, 36.7667],
+  'Donholm': [-1.3000, 36.8833],
+  'Kasaran': [-1.2167, 36.9000],
+  'Kiambu': [-1.1667, 36.8333],
+  'Default': [-1.286389, 36.817223]
+};
+
 const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) => {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('DEMOGRAPHICS');
+  const [showMapModal, setShowMapModal] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+
   const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
 
   const locationData = useMemo(() => {
@@ -71,6 +89,55 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
     { day: 'Sun 3', physical: 910, online: 280, target: 1000 },
     { day: 'Sun 4', physical: 850, online: 360, target: 1000 },
   ];
+
+  // Initialize Map when modal opens
+  useEffect(() => {
+    if (showMapModal && mapContainerRef.current) {
+      const L = (window as any).L;
+      if (!L) return;
+
+      // Clean up previous instance if any
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+      }
+
+      const map = L.map(mapContainerRef.current).setView([-1.286389, 36.817223], 12);
+      
+      L.tileLayer('https://{s}.tile.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      }).addTo(map);
+
+      // Add density circles
+      locationData.forEach((loc) => {
+        const coords = LOCATION_COORDS[loc.name] || LOCATION_COORDS['Default'];
+        const radius = Math.sqrt(loc.value) * 300; // Visual scaling
+
+        const circle = L.circle(coords, {
+          color: '#4f46e5',
+          fillColor: '#6366f1',
+          fillOpacity: 0.4,
+          radius: radius,
+          weight: 2
+        }).addTo(map);
+
+        circle.bindPopup(`
+          <div style="font-family: 'Inter', sans-serif; padding: 4px;">
+            <h4 style="margin: 0 0 4px 0; font-weight: 900; color: #1e293b; font-size: 14px;">${loc.name}</h4>
+            <p style="margin: 0; color: #6366f1; font-weight: 700; font-size: 12px;">${loc.value} Members Registered</p>
+          </div>
+        `);
+      });
+
+      mapInstanceRef.current = map;
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [showMapModal, locationData]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -127,12 +194,12 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
               <h4 className="text-xl font-black text-slate-800 mb-8 flex items-center gap-3"><PieIcon size={20} className="text-emerald-500"/> Gender Split</h4>
               <div className="h-72 w-full"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={genderData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={10} dataKey="value">{genderData.map((e, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Tooltip /><Legend /></PieChart></ResponsiveContainer></div>
             </div>
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col justify-between">
+            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col justify-between group">
               <div>
                 <h4 className="text-xl font-black text-slate-800 mb-4 flex items-center gap-3"><MapIcon size={20} className="text-amber-500"/> Geo-Heatmap</h4>
                 <p className="text-sm text-slate-500 mb-6 font-medium">Majority of members reside in {locationData[0]?.name}, accounting for {Math.round((locationData[0]?.value / members.length) * 100)}% of the congregation.</p>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 mb-6">
                 {locationData.slice(0, 3).map(loc => (
                   <div key={loc.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                     <span className="text-xs font-bold text-slate-700">{loc.name}</span>
@@ -140,6 +207,12 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                   </div>
                 ))}
               </div>
+              <button 
+                onClick={() => setShowMapModal(true)}
+                className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+              >
+                <Maximize2 size={16}/> Explore Distribution Map
+              </button>
             </div>
           </div>
         </>
@@ -243,6 +316,59 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
           <div className="mt-8 p-6 bg-slate-50 rounded-[2rem] border border-slate-100 flex items-center gap-6">
              <div className="p-4 bg-white rounded-2xl text-indigo-600 shadow-sm"><Info size={24}/></div>
              <p className="text-sm text-slate-600 font-medium">Service engagement peaked at <span className="font-black text-slate-800">1,190 souls</span> during Sun 3, likely due to the "Family Day" theme. Engagement is 12% higher than last quarter.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Distribution Map Modal */}
+      {showMapModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xl z-[200] flex items-center justify-center p-4 lg:p-10 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[3rem] w-full h-full shadow-2xl flex flex-col relative overflow-hidden">
+             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white z-10">
+                <div>
+                   <h3 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                      <MapIcon className="text-indigo-600" size={28}/> Distribution Mapping
+                   </h3>
+                   <p className="text-slate-500 font-medium text-sm mt-1 uppercase tracking-widest flex items-center gap-2">
+                     Congregation Density across Nairobi & Surrounding Regions
+                   </p>
+                </div>
+                <div className="flex gap-4">
+                   <button className="flex items-center gap-2 px-6 py-3 bg-slate-50 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-100">
+                      <ExternalLink size={16}/> Export Geo-Report
+                   </button>
+                   <button 
+                    onClick={() => setShowMapModal(false)}
+                    className="p-4 bg-slate-100 text-slate-400 hover:text-rose-500 rounded-2xl shadow-sm transition-all"
+                   >
+                      <X size={24}/>
+                   </button>
+                </div>
+             </div>
+
+             <div className="flex-1 relative">
+                <div ref={mapContainerRef} className="absolute inset-0 z-0 h-full" />
+                
+                {/* Overlay Legend */}
+                <div className="absolute bottom-10 left-10 z-[100] bg-white/90 backdrop-blur-md p-6 rounded-[2rem] border border-slate-100 shadow-2xl max-w-xs space-y-4">
+                   <h5 className="font-black text-slate-800 text-sm uppercase tracking-widest border-b border-slate-100 pb-2">Legend</h5>
+                   <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                         <div className="w-4 h-4 rounded-full bg-indigo-600/40 border-2 border-indigo-600" />
+                         <span className="text-xs font-bold text-slate-600">Member Density Zone</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
+                        Radius correlates with the number of registered members in each administrative area.
+                      </p>
+                   </div>
+                </div>
+             </div>
+
+             <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                  Powered by Imani Geo-Intelligence • Real-time ODPC Compliant Data
+                </p>
+             </div>
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Membership from './components/Membership';
@@ -8,133 +8,148 @@ import EventsManagement from './components/EventsManagement';
 import FinanceReporting from './components/FinanceReporting';
 import CommunicationCenter from './components/CommunicationCenter';
 import DemographicsAnalysis from './components/DemographicsAnalysis';
+import GroupsManagement from './components/GroupsManagement';
+import ReportsCenter from './components/ReportsCenter';
 import Settings from './components/Settings';
+import Login from './components/Login';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import CompliancePortal from './components/CompliancePortal';
+import SecurityOverview from './components/SecurityOverview';
+import NotificationsPanel from './components/NotificationsPanel';
+import MemberPortal from './components/MemberPortal';
 import { 
   AppView, Member, MemberStatus, Transaction, 
   ChurchEvent, MaritalStatus, MembershipType,
-  User, UserRole, CommunicationLog, Budget, RecurringExpense
+  User, UserRole, CommunicationLog, Budget, RecurringExpense,
+  AppNotification, Toast
 } from './types';
-import { Search, Bell, User as UserIcon, BarChart3 } from 'lucide-react';
+import { Bell, Menu, X, Smartphone, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('DASHBOARD');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [toasts, setToasts] = useState<Toast[]>([]);
   
-  // Auth / Role State
-  const [currentUser, setCurrentUser] = useState<User>({
-    id: 'u1',
-    name: 'Pastor John',
-    role: UserRole.ADMIN,
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100'
+  const [churchInfo] = useState({
+    name: 'Imani Central Parish',
+    region: 'Kenya Region'
   });
 
-  // Members State
+  const [branches] = useState(['Nairobi Central', 'Mombasa Branch', 'Kisumu Outreach', 'Nakuru Parish']);
+
+  // Notifications State
+  const [notifications, setNotifications] = useState<AppNotification[]>([
+    {
+      id: 'n1',
+      title: 'M-Pesa Transaction',
+      message: 'New Tithe received from Mary Wambui: KES 12,000.',
+      time: '2 mins ago',
+      type: 'MPESA',
+      read: false
+    }
+  ]);
+
+  const addToast = (message: string, type: Toast['type'] = 'success') => {
+    const id = Math.random().toString(36).substr(2, 9);
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  };
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('imani_user');
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      setCurrentUser(parsedUser);
+      setIsLoggedIn(true);
+      if (parsedUser.role === UserRole.MEMBER) setCurrentView('MY_PORTAL');
+    }
+  }, []);
+
+  const handleLogin = (user: User) => {
+    const userWithBranch = { ...user, branch: user.branch || branches[0] };
+    setCurrentUser(userWithBranch);
+    setIsLoggedIn(true);
+    localStorage.setItem('imani_user', JSON.stringify(userWithBranch));
+    setCurrentView(user.role === UserRole.MEMBER ? 'MY_PORTAL' : 'DASHBOARD');
+    addToast(`Logged in successfully as ${user.name}`);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    localStorage.removeItem('imani_user');
+    addToast("Logged out successfully", "info");
+  };
+
+  const handleBranchChange = (branch: string) => {
+    if (currentUser) {
+      const updatedUser = { ...currentUser, branch };
+      setCurrentUser(updatedUser);
+      localStorage.setItem('imani_user', JSON.stringify(updatedUser));
+      addToast(`Switched to ${branch}`);
+    }
+  };
+
   const [members, setMembers] = useState<Member[]>([
     { id: '1', firstName: 'David', lastName: 'Ochieng', phone: '0712345678', email: 'david@example.com', location: 'Nairobi West', group: 'Youth Fellowship', status: MemberStatus.ACTIVE, joinDate: '2023-01-15', maritalStatus: MaritalStatus.SINGLE, membershipType: MembershipType.FULL, age: 24, gender: 'Male' },
     { id: '2', firstName: 'Mary', lastName: 'Wambui', phone: '0722111222', email: 'mary@example.com', location: 'Kileleshwa', group: 'Women of Grace', status: MemberStatus.ACTIVE, joinDate: '2022-11-20', maritalStatus: MaritalStatus.MARRIED, membershipType: MembershipType.FULL, age: 38, gender: 'Female' },
-    { id: '3', firstName: 'Kennedy', lastName: 'Kamau', phone: '0733444555', email: 'ken@example.com', location: 'Thika Road', group: 'Men of Valor', status: MemberStatus.ACTIVE, joinDate: '2024-02-10', maritalStatus: MaritalStatus.SINGLE, membershipType: MembershipType.PROBATION, age: 31, gender: 'Male' },
   ]);
 
-  // Transactions State
+  const handleUpdateMember = (updatedMember: Member) => {
+    setMembers(prev => prev.map(m => m.id === updatedMember.id ? updatedMember : m));
+    addToast("Profile updated successfully");
+  };
+
   const [transactions, setTransactions] = useState<Transaction[]>([
     { id: 'trx1', memberId: '1', memberName: 'David Ochieng', amount: 5000, type: 'Tithe', paymentMethod: 'M-Pesa', date: '2024-05-19', reference: 'QSG812L90P', category: 'Income' },
-    { id: 'trx2', memberId: '2', memberName: 'Mary Wambui', amount: 12000, type: 'Offering', paymentMethod: 'M-Pesa', date: '2024-05-19', reference: 'RYH451K01X', category: 'Income' },
-    { id: 'exp1', memberId: '0', memberName: 'Kenya Power', amount: 4500, type: 'Expense', paymentMethod: 'Bank Transfer', date: '2024-05-18', reference: 'KPLC-UT-01', category: 'Expense', subCategory: 'Utilities' },
   ]);
 
-  // Budgeting State
-  const [budgets, setBudgets] = useState<Budget[]>([
-    { id: 'b1', category: 'Utilities', amount: 10000, month: '2024-05' },
-    { id: 'b2', category: 'Staff Salaries', amount: 150000, month: '2024-05' },
-  ]);
-
-  // Recurring Expenses State
-  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([
-    { id: 're1', name: 'Sanctuary Rent', amount: 45000, category: 'Maintenance', frequency: 'Monthly', nextDueDate: '2024-06-01', isActive: true },
-  ]);
-
-  // Events State
   const [events, setEvents] = useState<ChurchEvent[]>([
-    { id: 'ev1', title: 'Sunday Worship Service', description: 'Main service.', date: '2024-05-26', time: '09:00 AM', location: 'Main Sanctuary', attendance: ['1', '2'] },
+    { id: 'ev1', title: 'Sunday Worship Service', description: 'Main service of worship.', date: '2024-05-26', time: '09:00 AM', location: 'Main Sanctuary', attendance: ['1', '2'] },
   ]);
-
-  // Communication Logs State
-  const [commsLogs, setCommsLogs] = useState<CommunicationLog[]>([
-    { id: 'l1', type: 'SMS', recipientCount: 850, targetGroupName: 'All Members', subject: 'Service Reminder', content: 'Join us!', date: '2024-05-18', status: 'Sent', sender: 'Pastor John' },
-  ]);
-
-  const addMember = (m: Member) => setMembers(prev => [...prev, m]);
-  const addEvent = (e: ChurchEvent) => setEvents(prev => [...prev, e]);
-  const deleteEvent = (id: string) => setEvents(prev => prev.filter(e => e.id !== id));
-  const updateAttendance = (eventId: string, memberIds: string[]) => {
-    setEvents(prev => prev.map(e => e.id === eventId ? { ...e, attendance: memberIds } : e));
-  };
-  const addTransaction = (trx: Transaction) => setTransactions(prev => [trx, ...prev]);
-  const updateTransaction = (updated: Transaction) => {
-    setTransactions(prev => prev.map(t => t.id === updated.id ? updated : t));
-  };
-  const addCommsLog = (log: CommunicationLog) => setCommsLogs(prev => [log, ...prev]);
-  const setBudget = (budget: Budget) => {
-    setBudgets(prev => {
-      const idx = prev.findIndex(b => b.category === budget.category && b.month === budget.month);
-      if (idx > -1) {
-        const next = [...prev];
-        next[idx] = budget;
-        return next;
-      }
-      return [...prev, budget];
-    });
-  };
-  const addRecurring = (expense: RecurringExpense) => setRecurringExpenses(prev => [...prev, expense]);
-
-  const handleRoleSwitch = (role: UserRole) => {
-    const avatars: Record<UserRole, string> = {
-      [UserRole.ADMIN]: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100',
-      [UserRole.PASTOR]: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=100&h=100',
-      [UserRole.TREASURER]: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100',
-      [UserRole.SECRETARY]: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100'
-    };
-    setCurrentUser(prev => ({ ...prev, role, avatar: avatars[role] }));
-  };
 
   const renderView = () => {
+    if (currentView === 'PRIVACY') return <PrivacyPolicy onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
+    if (currentView === 'COMPLIANCE') return <CompliancePortal onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
+    if (currentView === 'SECURITY') return <SecurityOverview onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
+
+    if (!isLoggedIn || !currentUser) return null;
+
     switch (currentView) {
       case 'DASHBOARD':
-        return <Dashboard 
-          members={members} 
-          transactions={transactions} 
-          events={events}
-          onAddMember={() => setCurrentView('MEMBERS')}
-          onSendSMS={() => setCurrentView('COMMUNICATION')}
-        />;
+        return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => setCurrentView('MEMBERS')} onSendSMS={() => setCurrentView('COMMUNICATION')} />;
+      case 'MY_PORTAL':
+        return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} onNavigate={setCurrentView} onUpdateProfile={handleUpdateMember} />;
       case 'MEMBERS':
-        return <Membership members={members} onAddMember={addMember} />;
+        return <Membership 
+          members={members} 
+          onAddMember={(m) => { setMembers(prev => [...prev, m]); addToast("Member added successfully"); }} 
+          transactions={transactions} 
+          events={events} 
+          currentUserRole={currentUser.role}
+        />;
+      case 'GROUPS':
+        return <GroupsManagement members={members} />;
       case 'SERMONS':
         return <SermonHistory events={events} />;
       case 'FINANCE':
         return <FinanceReporting 
           transactions={transactions} 
-          members={members}
-          onAddTransaction={addTransaction}
-          onUpdateTransaction={updateTransaction}
-          budgets={budgets}
-          onSetBudget={setBudget}
-          recurringExpenses={recurringExpenses}
-          onAddRecurring={addRecurring}
+          members={members} 
+          onAddTransaction={(t) => { setTransactions(prev => [t, ...prev]); addToast("Transaction recorded"); }}
+          budgets={[]} onSetBudget={() => {}} recurringExpenses={[]} onAddRecurring={() => {}}
         />;
       case 'EVENTS':
-        return <EventsManagement events={events} members={members} onAddEvent={addEvent} onDeleteEvent={deleteEvent} onUpdateAttendance={updateAttendance} />;
+        return <EventsManagement events={events} members={members} onAddEvent={(e) => { setEvents(prev => [...prev, e]); addToast("Event scheduled"); }} onDeleteEvent={(id) => setEvents(prev => prev.filter(e => e.id !== id))} onUpdateAttendance={() => {}} />;
       case 'COMMUNICATION':
-        return <CommunicationCenter members={members} logs={commsLogs} onSendBroadcast={addCommsLog} currentUser={currentUser} />;
+        return <CommunicationCenter members={members} logs={[]} onSendBroadcast={() => addToast("Broadcast sent")} currentUser={currentUser} />;
       case 'REPORTS':
-        return <DemographicsAnalysis members={members} />;
-      case 'GROUPS':
-        return (
-          <div className="flex flex-col items-center justify-center h-[70vh] text-slate-400 bg-white rounded-[3rem] border border-dashed border-slate-200">
-             <UserIcon size={64} className="mb-6 opacity-20" />
-             <p className="text-2xl font-black text-slate-800">Small Groups & Cell Units</p>
-             <p className="text-sm mt-2 font-medium">Manage home fellowship groups and church departments.</p>
-          </div>
-        );
+        return <ReportsCenter transactions={transactions} members={members} events={events} />;
       case 'ANALYTICS':
         return <DemographicsAnalysis members={members} />;
       case 'SETTINGS':
@@ -144,41 +159,71 @@ const App: React.FC = () => {
     }
   };
 
+  if (!isLoggedIn || !currentUser) {
+    if (['PRIVACY', 'COMPLIANCE', 'SECURITY'].includes(currentView)) return renderView();
+    return <Login onLogin={handleLogin} onNavigateLegal={setCurrentView} />;
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 flex overflow-x-hidden font-sans">
+      {/* Toast System */}
+      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[300] flex flex-col items-center gap-3 pointer-events-none">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl animate-in slide-in-from-top-8 duration-300 pointer-events-auto border ${
+            toast.type === 'success' ? 'bg-emerald-600 border-emerald-500 text-white' : 
+            toast.type === 'error' ? 'bg-rose-600 border-rose-500 text-white' : 
+            'bg-slate-900 border-slate-800 text-white'
+          }`}>
+            {toast.type === 'success' ? <CheckCircle2 size={20}/> : toast.type === 'error' ? <AlertCircle size={20}/> : <Info size={20}/>}
+            <span className="font-bold text-sm tracking-tight">{toast.message}</span>
+            <button onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))} className="ml-4 opacity-50 hover:opacity-100 transition-opacity"><X size={16}/></button>
+          </div>
+        ))}
+      </div>
+
+      {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
       <Sidebar 
         currentView={currentView} 
-        setView={setCurrentView} 
-        currentUser={currentUser}
-        onRoleSwitch={handleRoleSwitch}
+        setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} 
+        currentUser={currentUser} 
+        branches={branches}
+        onBranchChange={handleBranchChange}
+        onRoleSwitch={(r) => { 
+          setCurrentUser({...currentUser, role: r}); 
+          addToast(`Role switched to ${r}`, "info"); 
+        }} 
+        onLogout={handleLogout} 
+        isOpen={isSidebarOpen} 
+        onClose={() => setIsSidebarOpen(false)} 
       />
       
-      <main className="ml-64 min-h-screen">
-        <header className="h-20 bg-white border-b border-slate-100 px-10 flex items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center gap-4 text-slate-400">
-             <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600/60">Kenya Region • Nairobi Central • {currentUser.role}</p>
+      <main className="flex-1 min-h-screen lg:ml-64 transition-all">
+        <header className="h-20 bg-white border-b border-slate-100 px-6 lg:px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors"><Menu size={24} /></button>
+            <div className="hidden sm:block">
+              <p className="text-[10px] font-black uppercase tracking-widest text-indigo-600/60">
+                {churchInfo.region} • {currentUser.branch || branches[0]} • {churchInfo.name}
+              </p>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-8">
-            <button className="relative p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+          <div className="flex items-center gap-4 relative">
+            <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className={`relative p-2.5 rounded-xl transition-all ${isNotificationsOpen ? 'bg-indigo-50 text-indigo-600' : 'text-slate-400 hover:text-indigo-600 hover:bg-slate-50'}`}>
               <Bell size={24} />
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+              {notifications.some(n => !n.read) && <span className="absolute top-1.5 right-1.5 w-3 h-3 bg-rose-500 rounded-full border-2 border-white animate-pulse" />}
             </button>
-            <div className="flex items-center gap-4 pl-8 border-l border-slate-200">
-              <div className="text-right hidden sm:block">
+            {isNotificationsOpen && <NotificationsPanel notifications={notifications} onClose={() => setIsNotificationsOpen(false)} onMarkAsRead={() => {}} onMarkAllAsRead={() => {}} onDelete={() => {}} />}
+            <div className="w-px h-8 bg-slate-100 mx-2 hidden lg:block" />
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden lg:block">
                 <p className="text-sm font-bold text-slate-800 leading-none">{currentUser.name}</p>
-                <p className="text-[10px] text-slate-400 uppercase tracking-tighter mt-1 font-bold">{currentUser.role}</p>
+                <p className="text-[10px] text-slate-400 uppercase font-black tracking-tighter mt-1">{currentUser.role}</p>
               </div>
-              <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 font-bold border border-indigo-100 shadow-sm overflow-hidden">
-                <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
-              </div>
+              <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-50" />
             </div>
           </div>
         </header>
-
-        <div className="p-10 max-w-[1600px] mx-auto pb-20">
-          {renderView()}
-        </div>
+        <div className="p-6 lg:p-10 max-w-[1600px] mx-auto pb-20">{renderView()}</div>
       </main>
     </div>
   );

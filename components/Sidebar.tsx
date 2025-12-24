@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const adminItems = [
     { id: 'DASHBOARD', label: 'Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.TREASURER] },
-    { id: 'MEMBERS', label: 'Membership', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
+    { id: 'MEMBERS', label: 'Membership', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.MEMBER] },
     { id: 'FINANCE', label: 'Finance', icon: Wallet, roles: [UserRole.ADMIN, UserRole.TREASURER] },
     { id: 'ANALYTICS', label: 'Analytics', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
     { id: 'GROUPS', label: 'Groups', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
@@ -59,6 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const memberItems = [
     { id: 'MY_PORTAL', label: 'My Dashboard', icon: Sparkles, roles: [UserRole.MEMBER] },
+    { id: 'MEMBERS', label: 'Directory', icon: Users, roles: [UserRole.MEMBER] },
     { id: 'SERMONS', label: 'Sermon Library', icon: BookOpen, roles: [UserRole.MEMBER] },
     { id: 'EVENTS', label: 'Church Calendar', icon: CalendarDays, roles: [UserRole.MEMBER] },
     { id: 'MY_GIVING', label: 'My Giving', icon: Wallet, roles: [UserRole.MEMBER] },

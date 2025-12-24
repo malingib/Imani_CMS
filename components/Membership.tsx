@@ -1,15 +1,18 @@
+
 import React, { useState, useRef, useMemo } from 'react';
 import { 
   Search, Plus, MoreHorizontal, Filter, Mail, Phone, MapPin, 
   MessageCircle, X, Camera, Check, User, Send, Eye,
   Calendar, Wallet, CheckCircle2, Map, ExternalLink,
-  Lock, Smartphone
+  Lock, Smartphone, Trash2, Edit2, AlertTriangle
 } from 'lucide-react';
 import { Member, MemberStatus, MembershipType, MaritalStatus, Transaction, ChurchEvent, UserRole } from '../types';
 
 interface MembershipProps {
   members: Member[];
   onAddMember: (member: Member) => void;
+  onUpdateMember: (member: Member) => void;
+  onDeleteMember: (id: string) => void;
   transactions: Transaction[];
   events: ChurchEvent[];
   currentUserRole: UserRole;
@@ -18,6 +21,8 @@ interface MembershipProps {
 const Membership: React.FC<MembershipProps> = ({ 
   members, 
   onAddMember, 
+  onUpdateMember,
+  onDeleteMember,
   transactions, 
   events,
   currentUserRole 
@@ -26,8 +31,11 @@ const Membership: React.FC<MembershipProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [groupFilter, setGroupFilter] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<Member | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<Member | null>(null);
   const [showSMSModal, setShowSMSModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [smsMessage, setSmsMessage] = useState('');
   const [activeDetailTab, setActiveDetailTab] = useState<'OVERVIEW' | 'GIVING' | 'ATTENDANCE'>('OVERVIEW');
   
@@ -113,9 +121,9 @@ const Membership: React.FC<MembershipProps> = ({
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden min-h-[400px]">
         <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row gap-4 items-center">
-          <div className="relative flex-1">
+          <div className="relative flex-1 w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
@@ -191,7 +199,7 @@ const Membership: React.FC<MembershipProps> = ({
                       {member.status}
                     </span>
                   </td>
-                  <td className="px-8 py-6 text-right">
+                  <td className="px-8 py-6 text-right relative">
                     <div className="flex items-center justify-end gap-2">
                        <button 
                         onClick={() => { setSelectedMember(member); setActiveDetailTab('OVERVIEW'); }}
@@ -200,9 +208,30 @@ const Membership: React.FC<MembershipProps> = ({
                          <Eye size={14} /> View
                        </button>
                        {currentUserRole !== UserRole.MEMBER && (
-                         <button className="p-2 text-slate-300 hover:text-slate-600 transition-colors">
-                            <MoreHorizontal size={20} />
-                         </button>
+                         <div className="relative">
+                            <button 
+                              onClick={() => setOpenActionMenuId(openActionMenuId === member.id ? null : member.id)}
+                              className={`p-2 rounded-lg transition-colors ${openActionMenuId === member.id ? 'bg-slate-200 text-slate-900' : 'text-slate-300 hover:text-slate-600'}`}
+                            >
+                                <MoreHorizontal size={20} />
+                            </button>
+                            {openActionMenuId === member.id && (
+                              <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                <button 
+                                  onClick={() => { setShowEditModal(member); setOpenActionMenuId(null); }}
+                                  className="w-full text-left px-5 py-3 text-xs font-bold text-slate-700 hover:bg-indigo-50 flex items-center gap-3 transition-colors border-b border-slate-50"
+                                >
+                                  <Edit2 size={14} className="text-indigo-600"/> Edit Record
+                                </button>
+                                <button 
+                                  onClick={() => { setShowDeleteConfirm(member); setOpenActionMenuId(null); }}
+                                  className="w-full text-left px-5 py-3 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition-colors"
+                                >
+                                  <Trash2 size={14} className="text-rose-500"/> Delete Member
+                                </button>
+                              </div>
+                            )}
+                         </div>
                        )}
                     </div>
                   </td>
@@ -213,7 +242,36 @@ const Membership: React.FC<MembershipProps> = ({
         </div>
       </div>
 
-      {/* Member 360 View Modal */}
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[250] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200">
+            <div className="flex flex-col items-center text-center gap-6">
+              <div className="p-6 bg-rose-50 text-rose-600 rounded-full">
+                <AlertTriangle size={48} />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-slate-800">Delete Record?</h3>
+                <p className="text-slate-500 mt-2 font-medium">Are you sure you want to remove <span className="font-bold text-slate-800">{showDeleteConfirm.firstName} {showDeleteConfirm.lastName}</span>? This action is permanent.</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => setShowDeleteConfirm(null)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Cancel</button>
+              <button 
+                onClick={() => {
+                  onDeleteMember(showDeleteConfirm.id);
+                  setShowDeleteConfirm(null);
+                }}
+                className="flex-1 py-4 font-black bg-rose-600 text-white rounded-2xl shadow-xl hover:bg-rose-700 transition-all"
+              >
+                Delete Forever
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Member 360 View Modal (Modified with better scroll behavior) */}
       {selectedMember && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4 lg:p-12">
           <div className="bg-white rounded-[3rem] w-full max-w-5xl h-full lg:max-h-[85vh] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in duration-300">
@@ -323,7 +381,7 @@ const Membership: React.FC<MembershipProps> = ({
 
                {activeDetailTab === 'GIVING' && (
                  <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-8">
-                    {currentUserRole === UserRole.MEMBER ? (
+                    {currentUserRole === UserRole.MEMBER && selectedMember.id !== transactions[0]?.memberId ? (
                       <div className="p-20 text-center space-y-4 bg-white rounded-[3rem] border border-slate-100">
                          <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto text-indigo-600">
                             <Lock size={40}/>
@@ -440,7 +498,12 @@ const Membership: React.FC<MembershipProps> = ({
                <div className="flex gap-4">
                   <button onClick={() => setSelectedMember(null)} className="px-10 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Close Profile</button>
                   {currentUserRole !== UserRole.MEMBER && (
-                    <button className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">Edit Record</button>
+                    <button 
+                      onClick={() => { setShowEditModal(selectedMember); setSelectedMember(null); }}
+                      className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
+                    >
+                      Edit Record
+                    </button>
                   )}
                </div>
             </div>
@@ -448,13 +511,13 @@ const Membership: React.FC<MembershipProps> = ({
         </div>
       )}
 
-      {/* Add Member Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+      {/* Add/Edit Member Modal */}
+      {(showAddModal || showEditModal) && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-indigo-50">
-              <h3 className="text-2xl font-black text-slate-800 tracking-tight">Add New Member</h3>
-              <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-white rounded-full transition-colors"><X size={20}/></button>
+              <h3 className="text-2xl font-black text-slate-800 tracking-tight">{showEditModal ? 'Edit Member Profile' : 'Add New Member'}</h3>
+              <button onClick={() => { setShowAddModal(false); setShowEditModal(null); }} className="p-2 hover:bg-white rounded-full transition-colors"><X size={20}/></button>
             </div>
             <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 max-h-[70vh] overflow-y-auto no-scrollbar">
               {/* Photo Upload Section */}
@@ -466,7 +529,7 @@ const Membership: React.FC<MembershipProps> = ({
                   </div>
                 ) : (
                   <div className="relative w-48 h-48 rounded-[2rem] overflow-hidden bg-white border-4 border-white shadow-2xl flex items-center justify-center group-hover:scale-[1.02] transition-transform">
-                    {photo ? <img src={photo} className="w-full h-full object-cover" /> : <User size={64} className="text-slate-200" />}
+                    {(photo || (showEditModal && showEditModal.photo)) ? <img src={photo || showEditModal?.photo} className="w-full h-full object-cover" /> : <User size={64} className="text-slate-200" />}
                     <button onClick={startCamera} className="absolute bottom-3 right-3 bg-indigo-600 text-white p-4 rounded-2xl shadow-xl hover:bg-indigo-700 transition-colors"><Camera size={20}/></button>
                   </div>
                 )}
@@ -474,36 +537,42 @@ const Membership: React.FC<MembershipProps> = ({
               </div>
 
               <div className="space-y-4">
-                <input type="text" placeholder="First Name" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" onChange={e => setNewMember({...newMember, firstName: e.target.value})} />
-                <input type="text" placeholder="Last Name" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" onChange={e => setNewMember({...newMember, lastName: e.target.value})} />
-                <input type="text" placeholder="Phone (e.g. 07...)" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" onChange={e => setNewMember({...newMember, phone: e.target.value})} />
-                <input type="date" placeholder="Birthday" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" onChange={e => setNewMember({...newMember, birthday: e.target.value})} />
+                <input type="text" placeholder="First Name" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" defaultValue={showEditModal?.firstName} onChange={e => setNewMember({...newMember, firstName: e.target.value})} />
+                <input type="text" placeholder="Last Name" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" defaultValue={showEditModal?.lastName} onChange={e => setNewMember({...newMember, lastName: e.target.value})} />
+                <input type="text" placeholder="Phone (e.g. 07...)" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" defaultValue={showEditModal?.phone} onChange={e => setNewMember({...newMember, phone: e.target.value})} />
+                <input type="date" placeholder="Birthday" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" defaultValue={showEditModal?.birthday} onChange={e => setNewMember({...newMember, birthday: e.target.value})} />
               </div>
               
               <div className="space-y-4">
-                <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" onChange={e => setNewMember({...newMember, status: e.target.value as MemberStatus})}>
+                <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" defaultValue={showEditModal?.status} onChange={e => setNewMember({...newMember, status: e.target.value as MemberStatus})}>
                   {Object.values(MemberStatus).map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-                <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" onChange={e => setNewMember({...newMember, membershipType: e.target.value as MembershipType})}>
+                <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" defaultValue={showEditModal?.membershipType} onChange={e => setNewMember({...newMember, membershipType: e.target.value as MembershipType})}>
                   {Object.values(MembershipType).map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
-                <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" onChange={e => setNewMember({...newMember, maritalStatus: e.target.value as MaritalStatus})}>
+                <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" defaultValue={showEditModal?.maritalStatus} onChange={e => setNewMember({...newMember, maritalStatus: e.target.value as MaritalStatus})}>
                   {Object.values(MaritalStatus).map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
-                <input type="text" placeholder="Fellowship/Group" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" onChange={e => setNewMember({...newMember, group: e.target.value})} />
+                <input type="text" placeholder="Fellowship/Group" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" defaultValue={showEditModal?.group} onChange={e => setNewMember({...newMember, group: e.target.value})} />
               </div>
             </div>
             <div className="p-8 bg-slate-50 border-t border-slate-100 flex gap-4">
-              <button onClick={() => setShowAddModal(false)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors">Cancel</button>
+              <button onClick={() => { setShowAddModal(false); setShowEditModal(null); }} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors">Cancel</button>
               <button 
                 onClick={() => {
-                  onAddMember({ ...newMember, id: Date.now().toString(), photo: photo || undefined, joinDate: new Date().toISOString() } as Member);
+                  if (showEditModal) {
+                    onUpdateMember({ ...showEditModal, ...newMember, photo: photo || showEditModal.photo } as Member);
+                  } else {
+                    onAddMember({ ...newMember, id: Date.now().toString(), photo: photo || undefined, joinDate: new Date().toISOString() } as Member);
+                  }
                   setShowAddModal(false);
+                  setShowEditModal(null);
                   setPhoto(null);
+                  setNewMember({});
                 }}
                 className="flex-1 py-4 font-black bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-700 transition-all"
               >
-                Enroll Member
+                {showEditModal ? 'Update Profile' : 'Enroll Member'}
               </button>
             </div>
           </div>

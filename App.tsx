@@ -105,6 +105,11 @@ const App: React.FC = () => {
     addToast("Profile updated successfully");
   };
 
+  const handleDeleteMember = (id: string) => {
+    setMembers(prev => prev.filter(m => m.id !== id));
+    addToast("Member record deleted", "error");
+  };
+
   const [transactions, setTransactions] = useState<Transaction[]>([
     { id: 'trx1', memberId: '1', memberName: 'David Ochieng', amount: 5000, type: 'Tithe', paymentMethod: 'M-Pesa', date: '2024-05-19', reference: 'QSG812L90P', category: 'Income' },
   ]);
@@ -129,6 +134,8 @@ const App: React.FC = () => {
         return <Membership 
           members={members} 
           onAddMember={(m) => { setMembers(prev => [...prev, m]); addToast("Member added successfully"); }} 
+          onUpdateMember={handleUpdateMember}
+          onDeleteMember={handleDeleteMember}
           transactions={transactions} 
           events={events} 
           currentUserRole={currentUser.role}

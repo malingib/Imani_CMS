@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
-import {
-  MessageSquare, Send, Mail, Phone, Search,
+import { 
+  MessageSquare, Send, Mail, Phone, Search, 
   Filter, MoreHorizontal, Plus, Users, History,
   CheckCircle2, AlertCircle, Clock, ChevronRight,
-  X, Trash2, Edit2, Calendar, Share2,
+  X, Trash2, Edit2, Layout, Calendar, Share2, 
   Smartphone, Eye, Zap, Repeat, Sparkles, Wand2,
   Save, Loader2
 } from 'lucide-react';
@@ -37,9 +38,9 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
   const [isGeneratingSermon, setIsGeneratingSermon] = useState(false);
 
   const stats = [
-    { label: 'Total Sent', value: '45.2k', icon: Send, color: 'indigo' },
+    { label: 'Total Sent', value: '45.2k', icon: Send, color: 'brand-primary' },
     { label: 'Delivery Rate', value: '98.5%', icon: CheckCircle2, color: 'emerald' },
-    { label: 'Pending', value: '124', icon: Clock, color: 'amber' },
+    { label: 'Pending', value: '124', icon: Clock, color: 'brand-gold' },
     { label: 'Failed', value: '12', icon: AlertCircle, color: 'rose' },
   ];
 
@@ -109,13 +110,13 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
     <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 overflow-x-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl lg:text-4xl font-black text-slate-800 tracking-tight">Communication Center</h2>
+          <h2 className="text-3xl lg:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Communication Center</h2>
           <p className="text-slate-500 mt-2 text-base lg:text-lg font-medium">AI-powered ministry outreach and engagement.</p>
         </div>
         <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-200 shadow-sm self-start lg:self-center overflow-x-auto no-scrollbar">
-          <button onClick={() => setActiveTab('LOGS')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all ${activeTab === 'LOGS' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-indigo-600'}`}>History</button>
-          <button onClick={() => setActiveTab('COMPOSE')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all ${activeTab === 'COMPOSE' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-indigo-600'}`}>New Message</button>
-          <button onClick={() => setActiveTab('AUTOMATION')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'AUTOMATION' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-indigo-600'}`}><Zap size={14}/> Automation</button>
+          <button onClick={() => setActiveTab('LOGS')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all ${activeTab === 'LOGS' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}>History</button>
+          <button onClick={() => setActiveTab('COMPOSE')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all ${activeTab === 'COMPOSE' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}>New Message</button>
+          <button onClick={() => setActiveTab('AUTOMATION')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'AUTOMATION' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}><Zap size={14}/> Automation</button>
         </div>
       </div>
 
@@ -124,10 +125,10 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl space-y-8">
               <div className="flex items-center justify-between">
                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><Sparkles size={24}/></div>
+                    <div className="p-3 bg-indigo-50 text-brand-primary rounded-2xl"><Sparkles size={24}/></div>
                     <h3 className="text-2xl font-black text-slate-800">Auto-Verse Service</h3>
                  </div>
-                 <div className={`w-14 h-7 rounded-full p-1 cursor-pointer transition-all ${autoVerseEnabled ? 'bg-indigo-600' : 'bg-slate-200'}`} onClick={() => setAutoVerseEnabled(!autoVerseEnabled)}>
+                 <div className={`w-14 h-7 rounded-full p-1 cursor-pointer transition-all ${autoVerseEnabled ? 'bg-brand-primary' : 'bg-slate-200'}`} onClick={() => setAutoVerseEnabled(!autoVerseEnabled)}>
                     <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-all ${autoVerseEnabled ? 'translate-x-7' : 'translate-x-0'}`} />
                  </div>
               </div>
@@ -162,53 +163,51 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     <div className="flex gap-3">
                        {['SMS', 'WhatsApp', 'Email'].map(channel => (
                           <div key={channel} className="flex-1 p-3 bg-white rounded-xl border border-slate-100 flex items-center justify-center gap-2">
-                             <input type="checkbox" defaultChecked className="accent-indigo-600" />
+                             <input type="checkbox" defaultChecked className="accent-brand-primary" />
                              <span className="text-xs font-black text-slate-600">{channel}</span>
                           </div>
                        ))}
                     </div>
                  </div>
               </div>
-              {/* Fix: Use imported Save icon */}
-              <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+              <button className="w-full py-4 bg-brand-solid text-white rounded-2xl font-black shadow-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
                  <Save size={18}/> Update Automation Schedule
               </button>
            </div>
 
            <div className="space-y-8">
-              <div className="bg-indigo-900 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
+              <div className="bg-brand-primary p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
                  <div className="relative z-10 space-y-6">
                     <div className="flex items-center gap-3">
-                       <div className="p-3 bg-white/10 rounded-2xl text-indigo-300"><Wand2 size={24}/></div>
+                       <div className="p-3 bg-white/10 rounded-2xl text-indigo-200"><Wand2 size={24}/></div>
                        <h3 className="text-2xl font-black">AI Sermonette</h3>
                     </div>
                     <p className="text-indigo-100 font-medium">Generate 100-word punchy, inspirational messages with Gemini for your ministry groups.</p>
                     <button 
                        onClick={handleGenerateAiSermon}
                        disabled={isGeneratingSermon}
-                       className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black shadow-xl hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                       className="w-full py-4 bg-white text-brand-primary rounded-2xl font-black shadow-xl hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                       {/* Fix: Use imported Loader2 icon */}
                        {isGeneratingSermon ? <Loader2 className="animate-spin"/> : <Sparkles size={20}/>}
                        {isGeneratingSermon ? 'Conceiving Word...' : 'Draft for WhatsApp/Email'}
                     </button>
                  </div>
-                 <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-indigo-500 rounded-full blur-[60px] opacity-20 group-hover:scale-125 transition-transform"></div>
+                 <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-indigo-400 rounded-full blur-[60px] opacity-20 group-hover:scale-125 transition-transform"></div>
               </div>
 
               <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
-                 <h4 className="text-xl font-black text-slate-800 flex items-center gap-3"><Clock size={20} className="text-indigo-600"/> Next Dispatch</h4>
+                 <h4 className="text-xl font-black text-slate-800 flex items-center gap-3"><Clock size={20} className="text-brand-primary"/> Next Dispatch</h4>
                  <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
                        <div className="flex items-center gap-3">
-                          <Zap size={16} className="text-indigo-600"/>
+                          <Zap size={16} className="text-brand-primary"/>
                           <span className="text-sm font-bold text-slate-700">Daily Verse Dispatch</span>
                        </div>
-                       <span className="text-[10px] font-black uppercase text-indigo-600">Today, 06:00 AM</span>
+                       <span className="text-[10px] font-black uppercase text-brand-primary">Today, 06:00 AM</span>
                     </div>
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
                        <div className="flex items-center gap-3">
-                          <MessageSquare size={16} className="text-indigo-600"/>
+                          <MessageSquare size={16} className="text-brand-primary"/>
                           <span className="text-sm font-bold text-slate-700">Youth Sermonette</span>
                        </div>
                        <span className="text-[10px] font-black uppercase text-slate-400">Wed, 09:00 PM</span>
@@ -226,7 +225,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
               <input 
                 type="text" 
                 placeholder="Search history..." 
-                className="w-full pl-12 pr-6 py-3 bg-white rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
+                className="w-full pl-12 pr-6 py-3 bg-white rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -237,7 +236,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
               <div key={log.id} className="p-6 lg:p-8 hover:bg-slate-50 transition-all flex items-center justify-between gap-6 min-w-[700px] lg:min-w-0">
                 <div className="flex items-start gap-4 lg:gap-6 flex-1">
                   <div className={`p-3 lg:p-4 rounded-2xl lg:rounded-3xl shadow-sm ${
-                    log.type === 'SMS' ? 'bg-blue-50 text-blue-600' : 
+                    log.type === 'SMS' ? 'bg-indigo-50 text-brand-primary' : 
                     log.type === 'Email' ? 'bg-amber-50 text-amber-600' : 
                     'bg-emerald-50 text-emerald-600'
                   }`}>
@@ -261,7 +260,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                   }`}>
                     {log.status}
                   </span>
-                  <button onClick={() => setShowLogDetails(log)} className="p-3 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"><ChevronRight size={20}/></button>
+                  <button onClick={() => setShowLogDetails(log)} className="p-3 text-brand-primary hover:bg-indigo-50 rounded-xl transition-all"><ChevronRight size={20}/></button>
                 </div>
               </div>
             ))}
@@ -275,13 +274,13 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Channel</label>
                 <div className="flex gap-2 lg:gap-3">
                   {(['SMS', 'Email', 'WhatsApp'] as const).map(t => (
-                    <button key={t} onClick={() => setMessageType(t)} className={`flex-1 py-3 lg:py-4 rounded-2xl lg:rounded-3xl font-black text-[10px] lg:text-xs transition-all border-2 ${messageType === t ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl' : 'bg-slate-50 text-slate-500 border-slate-50 hover:bg-slate-100'}`}>{t}</button>
+                    <button key={t} onClick={() => setMessageType(t)} className={`flex-1 py-3 lg:py-4 rounded-2xl lg:rounded-3xl font-black text-[10px] lg:text-xs transition-all border-2 ${messageType === t ? 'bg-brand-primary text-white border-brand-primary shadow-xl' : 'bg-slate-50 text-slate-500 border-slate-50 hover:bg-slate-100'}`}>{t}</button>
                   ))}
                 </div>
               </div>
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Audience</label>
-                <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-black text-xs lg:text-sm text-slate-700 outline-none" value={broadcastTarget} onChange={(e) => setBroadcastTarget(e.target.value)}>
+                <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] font-black text-xs lg:text-sm text-slate-700 outline-none focus:ring-2 focus:ring-brand-primary" value={broadcastTarget} onChange={(e) => setBroadcastTarget(e.target.value)}>
                    <option>All Members</option>
                    <option>Youth Fellowship</option>
                    <option>Women of Grace</option>
@@ -291,14 +290,13 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
 
             <div className="space-y-4">
               {messageType === 'Email' && (
-                <input type="text" placeholder="Email Subject" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-black text-slate-700 outline-none" value={subject} onChange={(e) => setSubject(e.target.value)} />
+                <input type="text" placeholder="Email Subject" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-black text-slate-700 outline-none focus:ring-2 focus:ring-brand-primary" value={subject} onChange={(e) => setSubject(e.target.value)} />
               )}
-              <textarea rows={8} placeholder="Type your message..." className="w-full p-6 lg:p-8 bg-slate-50 border border-slate-100 rounded-[2rem] font-bold text-slate-700 outline-none" value={content} onChange={(e) => setContent(e.target.value)} />
+              <textarea rows={8} placeholder="Type your message..." className="w-full p-6 lg:p-8 bg-slate-50 border border-slate-100 rounded-[2rem] font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-primary" value={content} onChange={(e) => setContent(e.target.value)} />
             </div>
 
-            <button onClick={handleSend} disabled={!content || isSending} className="w-full py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-lg shadow-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-4 disabled:opacity-50">
-              {/* Fix: Use imported Loader2 icon */}
-              {isSending ? <Loader2 className="animate-spin" /> : <Send size={24} />} 
+            <button onClick={handleSend} disabled={!content || isSending} className="w-full py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-lg shadow-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-4 disabled:opacity-50">
+              {isSending ? <Loader2 className="animate-spin" size={24} /> : <Send size={24} />} 
               {isSending ? 'Sending...' : `Send via ${messageType}`}
             </button>
           </div>

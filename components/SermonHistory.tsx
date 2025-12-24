@@ -59,19 +59,19 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-black text-slate-800 tracking-tight">Ministry Hub</h2>
+          <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-red uppercase">Ministry Hub</h2>
           <p className="text-slate-500 mt-2 text-lg font-medium">Archive past messages or co-create with Gemini AI.</p>
         </div>
         <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-200 shadow-sm">
           <button 
             onClick={() => setActiveTab('HISTORY')}
-            className={`px-6 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'HISTORY' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-indigo-600'}`}
+            className={`px-6 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'HISTORY' ? 'bg-brand-red text-white shadow-lg' : 'text-slate-400 hover:text-brand-red'}`}
           >
             <History size={16}/> Sermon History
           </button>
           <button 
             onClick={() => setActiveTab('LAB')}
-            className={`px-6 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'LAB' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-indigo-600'}`}
+            className={`px-6 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'LAB' ? 'bg-brand-red text-white shadow-lg' : 'text-slate-400 hover:text-brand-red'}`}
           >
             <Sparkles size={16}/> AI Sermon Lab
           </button>
@@ -86,12 +86,12 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
               <input 
                 type="text" 
                 placeholder="Search sermons..." 
-                className="w-full pl-12 pr-6 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-slate-700 outline-none"
+                className="w-full pl-12 pr-6 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-red"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
-            <button onClick={() => setShowAddModal(true)} className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 shadow-lg"><Plus size={20}/></button>
+            <button onClick={() => setShowAddModal(true)} className="px-6 py-3 bg-brand-red text-white rounded-2xl font-bold hover:bg-red-700 shadow-lg"><Plus size={20}/></button>
           </div>
 
           <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
@@ -109,7 +109,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                   <tr key={sermon.id} className="hover:bg-slate-50 transition-all group">
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
-                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><BookOpen size={20}/></div>
+                        <div className="p-3 bg-red-50 text-brand-red rounded-2xl"><BookOpen size={20}/></div>
                         <div>
                           <p className="font-bold text-slate-800">{sermon.title}</p>
                           <p className="text-[10px] text-slate-400 font-bold uppercase">{sermon.date} • {sermon.event}</p>
@@ -117,9 +117,9 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                       </div>
                     </td>
                     <td className="px-8 py-6 text-sm font-bold text-slate-700">{sermon.speaker}</td>
-                    <td className="px-8 py-6 text-sm font-bold text-indigo-600 italic">{sermon.scripture}</td>
+                    <td className="px-8 py-6 text-sm font-bold text-brand-red italic">{sermon.scripture}</td>
                     <td className="px-8 py-6 text-right">
-                      <button className="text-indigo-600 hover:underline font-bold text-xs uppercase tracking-widest">View</button>
+                      <button className="text-brand-red hover:underline font-black text-xs uppercase tracking-widest">View</button>
                     </td>
                   </tr>
                 ))}
@@ -131,20 +131,20 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="space-y-6">
             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-              <h3 className="text-xl font-black text-slate-800 flex items-center gap-2"><Wand2 size={20} className="text-indigo-600"/> Sermon Lab</h3>
+              <h3 className="text-xl font-black text-slate-800 flex items-center gap-2 uppercase"><Wand2 size={20} className="text-brand-red"/> Sermon Lab</h3>
               <div className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Topic / Theme</label>
-                  <input type="text" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold" value={aiTopic} onChange={e => setAiTopic(e.target.value)} placeholder="e.g. Faith in Nairobi City" />
+                  <input type="text" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-red outline-none" value={aiTopic} onChange={e => setAiTopic(e.target.value)} placeholder="e.g. Faith in Nairobi City" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Key Scripture</label>
-                  <input type="text" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold" value={aiScripture} onChange={e => setAiScripture(e.target.value)} placeholder="e.g. Hebrews 11:1" />
+                  <input type="text" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-red outline-none" value={aiScripture} onChange={e => setAiScripture(e.target.value)} placeholder="e.g. Hebrews 11:1" />
                 </div>
                 <button 
                   onClick={handleGenerateAI}
                   disabled={aiLoading || !aiTopic}
-                  className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                  className="w-full py-4 bg-brand-red text-white rounded-2xl font-black shadow-lg hover:bg-red-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {aiLoading ? <Loader2 className="animate-spin" size={20}/> : <Sparkles size={20}/>}
                   {aiLoading ? 'Drafting...' : 'Generate AI Outline'}
@@ -157,10 +157,10 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
             {aiResult ? (
               <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm min-h-[500px] flex flex-col">
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-50">
-                   <h4 className="text-2xl font-black text-slate-800">Draft Outline</h4>
-                   <button className="p-3 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all"><Download size={20}/></button>
+                   <h4 className="text-2xl font-black text-slate-800 uppercase">Draft Outline</h4>
+                   <button className="p-3 bg-slate-50 text-slate-400 hover:text-brand-red rounded-xl transition-all"><Download size={20}/></button>
                 </div>
-                <div className="prose prose-indigo max-w-none flex-1">
+                <div className="prose prose-red max-w-none flex-1">
                   <div className="whitespace-pre-wrap text-slate-700 leading-relaxed font-serif text-lg">
                     {aiResult}
                   </div>

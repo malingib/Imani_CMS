@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import Sidebar from './components/Sidebar';
+import Sidebar, { ImaniLogoIcon } from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Membership from './components/Membership';
 import SermonHistory from './components/SermonHistory';
@@ -181,8 +181,8 @@ const App: React.FC = () => {
         {toasts.map(toast => (
           <div key={toast.id} className={`w-full flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl shadow-2xl animate-in slide-in-from-top-4 duration-300 pointer-events-auto border ${
             toast.type === 'success' ? 'bg-emerald-600 border-emerald-500 text-white' : 
-            toast.type === 'error' ? 'bg-brand-red border-red-500 text-white' : 
-            'bg-slate-900 border-slate-800 text-white'
+            toast.type === 'error' ? 'bg-brand-primary border-slate-700 text-white' : 
+            'bg-brand-primary border-slate-800 text-white'
           }`}>
             {toast.type === 'success' ? <CheckCircle2 size={18}/> : toast.type === 'error' ? <AlertCircle size={18}/> : <Info size={18}/>}
             <span className="font-bold text-xs sm:text-sm tracking-tight flex-1">{toast.message}</span>
@@ -208,28 +208,34 @@ const App: React.FC = () => {
       />
       
       <main className="flex-1 min-h-screen lg:ml-64 transition-all">
-        <header className="h-16 h-20 bg-white border-b border-slate-100 px-4 px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm print:hidden">
-          <div className="flex items-center gap-2 gap-4">
+        <header className="h-16 h-20 bg-white border-b border-slate-100 px-4 sm:px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm print:hidden">
+          <div className="flex items-center gap-4">
             <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors"><Menu size={22} /></button>
-            <div className="max-w-[150px] max-w-none">
-              <p className="text-[9px] text-[10px] font-black uppercase tracking-widest text-brand-red/60 truncate">
+            
+            {/* Mobile Logo Visibility */}
+            <div className="lg:hidden w-10 h-10">
+              <ImaniLogoIcon />
+            </div>
+
+            <div className="max-w-[150px] sm:max-w-none">
+              <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-brand-primary opacity-60 truncate">
                 {churchInfo.region} • {currentUser.branch || branches[0]}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 gap-4 relative">
-            <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className={`relative p-2 rounded-xl transition-all ${isNotificationsOpen ? 'bg-brand-red/5 text-brand-red' : 'text-slate-400 hover:text-brand-red hover:bg-slate-50'}`}>
+          <div className="flex items-center gap-4 relative">
+            <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className={`relative p-2 rounded-xl transition-all ${isNotificationsOpen ? 'bg-slate-100 text-brand-primary' : 'text-slate-400 hover:text-brand-primary hover:bg-slate-50'}`}>
               <Bell size={22} />
-              {notifications.some(n => !n.read) && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-red rounded-full border-2 border-white animate-pulse" />}
+              {notifications.some(n => !n.read) && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-primary rounded-full border-2 border-white animate-pulse" />}
             </button>
             {isNotificationsOpen && <NotificationsPanel notifications={notifications} onClose={() => setIsNotificationsOpen(false)} onMarkAsRead={() => {}} onMarkAllAsRead={() => {}} onDelete={() => {}} />}
-            <div className="w-px h-6 h-8 bg-slate-100 mx-1 hidden sm:block" />
-            <div className="flex items-center gap-2 gap-3">
+            <div className="w-px h-8 bg-slate-100 mx-1 hidden sm:block" />
+            <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
                 <p className="text-xs font-bold text-slate-800 leading-none">{currentUser.name}</p>
                 <p className="text-[9px] text-slate-400 uppercase font-black tracking-tighter mt-1">{currentUser.role}</p>
               </div>
-              <img src={currentUser.avatar} alt="" className="w-8 h-8 h-10 rounded-xl object-cover ring-2 ring-brand-red/10" />
+              <img src={currentUser.avatar} alt="" className="w-8 h-8 h-10 rounded-xl object-cover ring-2 ring-brand-primary/10" />
             </div>
           </div>
         </header>

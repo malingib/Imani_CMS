@@ -1,8 +1,7 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 
 export const generateSermonOutline = async (topic: string, scripture: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Act as a seasoned Kenyan pastor. Create a structured sermon outline for the topic: "${topic}" based on scripture "${scripture}". Include an introduction, 3 main points with Kenyan context/examples, and a concluding call to action. Keep it inspiring and culturally relevant.`,
@@ -14,7 +13,7 @@ export const generateSermonOutline = async (topic: string, scripture: string) =>
 };
 
 export const generateShortInspirationalSermon = async (topic: string) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Write a short, powerful, 100-word inspirational message for a church WhatsApp group. Topic: "${topic}". Use Kenyan cultural nuances and include 1 relevant Bible verse. Format it with emojis suitable for WhatsApp.`,
@@ -26,7 +25,7 @@ export const generateShortInspirationalSermon = async (topic: string) => {
 };
 
 export const generateDailyVerse = async () => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
   // Add a unique seed based on time to force variety
   const seed = new Date().getTime();
   const response = await ai.models.generateContent({
@@ -45,7 +44,7 @@ export const generateDailyVerse = async () => {
 };
 
 export const scoutOutreachLocations = async (query: string, latitude: number, longitude: number) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: `Find 3 public spaces or community centers near these coordinates for a church outreach event: ${query}`,
@@ -68,7 +67,7 @@ export const scoutOutreachLocations = async (query: string, latitude: number, lo
 };
 
 export const analyzeFinances = async (transactions: any[]) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
   const dataSummary = JSON.stringify(transactions);
   
   const response = await ai.models.generateContent({

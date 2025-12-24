@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
-import { 
-  MessageSquare, Send, Mail, Phone, Search, 
+import {
+  MessageSquare, Send, Mail, Phone, Search,
   Filter, MoreHorizontal, Plus, Users, History,
   CheckCircle2, AlertCircle, Clock, ChevronRight,
-  X, Trash2, Edit2, Layout, Calendar, Share2, 
+  X, Trash2, Edit2, Calendar, Share2,
   Smartphone, Eye, Zap, Repeat, Sparkles, Wand2,
   Save, Loader2
 } from 'lucide-react';

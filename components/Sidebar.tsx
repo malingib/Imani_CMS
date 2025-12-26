@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
@@ -15,8 +16,10 @@ import {
   Sparkles,
   Building2,
   ChevronDown,
-  ChevronUp,
-  Globe
+  ShieldCheck,
+  CreditCard,
+  Globe,
+  Receipt
 } from 'lucide-react';
 import { AppView, User, UserRole } from '../types';
 
@@ -34,19 +37,10 @@ interface SidebarProps {
 
 export const ImaniLogoIcon = ({ className = "w-full h-full" }: { className?: string }) => (
   <svg viewBox="0 0 200 200" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Circle Backdrop */}
     <circle cx="100" cy="100" r="80" fill="#1E293B" />
     <circle cx="100" cy="100" r="70" stroke="white" strokeWidth="6" opacity="0.9" />
-    
-    {/* Church Structure */}
     <path d="M60 140 V100 L100 70 L140 100 V140 H60Z" fill="white" opacity="0.9" />
-    <path d="M45 140 V115 L60 100 V140 H45Z" fill="white" opacity="0.6" />
-    <path d="M140 100 L155 115 V140 H140 V100Z" fill="white" opacity="0.6" />
-    
-    {/* Arched Door */}
     <path d="M85 140 V115 C85 105 115 105 115 115 V140 H85Z" fill="#FFB800" />
-    
-    {/* Cross */}
     <rect x="96" y="30" width="8" height="35" rx="2" fill="#FFB800" />
     <rect x="85" y="40" width="30" height="8" rx="2" fill="#FFB800" />
   </svg>
@@ -66,23 +60,22 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
 
   const adminItems = [
-    { id: 'DASHBOARD', label: 'Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.TREASURER] },
-    { id: 'MEMBERS', label: 'Membership', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.MEMBER] },
-    { id: 'FINANCE', label: 'Finance', icon: Wallet, roles: [UserRole.ADMIN, UserRole.TREASURER] },
-    { id: 'ANALYTICS', label: 'Analytics', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'GROUPS', label: 'Groups', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'EVENTS', label: 'Events', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.MEMBER] },
+    { id: 'DASHBOARD', label: 'Command Center', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
+    { id: 'FINANCE', label: 'Finance Hub', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER] },
+    { id: 'EVENTS', label: 'Church Life', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
     { id: 'COMMUNICATION', label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'SERMONS', label: 'Ministry Word', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.MEMBER] },
-    { id: 'REPORTS', label: 'Reports', icon: BarChart3, roles: [UserRole.ADMIN, UserRole.TREASURER] },
+    { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'ANALYTICS', label: 'Intelligence', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'SERMONS', label: 'Word Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN] },
+    { id: 'BILLING', label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
   ];
 
   const memberItems = [
     { id: 'MY_PORTAL', label: 'My Sanctuary', icon: Sparkles, roles: [UserRole.MEMBER] },
-    { id: 'MEMBERS', label: 'Directory', icon: Users, roles: [UserRole.MEMBER] },
-    { id: 'SERMONS', label: 'Word Library', icon: BookOpen, roles: [UserRole.MEMBER] },
-    { id: 'EVENTS', label: 'Church Life', icon: CalendarDays, roles: [UserRole.MEMBER] },
-    { id: 'MY_GIVING', label: 'My Giving', icon: Wallet, roles: [UserRole.MEMBER] },
+    { id: 'SERMONS', label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.MEMBER] },
+    { id: 'MY_GIVING', label: 'Stewardship', icon: Wallet, roles: [UserRole.MEMBER] },
   ];
 
   const menuItems = currentUser.role === UserRole.MEMBER ? memberItems : adminItems;
@@ -93,48 +86,42 @@ const Sidebar: React.FC<SidebarProps> = ({
       w-64 h-full bg-white text-slate-600 fixed left-0 top-0 flex flex-col border-r border-slate-100 shadow-2xl lg:shadow-sm z-[70] transition-transform duration-300 ease-in-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
     `}>
-      <div className="p-5 sm:p-6">
-        <div className="flex items-center justify-between mb-8 sm:mb-10">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex-shrink-0">
+            <div className="w-10 h-10">
               <ImaniLogoIcon />
             </div>
-            <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-bold tracking-tight text-brand-primary truncate uppercase">Imani CMS</h1>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-black">Official Portal</p>
+            <div>
+              <h1 className="text-lg font-black tracking-tight text-brand-primary uppercase">Imani CMS</h1>
+              <p className="text-[8px] text-slate-400 uppercase tracking-widest font-black">Enterprise SaaS</p>
             </div>
           </div>
-          <button onClick={onClose} className="lg:hidden p-2 text-slate-400 hover:text-brand-primary transition-colors">
-            <X size={20} />
-          </button>
+          <button onClick={onClose} className="lg:hidden p-2 text-slate-400"><X size={20} /></button>
         </div>
 
         {currentUser.role !== UserRole.MEMBER && (
           <div className="mb-6 relative">
             <button 
               onClick={() => setIsBranchMenuOpen(!isBranchMenuOpen)}
-              className="w-full flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl group hover:border-brand-primary transition-all"
+              className="w-full flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-brand-primary transition-all"
             >
-              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                <div className="p-2 bg-white rounded-lg text-brand-primary shadow-sm flex-shrink-0"><Building2 size={14}/></div>
+              <div className="flex items-center gap-3 min-w-0">
+                <Building2 size={16} className="text-brand-primary"/>
                 <div className="text-left min-w-0">
-                  <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Branch</p>
-                  <p className="text-[10px] sm:text-xs font-bold text-slate-700 truncate">{currentUser.branch || branches[0]}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Parish</p>
+                  <p className="text-xs font-bold text-slate-700 truncate">{currentUser.branch || branches[0]}</p>
                 </div>
               </div>
-              {isBranchMenuOpen ? <ChevronDown size={12} className="text-brand-primary rotate-180 transition-transform" /> : <ChevronDown size={12} className="text-slate-300 transition-transform" />}
+              <ChevronDown size={14} className={`text-slate-300 transition-transform ${isBranchMenuOpen ? 'rotate-180' : ''}`} />
             </button>
-
             {isBranchMenuOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-xl sm:rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
                 {branches.map((branch) => (
                   <button
                     key={branch}
-                    onClick={() => {
-                      onBranchChange(branch);
-                      setIsBranchMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-3 text-[10px] sm:text-xs font-bold transition-colors border-b last:border-0 border-slate-50 ${
+                    onClick={() => { onBranchChange(branch); setIsBranchMenuOpen(false); }}
+                    className={`w-full text-left px-4 py-3 text-xs font-bold border-b last:border-0 border-slate-50 ${
                       currentUser.branch === branch ? 'bg-slate-100 text-brand-primary' : 'text-slate-600 hover:bg-slate-50'
                     }`}
                   >
@@ -147,7 +134,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
       
-      <nav className="flex-1 px-4 space-y-0.5 sm:space-y-1 overflow-y-auto no-scrollbar">
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto no-scrollbar">
         {filteredItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
@@ -155,56 +142,53 @@ const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => setView(item.id as AppView)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                isActive 
-                  ? 'bg-brand-primary/5 text-brand-indigo font-bold shadow-sm' 
-                  : 'text-slate-500 hover:bg-slate-50'
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
+                isActive ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'
               }`}
             >
               <Icon size={18} className={isActive ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
-              <span className="text-xs sm:text-sm">{item.label}</span>
+              <span className="text-sm">{item.label}</span>
             </button>
           );
         })}
       </nav>
 
       <div className="p-4 border-t border-slate-100 space-y-2">
-        <div className="px-2 sm:px-4 py-1.5 sm:py-2">
-          <p className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 sm:mb-2">Simulation</p>
-          <select 
-            className="w-full bg-slate-50 border border-slate-200 rounded-lg text-[9px] sm:text-[10px] font-bold py-1.5 px-2 outline-none appearance-none cursor-pointer focus:border-brand-indigo"
-            value={currentUser.role}
-            onChange={(e) => onRoleSwitch(e.target.value as UserRole)}
-          >
-            {Object.values(UserRole).map(role => (
-              <option key={role} value={role}>{role}</option>
-            ))}
-          </select>
-        </div>
-
-        <button 
-          onClick={() => setView('SETTINGS')}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-            currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'
-          }`}
-        >
-          <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
-          <span className="text-xs sm:text-sm">Global Settings</span>
-        </button>
-        
-        <div className="mt-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 flex items-center gap-2 sm:gap-3 mb-4">
-          <img src={currentUser.avatar} alt="" className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-white flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] sm:text-xs font-bold text-slate-800 truncate">{currentUser.name}</p>
-            <p className="text-[8px] sm:text-[9px] text-slate-400 uppercase font-black tracking-tighter truncate">{currentUser.role}</p>
+        <div className="px-4 py-2">
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Simulate Role</p>
+          <div className="relative">
+            <select 
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold py-2 px-3 outline-none appearance-none cursor-pointer focus:border-brand-indigo transition-all"
+              value={currentUser.role}
+              onChange={(e) => onRoleSwitch(e.target.value as UserRole)}
+            >
+              {Object.values(UserRole).map(role => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+               <ChevronDown size={10} />
+            </div>
           </div>
-          <button onClick={onLogout} className="text-slate-300 hover:text-rose-500 transition-colors p-1 flex-shrink-0"><LogOut size={16} /></button>
         </div>
 
-        <div className="text-center py-2 border-t border-slate-50">
-          <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest flex items-center justify-center gap-1.5">
-            <Globe size={8} /> Powered by <span className="text-brand-primary opacity-60">Mobiwave Innovations</span>
-          </p>
+        {currentUser.role !== UserRole.MEMBER && (
+          <button 
+            onClick={() => setView('SETTINGS')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}
+          >
+            <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
+            <span className="text-sm">Platform Settings</span>
+          </button>
+        )}
+        
+        <div className="mt-4 p-4 rounded-2xl bg-slate-50 flex items-center gap-3 border border-slate-100/50">
+          <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-slate-800 truncate">{currentUser.name}</p>
+            <p className="text-[9px] text-slate-400 uppercase font-black tracking-tighter truncate">{currentUser.role}</p>
+          </div>
+          <button onClick={onLogout} className="text-slate-300 hover:text-rose-500 transition-colors p-1" title="Logout"><LogOut size={16} /></button>
         </div>
       </div>
     </aside>

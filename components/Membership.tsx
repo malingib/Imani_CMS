@@ -6,13 +6,15 @@ import {
   Calendar, Wallet, CheckCircle2, Map, ExternalLink,
   Lock, Smartphone, Trash2, Edit2, AlertTriangle, Download,
   UserPlus, ShieldAlert, Loader2, ChevronRight, Activity,
-  Users, Heart
+  Users, Heart, FileSpreadsheet, Upload, FileText, Image as ImageIcon,
+  Layers
 } from 'lucide-react';
 import { Member, MemberStatus, MembershipType, MaritalStatus, Transaction, ChurchEvent, UserRole } from '../types';
 
 interface MembershipProps {
   members: Member[];
   onAddMember: (member: Member) => void;
+  onAddMembersBulk: (members: Member[]) => void;
   onUpdateMember: (member: Member) => void;
   onDeleteMember: (id: string) => void;
   transactions: Transaction[];
@@ -20,7 +22,6 @@ interface MembershipProps {
   currentUserRole: UserRole;
 }
 
-// Messaging type helper for the SMS modal logic
 interface MessagingTarget {
   id: string;
   name: string;
@@ -29,6 +30,7 @@ interface MessagingTarget {
 const Membership: React.FC<MembershipProps> = ({ 
   members, 
   onAddMember, 
+  onAddMembersBulk,
   onUpdateMember,
   onDeleteMember,
   transactions, 
@@ -39,11 +41,11 @@ const Membership: React.FC<MembershipProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [groupFilter, setGroupFilter] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState<Member | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Member | null>(null);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
-  const [smsMessage, setSmsMessage] = useState('');
   const [activeDetailTab, setActiveDetailTab] = useState<'OVERVIEW' | 'GIVING' | 'ATTENDANCE'>('OVERVIEW');
   const [isSaving, setIsSaving] = useState(false);
   
@@ -53,19 +55,23 @@ const Membership: React.FC<MembershipProps> = ({
   const [formData, setFormData] = useState<Partial<Member>>({
     status: MemberStatus.ACTIVE,
     membershipType: MembershipType.FULL,
-    maritalStatus: MaritalStatus.SINGLE
+    maritalStatus: MaritalStatus.SINGLE,
+    groups: []
   });
   const [photo, setPhoto] = useState<string | null>(null);
-  const [isCameraActive, setIsCameraActive] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const groups = Array.from(new Set(members.map(m => m.group)));
+  const allPossibleGroups = useMemo(() => {
+    const defaultGroups = ['Youth Fellowship', 'Women of Grace', 'Men of Valor', 'Worship Team', 'Media & Tech', 'Childrens Ministry'];
+    const existingGroups = Array.from(new Set(members.flatMap(m => m.groups)));
+    return Array.from(new Set([...defaultGroups, ...existingGroups]));
+  }, [members]);
 
   const filteredMembers = useMemo(() => {
     return members.filter(m => {
       const matchesSearch = `${m.firstName} ${m.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) || m.phone.includes(searchTerm);
       const matchesStatus = statusFilter === 'All' || m.status === statusFilter;
-      const matchesGroup = groupFilter === 'All' || m.group === groupFilter;
+      const matchesGroup = groupFilter === 'All' || (m.groups && m.groups.includes(groupFilter));
       return matchesSearch && matchesStatus && matchesGroup;
     });
   }, [members, searchTerm, statusFilter, groupFilter]);
@@ -75,45 +81,100 @@ const Membership: React.FC<MembershipProps> = ({
     return transactions.filter(t => t.memberId === selectedMember.id);
   }, [selectedMember, transactions]);
 
-  const memberAttendance = useMemo(() => {
-    if (!selectedMember) return [];
-    return events.filter(e => e.attendance.includes(selectedMember.id));
-  }, [selectedMember, events]);
-
-  const startCamera = async () => {
-    try {
-      setIsCameraActive(true);
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) videoRef.current.srcObject = stream;
-    } catch (e) {
-      alert("Camera access denied.");
-      setIsCameraActive(false);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhoto(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const capturePhoto = () => {
-    if (videoRef.current) {
-      const canvas = document.createElement('canvas');
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
-      const dataUrl = canvas.toDataURL('image/jpeg');
-      setPhoto(dataUrl);
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      setIsCameraActive(false);
-    }
+  const handleBulkCsvImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const lines = text.split('\n');
+      const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+      
+      // Fix: Explicitly type the map callback return as Member | null to ensure compatibility with Member type predicate
+      const importedMembers: Member[] = lines.slice(1)
+        .filter(line => line.trim() !== '')
+        .map((line): Member | null => {
+          const values = line.split(',').map(v => v.trim());
+          const obj: any = {};
+          header.forEach((h, i) => {
+            if (h === 'groups') {
+              obj[h] = values[i] ? values[i].split(';').map(g => g.trim()).filter(g => g !== '') : [];
+            } else {
+              obj[h] = values[i] === '' ? null : values[i];
+            }
+          });
+
+          // Mandatory fields check: Name, Location, Phone
+          if (!obj['firstname'] || !obj['lastname'] || !obj['phone'] || !obj['location']) {
+            return null;
+          }
+
+          return {
+            id: Math.random().toString(36).substr(2, 9),
+            firstName: obj['firstname'],
+            lastName: obj['lastname'],
+            phone: obj['phone'],
+            email: obj['email'] || '',
+            location: obj['location'],
+            groups: obj['groups'] && obj['groups'].length > 0 ? obj['groups'] : ['General'],
+            status: (obj['status'] as MemberStatus) || MemberStatus.ACTIVE,
+            joinDate: obj['joindate'] || new Date().toISOString().split('T')[0],
+            membershipType: (obj['membershiptype'] as MembershipType) || MembershipType.FULL,
+            maritalStatus: (obj['maritalstatus'] as MaritalStatus) || MaritalStatus.SINGLE,
+            age: obj['age'] ? parseInt(obj['age']) : undefined,
+            gender: obj['gender'] as 'Male' | 'Female' | 'Other'
+          };
+        })
+        .filter((m): m is Member => m !== null);
+
+      if (importedMembers.length > 0) {
+        onAddMembersBulk(importedMembers);
+        setShowBulkModal(false);
+      } else {
+        alert("Import failed. Ensure mandatory columns (Firstname, Lastname, Phone, Location) are filled for each row.");
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleExportCSV = () => {
-    const headers = "ID,First Name,Last Name,Phone,Email,Location,Group,Status,Join Date\n";
-    const rows = filteredMembers.map(m => `${m.id},${m.firstName},${m.lastName},${m.phone},${m.email},${m.location},${m.group},${m.status},${m.joinDate}`).join("\n");
+    const headers = "ID,FirstName,LastName,Phone,Email,Location,Groups,Status,JoinDate\n";
+    const rows = filteredMembers.map(m => 
+      `${m.id},${m.firstName},${m.lastName},${m.phone},${m.email},${m.location},"${m.groups.join(';')}",${m.status},${m.joinDate}`
+    ).join("\n");
     const blob = new Blob([headers + rows], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `congregation_export_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadTemplate = () => {
+    const headers = "Firstname,Lastname,Phone,Email,Location,Groups,Status,JoinDate,Age,Gender,MaritalStatus,MembershipType\n";
+    const exampleRow = "John,Doe,0712345678,john.doe@example.com,Nairobi West,Youth Fellowship;Media & Tech,Active,2024-01-01,25,Male,Single,Full Member\n";
+    const exampleRowMinimal = "Jane,Smith,0722333444,,Mombasa,,Active,2024-05-20,,Female,,Associate";
+    const csvContent = headers + exampleRow + exampleRowMinimal;
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "imani_member_import_template.csv";
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const handleAddSubmit = (e: React.FormEvent) => {
@@ -128,14 +189,14 @@ const Membership: React.FC<MembershipProps> = ({
         phone: formData.phone || '',
         email: formData.email || '',
         location: formData.location || '',
-        group: formData.group || 'General',
+        groups: formData.groups && formData.groups.length > 0 ? formData.groups : ['General'],
         joinDate: new Date().toISOString().split('T')[0],
         photo: photo || undefined
       };
       onAddMember(newM);
       setIsSaving(false);
       setShowAddModal(false);
-      setFormData({});
+      setFormData({ groups: [] });
       setPhoto(null);
     }, 1000);
   };
@@ -145,12 +206,28 @@ const Membership: React.FC<MembershipProps> = ({
     if (!showEditModal) return;
     setIsSaving(true);
     setTimeout(() => {
-      onUpdateMember({ ...showEditModal, ...formData, photo: photo || showEditModal.photo });
+      onUpdateMember({ 
+        ...showEditModal, 
+        ...formData, 
+        photo: photo || showEditModal.photo,
+        groups: formData.groups && formData.groups.length > 0 ? formData.groups : showEditModal.groups
+      } as Member);
       setIsSaving(false);
       setShowEditModal(null);
-      setFormData({});
+      setFormData({ groups: [] });
       setPhoto(null);
     }, 1000);
+  };
+
+  const toggleGroupSelection = (groupName: string) => {
+    setFormData(prev => {
+      const currentGroups = prev.groups || [];
+      if (currentGroups.includes(groupName)) {
+        return { ...prev, groups: currentGroups.filter(g => g !== groupName) };
+      } else {
+        return { ...prev, groups: [...currentGroups, groupName] };
+      }
+    });
   };
 
   return (
@@ -169,13 +246,19 @@ const Membership: React.FC<MembershipProps> = ({
           {currentUserRole !== UserRole.MEMBER && (
             <>
               <button 
+                onClick={() => setShowBulkModal(true)}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-brand-indigo border border-indigo-100 rounded-[1rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-sm"
+              >
+                <FileSpreadsheet size={16} /> Bulk Import
+              </button>
+              <button 
                 onClick={handleExportCSV}
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-[1rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
               >
                 <Download size={16} /> Export
               </button>
               <button 
-                onClick={() => setShowAddModal(true)}
+                onClick={() => { setShowAddModal(true); setFormData({ groups: [], status: MemberStatus.ACTIVE, membershipType: MembershipType.FULL, maritalStatus: MaritalStatus.SINGLE }); setPhoto(null); }}
                 className="flex items-center justify-center gap-2 px-8 py-3 bg-brand-primary text-white rounded-[1rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-xl shadow-brand-primary/20"
               >
                 <Plus size={18} /> New Soul
@@ -212,7 +295,7 @@ const Membership: React.FC<MembershipProps> = ({
               onChange={(e) => setGroupFilter(e.target.value)}
             >
               <option value="All">All Ministries</option>
-              {groups.map(g => <option key={g} value={g}>{g}</option>)}
+              {allPossibleGroups.map(g => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
         </div>
@@ -238,6 +321,11 @@ const Membership: React.FC<MembershipProps> = ({
                        <MapPin size={14} className="text-slate-400"/> {member.location}
                     </div>
                  </div>
+                 <div className="flex flex-wrap gap-1">
+                    {member.groups?.map(g => (
+                      <span key={g} className="px-2 py-0.5 bg-brand-indigo/5 text-brand-indigo text-[8px] font-black uppercase rounded border border-brand-indigo/10">{g}</span>
+                    ))}
+                 </div>
                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                     <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${member.status === MemberStatus.ACTIVE ? 'bg-brand-emerald/10 text-brand-emerald' : 'bg-slate-200 text-slate-600'}`}>{member.status}</span>
                     <button onClick={() => setSelectedMember(member)} className="p-2 bg-white rounded-xl text-brand-indigo shadow-sm hover:bg-brand-indigo hover:text-white transition-all"><Eye size={18}/></button>
@@ -253,7 +341,7 @@ const Membership: React.FC<MembershipProps> = ({
               <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b border-slate-100">
                 <th className="px-10 py-6">Congregant</th>
                 <th className="px-10 py-6">Contact Integrity</th>
-                <th className="px-10 py-6">Department</th>
+                <th className="px-10 py-6">Departments</th>
                 <th className="px-10 py-6">Stewardship</th>
                 <th className="px-10 py-6 text-right">Administrative</th>
               </tr>
@@ -281,9 +369,13 @@ const Membership: React.FC<MembershipProps> = ({
                     </div>
                   </td>
                   <td className="px-10 py-8">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2.5 h-2.5 rounded-full bg-brand-gold animate-pulse" />
-                      <span className="text-sm font-black text-slate-600 uppercase tracking-tighter">{member.group}</span>
+                    <div className="flex flex-wrap gap-1.5 max-w-[200px]">
+                      {member.groups?.map(g => (
+                        <div key={g} className="flex items-center gap-1.5 px-2 py-1 bg-brand-gold/5 border border-brand-gold/10 rounded-lg">
+                           <div className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
+                           <span className="text-[9px] font-black text-slate-600 uppercase tracking-tighter">{g}</span>
+                        </div>
+                      ))}
                     </div>
                   </td>
                   <td className="px-10 py-8">
@@ -319,7 +411,7 @@ const Membership: React.FC<MembershipProps> = ({
                                   <Edit2 size={14} className="text-brand-indigo"/> Modify Record
                                 </button>
                                 <button 
-                                  onClick={() => { setMessagingGroup({id: 'm1', name: `${member.firstName} ${member.lastName}`} as any); setOpenActionMenuId(null); }}
+                                  onClick={() => { setMessagingGroup({id: member.id, name: `${member.firstName} ${member.lastName}`} as any); setOpenActionMenuId(null); }}
                                   className="w-full text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-700 hover:bg-brand-emerald/5 flex items-center gap-3 transition-colors border-b border-slate-50"
                                 >
                                   <MessageCircle size={14} className="text-brand-emerald"/> Send SMS
@@ -343,11 +435,10 @@ const Membership: React.FC<MembershipProps> = ({
         </div>
       </div>
 
-      {/* Detail Modal - Improved Mobile Responsiveness & Reduced Overlap */}
+      {/* Detail Modal */}
       {selectedMember && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-0 sm:p-4 lg:p-12">
           <div className="bg-white rounded-none sm:rounded-[3rem] w-full max-w-6xl h-full lg:h-auto lg:max-h-[90vh] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-white/20">
-            {/* Modal Header - Refined spacing and typography for mobile */}
             <div className="p-5 sm:p-10 lg:p-14 bg-brand-primary text-white relative overflow-hidden flex-shrink-0">
                <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-10">
                   <div className="flex items-center gap-4 sm:gap-8 lg:gap-10 w-full lg:w-auto">
@@ -369,7 +460,6 @@ const Membership: React.FC<MembershipProps> = ({
                     <X size={20} className="sm:w-7 sm:h-7" />
                   </button>
                </div>
-               {/* Detail Tabs Scroller */}
                <div className="absolute bottom-0 left-0 w-full flex bg-black/20 backdrop-blur-md px-4 sm:px-10 lg:px-14 pt-3 sm:pt-6 overflow-x-auto no-scrollbar">
                   {[
                     { id: 'OVERVIEW', label: 'Overview', icon: User },
@@ -387,7 +477,6 @@ const Membership: React.FC<MembershipProps> = ({
                </div>
             </div>
 
-            {/* Modal Body Content */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-10 lg:p-14 no-scrollbar bg-slate-50/50">
                {activeDetailTab === 'OVERVIEW' && (
                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-10 animate-in fade-in duration-500">
@@ -412,7 +501,7 @@ const Membership: React.FC<MembershipProps> = ({
                        </section>
                     </div>
 
-                    <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-10">
+                    <div className="lg:col-span-8 space-y-8">
                        <section className="bg-white p-5 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-5 sm:space-y-8">
                           <h4 className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] text-slate-400 border-b border-slate-50 pb-3 sm:pb-5 flex items-center gap-2 sm:gap-3"><Activity size={12}/> Profile Info</h4>
                           <div className="grid grid-cols-2 gap-3 sm:gap-6">
@@ -430,21 +519,13 @@ const Membership: React.FC<MembershipProps> = ({
                           </div>
                        </section>
 
-                       <section className="bg-brand-primary p-5 sm:p-10 rounded-2xl sm:rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
-                          <div className="relative z-10 space-y-3 sm:space-y-6">
-                             <div className="flex justify-between items-start">
-                                <div className="p-2 sm:p-3 bg-white/10 rounded-lg sm:rounded-xl"><ShieldAlert size={18} className="sm:w-6 sm:h-6"/></div>
-                                <div className="text-right">
-                                   <p className="text-[7px] sm:text-[10px] font-black uppercase text-indigo-300 tracking-widest">Active placement</p>
-                                   <p className="text-lg sm:text-2xl font-black">{selectedMember.group}</p>
-                                </div>
-                             </div>
-                             <div className="pt-3 sm:pt-6 border-t border-white/10">
-                                <p className="text-[10px] sm:text-sm text-indigo-100/70 font-medium leading-relaxed italic">"Let us consider how we may spur one another on toward love and good deeds."</p>
-                             </div>
-                             <button className="w-full py-2.5 sm:py-4 bg-white text-brand-primary rounded-lg sm:rounded-2xl font-black text-[8px] sm:text-xs uppercase tracking-widest hover:bg-brand-gold transition-all">Move Department</button>
+                       <section className="bg-white p-5 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-5">
+                          <h4 className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] text-slate-400 border-b border-slate-50 pb-3 flex items-center gap-2"><Layers size={12}/> Active Ministries</h4>
+                          <div className="flex flex-wrap gap-2">
+                             {selectedMember.groups?.map(g => (
+                               <div key={g} className="px-4 py-2 bg-brand-indigo/5 border border-brand-indigo/20 text-brand-indigo rounded-xl text-xs font-black uppercase tracking-widest">{g}</div>
+                             ))}
                           </div>
-                          <div className="absolute top-[-10%] right-[-10%] w-24 sm:w-32 h-24 sm:w-32 bg-indigo-500 rounded-full blur-3xl opacity-20 group-hover:scale-150 transition-transform"></div>
                        </section>
                     </div>
                  </div>
@@ -460,112 +541,64 @@ const Membership: React.FC<MembershipProps> = ({
                              <p className="text-[7px] sm:text-[10px] font-black text-brand-emerald uppercase tracking-widest mt-1.5 sm:mt-2 flex items-center gap-1.5 sm:gap-2"><CheckCircle2 size={10} className="sm:w-3 sm:h-3"/> System Verified</p>
                           </div>
                        </div>
-                       <div className="md:col-span-2 bg-white p-5 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
-                          <h4 className="text-base sm:text-xl font-black text-slate-800 mb-4 sm:mb-8 flex items-center gap-2 sm:gap-3"><Wallet className="text-brand-indigo sm:w-6 sm:h-6" size={18}/> Channels Used</h4>
-                          <div className="flex flex-wrap gap-2 sm:gap-4">
-                             {['M-Pesa Paybill', 'Cash Deposit', 'EFT Transfer'].map(method => (
-                                <div key={method} className={`px-3 py-2 sm:px-6 sm:py-4 rounded-lg sm:rounded-2xl border-2 font-bold text-[10px] sm:text-sm ${method.includes('M-Pesa') ? 'bg-indigo-50 border-brand-indigo text-brand-indigo' : 'bg-white border-slate-100 text-slate-400'}`}>
-                                   {method}
-                                </div>
-                             ))}
-                          </div>
-                       </div>
-                    </div>
-                    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 overflow-x-auto shadow-sm">
-                       <table className="w-full text-left min-w-[500px]">
-                          <thead className="bg-slate-50 text-[8px] sm:text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100">
-                             <tr>
-                                <th className="px-5 sm:px-10 py-3 sm:py-6">Description</th>
-                                <th className="px-5 sm:px-10 py-3 sm:py-6">Ref ID</th>
-                                <th className="px-5 sm:px-10 py-3 sm:py-6 text-right">Settled</th>
-                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-50">
-                             {memberGivings.length > 0 ? memberGivings.map(t => (
-                                <tr key={t.id} className="hover:bg-slate-50/50 transition-all">
-                                   <td className="px-5 sm:px-10 py-4 sm:py-8">
-                                      <p className="font-bold text-slate-700 text-[11px] sm:text-sm">{t.type}</p>
-                                      <p className="text-[8px] sm:text-[10px] text-slate-400 font-bold uppercase mt-0.5 sm:mt-1">{t.date}</p>
-                                   </td>
-                                   <td className="px-5 sm:px-10 py-4 sm:py-8 font-mono text-[9px] sm:text-[11px] text-brand-indigo font-black tracking-widest uppercase">{t.reference}</td>
-                                   <td className="px-5 sm:px-10 py-4 sm:py-8 text-right font-black text-slate-800 text-sm sm:text-lg">KES {t.amount.toLocaleString()}</td>
-                                </tr>
-                             )) : (
-                                <tr><td colSpan={3} className="px-5 sm:px-10 py-12 sm:py-24 text-center text-slate-300 font-black uppercase tracking-widest text-xs">No matching records found</td></tr>
-                             )}
-                          </tbody>
-                       </table>
-                    </div>
-                 </div>
-               )}
-
-               {activeDetailTab === 'ATTENDANCE' && (
-                 <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-4 sm:space-y-10">
-                    <div className="bg-white p-3 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-8">
-                       {[
-                         { val: memberAttendance.length, label: 'Services', icon: Calendar },
-                         { val: '88%', label: 'Stability', icon: Activity },
-                         { val: 12, label: 'Outreach', icon: MapPin },
-                         { val: 'High', label: 'Vibrancy', icon: Heart }
-                       ].map((st, i) => (
-                         <div key={i} className="text-center p-2 sm:p-6 sm:border-r last:border-0 border-slate-50">
-                            <div className="mx-auto w-8 h-8 sm:w-12 sm:h-12 bg-slate-50 rounded-lg sm:rounded-2xl flex items-center justify-center text-slate-400 mb-1 sm:mb-4"><st.icon size={16} className="sm:w-6 sm:h-6"/></div>
-                            <p className="text-lg sm:text-3xl font-black text-slate-800 tracking-tighter">{st.val}</p>
-                            <p className="text-[7px] sm:text-[9px] font-black uppercase text-slate-400 tracking-widest mt-0.5 sm:mt-1">{st.label}</p>
-                         </div>
-                       ))}
-                    </div>
-                    <div className="bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 overflow-x-auto shadow-sm">
-                       <table className="w-full text-left min-w-[500px]">
-                          <thead className="bg-slate-50 text-[8px] sm:text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100">
-                             <tr>
-                                <th className="px-5 sm:px-10 py-3 sm:py-6">Service Detail</th>
-                                <th className="px-5 sm:px-10 py-3 sm:py-6">Date Verified</th>
-                                <th className="px-5 sm:px-10 py-3 sm:py-6 text-right">Integrity</th>
-                             </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-50">
-                             {memberAttendance.length > 0 ? memberAttendance.map(e => (
-                                <tr key={e.id} className="hover:bg-slate-50/50 transition-all">
-                                   <td className="px-5 sm:px-10 py-4 sm:py-8">
-                                      <p className="font-bold text-slate-700 text-[11px] sm:text-sm">{e.title}</p>
-                                      <p className="text-[8px] sm:text-[10px] text-slate-400 font-bold uppercase mt-0.5 sm:mt-1">{e.location}</p>
-                                   </td>
-                                   <td className="px-5 sm:px-10 py-4 sm:py-8 text-[11px] sm:text-xs font-black text-slate-500 uppercase tracking-widest">{e.date}</td>
-                                   <td className="px-5 sm:px-10 py-4 sm:py-8 text-right">
-                                      <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-brand-emerald/10 text-brand-emerald text-[7px] sm:text-[9px] font-black uppercase rounded-md sm:rounded-lg tracking-widest">Marked Present</span>
-                                   </td>
-                                </tr>
-                             )) : (
-                                <tr><td colSpan={3} className="px-5 sm:px-10 py-12 sm:py-24 text-center text-slate-300 font-black uppercase tracking-widest text-[10px]">No Presence Logs Found</td></tr>
-                             )}
-                          </tbody>
-                       </table>
                     </div>
                  </div>
                )}
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* Modal Footer - Adaptive layout for mobile buttons */}
-            <div className="p-4 sm:p-10 lg:p-14 border-t border-slate-100 bg-white flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6 flex-shrink-0">
-               <div className="hidden sm:flex items-center gap-4">
-                  <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white text-xs font-black ring-4 ring-slate-50">I</div>
-                  <div>
-                    <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-300 mb-0.5">Global Identification System</p>
-                    <p className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-tighter">Digital ID Secured • Encryption active</p>
-                  </div>
-               </div>
-               <div className="flex w-full sm:w-auto gap-2 sm:gap-4">
-                  <button onClick={() => setSelectedMember(null)} className="flex-1 sm:flex-none px-4 sm:px-10 py-3.5 sm:py-5 bg-slate-100 text-slate-600 rounded-xl sm:rounded-[1.5rem] font-black text-[9px] sm:text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Close</button>
-                  {currentUserRole !== UserRole.MEMBER && (
-                    <button 
-                      onClick={() => { setShowEditModal(selectedMember); setSelectedMember(null); }}
-                      className="flex-[1.5] sm:flex-none px-6 sm:px-12 py-3.5 sm:py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black text-[9px] sm:text-xs uppercase tracking-widest shadow-xl sm:shadow-2xl shadow-brand-primary/30 hover:bg-brand-indigo transition-all"
-                    >
-                      Update Profile
-                    </button>
-                  )}
-               </div>
+      {/* Bulk Import Modal */}
+      {showBulkModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[600] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-300">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <div className="p-4 bg-brand-indigo/10 text-brand-indigo rounded-[1.5rem] shadow-sm flex-shrink-0">
+                  <FileSpreadsheet size={28}/>
+                </div>
+                <div>
+                  <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none">Bulk Soul Import</h3>
+                  <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">CSV or Excel Format (Comma Separated)</p>
+                </div>
+              </div>
+              <button onClick={() => setShowBulkModal(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-3xl transition-all"><X size={24}/></button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="p-8 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50 flex flex-col items-center justify-center text-center space-y-4 group hover:border-brand-primary transition-all">
+                <Upload size={48} className="text-slate-300 group-hover:text-brand-primary transition-colors"/>
+                <div>
+                  <p className="text-sm font-black text-slate-600 uppercase">Drop CSV file here</p>
+                  <p className="text-xs text-slate-400 mt-1">Firstname, Lastname, Phone, Location (Mandatory)</p>
+                  <p className="text-[10px] text-brand-indigo font-bold mt-2 italic">* Use ';' to separate multiple groups in the Groups column</p>
+                </div>
+                <input 
+                  type="file" 
+                  accept=".csv" 
+                  className="hidden" 
+                  id="bulk-csv-input" 
+                  onChange={handleBulkCsvImport}
+                />
+                <label 
+                  htmlFor="bulk-csv-input"
+                  className="px-8 py-3 bg-white border border-slate-200 text-brand-indigo rounded-xl font-black text-[10px] uppercase tracking-widest cursor-pointer hover:bg-brand-indigo hover:text-white transition-all shadow-sm"
+                >
+                  Browse Files
+                </label>
+              </div>
+
+              <div className="flex items-start gap-4 p-5 bg-indigo-50 rounded-2xl border border-indigo-100">
+                 <ShieldAlert className="text-brand-indigo shrink-0" size={20}/>
+                 <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                   Basics required: Firstname, Lastname, Phone, and Location. Other fields will use defaults if left empty. Duplicates are matched by phone.
+                 </p>
+              </div>
+            </div>
+            
+            <div className="flex justify-center">
+              <button onClick={handleDownloadTemplate} className="text-[10px] font-black text-brand-indigo uppercase tracking-widest hover:underline">Download CSV Template</button>
             </div>
           </div>
         </div>
@@ -586,140 +619,92 @@ const Membership: React.FC<MembershipProps> = ({
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Stewardship Integrity Framework</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(null); setFormData({}); setPhoto(null); setIsCameraActive(false); }} className="relative z-10 p-4 hover:bg-white rounded-2xl transition-all text-slate-400"><X size={28}/></button>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-brand-indigo/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(null); setFormData({ groups: [] }); setPhoto(null); }} className="relative z-10 p-4 hover:bg-white rounded-2xl transition-all text-slate-400"><X size={28}/></button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-8 sm:p-12 lg:p-16 space-y-12 no-scrollbar">
                 <div className="flex flex-col lg:flex-row gap-12">
-                   {/* Left Column: Photo & Basic */}
                    <div className="lg:w-1/3 space-y-8">
                       <div className="space-y-4">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Member Portrait</label>
                         <div className="aspect-square w-full rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center relative overflow-hidden group shadow-inner">
-                           {isCameraActive ? (
+                           {photo ? (
                               <div className="relative w-full h-full">
-                                <video ref={videoRef} autoPlay className="w-full h-full object-cover" />
-                                <button type="button" onClick={capturePhoto} className="absolute bottom-6 left-1/2 -translate-x-1/2 p-5 bg-brand-primary text-white rounded-full shadow-2xl hover:scale-110 transition-transform active:scale-95"><Camera size={24}/></button>
-                              </div>
-                           ) : photo ? (
-                              <div className="relative w-full h-full">
-                                <img src={photo} className="w-full h-full object-cover" />
+                                <img src={photo} className="w-full h-full object-cover" alt="Member" />
                                 <button type="button" onClick={() => setPhoto(null)} className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-xl backdrop-blur-md hover:bg-rose-500 transition-colors"><Trash2 size={16}/></button>
                               </div>
                            ) : (
                               <div className="text-center p-8 space-y-4">
-                                <div className="p-5 bg-white rounded-2xl shadow-sm text-slate-200 inline-block"><User size={48}/></div>
+                                <div className="p-5 bg-white rounded-2xl shadow-sm text-slate-200 inline-block"><ImageIcon size={48}/></div>
                                 <div className="space-y-2">
-                                   <button type="button" onClick={startCamera} className="text-xs font-black text-brand-indigo uppercase tracking-widest hover:underline block w-full">Start Camera</button>
-                                   <p className="text-[9px] text-slate-400 font-bold uppercase">PNG or JPG, Max 5MB</p>
+                                   <input 
+                                     type="file" 
+                                     accept="image/*" 
+                                     className="hidden" 
+                                     id="member-photo-input" 
+                                     onChange={handleFileChange}
+                                     ref={fileInputRef}
+                                   />
+                                   <label 
+                                     htmlFor="member-photo-input"
+                                     className="text-xs font-black text-brand-indigo uppercase tracking-widest hover:underline block w-full cursor-pointer"
+                                   >
+                                     Upload Portrait
+                                   </label>
+                                   <p className="text-[9px] text-slate-400 font-bold uppercase">JPEG, PNG, Max 5MB</p>
                                 </div>
                               </div>
                            )}
                         </div>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Identity Type</label>
-                        <select 
-                          className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none transition-all cursor-pointer shadow-sm"
-                          value={formData.membershipType}
-                          onChange={e => setFormData({...formData, membershipType: e.target.value as MembershipType})}
-                        >
-                          {Object.values(MembershipType).map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
+                      
+                      <div className="space-y-4 p-6 bg-slate-100/50 rounded-[2rem] border border-slate-200">
+                        <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Assigned Ministries</label>
+                        <div className="space-y-2 max-h-48 overflow-y-auto pr-2 no-scrollbar">
+                           {allPossibleGroups.map(group => {
+                             const isSelected = formData.groups?.includes(group);
+                             return (
+                               <button 
+                                 key={group}
+                                 type="button"
+                                 onClick={() => toggleGroupSelection(group)}
+                                 className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${isSelected ? 'bg-brand-indigo text-white border-brand-indigo shadow-md' : 'bg-white border-slate-200 text-slate-600 hover:border-brand-indigo'}`}
+                               >
+                                  <span className="text-[10px] font-black uppercase truncate">{group}</span>
+                                  {isSelected ? <Check size={14}/> : <Plus size={14} className="text-slate-300"/>}
+                               </button>
+                             );
+                           })}
+                        </div>
                       </div>
                    </div>
 
-                   {/* Right Column: Information Form */}
                    <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-2">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">First Name</label>
-                        <input 
-                          required
-                          className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm transition-all"
-                          placeholder="e.g. David"
-                          value={formData.firstName}
-                          onChange={e => setFormData({...formData, firstName: e.target.value})}
-                        />
+                        <input required className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm" placeholder="e.g. David" value={formData.firstName || ''} onChange={e => setFormData({...formData, firstName: e.target.value})} />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Last Name</label>
-                        <input 
-                          required
-                          className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm transition-all"
-                          placeholder="e.g. Ochieng"
-                          value={formData.lastName}
-                          onChange={e => setFormData({...formData, lastName: e.target.value})}
-                        />
+                        <input required className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm" placeholder="e.g. Ochieng" value={formData.lastName || ''} onChange={e => setFormData({...formData, lastName: e.target.value})} />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Phone Number</label>
-                        <div className="relative">
-                           <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18}/>
-                           <input 
-                            required
-                            className="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm"
-                            placeholder="07XX XXX XXX"
-                            value={formData.phone}
-                            onChange={e => setFormData({...formData, phone: e.target.value})}
-                           />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Email Address</label>
-                        <div className="relative">
-                           <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18}/>
-                           <input 
-                            type="email"
-                            className="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm"
-                            placeholder="email@example.com"
-                            value={formData.email}
-                            onChange={e => setFormData({...formData, email: e.target.value})}
-                           />
-                        </div>
+                        <input required className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm" placeholder="07XX XXX XXX" value={formData.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Residential Hub</label>
-                        <div className="relative">
-                           <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18}/>
-                           <input 
-                            required
-                            className="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm"
-                            placeholder="e.g. Westlands Outreach"
-                            value={formData.location}
-                            onChange={e => setFormData({...formData, location: e.target.value})}
-                           />
-                        </div>
+                        <input required className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm" placeholder="e.g. Westlands" value={formData.location || ''} onChange={e => setFormData({...formData, location: e.target.value})} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Assigned Ministry</label>
-                        <select 
-                          className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none shadow-sm"
-                          value={formData.group}
-                          onChange={e => setFormData({...formData, group: e.target.value})}
-                        >
-                          <option value="General">General Congregation</option>
-                          {groups.map(g => <option key={g} value={g}>{g}</option>)}
-                          <option value="New Member Class">New Member Class</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Life Status</label>
-                        <select 
-                          className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none shadow-sm"
-                          value={formData.maritalStatus}
-                          onChange={e => setFormData({...formData, maritalStatus: e.target.value as MaritalStatus})}
-                        >
-                          {Object.values(MaritalStatus).map(m => <option key={m} value={m}>{m}</option>)}
+                        <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Identity Type</label>
+                        <select className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none shadow-sm" value={formData.membershipType} onChange={e => setFormData({...formData, membershipType: e.target.value as MembershipType})}>
+                          {Object.values(MembershipType).map(t => <option key={t} value={t}>{t}</option>)}
                         </select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Reporting Status</label>
-                        <select 
-                          className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none shadow-sm"
-                          value={formData.status}
-                          onChange={e => setFormData({...formData, status: e.target.value as MemberStatus})}
-                        >
+                        <select className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none shadow-sm" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as MemberStatus})}>
                           {Object.values(MemberStatus).map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
@@ -728,7 +713,7 @@ const Membership: React.FC<MembershipProps> = ({
               </div>
 
               <div className="p-10 sm:p-14 border-t border-slate-100 bg-white flex flex-col sm:flex-row gap-6 flex-shrink-0">
-                <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(null); }} className="flex-1 py-6 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest transition-all">Cancel Entry</button>
+                <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(null); setFormData({ groups: [] }); }} className="flex-1 py-6 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest transition-all">Cancel Entry</button>
                 <button 
                   type="submit" 
                   disabled={isSaving}
@@ -765,72 +750,6 @@ const Membership: React.FC<MembershipProps> = ({
             </div>
          </div>
       )}
-
-      {/* Bulk SMS Modal Integration (Simplified for now) */}
-      {messagingGroup && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[600] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-12 space-y-10 animate-in zoom-in-95 duration-300 border border-white/20">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-brand-indigo/10 text-brand-indigo rounded-[1.25rem]"><Send size={24}/></div>
-                <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Direct SMS</h3>
-              </div>
-              <button onClick={() => setMessagingGroup(null)} className="p-2 text-slate-400 hover:text-rose-500 transition-all"><X size={28}/></button>
-            </div>
-            
-            <div className="space-y-8">
-              <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] flex items-center justify-between">
-                 <div className="flex items-center gap-4">
-                    <User className="text-brand-primary" size={22}/>
-                    <span className="text-sm font-black text-slate-700 truncate max-w-[150px]">{messagingGroup.name}</span>
-                 </div>
-                 <div className="px-4 py-1 bg-white rounded-xl text-[10px] font-black text-brand-indigo uppercase tracking-widest border border-brand-indigo/10 shadow-sm">Recipient</div>
-              </div>
-
-              <div className="space-y-3">
-                 <label className="text-[11px] font-black uppercase text-slate-400 ml-3 tracking-[0.2em]">Message Content</label>
-                 <textarea 
-                    className="w-full p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] font-bold text-slate-700 outline-none resize-none focus:ring-2 focus:ring-brand-primary shadow-inner" 
-                    rows={5} 
-                    placeholder="Hello from Imani Central..."
-                    value={smsMessage}
-                    onChange={(e) => setSmsMessage(e.target.value)}
-                 />
-                 <div className="flex justify-end px-4">
-                    <span className="text-[10px] font-black text-slate-400 tracking-widest">{smsMessage.length} / 160 Characters</span>
-                 </div>
-              </div>
-
-              <div className="flex gap-4">
-                 <button onClick={() => setMessagingGroup(null)} className="flex-1 py-5 font-black text-slate-400 hover:bg-slate-100 rounded-[1.5rem] uppercase text-xs tracking-widest">Discard</button>
-                 <button 
-                  onClick={() => {
-                    setIsSaving(true);
-                    setTimeout(() => {
-                      setIsSaving(false);
-                      setMessagingGroup(null);
-                      setSmsMessage('');
-                    }, 1500);
-                  }}
-                  disabled={!smsMessage || isSaving}
-                  className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-2xl shadow-brand-primary/30 hover:bg-brand-indigo transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                 >
-                   {isSaving ? <Loader2 className="animate-spin" size={18}/> : <Send size={18}/>}
-                   {isSaving ? 'Dispatching...' : 'Fire Blast'}
-                 </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Floating Action Button (Mobile Only) */}
-      <button 
-        onClick={() => setShowAddModal(true)}
-        className="fixed bottom-8 right-8 w-20 h-20 bg-brand-primary text-white rounded-full shadow-2xl flex items-center justify-center lg:hidden hover:scale-110 active:scale-95 transition-all z-[100] ring-8 ring-slate-50"
-      >
-        <Plus size={32} />
-      </button>
     </div>
   );
 };

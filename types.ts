@@ -47,7 +47,7 @@ export interface Member {
   phone: string;
   email: string;
   location: string;
-  group: string;
+  groups: string[];
   status: MemberStatus;
   joinDate: string;
   birthday?: string;
@@ -56,41 +56,63 @@ export interface Member {
   maritalStatus?: MaritalStatus;
   membershipType?: MembershipType;
   photo?: string;
-  stewardshipScore?: number; // 0-100 based on attendance/giving
+  stewardshipScore?: number; 
 }
+
+export type TransactionType = 'Tithe' | 'Offering' | 'Project' | 'Harambee' | 'Benevolence' | 'Expense' | 'Salary' | 'Utility' | 'Maintenance';
 
 export interface Transaction {
   id: string;
-  memberId: string;
+  memberId?: string;
   memberName: string;
   amount: number;
-  type: 'Tithe' | 'Offering' | 'Project' | 'Harambee' | 'Benevolence' | 'Expense';
-  paymentMethod: 'M-Pesa' | 'Cash' | 'Bank Transfer';
+  type: TransactionType;
+  paymentMethod: 'M-Pesa' | 'Cash' | 'Bank Transfer' | 'Cheque';
   date: string;
   reference: string;
   category: 'Income' | 'Expense';
-  subCategory?: string;
+  notes?: string;
   phoneNumber?: string;
+  source: 'MANUAL' | 'INTEGRATED';
+}
+
+export interface StewardshipPledge {
+  id: string;
+  memberId: string;
+  category: TransactionType;
+  targetAmount: number;
+  period: 'Monthly' | 'Yearly';
+  startDate: string;
+  status: 'ACTIVE' | 'FULFILLED' | 'CANCELLED';
+}
+
+export interface MemberActivity {
+  id: string;
+  memberId: string;
+  type: 'PAYMENT' | 'EVENT_RSVP' | 'PROFILE_UPDATE' | 'GROUP_JOIN';
+  description: string;
+  timestamp: string;
+  metadata?: any;
 }
 
 export interface Budget {
   id: string;
   category: string;
   amount: number;
+  spent: number;
   month: string;
 }
 
-export interface RecurringExpense {
+export interface AuditLog {
   id: string;
-  name: string;
-  amount: number;
-  category: string;
-  frequency: 'Monthly' | 'Weekly';
-  nextDueDate: string;
-  isActive: boolean;
+  userId: string;
+  userName: string;
+  action: string;
+  module: AppView;
+  timestamp: string;
+  severity: 'INFO' | 'WARN' | 'CRITICAL';
+  metadata?: any;
 }
-
-export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ANNUALLY';
 
 export type ChurchEventType = 
   | 'WORSHIP' 
@@ -99,6 +121,8 @@ export type ChurchEventType =
   | 'OUTREACH' 
   | 'YOUTH' 
   | 'OTHER';
+
+export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ANNUALLY';
 
 export interface ChurchEvent {
   id: string;
@@ -109,24 +133,11 @@ export interface ChurchEvent {
   location: string;
   type: ChurchEventType;
   coordinator?: string;
+  attendance: string[];
   contactPerson?: string;
   rsvpDeadline?: string;
-  coordinates?: { lat: number; lng: number };
-  attendance: string[];
   recurrence?: RecurrenceType;
-  reminderTime?: string;
-}
-
-export interface Sermon {
-  id: string;
-  title: string;
-  speaker: string;
-  date: string;
-  time: string;
-  scripture: string;
-  event: string;
-  eventId?: string;
-  transcript?: string;
+  coordinates?: { lat: number; lng: number };
 }
 
 export interface AppNotification {
@@ -149,6 +160,8 @@ export type AppView =
   | 'SERMONS' 
   | 'ANALYTICS' 
   | 'SETTINGS' 
+  | 'AUDIT_LOGS'
+  | 'BILLING'
   | 'MY_PORTAL' 
   | 'MY_GIVING' 
   | 'PRIVACY' 
@@ -161,14 +174,6 @@ export interface Toast {
   type: 'success' | 'error' | 'info';
 }
 
-export interface Activity {
-  id: string;
-  action: string;
-  user: string;
-  date: string;
-  status: string;
-}
-
 export interface CommunicationLog {
   id: string;
   type: 'SMS' | 'Email' | 'WhatsApp';
@@ -177,9 +182,9 @@ export interface CommunicationLog {
   subject: string;
   content: string;
   date: string;
-  scheduledFor?: string;
   status: 'Sent' | 'Scheduled' | 'Failed';
   sender: string;
+  scheduledFor?: string;
   deliveryBreakdown?: {
     delivered: number;
     opened: number;
@@ -190,9 +195,9 @@ export interface CommunicationLog {
 export interface CommunicationTemplate {
   id: string;
   name: string;
-  subject?: string;
   content: string;
   type: 'SMS' | 'Email' | 'WhatsApp';
+  subject?: string;
 }
 
 export interface SystemRole {
@@ -200,16 +205,25 @@ export interface SystemRole {
   name: string;
   memberCount: number;
   description: string;
-  custom?: boolean;
-  modules: {
-    id: string;
-    label: string;
-    enabled: boolean;
-    permissions: {
-      id: string;
-      label: string;
-      enabled: boolean;
-      critical?: boolean;
-    }[];
-  }[];
+  modules: string[];
+}
+
+export interface RecurringExpense {
+  id: string;
+  category: string;
+  amount: number;
+  frequency: 'Weekly' | 'Monthly' | 'Quarterly' | 'Yearly';
+  nextDate: string;
+}
+
+export interface Sermon {
+  id: string;
+  title: string;
+  speaker: string;
+  date: string;
+  time: string;
+  scripture: string;
+  event: string;
+  eventId: string;
+  transcript: string;
 }

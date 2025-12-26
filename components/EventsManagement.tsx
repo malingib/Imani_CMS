@@ -6,7 +6,9 @@ import {
   Bell, Repeat, ChevronLeft, ChevronRight, LayoutGrid, Map as MapIcon,
   Filter, Sparkles, Map, Loader2, UserCheck, Search as SearchIcon,
   Music, BookOpen, HeartHandshake, Globe, Zap, HelpCircle,
-  User, Phone, CalendarClock, ExternalLink, Navigation
+  User, Phone, CalendarClock, ExternalLink, Navigation, Eye,
+  // Added Save to fix the "Cannot find name 'Save'" error
+  Save
 } from 'lucide-react';
 import { ChurchEvent, Member, RecurrenceType, ChurchEventType } from '../types';
 import { scoutOutreachLocations } from '../services/geminiService';
@@ -116,7 +118,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, on
     let lat: number | undefined;
     let lng: number | undefined;
 
-    // Attempt to get browser location for context
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
@@ -210,7 +211,22 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, on
             const config = EVENT_TYPE_CONFIG[event.type] || EVENT_TYPE_CONFIG.OTHER;
             const Icon = config.icon;
             return (
-              <div key={event.id} className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300">
+              <div key={event.id} className="relative bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+                {/* Quick Actions Overlay */}
+                <div className="absolute inset-0 bg-brand-primary/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-10 space-y-4 z-20">
+                  <p className="text-brand-gold font-black uppercase tracking-[0.2em] text-[10px] mb-2">Management Suite</p>
+                  <button onClick={() => {/* Logic to show details modal */}} className="w-full flex items-center justify-center gap-3 py-4 bg-white text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-xl">
+                    <Eye size={16}/> View Specifics
+                  </button>
+                  <button onClick={() => setShowAttendanceModal(event.id)} className="w-full flex items-center justify-center gap-3 py-4 bg-brand-gold text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white transition-all shadow-xl">
+                    <UserCheck size={16}/> Roll Call
+                  </button>
+                  <button onClick={() => onDeleteEvent(event.id)} className="w-full flex items-center justify-center gap-3 py-4 bg-rose-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-xl">
+                    <Trash2 size={16}/> Terminate Event
+                  </button>
+                  <button className="text-white/40 text-[9px] font-black uppercase tracking-widest hover:text-white transition-colors mt-2" onClick={(e) => e.stopPropagation()}>Dismiss Actions</button>
+                </div>
+
                 <div className="p-8 flex-1 space-y-4">
                   <div className="flex justify-between items-start">
                     <div className={`p-3 rounded-2xl text-white shadow-lg ${config.color}`}>
@@ -264,7 +280,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, on
                     <Users size={18} className="text-brand-primary" /> 
                     {event.attendance.length} <span className="hidden sm:inline">Attending</span>
                   </div>
-                  <button onClick={() => setShowAttendanceModal(event.id)} className="px-6 py-2.5 bg-white text-brand-primary text-xs font-black rounded-xl border border-indigo-100 hover:bg-brand-primary hover:text-white transition-all shadow-sm">Roll Call</button>
+                  <div className="px-4 py-1.5 bg-white text-brand-primary text-[10px] font-black rounded-lg border border-indigo-50 shadow-sm uppercase tracking-widest">Live Record</div>
                 </div>
               </div>
             );
@@ -432,61 +448,79 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, on
 
       {/* Attendance Modal */}
       {showAttendanceModal && activeEvent && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200 flex flex-col max-h-[85vh]">
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[300] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] border border-white/20">
             <div className="flex justify-between items-center">
-               <div className="flex items-center gap-4">
-                 <div className="p-4 bg-indigo-50 text-brand-primary rounded-2xl"><UserCheck size={24}/></div>
+               <div className="flex items-center gap-5">
+                 <div className="p-4 bg-brand-indigo text-white rounded-[1.5rem] shadow-xl shadow-brand-indigo/20"><UserCheck size={32}/></div>
                  <div>
-                   <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Roll Call Tracking</h3>
-                   <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">{activeEvent.title}</p>
+                   <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Souls Roll Call</h3>
+                   <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">{activeEvent.title} • {activeEvent.date}</p>
                  </div>
                </div>
-               <button onClick={() => setShowAttendanceModal(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400"><X size={24}/></button>
+               <button onClick={() => setShowAttendanceModal(null)} className="p-3 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 border border-slate-100"><X size={24}/></button>
             </div>
 
-            <div className="relative">
-               <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18}/>
+            <div className="relative group">
+               <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-brand-indigo transition-colors" size={22}/>
                <input 
                 type="text" 
-                placeholder="Find member to mark present..." 
-                className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
+                placeholder="Search by name, ministry or group..." 
+                className="w-full pl-14 pr-8 py-5 bg-slate-50 border-2 border-slate-100 rounded-[1.8rem] font-bold text-slate-700 focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary outline-none transition-all shadow-inner"
                 value={attendanceSearch}
                 onChange={e => setAttendanceSearch(e.target.value)}
                />
             </div>
 
-            <div className="flex-1 overflow-y-auto no-scrollbar space-y-2 pr-2">
-               {members.filter(m => `${m.firstName} ${m.lastName}`.toLowerCase().includes(attendanceSearch.toLowerCase())).map(m => {
+            <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-2 py-2">
+               {members.filter(m => `${m.firstName} ${m.lastName} ${m.groups?.join(' ')}`.toLowerCase().includes(attendanceSearch.toLowerCase())).map(m => {
                  const isPresent = currentAttendance.includes(m.id);
                  return (
                    <button 
                     key={m.id}
                     onClick={() => toggleAttendance(m.id)}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${isPresent ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100 hover:bg-slate-50'}`}
+                    className={`w-full group flex items-center justify-between p-5 rounded-[2rem] border-2 transition-all ${isPresent ? 'bg-brand-primary border-brand-primary shadow-xl shadow-indigo-100' : 'bg-white border-slate-50 hover:border-slate-200'}`}
                    >
-                     <div className="flex items-center gap-4">
-                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs ${isPresent ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
-                          {m.firstName[0]}{m.lastName[0]}
+                     <div className="flex items-center gap-5">
+                       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm transition-all ${isPresent ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                          {m.photo ? (
+                            <img src={m.photo} className="w-full h-full object-cover rounded-2xl" />
+                          ) : (
+                            <span>{m.firstName[0]}{m.lastName[0]}</span>
+                          )}
                        </div>
-                       <div className="text-left">
-                          <p className={`text-sm font-bold ${isPresent ? 'text-brand-primary' : 'text-slate-700'}`}>{m.firstName} {m.lastName}</p>
-                          <p className="text-[10px] text-slate-400 uppercase font-black">{m.group}</p>
+                       <div className="text-left min-w-0">
+                          <p className={`text-base font-black truncate ${isPresent ? 'text-white' : 'text-slate-800'}`}>{m.firstName} {m.lastName}</p>
+                          <div className="flex gap-2 mt-1">
+                             <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${isPresent ? 'bg-white/10 text-brand-gold' : 'bg-brand-indigo/5 text-brand-indigo'}`}>{m.membershipType}</span>
+                             <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${isPresent ? 'bg-white/10 text-white/60' : 'bg-slate-100 text-slate-400'}`}>{m.groups?.[0] || 'Member'}</span>
+                          </div>
                        </div>
                      </div>
-                     <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${isPresent ? 'bg-brand-primary text-white rotate-0' : 'border-2 border-slate-100 rotate-45'}`}>
-                        {isPresent && <CheckCircle2 size={16}/>}
+                     <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${isPresent ? 'bg-white text-brand-primary rotate-0' : 'bg-slate-50 text-slate-200 rotate-45 border-2 border-slate-100'}`}>
+                        {isPresent ? <CheckCircle2 size={24}/> : <Plus size={20}/>}
                      </div>
                    </button>
                  );
                })}
+               {members.filter(m => `${m.firstName} ${m.lastName}`.toLowerCase().includes(attendanceSearch.toLowerCase())).length === 0 && (
+                 <div className="py-20 text-center space-y-4">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200 shadow-inner"><Users size={32}/></div>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No matching souls found</p>
+                 </div>
+               )}
             </div>
 
-            <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
-               <p className="text-xs font-black uppercase text-slate-400 tracking-widest">{currentAttendance.length} souls present</p>
-               <div className="flex gap-3">
-                 <button onClick={() => setShowAttendanceModal(null)} className="px-8 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 uppercase text-[10px] tracking-widest">Discard</button>
-                 <button onClick={saveRollCall} className="px-8 py-3 bg-brand-primary text-white rounded-xl font-black shadow-lg hover:bg-indigo-700 uppercase text-[10px] tracking-widest">Save Attendance</button>
+            <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-6">
+               <div className="text-center sm:text-left">
+                  <p className="text-2xl font-black text-brand-primary tracking-tighter">{currentAttendance.length}</p>
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Confirmed Presence</p>
+               </div>
+               <div className="flex gap-4 w-full sm:w-auto">
+                 <button onClick={() => setShowAttendanceModal(null)} className="flex-1 sm:flex-none px-10 py-5 bg-slate-50 text-slate-500 rounded-[1.5rem] font-black hover:bg-slate-100 uppercase text-[11px] tracking-widest transition-all">Dismiss</button>
+                 <button onClick={saveRollCall} className="flex-[2] sm:flex-none px-12 py-5 bg-brand-primary text-white rounded-[1.5rem] font-black shadow-2xl hover:bg-brand-indigo uppercase text-[11px] tracking-widest transition-all flex items-center justify-center gap-3">
+                   <Save size={20}/> Save Log
+                 </button>
                </div>
             </div>
           </div>

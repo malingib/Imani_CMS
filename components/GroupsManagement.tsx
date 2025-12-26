@@ -31,7 +31,6 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
   
   // Modal States
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [viewingMembersGroup, setViewingMembersGroup] = useState<ChurchGroup | null>(null);
   const [messagingGroup, setMessagingGroup] = useState<ChurchGroup | null>(null);
   
@@ -62,11 +61,11 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
   });
 
   const getMemberCount = (groupName: string) => {
-    return members.filter(m => m.group === groupName).length;
+    return members.filter(m => m.groups && m.groups.includes(groupName)).length;
   };
 
   const getGroupMembers = (groupName: string) => {
-    return members.filter(m => m.group === groupName);
+    return members.filter(m => m.groups && m.groups.includes(groupName));
   };
 
   const handleCreateGroup = () => {
@@ -115,12 +114,6 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={() => setShowSettingsModal(true)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-50 transition-all shadow-sm"
-          >
-            <Filter size={20} /> Group Settings
-          </button>
-          <button 
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-slate-800 transition-all shadow-lg shadow-indigo-100"
           >
@@ -156,8 +149,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredGroups.map(group => {
           const groupMemberCount = getMemberCount(group.name);
-          const currentCount = groupMemberCount + 5; 
-          const progress = Math.min((currentCount / group.target) * 100, 100);
+          const progress = Math.min((groupMemberCount / group.target) * 100, 100);
 
           return (
             <div key={group.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
@@ -196,7 +188,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
                 <div className="space-y-2">
                    <div className="flex justify-between items-end">
                       <p className="text-[10px] font-black uppercase text-slate-400">Membership Growth</p>
-                      <p className="text-xs font-black text-slate-800">{currentCount} / {group.target}</p>
+                      <p className="text-xs font-black text-slate-800">{groupMemberCount} / {group.target}</p>
                    </div>
                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div 
@@ -239,21 +231,11 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Group Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Youth Fellowship" 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
-                    value={newGroup.name}
-                    onChange={e => setNewGroup({...newGroup, name: e.target.value})}
-                  />
+                  <input type="text" placeholder="e.g. Youth Fellowship" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.name || ''} onChange={e => setNewGroup({...newGroup, name: e.target.value})} />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Category</label>
-                  <select 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
-                    value={newGroup.category}
-                    onChange={e => setNewGroup({...newGroup, category: e.target.value as any})}
-                  >
+                  <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.category} onChange={e => setNewGroup({...newGroup, category: e.target.value as any})}>
                     <option value="Fellowship">Fellowship</option>
                     <option value="Department">Department</option>
                     <option value="Ministry">Ministry</option>
@@ -261,58 +243,29 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Leader Name</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter leader's name" 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
-                    value={newGroup.leader}
-                    onChange={e => setNewGroup({...newGroup, leader: e.target.value})}
-                  />
+                  <input type="text" placeholder="Enter leader's name" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.leader || ''} onChange={e => setNewGroup({...newGroup, leader: e.target.value})} />
                 </div>
               </div>
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Meeting Day & Time</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Saturdays, 4:00 PM" 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
-                    value={newGroup.meetingDay}
-                    onChange={e => setNewGroup({...newGroup, meetingDay: e.target.value})}
-                  />
+                  <input type="text" placeholder="e.g. Saturdays, 4:00 PM" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.meetingDay || ''} onChange={e => setNewGroup({...newGroup, meetingDay: e.target.value})} />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Primary Location</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. Youth Center" 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
-                    value={newGroup.location}
-                    onChange={e => setNewGroup({...newGroup, location: e.target.value})}
-                  />
+                  <input type="text" placeholder="e.g. Youth Center" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.location || ''} onChange={e => setNewGroup({...newGroup, location: e.target.value})} />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Membership Growth Target</label>
-                  <input 
-                    type="number" 
-                    placeholder="e.g. 50" 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
-                    value={newGroup.target}
-                    onChange={e => setNewGroup({...newGroup, target: Number(e.target.value)})}
-                  />
+                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Growth Target</label>
+                  <input type="number" placeholder="50" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" value={newGroup.target || ''} onChange={e => setNewGroup({...newGroup, target: parseInt(e.target.value)})} />
                 </div>
               </div>
             </div>
 
             <div className="flex gap-4 pt-4">
               <button onClick={() => setShowCreateModal(false)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Cancel</button>
-              <button 
-                onClick={handleCreateGroup}
-                disabled={isSubmitting}
-                className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-              >
-                {isSubmitting ? <Loader2 className="animate-spin" size={20}/> : <Plus size={20}/>}
-                {isSubmitting ? 'Creating...' : 'Establish Group'}
+              <button onClick={handleCreateGroup} disabled={isSubmitting} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+                {isSubmitting ? <Loader2 className="animate-spin" size={20}/> : <Plus size={20}/>} {isSubmitting ? 'Creating...' : 'Establish Group'}
               </button>
             </div>
           </div>
@@ -325,9 +278,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
           <div className="bg-white rounded-[3rem] w-full max-w-4xl shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200 max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-2xl bg-slate-50`}>
-                  {getCategoryIcon(viewingMembersGroup.category)}
-                </div>
+                <div className={`p-4 rounded-2xl bg-slate-50`}>{getCategoryIcon(viewingMembersGroup.category)}</div>
                 <div>
                   <h3 className="text-3xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">{viewingMembersGroup.name} Members</h3>
                   <p className="text-slate-500 font-medium">Community led by {viewingMembersGroup.leader}</p>
@@ -343,7 +294,6 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
                       <th className="px-8 py-5">Member Name</th>
                       <th className="px-8 py-5">Contact</th>
                       <th className="px-8 py-5">Location</th>
-                      <th className="px-8 py-5 text-right">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -351,32 +301,19 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
                       <tr key={m.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="px-8 py-5">
                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-brand-primary flex items-center justify-center font-black text-xs">
-                                 {m.firstName[0]}{m.lastName[0]}
-                              </div>
+                              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-brand-primary flex items-center justify-center font-black text-xs">{m.firstName[0]}{m.lastName[0]}</div>
                               <span className="font-bold text-slate-800">{m.firstName} {m.lastName}</span>
                            </div>
                         </td>
                         <td className="px-8 py-5 text-sm font-medium text-slate-600">{m.phone}</td>
                         <td className="px-8 py-5 text-sm font-medium text-slate-600">{m.location}</td>
-                        <td className="px-8 py-5 text-right">
-                           <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase rounded-lg">Active</span>
-                        </td>
                       </tr>
                     ))}
-                    {getGroupMembers(viewingMembersGroup.name).length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="py-20 text-center text-slate-300 font-bold">No members registered to this group yet.</td>
-                      </tr>
-                    )}
                   </tbody>
                </table>
             </div>
-
             <div className="flex justify-end pt-4">
-              <button onClick={() => setViewingMembersGroup(null)} className="px-8 py-4 bg-slate-100 text-slate-600 rounded-[1.25rem] font-black transition-all hover:bg-slate-200">
-                Close
-              </button>
+              <button onClick={() => setViewingMembersGroup(null)} className="px-8 py-4 bg-slate-100 text-slate-600 rounded-[1.25rem] font-black hover:bg-slate-200">Close</button>
             </div>
           </div>
         </div>
@@ -400,40 +337,13 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
                     <Users className="text-brand-primary" size={18}/>
                     <span className="text-sm font-bold text-slate-700">Targeting {messagingGroup.name}</span>
                  </div>
-                 <span className="text-[10px] font-black uppercase text-brand-primary">
-                    {getMemberCount(messagingGroup.name) + 5} Recipients
-                 </span>
+                 <span className="text-[10px] font-black uppercase text-brand-primary">{getMemberCount(messagingGroup.name)} Recipients</span>
               </div>
-
-              <div className="space-y-2">
-                 <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Broadcast Content</label>
-                 <textarea 
-                    className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[2rem] font-bold text-slate-700 outline-none resize-none focus:ring-2 focus:ring-brand-primary" 
-                    rows={5} 
-                    placeholder="Hello members, this is a reminder for our meeting..."
-                 />
-                 <div className="flex justify-end px-2">
-                    <span className="text-[10px] font-black text-slate-400">0 / 160 Characters (1 SMS)</span>
-                 </div>
-              </div>
-
+              <textarea className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[2rem] font-bold text-slate-700 outline-none resize-none focus:ring-2 focus:ring-brand-primary" rows={5} placeholder="Hello members, this is a reminder..."/>
               <div className="flex gap-4">
                  <button onClick={() => setMessagingGroup(null)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Discard</button>
-                 <button 
-                  onClick={() => {
-                    setIsSubmitting(true);
-                    setTimeout(() => {
-                      setIsSubmitting(false);
-                      setMessagingGroup(null);
-                      setSuccessMessage(`SMS Broadcast sent to ${messagingGroup.name}`);
-                      setTimeout(() => setSuccessMessage(null), 3000);
-                    }, 1500);
-                  }}
-                  disabled={isSubmitting}
-                  className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                 >
-                   {isSubmitting ? <Loader2 className="animate-spin" size={18}/> : <Send size={18}/>}
-                   {isSubmitting ? 'Sending...' : 'Send Blast'}
+                 <button onClick={() => { setIsSubmitting(true); setTimeout(() => { setIsSubmitting(false); setMessagingGroup(null); setSuccessMessage(`SMS Broadcast sent to ${messagingGroup.name}`); setTimeout(() => setSuccessMessage(null), 3000); }, 1500); }} disabled={isSubmitting} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+                   {isSubmitting ? <Loader2 className="animate-spin" size={18}/> : <Send size={18}/>} {isSubmitting ? 'Sending...' : 'Send Blast'}
                  </button>
               </div>
             </div>

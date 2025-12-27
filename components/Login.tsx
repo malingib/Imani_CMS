@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Lock, Mail, ArrowRight, Loader2, 
@@ -314,31 +315,31 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
         </div>
       </div>
 
-      {/* Outside Card Footer */}
-      <div className="w-full max-w-6xl mt-12 flex flex-col md:flex-row items-center justify-between gap-6 px-4">
-        <div className="flex items-center gap-3 text-slate-400">
-           <Globe size={16} />
+      {/* Outside Card Footer - Optimized Centering */}
+      <div className="w-full max-w-6xl mt-12 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 px-4">
+        <div className="flex items-center gap-3 text-slate-400 justify-center text-center">
+           <Globe size={16} className="shrink-0" />
            <p className="text-sm font-bold">
              Powered by <a href="#" className="text-brand-indigo hover:underline font-black">Mobiwave Innovations</a>
            </p>
         </div>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center justify-center gap-6 sm:gap-10">
            <button 
              onClick={() => onNavigateLegal('PRIVACY')} 
-             className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors"
+             className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors whitespace-nowrap"
            >
              Privacy Policy
            </button>
            <button 
              onClick={() => onNavigateLegal('COMPLIANCE')} 
-             className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors"
+             className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors whitespace-nowrap"
            >
              Compliance
            </button>
            <button 
              onClick={() => onNavigateLegal('SECURITY')} 
-             className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors"
+             className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors whitespace-nowrap"
            >
              Security
            </button>

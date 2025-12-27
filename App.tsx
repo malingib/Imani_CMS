@@ -23,7 +23,7 @@ import Billing from './components/Billing';
 import { 
   AppView, Member, MemberStatus, Transaction, 
   ChurchEvent, MaritalStatus, MembershipType,
-  User, UserRole, AppNotification, Toast, AuditLog
+  User, UserRole, AppNotification, Toast, AuditLog, MemberActivity
 } from './types';
 import { Bell, Menu, X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
@@ -43,6 +43,10 @@ const App: React.FC = () => {
 
   const [notifications] = useState<AppNotification[]>([
     { id: 'n1', title: 'M-Pesa Transaction', message: 'New Tithe received from Mary Wambui: KES 12,000.', time: '2 mins ago', type: 'MPESA', read: false }
+  ]);
+
+  const [memberActivities, setMemberActivities] = useState<MemberActivity[]>([
+    { id: 'act1', memberId: '1', type: 'PAYMENT', description: 'Tithe of KES 5,000 received', timestamp: '2024-05-19T10:30:00Z' },
   ]);
 
   const addToast = (message: string, type: Toast['type'] = 'success') => {
@@ -120,6 +124,40 @@ const App: React.FC = () => {
     addToast(`Transaction deleted`, 'info');
   };
 
+  const handleRSVP = (eventId: string, isRSVPing: boolean) => {
+    if (!currentUser || !currentUser.memberId) {
+      addToast("Only registered members can RSVP", "error");
+      return;
+    }
+    
+    const memberId = currentUser.memberId;
+    const event = events.find(e => e.id === eventId);
+    
+    // 1. Update event attendance
+    setEvents(prev => prev.map(e => {
+      if (e.id === eventId) {
+        const newAttendance = isRSVPing 
+          ? [...new Set([...e.attendance, memberId])]
+          : e.attendance.filter(id => id !== memberId);
+        return { ...e, attendance: newAttendance };
+      }
+      return e;
+    }));
+
+    // 2. Add activity log
+    const newActivity: MemberActivity = {
+      id: `act-${Date.now()}`,
+      memberId: memberId,
+      type: 'EVENT_RSVP',
+      description: isRSVPing ? `RSVP'd for ${event?.title}` : `Cancelled RSVP for ${event?.title}`,
+      timestamp: new Date().toISOString()
+    };
+    setMemberActivities(prev => [newActivity, ...prev]);
+    
+    addToast(isRSVPing ? "RSVP confirmed! See you there." : "RSVP cancelled.", "info");
+    createAudit(`${isRSVPing ? 'RSVP' : 'Cancel RSVP'} for ${event?.title}`, 'EVENTS');
+  };
+
   const renderView = () => {
     if (currentView === 'PRIVACY') return <PrivacyPolicy onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
     if (currentView === 'COMPLIANCE') return <CompliancePortal onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
@@ -131,7 +169,17 @@ const App: React.FC = () => {
       case 'DASHBOARD':
         return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => setCurrentView('MEMBERS')} onSendSMS={() => setCurrentView('COMMUNICATION')} onNavigate={setCurrentView} />;
       case 'MY_PORTAL':
-        return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} onNavigate={setCurrentView} onUpdateProfile={(m) => { setMembers(prev => prev.map(p => p.id === m.id ? m : p)); addToast('Profile updated'); createAudit('Updated profile', 'MY_PORTAL'); }} />;
+        return (
+          <MemberPortal 
+            member={members.find(m => m.id === currentUser.memberId) || members[0]} 
+            transactions={transactions} 
+            events={events} 
+            activities={memberActivities.filter(a => a.memberId === currentUser.memberId)}
+            onNavigate={setCurrentView} 
+            onRSVP={handleRSVP}
+            onUpdateProfile={(m) => { setMembers(prev => prev.map(p => p.id === m.id ? m : p)); addToast('Profile updated'); createAudit('Updated profile', 'MY_PORTAL'); }} 
+          />
+        );
       case 'MY_GIVING':
         return <MyGiving member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} onGive={() => { addToast('STK Push Sent'); createAudit('Initiated Giving STK', 'MY_GIVING'); }} />;
       case 'MEMBERS':
@@ -167,7 +215,17 @@ const App: React.FC = () => {
       case 'GROUPS':
         return <GroupsManagement members={members} />;
       case 'EVENTS':
-        return <EventsManagement events={events} members={members} onAddEvent={(e) => { setEvents(prev => [...prev, e]); createAudit(`Scheduled event ${e.title}`, 'EVENTS'); }} onDeleteEvent={(id) => setEvents(prev => prev.filter(e => e.id !== id))} onUpdateAttendance={(id, ids) => setEvents(prev => prev.map(e => e.id === id ? {...e, attendance: ids} : e))} />;
+        return (
+          <EventsManagement 
+            events={events} 
+            members={members} 
+            currentUser={currentUser}
+            onRSVP={handleRSVP}
+            onAddEvent={(e) => { setEvents(prev => [...prev, e]); createAudit(`Scheduled event ${e.title}`, 'EVENTS'); }} 
+            onDeleteEvent={(id) => setEvents(prev => prev.filter(e => e.id !== id))} 
+            onUpdateAttendance={(id, ids) => setEvents(prev => prev.map(e => e.id === id ? {...e, attendance: ids} : e))} 
+          />
+        );
       case 'ANALYTICS':
         return <DemographicsAnalysis members={members} />;
       case 'REPORTS':

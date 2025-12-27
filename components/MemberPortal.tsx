@@ -26,7 +26,6 @@ import {
   BookMarked,
   LayoutGrid,
   ListFilter,
-  // Added missing Plus and Download imports
   Plus,
   Download
 } from 'lucide-react';
@@ -37,12 +36,13 @@ interface MemberPortalProps {
   member: Member;
   transactions: Transaction[];
   events: ChurchEvent[];
+  activities: MemberActivity[];
   onNavigate: (view: AppView) => void;
   onUpdateProfile: (member: Member) => void;
+  onRSVP: (eventId: string, isRSVPing: boolean) => void;
 }
 
-const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, events, onNavigate, onUpdateProfile }) => {
-  const [registeredEvents, setRegisteredEvents] = useState<Set<string>>(new Set(['ev1']));
+const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, events, activities, onNavigate, onUpdateProfile, onRSVP }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Member>({ ...member });
   const [dailyVerse, setDailyVerse] = useState({ text: 'Loading inspirational word...', ref: '' });
@@ -50,13 +50,6 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
 
   const myTransactions = useMemo(() => transactions.filter(t => t.memberId === member.id), [transactions, member.id]);
   const totalGiving = myTransactions.reduce((sum, t) => sum + t.amount, 0);
-
-  // Simulated activities - in a real app, these would come from the backend
-  const activities: MemberActivity[] = useMemo(() => [
-    { id: 'act1', memberId: member.id, type: 'PAYMENT', description: 'Tithe of KES 5,000 received', timestamp: '2024-05-19T10:30:00Z' },
-    { id: 'act2', memberId: member.id, type: 'EVENT_RSVP', description: 'Registered for Sunday Worship Service', timestamp: '2024-05-18T14:20:00Z' },
-    { id: 'act3', memberId: member.id, type: 'PROFILE_UPDATE', description: 'Updated contact information', timestamp: '2024-05-10T09:15:00Z' },
-  ], [member.id]);
 
   useEffect(() => {
     const fetchVerse = async () => {
@@ -73,22 +66,15 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
     fetchVerse();
   }, []);
 
+  const isGoing = (eventId: string) => events.find(e => e.id === eventId)?.attendance.includes(member.id);
+
   const upcomingEvents = useMemo(() => {
     let filtered = events.filter(e => new Date(e.date) >= new Date(new Date().setHours(0,0,0,0)));
     if (eventFilter === 'REGISTERED') {
-      filtered = filtered.filter(e => registeredEvents.has(e.id));
+      filtered = filtered.filter(e => e.attendance.includes(member.id));
     }
     return filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [events, eventFilter, registeredEvents]);
-
-  const handleRegister = (eventId: string) => {
-    setRegisteredEvents(prev => {
-      const next = new Set(prev);
-      if (next.has(eventId)) next.delete(eventId);
-      else next.add(eventId);
-      return next;
-    });
-  };
+  }, [events, eventFilter, member.id]);
 
   const handleSave = () => {
     onUpdateProfile(formData);
@@ -194,45 +180,48 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 {upcomingEvents.length > 0 ? upcomingEvents.map(event => (
-                   <div key={event.id} className="group bg-slate-50 border border-slate-100 p-8 rounded-[2.5rem] hover:bg-white hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between h-full">
-                      <div className="space-y-6">
-                         <div className="flex justify-between items-start">
-                            <div className="w-14 h-14 bg-brand-primary text-white rounded-2xl flex flex-col items-center justify-center font-black shadow-lg">
-                               <span className="text-[10px] uppercase opacity-60 leading-none mb-1">{new Date(event.date).toLocaleString('default', { month: 'short' })}</span>
-                               <span className="text-xl leading-none">{new Date(event.date).getDate()}</span>
-                            </div>
-                            {registeredEvents.has(event.id) && (
-                               <div className="p-2 bg-brand-emerald text-white rounded-xl shadow-lg animate-in zoom-in">
-                                  <CheckCircle2 size={16}/>
-                               </div>
-                            )}
-                         </div>
-                         <div>
-                            <h4 className="text-xl font-black text-slate-800 uppercase leading-tight line-clamp-1">{event.title}</h4>
-                            <div className="flex items-center gap-4 mt-3">
-                               <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 tracking-tighter">
-                                  <Clock size={12} className="text-brand-indigo"/> {event.time}
-                               </div>
-                               <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 tracking-tighter">
-                                  <MapPin size={12} className="text-brand-indigo"/> {event.location}
-                               </div>
-                            </div>
-                         </div>
-                      </div>
-                      <button 
-                         onClick={() => handleRegister(event.id)}
-                         className={`mt-8 w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm flex items-center justify-center gap-2 ${
-                           registeredEvents.has(event.id) 
-                             ? 'bg-brand-emerald/10 text-brand-emerald hover:bg-rose-50 hover:text-rose-500' 
-                             : 'bg-white text-brand-indigo border border-indigo-100 hover:bg-brand-primary hover:text-white'
-                         }`}
-                      >
-                         {registeredEvents.has(event.id) ? 'Deregister' : 'Register Now'}
-                      </button>
-                      <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-indigo-500 rounded-full blur-2xl opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                   </div>
-                 )) : (
+                 {upcomingEvents.length > 0 ? upcomingEvents.map(event => {
+                   const going = isGoing(event.id);
+                   return (
+                     <div key={event.id} className="group bg-slate-50 border border-slate-100 p-8 rounded-[2.5rem] hover:bg-white hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col justify-between h-full">
+                        <div className="space-y-6">
+                           <div className="flex justify-between items-start">
+                              <div className="w-14 h-14 bg-brand-primary text-white rounded-2xl flex flex-col items-center justify-center font-black shadow-lg">
+                                 <span className="text-[10px] uppercase opacity-60 leading-none mb-1">{new Date(event.date).toLocaleString('default', { month: 'short' })}</span>
+                                 <span className="text-xl leading-none">{new Date(event.date).getDate()}</span>
+                              </div>
+                              {going && (
+                                 <div className="p-2 bg-brand-emerald text-white rounded-xl shadow-lg animate-in zoom-in">
+                                    <CheckCircle2 size={16}/>
+                                 </div>
+                              )}
+                           </div>
+                           <div>
+                              <h4 className="text-xl font-black text-slate-800 uppercase leading-tight line-clamp-1">{event.title}</h4>
+                              <div className="flex items-center gap-4 mt-3">
+                                 <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 tracking-tighter">
+                                    <Clock size={12} className="text-brand-indigo"/> {event.time}
+                                 </div>
+                                 <div className="flex items-center gap-1.5 text-[10px] font-black uppercase text-slate-400 tracking-tighter">
+                                    <MapPin size={12} className="text-brand-indigo"/> {event.location}
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <button 
+                           onClick={() => onRSVP(event.id, !going)}
+                           className={`mt-8 w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm flex items-center justify-center gap-2 ${
+                             going 
+                               ? 'bg-brand-emerald/10 text-brand-emerald hover:bg-rose-50 hover:text-rose-500' 
+                               : 'bg-white text-brand-indigo border border-indigo-100 hover:bg-brand-primary hover:text-white'
+                           }`}
+                        >
+                           {going ? 'Deregister' : 'Register Now'}
+                        </button>
+                        <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-indigo-500 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                     </div>
+                   );
+                 }) : (
                    <div className="md:col-span-2 py-20 text-center space-y-4">
                       <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200">
                          <CalendarCheck size={40}/>
@@ -304,7 +293,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                  <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><BellRing size={16}/></div>
               </div>
               <div className="relative space-y-8 before:absolute before:left-4 before:top-4 before:bottom-4 before:w-px before:bg-slate-100">
-                 {activities.map((act, i) => (
+                 {activities.length > 0 ? activities.map((act, i) => (
                    <div key={act.id} className="relative pl-10 group">
                       <div className={`absolute left-0 top-1 w-8 h-8 rounded-xl border-4 border-white shadow-lg flex items-center justify-center z-10 transition-transform group-hover:scale-110 ${
                         act.type === 'PAYMENT' ? 'bg-brand-emerald text-white' : 
@@ -320,7 +309,9 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                          </p>
                       </div>
                    </div>
-                 ))}
+                 )) : (
+                   <p className="text-center py-10 text-xs font-black uppercase text-slate-300">No activity yet</p>
+                 )}
               </div>
            </div>
 

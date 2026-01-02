@@ -1,0 +1,8 @@
+{
+  "name": "Imani CMS",
+  "description": "Professional Church Management platform with an indigo and warm navy aesthetic tailored for Kenyan congregations.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}

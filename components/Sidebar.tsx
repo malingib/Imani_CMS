@@ -19,7 +19,10 @@ import {
   ShieldCheck,
   CreditCard,
   Globe,
-  Receipt
+  Receipt,
+  Server,
+  HelpCircle,
+  Network
 } from 'lucide-react';
 import { AppView, User, UserRole } from '../types';
 
@@ -59,16 +62,26 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
 
+  // OWNER-SPECIFIC NAVIGATION (Enterprise Grade)
+  const ownerItems = [
+    { id: 'OWNER_DASHBOARD', label: 'Platform Hub', icon: Globe },
+    { id: 'PARISH_REGISTRY', label: 'Tenant Registry', icon: Network },
+    { id: 'FINANCE', label: 'Global Revenue', icon: Receipt },
+    { id: 'INFRASTRUCTURE', label: 'Nodes & Health', icon: Server },
+    { id: 'PLATFORM_SUPPORT', label: 'Support Desk', icon: HelpCircle },
+    { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck },
+  ];
+
+  // ADMIN/PASTOR NAVIGATION (Church Grade)
   const adminItems = [
     { id: 'DASHBOARD', label: 'Command Center', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR] },
     { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'FINANCE', label: 'Finance Hub', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER] },
+    { id: 'FINANCE', label: 'Church Treasury', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER] },
     { id: 'EVENTS', label: 'Church Life', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
     { id: 'COMMUNICATION', label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
     { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR] },
     { id: 'ANALYTICS', label: 'Intelligence', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
     { id: 'SERMONS', label: 'Word Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN] },
     { id: 'BILLING', label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
   ];
 
@@ -78,8 +91,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'MY_GIVING', label: 'Stewardship', icon: Wallet, roles: [UserRole.MEMBER] },
   ];
 
-  const menuItems = currentUser.role === UserRole.MEMBER ? memberItems : adminItems;
-  const filteredItems = menuItems.filter(item => item.roles.includes(currentUser.role));
+  const getFilteredItems = () => {
+    if (currentUser.role === UserRole.SYSTEM_OWNER) return ownerItems;
+    if (currentUser.role === UserRole.MEMBER) return memberItems;
+    return adminItems.filter(item => item.roles.includes(currentUser.role));
+  };
+
+  const filteredItems = getFilteredItems();
 
   return (
     <aside className={`
@@ -93,14 +111,14 @@ const Sidebar: React.FC<SidebarProps> = ({
               <ImaniLogoIcon />
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-tight text-brand-primary uppercase">Imani CMS</h1>
-              <p className="text-[8px] text-slate-400 uppercase tracking-widest font-black">Enterprise SaaS</p>
+              <h1 className="text-lg font-black tracking-tight text-brand-primary uppercase leading-none">Imani CMS</h1>
+              <p className="text-[8px] text-slate-400 uppercase tracking-widest font-black mt-1">Enterprise SaaS</p>
             </div>
           </div>
           <button onClick={onClose} className="lg:hidden p-2 text-slate-400"><X size={20} /></button>
         </div>
 
-        {currentUser.role !== UserRole.MEMBER && (
+        {currentUser.role !== UserRole.MEMBER && currentUser.role !== UserRole.SYSTEM_OWNER && (
           <div className="mb-6 relative">
             <button 
               onClick={() => setIsBranchMenuOpen(!isBranchMenuOpen)}
@@ -109,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="flex items-center gap-3 min-w-0">
                 <Building2 size={16} className="text-brand-primary"/>
                 <div className="text-left min-w-0">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Parish</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Instance</p>
                   <p className="text-xs font-bold text-slate-700 truncate">{currentUser.branch || branches[0]}</p>
                 </div>
               </div>
@@ -132,9 +150,22 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         )}
+
+        {currentUser.role === UserRole.SYSTEM_OWNER && (
+          <div className="mb-6 p-4 bg-brand-primary text-white rounded-2xl shadow-lg relative overflow-hidden ring-4 ring-indigo-50 border border-indigo-100">
+             <div className="relative z-10">
+                <p className="text-[9px] font-black uppercase tracking-widest text-brand-gold mb-1">Global Owner</p>
+                <p className="text-xs font-black">Mobiwave Portal</p>
+             </div>
+             <Globe size={48} className="absolute -right-4 -bottom-4 text-white/5" />
+          </div>
+        )}
       </div>
       
       <nav className="flex-1 px-4 space-y-1 overflow-y-auto no-scrollbar">
+        <div className="px-4 py-2">
+           <p className="text-[8px] font-black uppercase text-slate-300 tracking-[0.3em] mb-4">Navigation Hub</p>
+        </div>
         {filteredItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
@@ -178,7 +209,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}
           >
             <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
-            <span className="text-sm">Platform Settings</span>
+            <span className="text-sm">{currentUser.role === UserRole.SYSTEM_OWNER ? 'Global Config' : 'Parish Settings'}</span>
           </button>
         )}
         

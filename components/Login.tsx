@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Lock, Mail, ArrowRight, Loader2, 
   Eye, EyeOff, Quote, AlertCircle, 
-  ArrowLeft, CheckCircle2, User, Globe
+  ArrowLeft, CheckCircle2, User, Globe, Shield
 } from 'lucide-react';
 import { User as UserType, UserRole, AppView } from '../types';
 import { generateDailyVerse } from '../services/geminiService';
@@ -87,7 +87,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
     setIsLoading(true);
     setError('');
     setTimeout(() => {
-      if (email === 'admin@imani.org' && password === 'admin') {
+      if (email === 'owner@mobiwave.co.ke' && password === 'owner') {
+        onLogin({ id: 's1', name: 'Mobiwave Owner', role: UserRole.SYSTEM_OWNER, avatar: 'https://i.pravatar.cc/100?img=11' });
+      } else if (email === 'admin@imani.org' && password === 'admin') {
         onLogin({ id: 'u1', name: 'Pastor John', role: UserRole.ADMIN, avatar: 'https://i.pravatar.cc/100?img=12' });
       } else if (email === 'pastor@imani.org' && password === 'pastor') {
         onLogin({ id: 'u2', name: 'Pastor Mary', role: UserRole.PASTOR, avatar: 'https://i.pravatar.cc/100?img=32' });
@@ -289,20 +291,26 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
               <p className="text-[11px] font-black uppercase text-slate-400 tracking-[0.25em] mb-6">Simulation Accounts</p>
               <div className="flex flex-wrap justify-center gap-3 mb-6">
                 <button 
-                  onClick={() => { setEmail('admin@imani.org'); setPassword('admin'); }} 
-                  className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
+                  onClick={() => { setEmail('owner@mobiwave.co.ke'); setPassword('owner'); }} 
+                  className="px-8 py-3 bg-brand-indigo text-white border border-brand-indigo rounded-2xl text-xs font-black hover:bg-brand-indigo-600 transition-all shadow-md flex items-center gap-2"
                 >
-                  Admin
+                  <Shield size={14}/> Super Admin
+                </button>
+                <button 
+                  onClick={() => { setEmail('admin@imani.org'); setPassword('admin'); }} 
+                  className="px-8 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
+                >
+                  Parish Admin
                 </button>
                 <button 
                   onClick={() => { setEmail('pastor@imani.org'); setPassword('pastor'); }} 
-                  className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
+                  className="px-8 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
                 >
                   Pastor
                 </button>
                 <button 
                   onClick={() => { setEmail('member@imani.org'); setPassword('member'); }} 
-                  className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
+                  className="px-8 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
                 >
                   Member
                 </button>

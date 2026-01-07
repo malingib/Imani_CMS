@@ -24,6 +24,7 @@ export enum MembershipType {
 }
 
 export enum UserRole {
+  SYSTEM_OWNER = 'SYSTEM_OWNER',
   ADMIN = 'ADMIN',
   PASTOR = 'PASTOR',
   TREASURER = 'TREASURER',
@@ -76,6 +77,31 @@ export interface Transaction {
   source: 'MANUAL' | 'INTEGRATED';
 }
 
+export interface Tenant {
+  id: string;
+  name: string;
+  subdomain: string;
+  plan: 'Basic' | 'Pro' | 'Enterprise';
+  status: 'Active' | 'Suspended' | 'Trialing' | 'Past Due';
+  ownerEmail: string;
+  region: string;
+  memberCount: number;
+  mrr: number;
+  renewalDate: string;
+  healthScore: number;
+}
+
+export interface SupportTicket {
+  id: string;
+  tenantName: string;
+  subject: string;
+  description: string;
+  status: 'Open' | 'Pending' | 'Resolved';
+  priority: 'Low' | 'Medium' | 'High' | 'Critical';
+  createdAt: string;
+  lastUpdate: string;
+}
+
 export interface StewardshipPledge {
   id: string;
   memberId: string;
@@ -114,17 +140,7 @@ export interface AuditLog {
   metadata?: any;
 }
 
-export type ChurchEventType = 
-  | 'WORSHIP' 
-  | 'BIBLE_STUDY' 
-  | 'PRAYER' 
-  | 'OUTREACH' 
-  | 'YOUTH' 
-  | 'OTHER';
-
-export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ANNUALLY';
-
-export interface ChurchEvent {
+export type ChurchEvent = {
   id: string;
   title: string;
   description: string;
@@ -139,6 +155,16 @@ export interface ChurchEvent {
   recurrence?: RecurrenceType;
   coordinates?: { lat: number; lng: number };
 }
+
+export type ChurchEventType = 
+  | 'WORSHIP' 
+  | 'BIBLE_STUDY' 
+  | 'PRAYER' 
+  | 'OUTREACH' 
+  | 'YOUTH' 
+  | 'OTHER';
+
+export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ANNUALLY';
 
 export interface AppNotification {
   id: string;
@@ -160,13 +186,17 @@ export type AppView =
   | 'SERMONS' 
   | 'ANALYTICS' 
   | 'SETTINGS' 
-  | 'AUDIT_LOGS'
-  | 'BILLING'
+  | 'AUDIT_LOGS' 
+  | 'BILLING' 
   | 'MY_PORTAL' 
   | 'MY_GIVING' 
   | 'PRIVACY' 
   | 'COMPLIANCE' 
-  | 'SECURITY';
+  | 'SECURITY' 
+  | 'OWNER_DASHBOARD' 
+  | 'PARISH_REGISTRY' 
+  | 'PLATFORM_SUPPORT' 
+  | 'INFRASTRUCTURE';
 
 export interface Toast {
   id: string;
@@ -211,9 +241,22 @@ export interface SystemRole {
 export interface RecurringExpense {
   id: string;
   category: string;
+  recipient: string;
   amount: number;
   frequency: 'Weekly' | 'Monthly' | 'Quarterly' | 'Yearly';
   nextDate: string;
+  status: 'ACTIVE' | 'PAUSED';
+}
+
+export interface RecurringContribution {
+  id: string;
+  memberId: string;
+  memberName: string;
+  type: TransactionType;
+  amount: number;
+  frequency: 'Monthly' | 'Yearly';
+  nextDueDate: string;
+  status: 'ACTIVE' | 'CANCELLED';
 }
 
 export interface Sermon {

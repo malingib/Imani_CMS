@@ -32,6 +32,14 @@ export enum UserRole {
   MEMBER = 'MEMBER'
 }
 
+// Add Modality enum for Gemini API consistency
+export enum Modality {
+  TEXT = 'TEXT',
+  IMAGE = 'IMAGE',
+  AUDIO = 'AUDIO',
+  VIDEO = 'VIDEO'
+}
+
 export interface User {
   id: string;
   name: string;
@@ -89,6 +97,12 @@ export interface Tenant {
   mrr: number;
   renewalDate: string;
   healthScore: number;
+  usageMetrics?: {
+    cpu: number;
+    memory: number;
+    dbConnections: number;
+    smsSent: number;
+  };
 }
 
 export interface SupportTicket {
@@ -186,16 +200,16 @@ export type AppView =
   | 'SERMONS' 
   | 'ANALYTICS' 
   | 'SETTINGS' 
-  | 'AUDIT_LOGS' 
-  | 'BILLING' 
+  | 'AUDIT_LOGS'
+  | 'BILLING'
   | 'MY_PORTAL' 
   | 'MY_GIVING' 
   | 'PRIVACY' 
   | 'COMPLIANCE' 
-  | 'SECURITY' 
-  | 'OWNER_DASHBOARD' 
-  | 'PARISH_REGISTRY' 
-  | 'PLATFORM_SUPPORT' 
+  | 'SECURITY'
+  | 'OWNER_DASHBOARD'
+  | 'PARISH_REGISTRY'
+  | 'PLATFORM_SUPPORT'
   | 'INFRASTRUCTURE';
 
 export interface Toast {
@@ -269,4 +283,13 @@ export interface Sermon {
   event: string;
   eventId: string;
   transcript: string;
+}
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  key: string;
+  createdAt: string;
+  lastUsed: string;
+  status: 'ACTIVE' | 'REVOKED';
 }

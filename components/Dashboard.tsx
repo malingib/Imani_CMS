@@ -17,7 +17,7 @@ import {
   MessageSquare, 
   Plus, 
   Wallet, 
-  Smartphone,
+  Smartphone, 
   CheckCircle2,
   Gift,
   ArrowRight,
@@ -117,7 +117,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
       <header className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-brand-indigo-50 text-brand-indigo rounded-xl">
+            <div className="p-2 bg-indigo-50 text-brand-indigo rounded-xl">
                <ShieldCheck size={24} />
             </div>
             <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Ministry Command</h2>
@@ -129,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
           <button onClick={() => onNavigate('COMMUNICATION')} className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-slate-700 border border-slate-200 rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
             <MessageSquare size={18} className="text-brand-indigo" /> Outreach Hub
           </button>
-          <button onClick={() => onNavigate('FINANCE')} className="flex items-center justify-center gap-2 px-6 py-4 bg-brand-primary text-white rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-xl shadow-brand-primary/20">
+          <button onClick={() => onNavigate('FINANCE')} className="flex items-center justify-center gap-2 px-6 py-4 bg-brand-primary text-white rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-brand-primary/20">
             <Smartphone size={18} className="text-brand-gold"/> Record Settlement
           </button>
         </div>
@@ -148,14 +148,19 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                 <p className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black mb-1">{stat.label}</p>
                 <h4 className="text-3xl font-black text-slate-800 tracking-tighter">{stat.val}</h4>
               </div>
-              <div className={`p-4 bg-brand-${stat.color}-50 text-brand-${stat.color}-500 rounded-2xl group-hover:scale-110 transition-transform`}>
+              <div className={`p-4 rounded-2xl group-hover:scale-110 transition-transform ${
+                stat.color === 'indigo' ? 'bg-indigo-50 text-indigo-600' :
+                stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+                stat.color === 'gold' ? 'bg-amber-50 text-amber-600' :
+                'bg-slate-50 text-slate-600'
+              }`}>
                 <stat.icon size={20} />
               </div>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="text-brand-emerald font-black text-xs">{stat.trend}</span>
-                <ArrowUpRight size={14} className="text-brand-emerald" />
+                <span className="text-emerald-500 font-black text-xs">{stat.trend}</span>
+                <ArrowUpRight size={14} className="text-emerald-500" />
               </div>
               <div className="h-8 w-24">
                 <ResponsiveContainer width="100%" height="100%">
@@ -174,7 +179,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
           <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden">
              <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4 relative z-10">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-800 tracking-tight">Ministry Vitality</h3>
+                  <h3 className="text-2xl font-black text-slate-800 tracking-tight uppercase">Ministry Vitality</h3>
                   <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">Stewardship vs. Presence</p>
                 </div>
                 <div className="flex items-center gap-6">
@@ -215,7 +220,12 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                  onClick={btn.action}
                  className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col items-center justify-center gap-4 group"
                >
-                 <div className={`p-4 bg-brand-${btn.color}-50 text-brand-${btn.color}-500 rounded-[1.5rem] group-hover:scale-110 transition-transform`}>
+                 <div className={`p-4 rounded-[1.5rem] group-hover:scale-110 transition-transform ${
+                   btn.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+                   btn.color === 'indigo' ? 'bg-indigo-50 text-indigo-600' :
+                   btn.color === 'gold' ? 'bg-amber-50 text-amber-600' :
+                   'bg-slate-50 text-slate-600'
+                 }`}>
                     <btn.icon size={28} />
                  </div>
                  <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{btn.label}</span>
@@ -230,7 +240,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                  <h4 className="text-xl font-black text-slate-800 uppercase flex items-center gap-3">
                    <Smartphone size={20} className="text-brand-indigo" /> Live Stream
                  </h4>
-                 <div className="px-3 py-1 bg-brand-emerald/10 text-brand-emerald rounded-lg text-[10px] font-black uppercase tracking-widest">REAL-TIME</div>
+                 <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest">REAL-TIME</div>
               </div>
               
               <div className="space-y-6">
@@ -242,7 +252,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                       <div className="flex-1 min-w-0">
                          <div className="flex justify-between items-start">
                             <p className="text-sm font-bold text-slate-800 truncate pr-2">{trx.memberName}</p>
-                            <span className="text-brand-emerald font-black text-xs">KES {trx.amount.toLocaleString()}</span>
+                            <span className="text-emerald-500 font-black text-xs">KES {trx.amount.toLocaleString()}</span>
                          </div>
                          <div className="flex items-center justify-between mt-1">
                             <p className="text-[10px] text-slate-400 font-black uppercase tracking-tighter truncate">{trx.type}</p>
@@ -273,7 +283,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                    Send Kingdom Blessings
                  </button>
               </div>
-              <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-brand-indigo rounded-full blur-[80px] opacity-10 group-hover:scale-125 transition-transform duration-1000" />
+              <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-10 group-hover:scale-125 transition-transform duration-1000" />
            </div>
 
            <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
@@ -288,7 +298,11 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                  ].map((h, i) => (
                    <div key={i} className="flex items-center justify-between">
                      <span className="text-xs font-bold text-slate-500">{h.label}</span>
-                     <span className={`px-3 py-1 bg-brand-${h.color}-50 text-brand-${h.color}-500 rounded-lg text-[10px] font-black uppercase`}>{h.val}</span>
+                     <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${
+                       h.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+                       h.color === 'indigo' ? 'bg-indigo-50 text-indigo-600' :
+                       'bg-amber-50 text-amber-600'
+                     }`}>{h.val}</span>
                    </div>
                  ))}
               </div>
@@ -321,7 +335,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                       <h4 className="font-black text-slate-800 text-lg truncate">{item.name}</h4>
                       <p className="text-[10px] font-black uppercase text-brand-indigo tracking-widest">{item.type} • {item.date}</p>
                     </div>
-                    <div className="w-3 h-3 rounded-full bg-brand-emerald animate-pulse" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
                 ))}
               </div>

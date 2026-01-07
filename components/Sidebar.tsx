@@ -64,37 +64,37 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // OWNER-SPECIFIC NAVIGATION (Enterprise Grade)
   const ownerItems = [
-    { id: 'OWNER_DASHBOARD', label: 'Platform Hub', icon: Globe },
-    { id: 'PARISH_REGISTRY', label: 'Tenant Registry', icon: Network },
-    { id: 'FINANCE', label: 'Global Revenue', icon: Receipt },
-    { id: 'INFRASTRUCTURE', label: 'Nodes & Health', icon: Server },
-    { id: 'PLATFORM_SUPPORT', label: 'Support Desk', icon: HelpCircle },
-    { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck },
+    { id: 'OWNER_DASHBOARD' as AppView, label: 'Platform Hub', icon: Globe },
+    { id: 'PARISH_REGISTRY' as AppView, label: 'Tenant Registry', icon: Network },
+    { id: 'FINANCE' as AppView, label: 'Global Revenue', icon: Receipt },
+    { id: 'INFRASTRUCTURE' as AppView, label: 'Nodes & Health', icon: Server },
+    { id: 'PLATFORM_SUPPORT' as AppView, label: 'Support Desk', icon: HelpCircle },
+    { id: 'AUDIT_LOGS' as AppView, label: 'System Audit', icon: ShieldCheck },
   ];
 
   // ADMIN/PASTOR NAVIGATION (Church Grade)
   const adminItems = [
-    { id: 'DASHBOARD', label: 'Command Center', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'FINANCE', label: 'Church Treasury', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER] },
-    { id: 'EVENTS', label: 'Church Life', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'COMMUNICATION', label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'ANALYTICS', label: 'Intelligence', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'SERMONS', label: 'Word Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'BILLING', label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
+    { id: 'DASHBOARD' as AppView, label: 'Command Center', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'MEMBERS' as AppView, label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
+    { id: 'FINANCE' as AppView, label: 'Church Treasury', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER] },
+    { id: 'EVENTS' as AppView, label: 'Church Life', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
+    { id: 'COMMUNICATION' as AppView, label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
+    { id: 'GROUPS' as AppView, label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'ANALYTICS' as AppView, label: 'Intelligence', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'SERMONS' as AppView, label: 'Word Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'BILLING' as AppView, label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
   ];
 
   const memberItems = [
-    { id: 'MY_PORTAL', label: 'My Sanctuary', icon: Sparkles, roles: [UserRole.MEMBER] },
-    { id: 'SERMONS', label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.MEMBER] },
-    { id: 'MY_GIVING', label: 'Stewardship', icon: Wallet, roles: [UserRole.MEMBER] },
+    { id: 'MY_PORTAL' as AppView, label: 'My Sanctuary', icon: Sparkles, roles: [UserRole.MEMBER] },
+    { id: 'SERMONS' as AppView, label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.MEMBER] },
+    { id: 'MY_GIVING' as AppView, label: 'Stewardship', icon: Wallet, roles: [UserRole.MEMBER] },
   ];
 
   const getFilteredItems = () => {
     if (currentUser.role === UserRole.SYSTEM_OWNER) return ownerItems;
     if (currentUser.role === UserRole.MEMBER) return memberItems;
-    return adminItems.filter(item => item.roles.includes(currentUser.role));
+    return adminItems.filter(item => item.roles?.includes(currentUser.role));
   };
 
   const filteredItems = getFilteredItems();

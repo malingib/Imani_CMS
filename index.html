@@ -6,57 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Imani CMS - Church Management</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='110' r='75' fill='%231E293B'/%3E%3Ccircle cx='100' cy='110' r='60' stroke='white' stroke-width='6' fill='none'/%3E%3Cpath d='M75 110 L100 85 L125 110 V150 H75 Z' fill='white' opacity='0.8'/%3E%3Crect x='97' y='45' width='6' height='30' fill='%23FFB800'/%3E%3Crect x='88' y='55' width='24' height='6' fill='%23FFB800'/%3E%3C/svg%3E">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.cdnfonts.com/css/lufga" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    
+    <!-- Leaflet for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
       tailwind.config = {
         theme: {
           extend: {
-            fontFamily: {
-              sans: ['Lufga', 'Inter', 'sans-serif'],
-            },
+            fontFamily: { sans: ['Lufga', 'Inter', 'sans-serif'] },
             colors: {
               brand: {
-                primary: {
-                  DEFAULT: '#1E293B', // Warm Navy
-                  50: '#F8FAFC',
-                  100: '#F1F5F9',
-                  200: '#E2E8F0',
-                  300: '#CBD5E1',
-                  400: '#94A3B8',
-                  500: '#64748B',
-                  600: '#1E293B',
-                  700: '#0F172A',
-                  800: '#020617',
-                  900: '#000000',
-                },
-                indigo: {
-                  DEFAULT: '#4F46E5', // Indigo
-                  50: '#EEF2FF',
-                  100: '#E0E7FF',
-                  500: '#4F46E5',
-                  600: '#4338CA',
-                  700: '#3730A3',
-                },
-                gold: {
-                  DEFAULT: '#FFB800', // Gold
-                  50: '#FFFBEB',
-                  100: '#FEF3C7',
-                  500: '#FFB800',
-                  600: '#D97706',
-                },
-                emerald: {
-                  DEFAULT: '#10B981', // Emerald
-                  50: '#ECFDF5',
-                  100: '#D1FAE5',
-                  500: '#10B981',
-                  600: '#059669',
-                }
+                primary: { DEFAULT: '#1E293B', 50: '#F8FAFC', 100: '#F1F5F9', 600: '#1E293B', 700: '#0F172A' },
+                indigo: { DEFAULT: '#4F46E5', 50: '#EEF2FF', 500: '#4F46E5' },
+                gold: { DEFAULT: '#FFB800', 500: '#FFB800' },
+                emerald: { DEFAULT: '#10B981', 500: '#10B981' }
               }
             }
           },
@@ -64,55 +32,29 @@
       }
     </script>
     <style>
-      body { font-family: 'Lufga', sans-serif; }
-      .leaflet-container {
-        width: 100%;
-        height: 100%;
-        border-radius: 2.5rem;
-        z-index: 10;
-      }
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #e2e8f0;
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #cbd5e1;
-      }
-      .grid-pattern {
-        background-image: linear-gradient(#ffffff04 1px, transparent 1px), linear-gradient(90deg, #ffffff04 1px, transparent 1px);
-        background-size: 40px 40px;
-      }
-      .glass-card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(226, 232, 240, 0.5);
-      }
-      /* Custom cluster colors */
-      .marker-cluster-small { background-color: rgba(79, 70, 229, 0.6); }
-      .marker-cluster-small div { background-color: rgba(79, 70, 229, 0.9); color: white; }
-      .marker-cluster-medium { background-color: rgba(255, 184, 0, 0.6); }
-      .marker-cluster-medium div { background-color: rgba(255, 184, 0, 0.9); color: white; }
+      body { font-family: 'Lufga', sans-serif; overflow-x: hidden; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.5); }
     </style>
-  <script type="importmap">
+
+    <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0",
+    "recharts": "https://esm.sh/recharts@2.12.2",
+    "@google/genai": "https://esm.sh/@google/genai@1.3.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
-    "recharts": "https://esm.sh/recharts@^3.6.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0"
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
-</head>
+  </head>
   <body class="bg-slate-50 text-slate-900">
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>

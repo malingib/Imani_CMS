@@ -110,7 +110,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Groups & Fellowships</h2>
-          <p className="text-slate-500 mt-2 text-lg">Organize your congregation into thriving communities.</p>
+          <p className="text-slate-500 mt-2 text-lg">Manage groups and fellowships.</p>
         </div>
         <div className="flex gap-3">
           <button 
@@ -171,7 +171,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
                 <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
                    <img src={group.leaderAvatar} alt={group.leader} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
                    <div>
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Lead by</p>
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Led by</p>
                       <p className="text-sm font-bold text-slate-700">{group.leader}</p>
                    </div>
                 </div>
@@ -265,7 +265,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
             <div className="flex gap-4 pt-4">
               <button onClick={() => setShowCreateModal(false)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Cancel</button>
               <button onClick={handleCreateGroup} disabled={isSubmitting} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
-                {isSubmitting ? <Loader2 className="animate-spin" size={20}/> : <Plus size={20}/>} {isSubmitting ? 'Creating...' : 'Establish Group'}
+                {isSubmitting ? <Loader2 className="animate-spin" size={20}/> : <Plus size={20}/>} {isSubmitting ? 'Creating...' : 'Create Group'}
               </button>
             </div>
           </div>
@@ -343,7 +343,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
               <div className="flex gap-4">
                  <button onClick={() => setMessagingGroup(null)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Discard</button>
                  <button onClick={() => { setIsSubmitting(true); setTimeout(() => { setIsSubmitting(false); setMessagingGroup(null); setSuccessMessage(`SMS Broadcast sent to ${messagingGroup.name}`); setTimeout(() => setSuccessMessage(null), 3000); }, 1500); }} disabled={isSubmitting} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
-                   {isSubmitting ? <Loader2 className="animate-spin" size={18}/> : <Send size={18}/>} {isSubmitting ? 'Sending...' : 'Send Blast'}
+                   {isSubmitting ? <Loader2 className="animate-spin" size={18}/> : <Send size={18}/>} {isSubmitting ? 'Sending...' : 'Send'}
                  </button>
               </div>
             </div>

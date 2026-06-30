@@ -53,7 +53,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   currentView, 
   setView, 
   currentUser, 
-  branches,
   onBranchChange,
   onRoleSwitch, 
   onLogout,
@@ -74,15 +73,16 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // ADMIN/PASTOR NAVIGATION (Church Grade)
   const adminItems = [
-    { id: 'DASHBOARD' as AppView, label: 'Command Center', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'MEMBERS' as AppView, label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'FINANCE' as AppView, label: 'Church Treasury', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER] },
-    { id: 'EVENTS' as AppView, label: 'Church Life', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'COMMUNICATION' as AppView, label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'GROUPS' as AppView, label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'ANALYTICS' as AppView, label: 'Intelligence', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'SERMONS' as AppView, label: 'Word Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'BILLING' as AppView, label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
+    { id: 'DASHBOARD', label: 'Command Center', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
+    { id: 'FINANCE', label: 'Finance Hub', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER] },
+    { id: 'EVENTS', label: 'Church Life', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
+    { id: 'COMMUNICATION', label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
+    { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'ANALYTICS', label: 'Intelligence', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'SERMONS', label: 'Word Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR] },
+    { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN] },
+    { id: 'BILLING', label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
   ];
 
   const memberItems = [

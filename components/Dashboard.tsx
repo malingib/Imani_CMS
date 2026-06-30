@@ -17,7 +17,7 @@ import {
   MessageSquare, 
   Plus, 
   Wallet, 
-  Smartphone, 
+  Smartphone,
   CheckCircle2,
   Gift,
   ArrowRight,
@@ -37,8 +37,7 @@ import {
   UserPlus,
   Clock,
   ExternalLink,
-  ShieldCheck,
-  Server
+  ShieldCheck
 } from 'lucide-react';
 import { Member, Transaction, ChurchEvent, AppView } from '../types';
 
@@ -52,7 +51,6 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, onAddMember, onSendSMS, onNavigate }) => {
-  const [timeRange, setTimeRange] = useState<'7D' | '30D' | '90D' | '1Y'>('30D');
   const [showAnniversaryModal, setShowAnniversaryModal] = useState(false);
   const [isSendingBlessings, setIsSendingBlessings] = useState(false);
   const [blessingSent, setBlessingSent] = useState(false);
@@ -75,92 +73,44 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
     { name: 'Sun', tithes: 580000, attendance: 1150 },
   ], []);
 
-  const systemHealth = [
-    { label: 'Database Sync', val: '99.9%', status: 'optimal' },
-    { label: 'M-Pesa Webhook', val: '12ms', status: 'optimal' },
-    { label: 'Cloud Resilience', val: 'Nairobi-West', status: 'optimal' }
-  ];
-
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-10">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-4 px-6 py-3 bg-brand-primary text-white rounded-[1.5rem] relative overflow-hidden shadow-2xl">
-        <div className="flex items-center gap-6 z-10 w-full lg:w-auto overflow-x-auto no-scrollbar">
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            Node: <span className="text-emerald-400">Nairobi East (Region-01)</span>
-          </div>
-          <div className="h-4 w-px bg-white/10 hidden md:block" />
-          <div className="hidden md:flex items-center gap-4">
-            {systemHealth.map((h, i) => (
-              <div key={i} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/50 whitespace-nowrap">
-                <Server size={12} className="text-brand-gold opacity-50"/>
-                {h.label}: <span className="text-white">{h.val}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2 bg-white/10 p-1 rounded-xl z-10 w-full lg:w-auto justify-between lg:justify-start">
-          {(['7D', '30D', '90D', '1Y'] as const).map(range => (
-            <button 
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`flex-1 lg:flex-none px-4 py-1.5 rounded-lg text-[10px] font-black transition-all ${timeRange === range ? 'bg-white text-brand-primary shadow-lg' : 'text-white/60 hover:text-white'}`}
-            >
-              {range}
-            </button>
-          ))}
-        </div>
-        <div className="absolute top-0 right-0 h-full w-1/2 bg-gradient-to-l from-brand-indigo/20 to-transparent pointer-events-none hidden lg:block" />
-      </div>
-
       <header className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-indigo-50 text-brand-indigo rounded-xl">
-               <ShieldCheck size={24} />
-            </div>
-            <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Ministry Command</h2>
-          </div>
-          <p className="text-slate-500 text-lg font-medium">Real-time ministry trajectory for the Imani Global Parish network.</p>
+          <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Dashboard</h2>
         </div>
         
         <div className="grid grid-cols-2 md:flex gap-3">
           <button onClick={() => onNavigate('COMMUNICATION')} className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-slate-700 border border-slate-200 rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
-            <MessageSquare size={18} className="text-brand-indigo" /> Outreach Hub
+            <MessageSquare size={18} className="text-brand-indigo" /> Messages
           </button>
-          <button onClick={() => onNavigate('FINANCE')} className="flex items-center justify-center gap-2 px-6 py-4 bg-brand-primary text-white rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-brand-primary/20">
-            <Smartphone size={18} className="text-brand-gold"/> Record Settlement
+          <button onClick={() => onNavigate('FINANCE')} className="flex items-center justify-center gap-2 px-6 py-4 bg-brand-primary text-white rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-xl shadow-brand-primary/20">
+            <Smartphone size={18} className="text-brand-gold"/> Record Payment
           </button>
         </div>
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Congregation', val: members.length.toLocaleString(), icon: Users, color: 'indigo', trend: '+5.2%' },
-          { label: 'Net Tithe', val: `KES ${(transactions.filter(t=>t.type==='Tithe').reduce((s,t)=>s+t.amount,0)/1000).toFixed(1)}k`, icon: Wallet, color: 'emerald', trend: '+12.4%' },
-          { label: 'Digital Flows', val: '86%', icon: Smartphone, color: 'gold', trend: '+2.1%' },
-          { label: 'Service Pulse', val: '942', icon: Activity, color: 'primary', trend: '+3.8%' }
+          { label: 'Members', val: members.length.toLocaleString(), icon: Users, color: 'indigo', trend: '+5.2%' },
+          { label: 'Total Tithes', val: `KES ${(transactions.filter(t=>t.type==='Tithe').reduce((s,t)=>s+t.amount,0)/1000).toFixed(1)}k`, icon: Wallet, color: 'emerald', trend: '+12.4%' },
+          { label: 'Mobile Payments', val: '86%', icon: Smartphone, color: 'gold', trend: '+2.1%' },
+          { label: 'Attendance', val: '942', icon: Activity, color: 'primary', trend: '+3.8%' }
         ].map((stat, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all group relative overflow-hidden">
+          <div key={i} className="bg-white p-5 rounded-[2rem] shadow-md hover:shadow-xl transition-all group relative overflow-hidden">
             <div className="flex items-start justify-between mb-8">
               <div>
                 <p className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black mb-1">{stat.label}</p>
                 <h4 className="text-3xl font-black text-slate-800 tracking-tighter">{stat.val}</h4>
               </div>
-              <div className={`p-4 rounded-2xl group-hover:scale-110 transition-transform ${
-                stat.color === 'indigo' ? 'bg-indigo-50 text-indigo-600' :
-                stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
-                stat.color === 'gold' ? 'bg-amber-50 text-amber-600' :
-                'bg-slate-50 text-slate-600'
-              }`}>
+              <div className={`p-4 bg-brand-${stat.color}-50 text-brand-${stat.color}-500 rounded-2xl group-hover:scale-110 transition-transform`}>
                 <stat.icon size={20} />
               </div>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="text-emerald-500 font-black text-xs">{stat.trend}</span>
-                <ArrowUpRight size={14} className="text-emerald-500" />
+                <span className="text-brand-emerald font-black text-xs">{stat.trend}</span>
+                <ArrowUpRight size={14} className="text-brand-emerald" />
               </div>
               <div className="h-8 w-24">
                 <ResponsiveContainer width="100%" height="100%">
@@ -176,17 +126,16 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden">
-             <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4 relative z-10">
-                <div>
-                  <h3 className="text-2xl font-black text-slate-800 tracking-tight uppercase">Ministry Vitality</h3>
-                  <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">Stewardship vs. Presence</p>
-                </div>
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-primary" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Tithing</span></div>
-                  <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-gold" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Attendance</span></div>
-                </div>
-             </div>
+          <div className="bg-white p-6 rounded-[2rem] shadow-md relative overflow-hidden">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 relative z-10">
+                 <div>
+                   <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Tithing | Attendance</p>
+                 </div>
+                 <div className="flex items-center gap-6">
+                   <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-primary" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Tithing</span></div>
+                   <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-gold" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Attendance</span></div>
+                 </div>
+              </div>
              
              <div className="h-[400px] w-full relative z-10">
                 <ResponsiveContainer width="100%" height="100%">
@@ -218,14 +167,9 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                <button 
                  key={i} 
                  onClick={btn.action}
-                 className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col items-center justify-center gap-4 group"
+                 className="bg-white p-5 rounded-[2rem] shadow-md hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col items-center justify-center gap-4 group"
                >
-                 <div className={`p-4 rounded-[1.5rem] group-hover:scale-110 transition-transform ${
-                   btn.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
-                   btn.color === 'indigo' ? 'bg-indigo-50 text-indigo-600' :
-                   btn.color === 'gold' ? 'bg-amber-50 text-amber-600' :
-                   'bg-slate-50 text-slate-600'
-                 }`}>
+                 <div className={`p-4 bg-brand-${btn.color}-50 text-brand-${btn.color}-500 rounded-[1.5rem] group-hover:scale-110 transition-transform`}>
                     <btn.icon size={28} />
                  </div>
                  <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{btn.label}</span>
@@ -235,12 +179,12 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+           <div className="bg-white p-6 rounded-[2rem] shadow-md space-y-6">
               <div className="flex items-center justify-between">
                  <h4 className="text-xl font-black text-slate-800 uppercase flex items-center gap-3">
-                   <Smartphone size={20} className="text-brand-indigo" /> Live Stream
+                   <Smartphone size={20} className="text-brand-indigo" /> Recent Transactions
                  </h4>
-                 <div className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest">REAL-TIME</div>
+                 <div className="px-3 py-1 bg-brand-emerald/10 text-brand-emerald rounded-lg text-[10px] font-black uppercase tracking-widest">REAL-TIME</div>
               </div>
               
               <div className="space-y-6">
@@ -252,7 +196,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                       <div className="flex-1 min-w-0">
                          <div className="flex justify-between items-start">
                             <p className="text-sm font-bold text-slate-800 truncate pr-2">{trx.memberName}</p>
-                            <span className="text-emerald-500 font-black text-xs">KES {trx.amount.toLocaleString()}</span>
+                            <span className="text-brand-emerald font-black text-xs">KES {trx.amount.toLocaleString()}</span>
                          </div>
                          <div className="flex items-center justify-between mt-1">
                             <p className="text-[10px] text-slate-400 font-black uppercase tracking-tighter truncate">{trx.type}</p>
@@ -263,49 +207,27 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                  ))}
               </div>
               <button onClick={() => onNavigate('FINANCE')} className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
-                 View Treasury Vault <ExternalLink size={12}/>
+                 View All <ExternalLink size={12}/>
               </button>
            </div>
 
-           <div className="bg-brand-primary p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
+           <div className="bg-brand-primary p-6 rounded-[2rem] text-white shadow-2xl relative overflow-hidden group">
               <div className="relative z-10 space-y-6">
                  <div className="flex items-center gap-3">
-                    <Gift size={28} className="text-brand-gold animate-bounce" />
-                    <h4 className="text-xl font-black uppercase tracking-tight">Milestone Pulse</h4>
+<Gift size={28} className="text-brand-gold animate-bounce" />
+                     <h4 className="text-xl font-black uppercase tracking-tight">Celebrations</h4>
                  </div>
                  <p className="text-slate-300 text-base font-medium leading-relaxed">
-                   <span className="text-white font-black">{celebrations.length} Members</span> marking spiritual or personal anniversaries this week.
+                   <span className="text-white font-black">{celebrations.length} members</span> with birthdays or anniversaries this week.
                  </p>
                  <button 
                    onClick={() => setShowAnniversaryModal(true)}
                    className="w-full py-4 bg-white text-brand-primary rounded-[1.25rem] font-black text-xs uppercase tracking-widest shadow-xl hover:bg-brand-gold transition-all"
                  >
-                   Send Kingdom Blessings
+                   Send Blessings
                  </button>
               </div>
-              <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-10 group-hover:scale-125 transition-transform duration-1000" />
-           </div>
-
-           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-              <h4 className="text-xl font-black text-slate-800 uppercase flex items-center gap-3 mb-8">
-                 <ShieldCheck size={20} className="text-brand-gold" /> System Integrity
-              </h4>
-              <div className="space-y-6">
-                 {[
-                   { label: 'Data Encryption', val: 'AES-256', color: 'emerald' },
-                   { label: 'Audit Compliance', val: 'Active', color: 'indigo' },
-                   { label: 'Regional Uptime', val: '99.9%', color: 'gold' }
-                 ].map((h, i) => (
-                   <div key={i} className="flex items-center justify-between">
-                     <span className="text-xs font-bold text-slate-500">{h.label}</span>
-                     <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${
-                       h.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
-                       h.color === 'indigo' ? 'bg-indigo-50 text-indigo-600' :
-                       'bg-amber-50 text-amber-600'
-                     }`}>{h.val}</span>
-                   </div>
-                 ))}
-              </div>
+              <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-brand-indigo rounded-full blur-[80px] opacity-10 group-hover:scale-125 transition-transform duration-1000" />
            </div>
         </div>
       </div>
@@ -317,10 +239,10 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
               <div className="flex justify-between items-start relative z-10">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <Gift className="text-brand-gold" size={24} />
-                    <h3 className="text-3xl font-black tracking-tight uppercase leading-tight">Kingdom Celebrations</h3>
+<Gift className="text-brand-gold" size={24} />
+                     <h3 className="text-3xl font-black tracking-tight uppercase leading-tight">Celebrations</h3>
                   </div>
-                  <p className="text-slate-300 text-sm font-medium">Automatic blessing dispatch via SMS and WhatsApp.</p>
+                  <p className="text-slate-300 text-sm font-medium">Send birthday and anniversary wishes via SMS and WhatsApp.</p>
                 </div>
                 <button onClick={() => setShowAnniversaryModal(false)} className="p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"><X size={24} /></button>
               </div>
@@ -335,7 +257,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                       <h4 className="font-black text-slate-800 text-lg truncate">{item.name}</h4>
                       <p className="text-[10px] font-black uppercase text-brand-indigo tracking-widest">{item.type} • {item.date}</p>
                     </div>
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <div className="w-3 h-3 rounded-full bg-brand-emerald animate-pulse" />
                   </div>
                 ))}
               </div>
@@ -354,7 +276,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                 }}
                 className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl flex items-center justify-center gap-3"
               >
-                {isSendingBlessings ? <Loader2 className="animate-spin" /> : <Send size={20} />} {isSendingBlessings ? 'Dispatching...' : 'Blast Blessings'}
+                {isSendingBlessings ? <Loader2 className="animate-spin" /> : <Send size={20} />} {isSendingBlessings ? 'Sending...' : 'Send Blessings'}
               </button>
             </div>
           </div>

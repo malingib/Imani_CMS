@@ -95,7 +95,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
         setActiveTab('COMPOSE');
       }
     } catch (e) {
-      alert('Failed to reach AI Ministry Assistant.');
+      alert('Failed to generate message.');
     } finally {
       setIsGeneratingSermon(false);
     }
@@ -118,8 +118,8 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 overflow-x-hidden pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Outreach Center</h2>
-          <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">AI-powered ministry outreach and engagement.</p>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Communication</h2>
+          <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">Send SMS, email, and WhatsApp messages to members.</p>
         </div>
         <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm self-start lg:self-center overflow-x-auto no-scrollbar max-w-full">
           {[
@@ -199,23 +199,23 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                  <div className="relative z-10 space-y-5">
                     <div className="flex items-center gap-3">
                        <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Wand2 size={24}/></div>
-                       <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight">AI Sermonette</h3>
+                       <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight">AI Message Generator</h3>
                     </div>
-                    <p className="text-indigo-100 text-sm font-medium opacity-80 leading-relaxed">Generate high-impact, 100-word inspirational messages for WhatsApp or Email bulletins.</p>
+                    <p className="text-indigo-100 text-sm font-medium opacity-80 leading-relaxed">Generate short messages for WhatsApp or email.</p>
                     <button 
                        onClick={handleGenerateAiSermon}
                        disabled={isGeneratingSermon}
                        className="w-full py-4 bg-white text-brand-primary rounded-xl sm:rounded-2xl font-black shadow-xl hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                        {isGeneratingSermon ? <Loader2 className="animate-spin" size={18}/> : <Sparkles size={18}/>}
-                       {isGeneratingSermon ? 'Synthesizing...' : 'Draft with Gemini'}
+                       {isGeneratingSermon ? 'Generating...' : 'Draft with Gemini'}
                     </button>
                  </div>
                  <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-indigo rounded-full blur-[60px] opacity-20 group-hover:scale-125 transition-transform"></div>
               </div>
 
               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                 <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight"><Clock size={20} className="text-brand-indigo"/> Pending Dispatches</h4>
+                 <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight"><Clock size={20} className="text-brand-indigo"/> Scheduled Messages</h4>
                  <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-white hover:shadow-md transition-all">
                        <div className="flex items-center gap-3">
@@ -303,7 +303,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                      <div className={`p-3 rounded-2xl ${t.type === 'SMS' ? 'bg-brand-indigo/10 text-brand-indigo' : t.type === 'Email' ? 'bg-brand-gold/10 text-brand-gold' : 'bg-brand-emerald/10 text-brand-emerald'}`}>
                         {t.type === 'SMS' ? <Smartphone size={20}/> : t.type === 'Email' ? <Mail size={20}/> : <Share2 size={20}/>}
                      </div>
-                     <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-300">Enterprise Standard</span>
+                     <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-300">Standard</span>
                   </div>
                   <h4 className="text-lg sm:text-xl font-black text-slate-800 mb-4">{t.name}</h4>
                   <p className="text-xs sm:text-sm text-slate-500 leading-relaxed italic font-medium">"{t.content}"</p>
@@ -336,7 +336,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                 </div>
               </div>
               <div className="space-y-3">
-                <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Audience Target</label>
+                <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Recipients</label>
                 <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-[1.5rem] font-black text-xs text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo cursor-pointer shadow-inner" value={broadcastTarget} onChange={(e) => setBroadcastTarget(e.target.value)}>
                    <option>All Members</option>
                    <option>Youth Fellowship</option>
@@ -349,14 +349,14 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
               {messageType === 'Email' && (
                 <input type="text" placeholder="Email Subject Header" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl font-black text-sm text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo shadow-inner" value={subject} onChange={(e) => setSubject(e.target.value)} />
               )}
-              <textarea rows={8} placeholder="Draft your spiritual message here..." className="w-full p-6 sm:p-8 bg-slate-50 border border-slate-100 rounded-[1.5rem] sm:rounded-[2rem] font-bold text-sm sm:text-base text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo shadow-inner" value={content} onChange={(e) => setContent(e.target.value)} />
+              <textarea rows={8} placeholder="Type your message here..." className="w-full p-6 sm:p-8 bg-slate-50 border border-slate-100 rounded-[1.5rem] sm:rounded-[2rem] font-bold text-sm sm:text-base text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo shadow-inner" value={content} onChange={(e) => setContent(e.target.value)} />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                <button onClick={resetForm} className="w-full sm:w-auto px-10 py-5 bg-slate-50 text-slate-400 rounded-xl sm:rounded-2xl font-black uppercase text-[10px] hover:bg-slate-100 transition-all order-2 sm:order-1">Clear Draft</button>
                <button onClick={handleSend} disabled={!content || isSending} className="flex-1 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black text-sm sm:text-lg shadow-2xl hover:bg-brand-primary-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50 order-1 sm:order-2">
                  {isSending ? <Loader2 className="animate-spin" size={24} /> : <Send size={24} />} 
-                 {isSending ? 'Dispatching...' : `Fire ${messageType} Blast`}
+                 {isSending ? 'Dispatching...' : `Send ${messageType}`}
                </button>
             </div>
           </div>
@@ -371,7 +371,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
              </div>
              
              <div className="bg-white p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-                <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">Credits Integrity</h4>
+                <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">SMS Credits</h4>
                 <div className="flex items-center justify-between">
                    <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">4,280</p>
                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Zap size={20}/></div>

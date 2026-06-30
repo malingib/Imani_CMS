@@ -90,10 +90,10 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
         <div>
            <div className="flex items-center gap-3 mb-2">
               <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-2xl"><Landmark size={28}/></div>
-              <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Kingdom Stewardship</h2>
+              <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Giving</h2>
            </div>
            <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-2xl">
-             "Give, and it will be given to you." Securely track your tithes, offerings, and special project pledges.
+             Track your tithes, offerings, and pledges.
            </p>
         </div>
         <div className="flex gap-4">
@@ -122,7 +122,7 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
                   </div>
                   <div className="flex gap-4">
                      <button onClick={() => setShowStatementModal(true)} className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2">
-                        <FileText size={14}/> Full Audit Statement
+                        <FileText size={14}/> View Statement
                      </button>
                   </div>
                </div>
@@ -140,7 +140,7 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
                         </AreaChart>
                      </ResponsiveContainer>
                   </div>
-                  <p className="text-[10px] font-black uppercase text-indigo-400 text-center mt-4">6-Month Giving Pulse</p>
+                  <p className="text-[10px] font-black uppercase text-indigo-400 text-center mt-4">6-Month Trend</p>
                </div>
             </div>
             <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[120%] bg-brand-indigo rounded-full blur-[100px] opacity-20"></div>
@@ -179,7 +179,7 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
                <div className="p-4 bg-brand-gold/5 rounded-2xl flex items-start gap-4">
                   <Zap className="text-brand-gold shrink-0 mt-1" size={16}/>
                   <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
-                     Your faithful pledges fund our <span className="text-brand-primary font-black">2024 Sanctuary Project</span>. Asante sana!
+                     Your faithful pledges fund our <span className="text-brand-primary font-black">2024 Building Fund</span>. Asante sana!
                   </p>
                </div>
             </div>
@@ -212,7 +212,7 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
 
             <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-[3rem] space-y-6">
                <h5 className="font-black text-slate-600 uppercase text-center tracking-tight flex items-center justify-center gap-2">
-                  <ListFilter size={16}/> Ledger Filters
+                  <ListFilter size={16}/> Filters
                </h5>
                <div className="space-y-4">
                   <div className="space-y-1.5">
@@ -232,14 +232,14 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
                      </select>
                   </div>
                </div>
-               <button onClick={() => { setTypeFilter('All'); setYearFilter('2024'); setSearchTerm(''); }} className="w-full py-4 text-brand-primary font-black text-[10px] uppercase tracking-widest hover:underline">Reset Ledger View</button>
+               <button onClick={() => { setTypeFilter('All'); setYearFilter('2024'); setSearchTerm(''); }} className="w-full py-4 text-brand-primary font-black text-[10px] uppercase tracking-widest hover:underline">Reset Filters</button>
             </div>
          </div>
 
          {/* Detailed Table */}
          <div className="lg:col-span-8 bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
             <div className="p-8 sm:p-10 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 bg-slate-50/30">
-               <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Personal Giving Ledger</h4>
+               <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Giving History</h4>
                <div className="relative w-full md:w-64">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16}/>
                   <input 
@@ -255,10 +255,10 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
                <table className="w-full text-left min-w-[700px]">
                   <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 tracking-widest border-b border-slate-100">
                      <tr>
-                        <th className="px-10 py-6">Transaction Meta</th>
-                        <th className="px-10 py-6">Identity Key</th>
+                        <th className="px-10 py-6">Details</th>
+                        <th className="px-10 py-6">Reference</th>
                         <th className="px-10 py-6">Status</th>
-                        <th className="px-10 py-6 text-right">Settled Amount</th>
+                        <th className="px-10 py-6 text-right">Amount</th>
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -322,7 +322,7 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
                     </div>
                     <div>
                        <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none">Annual Statement</h3>
-                       <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">FY 2024 Stewardship Summary</p>
+                       <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">FY 2024 Giving Summary</p>
                     </div>
                  </div>
                  <button onClick={() => setShowStatementModal(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-3xl transition-all"><X size={24}/></button>
@@ -342,7 +342,7 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
                     <span className="text-sm font-bold text-slate-800">KES {myGifts.filter(t=>t.type!=='Tithe').reduce((s,t)=>s+t.amount,0).toLocaleString()}</span>
                  </div>
                  <div className="pt-6 border-t border-slate-200 flex justify-between items-center">
-                    <span className="text-lg font-black uppercase text-brand-primary tracking-tight">Net Stewardship</span>
+                    <span className="text-lg font-black uppercase text-brand-primary tracking-tight">Total Given</span>
                     <span className="text-2xl font-black text-brand-primary">KES {totalGivingYear.toLocaleString()}</span>
                  </div>
               </div>
@@ -376,7 +376,7 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
                        </div>
                        <div>
                           <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none">M-Pesa Express</h3>
-                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">Instant Kingdom Giving</p>
+                          <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">M-Pesa Payment</p>
                        </div>
                     </div>
                     <button type="button" onClick={() => setShowGiftModal(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-3xl transition-all">

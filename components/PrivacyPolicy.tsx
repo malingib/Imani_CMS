@@ -18,7 +18,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
       <header className="space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-indigo/10 text-brand-indigo rounded-full border border-brand-indigo/20">
           <Scale size={16} />
-          <span className="text-[10px] font-black uppercase tracking-widest">Legal & Privacy Framework</span>
+          <span className="text-[10px] font-black uppercase tracking-widest">Privacy Policy</span>
         </div>
         <h1 className="text-4xl font-black text-slate-900 tracking-tight">Privacy Policy</h1>
         <p className="text-slate-500 text-lg font-medium leading-relaxed">
@@ -58,9 +58,9 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {[
-              { title: "Ministry Outreach", desc: "Sending SMS/WhatsApp updates about services and fellowship meetings." },
-              { title: "Stewardship", desc: "Providing faithful givers with annual contribution summaries for audit." },
-              { title: "Engagement", desc: "Analyzing demographics to better serve youth and senior ministries." },
+              { title: 'Communication', desc: "Sending SMS/WhatsApp updates about services and fellowship meetings." },
+              { title: 'Giving Records', desc: "Providing faithful givers with annual contribution summaries for audit." },
+              { title: 'Analytics', desc: "Analyzing demographics to better serve youth and senior ministries." },
               { title: "Security", desc: "Verifying access to restricted leadership modules." }
             ].map((use, i) => (
               <div key={i} className="flex gap-4 p-4 border border-slate-50 rounded-2xl">
@@ -105,7 +105,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             Last Updated: October 2023 • Office of the Data Protection Commissioner (ODPC) Standards
           </p>
           <p className="text-[10px] text-slate-300 font-bold">
-            Imani CMS by Mobiwave Innovations • Empowering Kenyan Congregations
+            Imani CMS by Mobiwave Innovations • Church Management System
           </p>
         </footer>
       </div>

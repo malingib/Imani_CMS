@@ -18,11 +18,11 @@ const SecurityOverview: React.FC<SecurityOverviewProps> = ({ onBack }) => {
       <header className="space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-emerald/10 text-brand-emerald rounded-full border border-brand-emerald/20">
           <Shield size={16} />
-          <span className="text-[10px] font-black uppercase tracking-widest">Ministry Integrity Defense</span>
+          <span className="text-[10px] font-black uppercase tracking-widest">Security</span>
         </div>
         <h1 className="text-4xl font-black text-slate-900 tracking-tight">System Security</h1>
         <p className="text-slate-500 text-lg font-medium leading-relaxed">
-          Your congregation's data and financial stewardship are protected by enterprise-grade protocols designed for the African fintech landscape.
+          Your data and transactions are protected by enterprise-grade protocols designed for the African fintech landscape.
         </p>
       </header>
 
@@ -44,7 +44,7 @@ const SecurityOverview: React.FC<SecurityOverviewProps> = ({ onBack }) => {
 
         <div className="bg-brand-primary p-10 rounded-[3rem] text-white shadow-xl space-y-6 relative overflow-hidden">
            <div className="p-4 bg-white/10 text-brand-indigo/30 rounded-2xl w-fit relative z-10"><Smartphone size={32}/></div>
-           <h3 className="text-2xl font-black relative z-10">Safe-Pay M-Pesa</h3>
+           <h3 className="text-2xl font-black relative z-10">M-Pesa Security</h3>
            <p className="text-sm text-indigo-100/70 font-medium leading-relaxed relative z-10">
              Our Daraja integration operates on the <strong>STK Push</strong> model. We never see or store a member's M-Pesa PIN. Authentication is handled exclusively on the member's handset and Safaricom's core infrastructure.
            </p>
@@ -67,8 +67,8 @@ const SecurityOverview: React.FC<SecurityOverviewProps> = ({ onBack }) => {
          <div className="grid md:grid-cols-2 gap-10">
             <div className="space-y-4">
                <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl w-fit"><ShieldAlert size={20}/></div>
-               <h4 className="font-black text-slate-700 uppercase text-xs tracking-widest">Zero-Trust Access</h4>
-               <p className="text-sm text-slate-500 leading-relaxed font-medium">Ministry leaders are restricted to specific modules. A Treasurer cannot view Counseling transcripts, and a Secretary cannot modify Payroll without secondary admin approval.</p>
+               <h4 className="font-black text-slate-700 uppercase text-xs tracking-widest">Role-Based Access</h4>
+               <p className="text-sm text-slate-500 leading-relaxed font-medium">Ministry leaders are restricted to specific modules. A Treasurer cannot view member notes, and a Secretary cannot modify Payroll without secondary admin approval.</p>
             </div>
             <div className="space-y-4">
                <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-xl w-fit"><CheckCircle2 size={20}/></div>
@@ -80,7 +80,7 @@ const SecurityOverview: React.FC<SecurityOverviewProps> = ({ onBack }) => {
 
       <footer className="text-center">
         <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">
-          Audit Reference: Mobiwave-Sec-2023-V4 • Managed by Mobiwave Innovations
+          Security Reference: v4 • Managed by Mobiwave Innovations
         </p>
       </footer>
     </div>

@@ -32,8 +32,8 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
   const stats = useMemo(() => [
     { label: 'Fiscal Revenue', value: `KES ${(transactions.filter(t => t.category === 'Income').reduce((s, t) => s + t.amount, 0) / 1000).toFixed(0)}k`, color: 'emerald', icon: Wallet },
     { label: 'Operating Costs', value: `KES ${(transactions.filter(t => t.category === 'Expense').reduce((s, t) => s + t.amount, 0) / 1000).toFixed(0)}k`, color: 'indigo', icon: BarChart3 },
-    { label: 'Growth Vitality', value: `+${members.length}`, color: 'primary', icon: Users },
-    { label: 'Avg Presence', value: '82%', color: 'gold', icon: Calendar },
+    { label: 'New Members', value: `+${members.length}`, color: 'primary', icon: Users },
+    { label: 'Avg Attendance', value: '82%', color: 'gold', icon: Calendar },
   ], [transactions, members]);
 
   const handleGenerateAIInsight = async () => {
@@ -81,7 +81,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
         </div>
         <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
           <h4 className="text-sm font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
-            <Activity size={16} className="text-brand-indigo"/> Monthly Cashflow Strategy
+            <Activity size={16} className="text-brand-indigo"/> Monthly Income vs Expenses
           </h4>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -106,7 +106,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
         <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
-          <h4 className="font-black text-slate-800 uppercase tracking-tight">Audit Trail: M-Pesa Reconciliation</h4>
+          <h4 className="font-black text-slate-800 uppercase tracking-tight">M-Pesa Reconciliation</h4>
           <span className="px-3 py-1 bg-brand-emerald/10 text-brand-emerald text-[10px] font-black uppercase rounded-lg">PCI Compliant</span>
         </div>
         <table className="w-full text-left">
@@ -157,7 +157,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
       </div>
 
       <div className="bg-slate-50/50 p-8 rounded-[3rem] border border-slate-100">
-        <h4 className="text-sm font-black uppercase text-slate-400 mb-6 px-2 tracking-[0.2em]">Net Congregation Growth</h4>
+        <h4 className="text-sm font-black uppercase text-slate-400 mb-6 px-2 tracking-[0.2em]">Membership Growth</h4>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={[
@@ -191,7 +191,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
       <div className="bg-slate-50/50 p-8 rounded-[3rem] border border-slate-100">
         <div className="flex justify-between items-center mb-8 px-2">
           <div>
-            <h4 className="text-sm font-black uppercase text-slate-400 tracking-[0.2em]">Service Attendance Vitality</h4>
+            <h4 className="text-sm font-black uppercase text-slate-400 tracking-[0.2em]">Attendance Over Time</h4>
             <p className="text-xs font-bold text-slate-500 mt-1">Consistency tracking across Sunday and Mid-week services.</p>
           </div>
           <div className="flex gap-4">
@@ -220,7 +220,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
          <div className="bg-brand-primary p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-            <h4 className="text-sm font-black uppercase text-indigo-300 mb-6 tracking-[0.2em] relative z-10">Attendance Benchmarking</h4>
+            <h4 className="text-sm font-black uppercase text-indigo-300 mb-6 tracking-[0.2em] relative z-10">Attendance Targets</h4>
             <div className="space-y-4 relative z-10">
                {[
                  { label: 'Sunday Morning Sanctuary', p: 85, t: 'Target: 90%' },
@@ -245,9 +245,9 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
             <div className="mx-auto w-16 h-16 bg-brand-emerald/10 text-brand-emerald rounded-[1.5rem] flex items-center justify-center">
                <ShieldCheck size={32}/>
             </div>
-            <h5 className="text-xl font-black text-slate-800">Verified Spiritual Engagement</h5>
+            <h5 className="text-xl font-black text-slate-800">Attendance Insights</h5>
             <p className="text-sm text-slate-500 leading-relaxed font-medium">
-              Data synchronized from the Events Roll Call system. High consistency detected in the <span className="text-brand-primary font-black">Nairobi West Outreach Zone</span>.
+              Data synchronized from the Events Roll Call system. High consistency detected in the <span className="text-brand-primary font-black">Nairobi West area</span>.
             </p>
             <button className="text-xs font-black uppercase tracking-widest text-brand-indigo hover:underline mt-4">View Regional Breakdown</button>
          </div>
@@ -331,8 +331,8 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 print:hidden">
         <div>
-          <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Executive Reports</h2>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Stewardship transparency and operational vitality dashboards.</p>
+          <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Reports</h2>
+          <p className="text-slate-500 mt-2 text-lg font-medium">View reports on giving, attendance, and membership.</p>
         </div>
         <div className="flex gap-3 flex-wrap">
           <button className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
@@ -366,10 +366,10 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-2">
               <p className="text-[10px] font-black uppercase text-slate-400 mb-6 px-4 tracking-[0.2em]">Report Scope</p>
               {[
-                { id: 'FINANCIAL', label: 'Fiscal Stewardship', icon: Landmark, desc: 'Audit & Cashflow' },
-                { id: 'MEMBERSHIP', label: 'Congregation Life', icon: Users, desc: 'Growth & Churn' },
-                { id: 'ATTENDANCE', label: 'Spiritual Pulse', icon: BarChart3, desc: 'Service Vitality' },
-                { id: 'SUNDAY_SCHOOL', label: 'Sunday School', icon: Baby, desc: 'NextGen Ministry' },
+                { id: 'FINANCIAL', label: 'Financial', icon: Landmark, desc: 'Audit & Cashflow' },
+                { id: 'MEMBERSHIP', label: 'Membership', icon: Users, desc: 'Growth & Churn' },
+                { id: 'ATTENDANCE', label: 'Attendance', icon: BarChart3, desc: 'Service Vitality' },
+                { id: 'SUNDAY_SCHOOL', label: 'Sunday School', icon: Baby, desc: 'Children' },
               ].map(report => (
                 <button 
                   key={report.id} 
@@ -389,10 +389,10 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
               <div className="relative z-10 space-y-6">
                  <div className="flex items-center gap-3">
                     <Sparkles className="text-brand-gold animate-pulse" size={28}/>
-                    <h4 className="text-xl font-black uppercase tracking-tight">Executive AI</h4>
+                    <h4 className="text-xl font-black uppercase tracking-tight">AI Insights</h4>
                  </div>
                  <p className="text-sm text-indigo-100 font-medium leading-relaxed">
-                   Let Gemini synthesize your ministry data into high-level strategic summaries.
+                   Generate insights from your data.
                  </p>
                  <button 
                     onClick={handleGenerateAIInsight} 
@@ -400,7 +400,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
                     className="w-full py-4 bg-white text-brand-primary rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-brand-gold hover:text-brand-primary transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                  >
                     {isGeneratingAI ? <Loader2 className="animate-spin" size={18}/> : <ShieldCheck size={18}/>} 
-                    {isGeneratingAI ? 'Processing...' : 'Run Audit Insight'}
+                    {isGeneratingAI ? 'Processing...' : 'Generate Insights'}
                  </button>
               </div>
               <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-400/20 rounded-full blur-[80px] group-hover:scale-125 transition-transform duration-1000"></div>
@@ -420,8 +420,8 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
                  <div className="flex items-center gap-4">
                     <div className="p-3 bg-white rounded-2xl text-brand-primary shadow-sm"><Sparkles size={28}/></div>
                     <div>
-                       <h4 className="text-2xl font-black text-slate-800 tracking-tight">Executive Strategy Insight</h4>
-                       <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Generated via Gemini Advanced Analysis</p>
+                       <h4 className="text-2xl font-black text-slate-800 tracking-tight">AI Analysis</h4>
+                       <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Generated by AI</p>
                     </div>
                  </div>
 

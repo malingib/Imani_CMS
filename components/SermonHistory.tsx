@@ -68,21 +68,21 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase leading-tight">Word Archive</h2>
-          <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">Digital storage for past messages and living scripture.</p>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase leading-tight">Sermons</h2>
+          <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">Browse and search past sermons.</p>
         </div>
         <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm self-start lg:self-center overflow-x-auto no-scrollbar max-w-full">
           <button 
             onClick={() => setActiveTab('HISTORY')}
             className={`px-5 py-2.5 sm:px-6 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'HISTORY' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}
           >
-            <History size={16}/> Sermon Vault
+            <History size={16}/> Sermons
           </button>
           <button 
             onClick={() => setActiveTab('BIBLE')}
             className={`px-5 py-2.5 sm:px-6 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'BIBLE' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}
           >
-            <Book size={16}/> Scripture Explorer
+            <Book size={16}/> Bible
           </button>
         </div>
       </div>
@@ -109,10 +109,10 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                 <table className="w-full text-left min-w-[600px]">
                   <thead className="bg-slate-50 text-[10px] uppercase text-slate-400 font-black tracking-widest border-b border-slate-50">
                     <tr>
-                      <th className="px-10 py-6">Message Context</th>
-                      <th className="px-10 py-6">Orator</th>
-                      <th className="px-10 py-6">Biblical Key</th>
-                      <th className="px-10 py-6 text-right">Integrity</th>
+                      <th className="px-10 py-6">Title</th>
+                      <th className="px-10 py-6">Speaker</th>
+                      <th className="px-10 py-6">Scripture</th>
+                      <th className="px-10 py-6 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -132,7 +132,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                         </td>
                         <td className="px-10 py-8 font-black text-brand-indigo italic text-sm">{sermon.scripture}</td>
                         <td className="px-10 py-8 text-right">
-                          <button className="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-black text-[10px] uppercase tracking-widest group-hover:bg-brand-primary group-hover:text-white transition-all">View Archive</button>
+                          <button className="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl font-black text-[10px] uppercase tracking-widest group-hover:bg-brand-primary group-hover:text-white transition-all">View</button>
                         </td>
                       </tr>
                     ))}
@@ -143,8 +143,8 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
               <div className="py-32 text-center space-y-6">
                  <History size={64} className="mx-auto text-slate-100" />
                  <div>
-                    <h4 className="text-xl font-black text-slate-400 uppercase">Archive Empty</h4>
-                    <p className="text-sm font-medium text-slate-300">Sermons are recorded during the 'Roll Call' event workflow.</p>
+                    <h4 className="text-xl font-black text-slate-400 uppercase">No Sermons Found</h4>
+                    <p className="text-sm font-medium text-slate-300">Sermons will appear here once recorded.</p>
                  </div>
               </div>
             )}
@@ -158,7 +158,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                   <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-2xl">
                     <Book size={24} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Living Word Hub</h3>
+                  <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Bible Search</h3>
                 </div>
                 
                 <div className="space-y-6">
@@ -184,7 +184,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                    </div>
 
                    <div className="space-y-3 pt-4">
-                      <p className="text-[10px] font-black uppercase text-slate-300 ml-2 tracking-widest">Global Favourites</p>
+                      <p className="text-[10px] font-black uppercase text-slate-300 ml-2 tracking-widest">Favourites</p>
                       <div className="space-y-2">
                          {[
                            { ref: 'Isaiah 40:31', tag: 'Strength' },
@@ -209,7 +209,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                 <div className="relative z-10 space-y-4">
                    <div className="flex items-center gap-3">
                       <Sparkles className="text-brand-gold animate-pulse" size={20}/>
-                      <h4 className="font-black uppercase tracking-tight text-sm">AI Theology Lens</h4>
+                      <h4 className="font-black uppercase tracking-tight text-sm">AI Bible Assistant</h4>
                    </div>
                    <p className="text-xs text-indigo-100 leading-relaxed font-medium opacity-80">
                      Our AI layer maps ancient texts to modern Kenyan realities: community, work, and faith.
@@ -226,7 +226,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                    <div className="flex justify-between items-start border-b border-slate-50 pb-10">
                       <div>
                         <h3 className="text-3xl sm:text-5xl font-black text-brand-primary tracking-tighter uppercase">{bibleSearch}</h3>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">KJV Standard • Contextually Analyzed</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">KJV</p>
                       </div>
                       <div className="flex gap-2">
                         <button className="p-4 bg-slate-50 text-slate-400 hover:text-brand-primary rounded-2xl transition-all shadow-sm"><Bookmark size={20}/></button>
@@ -243,14 +243,14 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                    <div className="p-10 bg-indigo-50/50 rounded-[3rem] border border-indigo-100 space-y-8">
                       <div className="flex items-center gap-4 text-brand-indigo">
                          <Quote size={32} className="opacity-50"/>
-                         <h4 className="text-xl font-black uppercase tracking-tight">Kenyan Ministry Exegesis</h4>
+                         <h4 className="text-xl font-black uppercase tracking-tight">Reflection</h4>
                       </div>
                       <p className="text-sm sm:text-lg font-medium text-slate-600 leading-relaxed">
                         {bibleContent.reflection}
                       </p>
                       <div className="pt-6 flex items-center gap-4 border-t border-indigo-100/50">
                          <div className="w-10 h-10 rounded-2xl bg-brand-primary flex items-center justify-center text-xs text-white font-black">I</div>
-                         <p className="text-[10px] font-black text-brand-primary/60 uppercase tracking-widest">Strategic Insight generated for Imani global parish</p>
+                         <p className="text-[10px] font-black text-brand-primary/60 uppercase tracking-widest">AI-generated reflection</p>
                       </div>
                    </div>
                 </div>
@@ -263,7 +263,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                          <div className="w-20 h-20 border-4 border-brand-indigo/10 rounded-full animate-spin border-t-brand-primary"></div>
                          <BookOpen className="absolute inset-0 m-auto text-brand-primary" size={24}/>
                       </div>
-                      <p className="font-black text-brand-primary uppercase tracking-widest text-sm">Synthesizing the Word...</p>
+                      <p className="font-black text-brand-primary uppercase tracking-widest text-sm">Searching...</p>
                    </div>
                  ) : (
                    <>
@@ -271,7 +271,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                         <BookOpen size={48}/>
                      </div>
                      <div className="max-w-md space-y-4">
-                        <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Scripture Intelligence</h4>
+                        <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Bible Search</h4>
                         <p className="text-base font-medium text-slate-400 leading-relaxed">Access the living word with AI-assisted contextual reflection. Perfect for sermon prep or personal study.</p>
                      </div>
                      <button 
@@ -297,7 +297,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                    <div className="space-y-4">
                       <div className="flex items-center gap-3 text-brand-gold">
                          <BookOpen size={20}/>
-                         <span className="text-[10px] font-black uppercase tracking-widest">Sermon Archive</span>
+                         <span className="text-[10px] font-black uppercase tracking-widest">Sermon</span>
                       </div>
                       <h3 className="text-3xl sm:text-5xl font-black tracking-tight uppercase leading-tight">{viewingSermon.title}</h3>
                       <div className="flex flex-wrap items-center gap-4 text-slate-300 font-bold">
@@ -336,11 +336,11 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
                    <div className="pt-12 border-t border-slate-50">
                       <div className="bg-slate-50 p-8 rounded-[2rem] flex flex-col md:flex-row justify-between items-center gap-6">
                          <div className="text-center md:text-left">
-                            <h4 className="font-black text-slate-800 uppercase tracking-tight">Spread the Word</h4>
+                            <h4 className="font-black text-slate-800 uppercase tracking-tight">Share</h4>
                             <p className="text-xs text-slate-400 font-medium">Share this message with your department or fellowship.</p>
                          </div>
                          <button className="w-full md:w-auto px-10 py-4 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-brand-indigo transition-all flex items-center justify-center gap-3">
-                            <Share2 size={18}/> Push to Outreach
+                            <Share2 size={18}/> Share
                          </button>
                       </div>
                    </div>

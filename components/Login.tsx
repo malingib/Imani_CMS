@@ -168,11 +168,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
 
           <div className="mb-8 text-center lg:text-left">
             <h3 className="text-3xl lg:text-4xl font-black text-brand-primary tracking-tight uppercase">
-              {mode === 'LOGIN' ? 'Portal Sign In' : mode === 'SIGNUP' ? 'Create Account' : 'Reset Password'}
+              {mode === 'LOGIN' ? 'Sign In' : mode === 'SIGNUP' ? 'Create Account' : 'Reset Password'}
             </h3>
             <p className="text-slate-500 mt-3 font-medium text-lg leading-relaxed">
-              {mode === 'LOGIN' ? 'Secure access to your church ministry dashboard.' : 
-               mode === 'SIGNUP' ? 'Join the Imani ministry administration network.' : 
+              {mode === 'LOGIN' ? 'Sign in to your account.' : 
+               mode === 'SIGNUP' ? 'Create your account.' : 
                'Enter your email to receive recovery instructions.'}
             </p>
           </div>
@@ -316,7 +316,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
                 </button>
               </div>
               <p className="text-[11px] text-slate-400 font-black tracking-tight opacity-80 uppercase">
-                Imani CMS • Built for Kenyan Ministry Excellence
+                Imani CMS • Church Management System
               </p>
             </div>
           )}

@@ -132,7 +132,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
           <div className="lg:col-span-4 space-y-6">
              <div className="bg-white/10 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/10 space-y-6">
                 <div className="flex justify-between items-center">
-                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">My Stewardship</h4>
+                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-300">My Giving</h4>
                    <button onClick={() => onNavigate('MY_GIVING')} className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"><ArrowRight size={16}/></button>
                 </div>
                 <div className="space-y-1">
@@ -142,7 +142,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                 <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                    <div className="h-full bg-brand-gold rounded-full" style={{ width: '65%' }} />
                 </div>
-                <p className="text-[9px] font-black text-white/40 uppercase text-center italic">65% of your annual target met. Keep pressing on!</p>
+                <p className="text-[9px] font-black text-white/40 uppercase text-center italic">65% of your annual target met.</p>
              </div>
           </div>
         </div>
@@ -159,7 +159,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                  <div className="flex items-center gap-4">
                     <div className="p-4 bg-brand-indigo/10 text-brand-indigo rounded-2xl"><CalendarCheck size={28}/></div>
                     <div>
-                       <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Ministry Schedule</h3>
+                       <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Events</h3>
                        <p className="text-slate-400 font-medium text-sm">Stay connected with our weekly services.</p>
                     </div>
                  </div>
@@ -243,7 +243,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                        <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Layers size={20}/></div>
                        <h4 className="text-lg font-black text-slate-800 uppercase tracking-tight">Active Groups</h4>
                     </div>
-                    <span className="text-[10px] font-black text-brand-primary uppercase">{member.groups.length} Ministries</span>
+                    <span className="text-[10px] font-black text-brand-primary uppercase">{member.groups.length} Groups</span>
                  </div>
                  <div className="space-y-3">
                     {member.groups.map(group => (
@@ -256,7 +256,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                        </div>
                     ))}
                     <button onClick={() => onNavigate('GROUPS' as any)} className="w-full py-4 border-2 border-dashed border-slate-100 rounded-2xl text-[10px] font-black uppercase text-slate-300 hover:border-brand-primary hover:text-brand-primary transition-all flex items-center justify-center gap-2">
-                       <Plus size={14}/> Join New Ministry
+                       <Plus size={14}/> Join a Group
                     </button>
                  </div>
               </div>
@@ -264,7 +264,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
               <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
                  <div className="flex items-center gap-3">
                     <div className="p-3 bg-brand-emerald/10 text-brand-emerald rounded-xl"><BookMarked size={20}/></div>
-                    <h4 className="text-lg font-black text-slate-800 uppercase tracking-tight">Library Access</h4>
+                    <h4 className="text-lg font-black text-slate-800 uppercase tracking-tight">Resources</h4>
                  </div>
                  <div className="space-y-4">
                     <div className="p-6 bg-indigo-50 border border-indigo-100 rounded-[2rem] space-y-4 group cursor-pointer hover:bg-indigo-100 transition-all">
@@ -320,10 +320,10 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
               <div className="relative z-10 space-y-6">
                  <div className="flex items-center gap-3 text-brand-gold">
                     <Target size={28}/>
-                    <h4 className="text-xl font-black uppercase tracking-tight">Consistency Pulse</h4>
+                    <h4 className="text-xl font-black uppercase tracking-tight">Attendance Insights</h4>
                  </div>
                  <p className="text-indigo-100 font-medium leading-relaxed">
-                   Your service attendance is <span className="text-white font-black">Top 15%</span> this quarter. Maintain your streak for a special recognition during the AGM.
+                   Your service attendance is <span className="text-white font-black">Top 15%</span> this quarter. Keep attending to stay on track.
                  </p>
                  <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-white/10 rounded-2xl border border-white/10 text-center">
@@ -332,7 +332,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                     </div>
                     <div className="p-4 bg-white/10 rounded-2xl border border-white/10 text-center">
                        <p className="text-2xl font-black">82</p>
-                       <p className="text-[9px] font-black uppercase text-slate-400">Stewardship Score</p>
+                       <p className="text-[9px] font-black uppercase text-slate-400">Giving Score</p>
                     </div>
                  </div>
               </div>
@@ -354,7 +354,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
            <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20">
               <div className="p-10 sm:p-14 space-y-10">
                  <div className="flex justify-between items-center">
-                    <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Identity Settings</h3>
+                    <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Edit Profile</h3>
                     <button onClick={() => setIsEditing(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-3xl transition-all"><X size={24}/></button>
                  </div>
                  
@@ -376,7 +376,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                        />
                     </div>
                     <div className="md:col-span-2 space-y-2">
-                       <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Contact Hub (Phone)</label>
+                       <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Phone</label>
                        <input 
                          disabled
                          className="w-full p-4 bg-slate-100 border border-slate-100 rounded-2xl font-bold text-slate-400 cursor-not-allowed" 
@@ -392,7 +392,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                        onClick={handleSave}
                        className="flex-[2] py-5 bg-brand-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3"
                     >
-                       <Save size={20}/> Push Updates
+                       <Save size={20}/> Save Changes
                     </button>
                  </div>
               </div>

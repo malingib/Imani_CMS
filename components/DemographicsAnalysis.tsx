@@ -110,7 +110,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
       const res = await scoutOutreachLocations(`${resourceType} near ${topLoc} for community service and benevolence ministry`);
       setResourceResults(res);
     } catch (e) {
-      alert("AI Intelligence error.");
+      alert('Failed to find locations.');
     } finally {
       setIsFindingResources(false);
     }
@@ -172,15 +172,15 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
             <div className="p-2 bg-brand-indigo-50 text-brand-indigo rounded-xl">
                <TrendingUp size={24} />
             </div>
-            <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Ministry Analytics</h2>
+            <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Analytics</h2>
           </div>
-          <p className="text-slate-500 text-lg font-medium">Quantifying spiritual growth and operational effectiveness across all departments.</p>
+          <p className="text-slate-500 text-lg font-medium">View member demographics, growth, and giving trends.</p>
         </div>
         
         <div className="flex bg-white p-1.5 rounded-[1.8rem] border border-slate-200 shadow-sm overflow-x-auto no-scrollbar glass-card self-start">
           {[
             { id: 'DEMOGRAPHICS', label: 'Congregation', icon: Users },
-            { id: 'RESOURCES', label: 'Kingdom Resources', icon: MapIcon },
+            { id: 'RESOURCES', label: 'Resources', icon: MapIcon },
             { id: 'GROWTH', label: 'Growth', icon: ArrowUpRight },
             { id: 'ENGAGEMENT', label: 'Engagement', icon: Activity }
           ].map(tab => (
@@ -205,7 +205,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
                  <div className="flex items-center gap-3">
                     <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-2xl"><Target size={24}/></div>
-                    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Geo-Ministry Hub</h3>
+                    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Location Finder</h3>
                  </div>
                  
                  <p className="text-sm text-slate-400 font-medium leading-relaxed">
@@ -237,7 +237,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                       className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black shadow-lg hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                     >
                        {isFindingResources ? <Loader2 className="animate-spin" size={18}/> : <Search size={18}/>}
-                       {isFindingResources ? 'Processing...' : 'Identify Hubs'}
+                       {isFindingResources ? 'Processing...' : 'Search'}
                     </button>
                  </div>
               </div>
@@ -246,9 +246,9 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                  <div className="relative z-10 space-y-4">
                     <div className="flex items-center gap-2 text-brand-gold">
                       <Cross size={16}/>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Strategy Mode</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Community</span>
                     </div>
-                    <h4 className="text-lg font-black uppercase leading-tight">Benevolence Mapping</h4>
+                    <h4 className="text-lg font-black uppercase leading-tight">Community Resources</h4>
                     <p className="text-xs text-indigo-100 opacity-70 leading-relaxed font-medium">Identifying partner institutions near member concentrations to streamline church-led community outreach.</p>
                  </div>
                  <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
@@ -260,8 +260,8 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                 <div className="bg-white p-8 lg:p-12 rounded-[3.5rem] border border-slate-100 shadow-sm space-y-10 min-h-[600px]">
                    <div className="flex justify-between items-center border-b border-slate-50 pb-8">
                       <div>
-                         <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Intelligence Report</h4>
-                         <p className="text-[10px] font-black uppercase text-brand-indigo tracking-widest mt-1">Grounding verified via Google Maps Tool</p>
+                         <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Results</h4>
+                         <p className="text-[10px] font-black uppercase text-brand-indigo tracking-widest mt-1">Results from Google Maps</p>
                       </div>
                       <div className="p-3 bg-brand-emerald/10 text-brand-emerald rounded-xl"><CheckCircle2 size={24}/></div>
                    </div>
@@ -275,7 +275,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                               <div className="p-4 bg-white text-brand-primary rounded-2xl shadow-sm group-hover:bg-brand-primary group-hover:text-white transition-all">
                                  <Building2 size={24}/>
                               </div>
-                              <span className="text-[9px] font-black uppercase text-slate-300">Identity ID #{i+1}</span>
+                              <span className="text-[9px] font-black uppercase text-slate-300">Result #{i+1}</span>
                            </div>
                            <div>
                               <h5 className="text-xl font-black text-slate-800 line-clamp-1">{chunk.maps?.title || "Local Hub"}</h5>
@@ -298,8 +298,8 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-inner mb-6">
                       <Sparkles size={48} className="text-slate-200"/>
                    </div>
-                   <h4 className="text-xl font-black text-slate-400 uppercase">Awaiting Intelligence Probe</h4>
-                   <p className="max-w-xs text-sm font-medium text-slate-300 mt-2 leading-relaxed">Select a category and trigger identifying hubs to map out local partnership opportunities.</p>
+                   <h4 className="text-xl font-black text-slate-400 uppercase">No Results Yet</h4>
+                   <p className="max-w-xs text-sm font-medium text-slate-300 mt-2 leading-relaxed">Select a category and select a category and search.</p>
                 </div>
               )}
            </div>
@@ -395,7 +395,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
               <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                      <h4 className="text-2xl font-black text-slate-800">Congregation Trajectory</h4>
+                      <h4 className="text-2xl font-black text-slate-800">Membership Growth</h4>
                       <p className="text-slate-500 font-medium">Monthly acquisition vs outreach engagement.</p>
                     </div>
                     <div className="flex items-center gap-6">
@@ -432,7 +432,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
               <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                      <h4 className="text-2xl font-black text-slate-800">Stewardship Flow</h4>
+                      <h4 className="text-2xl font-black text-slate-800">Income vs Expenses</h4>
                       <p className="text-slate-500 font-medium">Operational income vs ministry expenses.</p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -458,7 +458,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
               <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                      <h4 className="text-2xl font-black text-slate-800">Ministry Engagement</h4>
+                      <h4 className="text-2xl font-black text-slate-800">Attendance by Service</h4>
                       <p className="text-slate-500 font-medium">Actual attendance vs facility capacity.</p>
                     </div>
                  </div>
@@ -483,10 +483,10 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                 <div className="relative z-10 space-y-6">
                    <div className="flex items-center gap-3">
                       <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Target size={24}/></div>
-                      <h4 className="text-xl font-black uppercase tracking-tight">Strategic Insight</h4>
+                      <h4 className="text-xl font-black uppercase tracking-tight">Recommendations</h4>
                    </div>
                    <p className="text-slate-300 font-medium leading-relaxed">
-                     Current growth trends show a <span className="text-brand-gold font-black">12% uptick</span> in the 19-35 demographic. It is recommended to increase resource allocation for the <span className="text-white font-black underline decoration-brand-gold">NextGen Ministry</span> by 15% next quarter.
+                     Current growth trends show a <span className="text-brand-gold font-black">12% uptick</span> in the 19-35 demographic. It is recommended to increase resource allocation for the <span className="text-white font-black underline decoration-brand-gold">youth programs</span> by 15% next quarter.
                    </p>
                    <div className="pt-6 border-t border-white/10">
                       <button className="w-full py-4 bg-white text-brand-primary rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-gold hover:text-brand-primary transition-all flex items-center justify-center gap-2">
@@ -529,7 +529,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
 
              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
                 <h4 className="text-xl font-black text-slate-800 flex items-center gap-3">
-                   <Activity size={20} className="text-brand-emerald"/> Ministry Pulse
+                   <Activity size={20} className="text-brand-emerald"/> Key Metrics
                 </h4>
                 <div className="space-y-6">
                    {[
@@ -561,8 +561,8 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                       <MapIcon size={32}/>
                    </div>
                    <div>
-                      <h3 className="text-3xl font-black text-brand-primary tracking-tight uppercase">Kingdom Geo-Spread</h3>
-                      <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Global ministry footprint visualization</p>
+                      <h3 className="text-3xl font-black text-brand-primary tracking-tight uppercase">Member Locations</h3>
+                      <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Map of member locations</p>
                    </div>
                 </div>
                 <button 
@@ -581,7 +581,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                    <div className="space-y-4">
                       <div className="flex items-center gap-3">
                          <div className="w-4 h-4 rounded-full bg-brand-indigo opacity-50 border-2 border-brand-indigo shadow-sm"></div>
-                         <span className="text-[10px] font-black text-slate-600 uppercase">Congregation Hub</span>
+                         <span className="text-[10px] font-black text-slate-600 uppercase">Member Cluster</span>
                       </div>
                       <div className="p-4 bg-brand-primary/5 rounded-2xl space-y-2">
                          <div className="flex justify-between text-[8px] font-black uppercase text-slate-400">

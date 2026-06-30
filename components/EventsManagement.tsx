@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Calendar, Clock, MapPin, Plus, MoreVertical, 
   Search, Users, Trash2, Edit2, CheckCircle2, X,
   Bell, Repeat, ChevronLeft, ChevronRight, LayoutGrid, Map as MapIcon,
-  Filter, Sparkles, Map, Loader2, UserCheck, Search as SearchIcon,
+  Filter, Sparkles, Loader2, UserCheck, Search as SearchIcon,
   Music, BookOpen, HeartHandshake, Globe, Zap, HelpCircle,
   User, Phone, CalendarClock, ExternalLink, Navigation, Eye,
   Save, Heart, CalendarPlus, UserMinus, Info, ClipboardList,
@@ -27,7 +27,7 @@ const EVENT_TYPE_CONFIG: Record<ChurchEventType, { icon: any, color: string, lab
   WORSHIP: { icon: Music, color: 'bg-brand-indigo', label: 'Worship Service' },
   BIBLE_STUDY: { icon: BookOpen, color: 'bg-brand-gold', label: 'Bible Study' },
   PRAYER: { icon: HeartHandshake, color: 'bg-brand-emerald', label: 'Prayer Meeting' },
-  OUTREACH: { icon: Globe, color: 'bg-purple-600', label: 'Special Outreach' },
+  OUTREACH: { icon: Globe, color: 'bg-purple-600', label: 'Outreach Event' },
   YOUTH: { icon: Zap, color: 'bg-pink-600', label: 'Youth Event' },
   OTHER: { icon: HelpCircle, color: 'bg-slate-600', label: 'Other Event' }
 };
@@ -38,17 +38,12 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
   const [showReminderModal, setShowReminderModal] = useState<ChurchEvent | null>(null);
   const [viewingEvent, setViewingEvent] = useState<ChurchEvent | null>(null);
   const [showScoutModal, setShowScoutModal] = useState(false);
-  const [viewMode, setViewMode] = useState<'GRID' | 'CALENDAR' | 'MAP'>('GRID');
   
   const [newEvent, setNewEvent] = useState<Partial<ChurchEvent>>({
     type: 'WORSHIP',
     recurrence: 'NONE',
     attendance: [],
   });
-
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<any>(null);
-  const clusterLayer = useRef<any>(null);
 
   // Scouting State
   const [scoutQuery, setScoutQuery] = useState('High-traffic areas for street ministry');
@@ -68,56 +63,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       setCurrentAttendance(activeEventForRollCall.attendance);
     }
   }, [activeEventForRollCall]);
-
-  useEffect(() => {
-    if (viewMode === 'MAP' && mapRef.current) {
-      const L = (window as any).L;
-      if (!L) return;
-
-      if (!mapInstance.current) {
-        mapInstance.current = L.map(mapRef.current).setView([-1.286389, 36.817223], 12);
-        L.tileLayer('https://{s}.tile.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
-        }).addTo(mapInstance.current);
-      }
-
-      if (clusterLayer.current) {
-        mapInstance.current.removeLayer(clusterLayer.current);
-      }
-
-      clusterLayer.current = L.markerClusterGroup();
-
-      events.forEach(event => {
-        const lat = event.coordinates?.lat || -1.286389 + (Math.random() - 0.5) * 0.1;
-        const lng = event.coordinates?.lng || 36.817223 + (Math.random() - 0.5) * 0.1;
-        
-        const config = EVENT_TYPE_CONFIG[event.type] || EVENT_TYPE_CONFIG.OTHER;
-        const marker = L.circleMarker([lat, lng], {
-          radius: 12,
-          fillColor: config.color === 'bg-brand-indigo' ? '#4F46E5' : 
-                    config.color === 'bg-brand-gold' ? '#FFB800' : 
-                    config.color === 'bg-brand-emerald' ? '#10B981' : 
-                    config.color === 'bg-purple-600' ? '#9333ea' : '#4b5563',
-          color: '#fff',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.8
-        });
-
-        marker.bindPopup(`
-          <div class="p-3">
-            <p class="text-[10px] font-black uppercase text-slate-400 mb-1">${config.label}</p>
-            <h4 class="font-bold text-slate-800 text-sm">${event.title}</h4>
-            <p class="text-xs text-slate-500 mt-1">${event.location}</p>
-            <p class="text-xs font-bold text-brand-primary mt-2">${event.date} • ${event.time}</p>
-          </div>
-        `);
-        clusterLayer.current.addLayer(marker);
-      });
-
-      mapInstance.current.addLayer(clusterLayer.current);
-    }
-  }, [viewMode, events]);
 
   const handleScoutOutreach = async () => {
     setIsScouting(true);
@@ -189,11 +134,11 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Events Management</h2>
-          <p className="text-slate-500 mt-2 text-lg">Schedule services and track spiritual engagement across the ministry.</p>
+          <p className="text-slate-500 mt-2 text-lg">Manage church events and track attendance.</p>
         </div>
         <div className="flex gap-3">
           <button onClick={() => setShowScoutModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-white text-brand-primary border border-indigo-100 rounded-xl font-black hover:bg-indigo-50 transition-all shadow-sm text-xs sm:text-sm">
-             <Sparkles size={20}/> AI Outreach Scouter
+             <Sparkles size={20}/> Find Outreach Locations
           </button>
           {currentUser?.role !== UserRole.MEMBER && (
             <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 text-xs sm:text-sm">
@@ -206,18 +151,13 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-200 shadow-sm self-start overflow-x-auto no-scrollbar max-w-full">
         <button onClick={() => setViewMode('GRID')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${viewMode === 'GRID' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}><LayoutGrid size={16}/> Cards</button>
         <button onClick={() => setViewMode('CALENDAR')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${viewMode === 'CALENDAR' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}><Calendar size={16}/> Calendar</button>
-        <button onClick={() => setViewMode('MAP')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${viewMode === 'MAP' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}><Map size={16}/> Outreach Map</button>
       </div>
 
-      {viewMode === 'MAP' ? (
-        <div className="bg-white p-4 rounded-[3rem] border border-slate-100 shadow-sm h-[600px] relative overflow-hidden">
-          <div ref={mapRef} className="h-full w-full" />
-        </div>
-      ) : viewMode === 'CALENDAR' ? (
+      {viewMode === 'CALENDAR' ? (
         <div className="bg-white p-12 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-slate-300 min-h-[500px]">
            <CalendarClock size={64} className="opacity-20 mb-4"/>
            <p className="font-black uppercase tracking-widest text-sm">Calendar View Coming Soon</p>
-           <p className="text-xs font-medium text-slate-400 mt-2">Currently available in Cards & Map views.</p>
+           <p className="text-xs font-medium text-slate-400 mt-2">Currently available in Cards view.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -230,7 +170,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
               <div key={event.id} className="relative bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-2xl hover:scale-[1.03] transition-all duration-300">
                 {/* Quick Actions Overlay */}
                 <div className="absolute inset-0 bg-brand-primary/95 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-8 space-y-3 z-20">
-                  <p className="text-brand-gold font-black uppercase tracking-[0.2em] text-[10px] mb-2">Stewardship Suite</p>
+                  <p className="text-brand-gold font-black uppercase tracking-[0.2em] text-[10px] mb-2">Quick Actions</p>
                   
                   <button onClick={() => setViewingEvent(event)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-white text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-xl">
                     <Eye size={16}/> View Details
@@ -297,7 +237,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                     <Users size={18} className="text-brand-primary" /> 
                     {event.attendance.length} <span className="hidden sm:inline">Registered</span>
                   </div>
-                  <div className="px-4 py-1.5 bg-white text-brand-primary text-[10px] font-black rounded-lg border border-indigo-50 shadow-sm uppercase tracking-widest">Live Log</div>
+                  <div className="px-4 py-1.5 bg-white text-brand-primary text-[10px] font-black rounded-lg border border-indigo-50 shadow-sm uppercase tracking-widest">Live</div>
                 </div>
               </div>
             );
@@ -315,8 +255,8 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                     <BellRing size={28}/>
                  </div>
                  <div>
-                    <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">Event Alerts</h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">Personal Notification Opt-in</p>
+                    <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">Event Reminders</h3>
+                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">Set Reminder</p>
                  </div>
                </div>
                <button onClick={() => setShowReminderModal(null)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all"><X size={20}/></button>
@@ -341,7 +281,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                         onClick={() => setReminderType('EMAIL')}
                         className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase transition-all ${reminderType === 'EMAIL' ? 'bg-white text-brand-primary shadow-md' : 'text-slate-400'}`}
                       >
-                         <Mail size={14}/> Email Hook
+                         <Mail size={14}/> Email
                       </button>
                    </div>
                 </div>
@@ -373,7 +313,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                    onClick={() => { alert('Reminder Armed'); setShowReminderModal(null); }}
                    className="w-full py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3"
                 >
-                   <Save size={18}/> Arm Notification
+                   <Save size={18}/> Save Reminder
                 </button>
                 <button onClick={() => setShowReminderModal(null)} className="w-full py-4 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:underline">Dismiss</button>
              </div>
@@ -406,10 +346,10 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   <section className="space-y-6">
                     <div className="flex items-center gap-3 text-slate-800">
                       <Info size={24} className="text-brand-indigo" />
-                      <h4 className="text-xl font-black uppercase tracking-tight">Mission Description</h4>
+                      <h4 className="text-xl font-black uppercase tracking-tight">Description</h4>
                     </div>
                     <p className="text-lg text-slate-600 leading-relaxed font-medium">
-                      {viewingEvent.description || "No detailed description provided for this spiritual gathering."}
+                      {viewingEvent.description || "No description provided."}
                     </p>
                   </section>
 
@@ -438,7 +378,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                     </h4>
                     <div className="space-y-4">
                        <div className="flex justify-between items-end">
-                          <p className="text-3xl font-black tracking-tighter">{viewingEvent.attendance.length} Souls</p>
+                          <p className="text-3xl font-black tracking-tighter">{viewingEvent.attendance.length} People</p>
                           <p className="text-[10px] font-black text-indigo-300 uppercase">Confirmed RSVP</p>
                        </div>
                        <div className="flex -space-x-3 overflow-hidden">
@@ -493,7 +433,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   }`}
                  >
                    {isUserRSVPd(viewingEvent) ? <UserMinus size={20}/> : <CheckCircle2 size={20}/>}
-                   {isUserRSVPd(viewingEvent) ? 'Retract My RSVP' : 'Commit Attendance'}
+                   {isUserRSVPd(viewingEvent) ? 'Retract My RSVP' : 'Register'}
                  </button>
                )}
             </div>
@@ -718,7 +658,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                {members.filter(m => `${m.firstName} ${m.lastName}`.toLowerCase().includes(attendanceSearch.toLowerCase())).length === 0 && (
                  <div className="py-20 text-center space-y-4">
                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-200 shadow-inner"><Users size={32}/></div>
-                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No matching souls found</p>
+                    <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No matching members found</p>
                  </div>
                )}
             </div>
@@ -726,7 +666,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
             <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-6">
                <div className="text-center sm:text-left">
                   <p className="text-2xl font-black text-brand-primary tracking-tighter">{currentAttendance.length}</p>
-                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Verified Present</p>
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Present</p>
                </div>
                <div className="flex gap-4 w-full sm:w-auto">
                  <button onClick={() => setShowAttendanceModal(null)} className="flex-1 sm:flex-none px-10 py-5 bg-slate-50 text-slate-500 rounded-[1.5rem] font-black hover:bg-slate-100 uppercase text-[11px] tracking-widest transition-all">Discard</button>
@@ -747,15 +687,15 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                <div className="flex items-center gap-4">
                  <div className="p-4 bg-indigo-50 text-brand-primary rounded-2xl"><Sparkles size={24}/></div>
                  <div>
-                   <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Geo-Outreach Scouter</h3>
-                   <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Powered by Gemini Maps Grounding</p>
+                   <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Location Finder</h3>
+                   <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Powered by Google Maps</p>
                  </div>
                </div>
                <button onClick={() => setShowScoutModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"><X size={24}/></button>
             </div>
             
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Define your Outreach Mission</label>
+              <label className="text-[10px] font-black uppercase text-slate-400 ml-2">What are you looking for?</label>
               <div className="flex gap-3">
                 <input 
                   className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-primary"
@@ -789,7 +729,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                                <div className="p-3 bg-brand-primary/5 text-brand-primary rounded-xl group-hover:bg-brand-primary group-hover:text-white transition-colors">
                                   <MapPin size={20}/>
                                </div>
-                               <span className="text-[9px] font-black uppercase text-slate-300 tracking-widest">Grounding Chunk {i+1}</span>
+                               <span className="text-[9px] font-black uppercase text-slate-300 tracking-widest">Result {i+1}</span>
                             </div>
                             <div>
                                <h4 className="font-black text-slate-800 text-lg line-clamp-1">{chunk.maps?.title || "Suggested Venue"}</h4>
@@ -823,7 +763,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                )}
             </div>
 
-            <button onClick={() => setShowScoutModal(false)} className="w-full py-4 bg-slate-50 text-slate-400 rounded-[1.25rem] font-black uppercase text-[10px] tracking-widest hover:bg-slate-100 transition-all">Dismiss Scouter</button>
+            <button onClick={() => setShowScoutModal(false)} className="w-full py-4 bg-slate-50 text-slate-400 rounded-[1.25rem] font-black uppercase text-[10px] tracking-widest hover:bg-slate-100 transition-all">Close</button>
           </div>
         </div>
       )}

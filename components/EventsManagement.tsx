@@ -33,6 +33,7 @@ const EVENT_TYPE_CONFIG: Record<ChurchEventType, { icon: any, color: string, lab
 };
 
 const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, currentUser, onRSVP, onAddEvent, onDeleteEvent, onUpdateAttendance }) => {
+  const [viewMode, setViewMode] = useState<'GRID' | 'CALENDAR'>('GRID');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState<string | null>(null);
   const [showReminderModal, setShowReminderModal] = useState<ChurchEvent | null>(null);

@@ -1,30 +1,30 @@
 
 import React, { useState, useEffect } from 'react';
-import Sidebar, { ImaniLogoIcon } from './components/Sidebar';
-import Dashboard from './components/Dashboard';
-import Membership from './components/Membership';
-import SermonHistory from './components/SermonHistory';
-import EventsManagement from './components/EventsManagement';
-import FinanceReporting from './components/FinanceReporting';
-import CommunicationCenter from './components/CommunicationCenter';
-import DemographicsAnalysis from './components/DemographicsAnalysis';
-import GroupsManagement from './components/GroupsManagement';
-import ReportsCenter from './components/ReportsCenter';
-import Settings from './components/Settings';
-import Login from './components/Login';
-import PrivacyPolicy from './components/PrivacyPolicy';
-import CompliancePortal from './components/CompliancePortal';
-import SecurityOverview from './components/SecurityOverview';
-import NotificationsPanel from './components/NotificationsPanel';
-import MemberPortal from './components/MemberPortal';
-import MyGiving from './components/MyGiving';
-import AuditLogs from './components/AuditLogs';
-import Billing from './components/Billing';
+import Sidebar, { ImaniLogoIcon } from './Sidebar';
+import Dashboard from './Dashboard';
+import Membership from './Membership';
+import SermonHistory from './SermonHistory';
+import EventsManagement from './EventsManagement';
+import FinanceReporting from './FinanceReporting';
+import CommunicationCenter from './CommunicationCenter';
+import DemographicsAnalysis from './DemographicsAnalysis';
+import GroupsManagement from './GroupsManagement';
+import ReportsCenter from './ReportsCenter';
+import Settings from './Settings';
+import Login from './Login';
+import PrivacyPolicy from './PrivacyPolicy';
+import CompliancePortal from './CompliancePortal';
+import SecurityOverview from './SecurityOverview';
+import NotificationsPanel from './NotificationsPanel';
+import MemberPortal from './MemberPortal';
+import MyGiving from './MyGiving';
+import AuditLogs from './AuditLogs';
+import Billing from './Billing';
 import { 
   AppView, Member, MemberStatus, Transaction, 
   ChurchEvent, MaritalStatus, MembershipType,
   User, UserRole, AppNotification, Toast, AuditLog
-} from './types';
+} from '../types';
 import { Bell, Menu, X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -91,7 +91,7 @@ const App: React.FC = () => {
   ]);
 
   const [transactions, setTransactions] = useState<Transaction[]>([
-    { id: 'trx1', memberId: '1', memberName: 'David Ochieng', amount: 5000, type: 'Tithe', paymentMethod: 'M-Pesa', date: '2024-05-19', reference: 'QSG812L90P', category: 'Income' },
+    { id: 'trx1', memberId: '1', memberName: 'David Ochieng', amount: 5000, type: 'Tithe', paymentMethod: 'M-Pesa', date: '2024-05-19', reference: 'QSG812L90P', category: 'Income', source: 'MANUAL' },
   ]);
 
   const [events, setEvents] = useState<ChurchEvent[]>([
@@ -115,7 +115,7 @@ const App: React.FC = () => {
       case 'DASHBOARD':
         return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => setCurrentView('MEMBERS')} onSendSMS={() => setCurrentView('COMMUNICATION')} onNavigate={setCurrentView} />;
       case 'MY_PORTAL':
-        return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} onNavigate={setCurrentView} onUpdateProfile={(m) => { setMembers(prev => prev.map(p => p.id === m.id ? m : p)); addToast('Profile updated'); createAudit('Updated profile', 'MY_PORTAL'); }} />;
+        return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} activities={[]} onNavigate={setCurrentView} onUpdateProfile={(m) => { setMembers(prev => prev.map(p => p.id === m.id ? m : p)); addToast('Profile updated'); createAudit('Updated profile', 'MY_PORTAL'); }} onRSVP={() => {}} />;
       case 'MY_GIVING':
         return <MyGiving member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} onGive={() => { addToast('STK Push Sent'); createAudit('Initiated Giving STK', 'MY_GIVING'); }} />;
       case 'MEMBERS':
@@ -132,13 +132,13 @@ const App: React.FC = () => {
           />
         );
       case 'FINANCE':
-        return <FinanceReporting transactions={transactions} members={members} onAddTransaction={(t) => { setTransactions(prev => [t, ...prev]); createAudit(`Recorded transaction ${t.reference}`, 'FINANCE'); }} budgets={[]} onSetBudget={() => {}} recurringExpenses={[]} onAddRecurring={() => {}} />;
+        return <FinanceReporting transactions={transactions} members={members} onAddTransaction={(t) => { setTransactions(prev => [t, ...prev]); createAudit(`Recorded transaction ${t.reference}`, 'FINANCE'); }} onUpdateTransaction={() => {}} onDeleteTransaction={() => {}} budgets={[]} onSetBudget={() => {}} recurringExpenses={[]} onAddRecurring={() => {}} currentUserRole={currentUser.role} />;
       case 'COMMUNICATION':
         return <CommunicationCenter members={members} logs={[]} onSendBroadcast={(log) => { addToast('Broadcast sent'); createAudit(`Sent ${log.type} broadcast to ${log.targetGroupName}`, 'COMMUNICATION'); }} currentUser={currentUser} />;
       case 'GROUPS':
         return <GroupsManagement members={members} />;
       case 'EVENTS':
-        return <EventsManagement events={events} members={members} onAddEvent={(e) => { setEvents(prev => [...prev, e]); createAudit(`Scheduled event ${e.title}`, 'EVENTS'); }} onDeleteEvent={(id) => setEvents(prev => prev.filter(e => e.id !== id))} onUpdateAttendance={(id, ids) => setEvents(prev => prev.map(e => e.id === id ? {...e, attendance: ids} : e))} />;
+        return <EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={() => {}} onAddEvent={(e) => { setEvents(prev => [...prev, e]); createAudit(`Scheduled event ${e.title}`, 'EVENTS'); }} onDeleteEvent={(id) => setEvents(prev => prev.filter(e => e.id !== id))} onUpdateAttendance={(id, ids) => setEvents(prev => prev.map(e => e.id === id ? {...e, attendance: ids} : e))} />;
       case 'ANALYTICS':
         return <DemographicsAnalysis members={members} />;
       case 'REPORTS':
@@ -148,7 +148,7 @@ const App: React.FC = () => {
       case 'BILLING':
         return <Billing />;
       case 'SETTINGS':
-        return <Settings />;
+        return <Settings currentUserRole={currentUser.role} />;
       default:
         return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => {}} onSendSMS={() => {}} onNavigate={setCurrentView} />;
     }
@@ -175,7 +175,7 @@ const App: React.FC = () => {
       </div>
 
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-      <Sidebar currentView={currentView} setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} currentUser={currentUser} onRoleSwitch={(r) => { setCurrentUser({...currentUser, role: r}); addToast(`Role: ${r}`, "info"); createAudit(`Simulated role switch to ${r}`, 'SETTINGS'); }} onLogout={handleLogout} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar currentView={currentView} setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} currentUser={currentUser} branches={branches} onBranchChange={() => {}} onRoleSwitch={(r) => { setCurrentUser({...currentUser, role: r}); addToast(`Role: ${r}`, "info"); createAudit(`Simulated role switch to ${r}`, 'SETTINGS'); }} onLogout={handleLogout} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <main className="flex-1 min-h-screen lg:ml-64 transition-all">
         <header className="h-20 bg-white border-b border-slate-100 px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">

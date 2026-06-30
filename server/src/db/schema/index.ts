@@ -1,2 +1,1 @@
-// Placeholder — schema tables added in Task 3
-export {};
+export { users, sessions, accounts, verifications, usersRelations, sessionsRelations, accountsRelations } from "./auth.js";

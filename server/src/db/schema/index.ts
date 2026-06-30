@@ -1,1 +1,11 @@
 export { users, sessions, accounts, verifications, usersRelations, sessionsRelations, accountsRelations } from "./auth.js";
+export { members, memberStatusEnum, maritalStatusEnum, membershipTypeEnum } from "./members.js";
+export { transactions, transactionTypeEnum, paymentMethodEnum, transactionCategoryEnum, transactionSourceEnum } from "./transactions.js";
+export { churchEvents, eventAttendance, eventTypeEnum, recurrenceEnum, churchEventsRelations, eventAttendanceRelations } from "./events.js";
+export { groups, groupMembers, groupsRelations, groupMembersRelations } from "./groups.js";
+export { communications, communicationTypeEnum, communicationStatusEnum } from "./communications.js";
+export { activities, activityTypeEnum, activitiesRelations } from "./activities.js";
+export { budgets, recurringExpenses, frequencyEnum } from "./budgets.js";
+export { sermons, sermonsRelations } from "./sermons.js";
+export { notifications, notificationTypeEnum } from "./notifications.js";
+export { auditLogs, severityEnum } from "./audit_logs.js";

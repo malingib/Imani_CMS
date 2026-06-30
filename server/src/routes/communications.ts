@@ -1,21 +1,25 @@
 import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
+import { requireRole } from "../middleware/authz.js";
 import { db } from "../db/index.js";
 import { communications } from "../db/schema/communications.js";
 
 const router = Router();
 router.use(requireAuth);
 
-router.get("/", async (_req, res) => { res.json(await db.select().from(communications)); });
+router.get("/", requireRole("communications", "read"), async (_req, res) => { res.json(await db.select().from(communications)); });
 
 const broadcastSchema = z.object({
-  type: z.enum(["SMS","Email","WhatsApp"]), recipientCount: z.number(),
-  targetGroupName: z.string(), subject: z.string().optional(), content: z.string().min(1),
-  sender: z.string(),
+  type: z.enum(["SMS","Email","WhatsApp"]),
+  recipientCount: z.number().int().min(1).max(1_000_000),
+  targetGroupName: z.string().min(1).max(200),
+  subject: z.string().max(500).optional(),
+  content: z.string().min(1).max(10000),
+  sender: z.string().min(1).max(200),
 });
 
-router.post("/broadcast", async (req, res) => {
+router.post("/broadcast", requireRole("communications", "create"), async (req, res) => {
   const parsed = broadcastSchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return; }
   const [created] = await db.insert(communications).values({

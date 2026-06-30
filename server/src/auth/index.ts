@@ -10,6 +10,11 @@ const authConfig: BetterAuthOptions = {
     provider: "pg",
     schema: { user: schema.users, session: schema.sessions, account: schema.accounts, verification: schema.verifications },
   }),
+  user: {
+    additionalFields: {
+      role: { type: "string", required: false, defaultValue: "MEMBER", input: false },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,

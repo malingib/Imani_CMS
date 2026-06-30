@@ -16,7 +16,10 @@ import geminiRoutes from "./routes/gemini.js";
 
 export const app = express();
 app.set("trust proxy", 1);
-app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", "data:", "https:"], connectSrc: ["'self'", env.BACKEND_URL, env.FRONTEND_URL] } } }));
+app.use(helmet({
+  contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'"], imgSrc: ["'self'", "data:", "https:"], connectSrc: ["'self'", env.BACKEND_URL, env.FRONTEND_URL] } },
+  strictTransportSecurity: env.NODE_ENV === "production" ? { maxAge: 31536000, includeSubDomains: true, preload: true } : false,
+}));
 app.use(corsMiddleware);
 app.use("/api/auth", authLimiter);
 app.all("/api/auth/{*splat}", toNodeHandler);

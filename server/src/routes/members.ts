@@ -3,6 +3,7 @@ import { eq, like, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/authz.js";
+import { bodyLimit } from "../middleware/body-limit.js";
 import { db } from "../db/index.js";
 import { members } from "../db/schema/members.js";
 import { logger } from "../lib/logger.js";
@@ -54,7 +55,7 @@ const createSchema = z.object({
   photo: z.string().max(500).optional(), stewardshipScore: z.number().min(0).max(100).optional(),
 });
 
-router.post("/", requireRole("members", "create"), async (req, res) => {
+router.post("/", bodyLimit(2048), requireRole("members", "create"), async (req, res) => {
   try {
     const parsed = createSchema.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return; }
@@ -65,7 +66,7 @@ router.post("/", requireRole("members", "create"), async (req, res) => {
   } catch (err) { logger.error(err, "Failed to create member"); res.status(500).json({ error: "Internal server error" }); }
 });
 
-router.post("/bulk", requireRole("members", "create"), async (req, res) => {
+router.post("/bulk", bodyLimit(524288), requireRole("members", "create"), async (req, res) => {
   try {
     const schema = z.array(z.object({
       firstName: z.string().min(1).max(100), lastName: z.string().min(1).max(100),

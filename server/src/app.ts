@@ -5,6 +5,7 @@ import { corsMiddleware } from "./middleware/cors.js";
 import { authLimiter, apiLimiter, publicLimiter } from "./middleware/rate-limit.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import { toNodeHandler } from "./auth/index.js";
+import { loginLockout } from "./middleware/login-lockout.js";
 import healthRoutes from "./routes/health.js";
 import profileRoutes from "./routes/profile.js";
 import membersRoutes from "./routes/members.js";
@@ -22,6 +23,7 @@ app.use(helmet({
 }));
 app.use(corsMiddleware);
 app.use("/api/auth", authLimiter);
+app.post("/api/auth/sign-in/email", loginLockout);
 app.all("/api/auth/{*splat}", toNodeHandler);
 app.use(express.json({ limit: "100kb" }));
 app.use("/api", csrfProtection);

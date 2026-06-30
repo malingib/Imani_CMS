@@ -12,11 +12,11 @@ const ROLE_HIERARCHY: Record<string, number> = {
 };
 
 const PERMISSIONS: Record<Resource, Record<Action, number>> = {
-  members:      { create: 40, read: 10, update: 40, delete: 100 },
-  transactions: { create: 50, read: 10, update: 50, delete: 100 },
-  events:       { create: 40, read: 10, update: 40, delete: 60 },
-  groups:       { create: 40, read: 10, update: 40, delete: 60 },
-  communications: { create: 40, read: 10, update: 40, delete: 60 },
+  members:      { create: 40, read: 30, update: 40, delete: 100 },
+  transactions: { create: 50, read: 30, update: 50, delete: 100 },
+  events:       { create: 40, read: 30, update: 40, delete: 60 },
+  groups:       { create: 40, read: 30, update: 40, delete: 60 },
+  communications: { create: 40, read: 30, update: 40, delete: 60 },
   gemini:       { create: 10, read: 10, update: 10, delete: 10 },
   profile:      { create: 0,  read: 10, update: 10, delete: 0 },
 };

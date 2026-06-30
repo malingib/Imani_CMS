@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/authz.js";
+import { bodyLimit } from "../middleware/body-limit.js";
 import { db } from "../db/index.js";
 import { users } from "../db/schema/index.js";
 
@@ -13,7 +14,7 @@ router.get("/", requireRole("profile", "read"), (req, res) => { res.json({ user:
 
 const updateSchema = z.object({ name: z.string().min(1).max(100).optional(), image: z.string().url().optional() });
 
-router.patch("/", requireRole("profile", "update"), async (req, res) => {
+router.patch("/", bodyLimit(2048), requireRole("profile", "update"), async (req, res) => {
   const parsed = updateSchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return; }
   const updateData: Record<string, unknown> = { updatedAt: new Date() };

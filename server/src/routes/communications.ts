@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { requireRole } from "../middleware/authz.js";
+import { bodyLimit } from "../middleware/body-limit.js";
 import { db } from "../db/index.js";
 import { communications } from "../db/schema/communications.js";
 
@@ -19,7 +20,7 @@ const broadcastSchema = z.object({
   sender: z.string().min(1).max(200),
 });
 
-router.post("/broadcast", requireRole("communications", "create"), async (req, res) => {
+router.post("/broadcast", bodyLimit(102400), requireRole("communications", "create"), async (req, res) => {
   const parsed = broadcastSchema.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.flatten() }); return; }
   const [created] = await db.insert(communications).values({

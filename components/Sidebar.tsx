@@ -53,6 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   currentView, 
   setView, 
   currentUser, 
+  branches,
   onBranchChange,
   onRoleSwitch, 
   onLogout,

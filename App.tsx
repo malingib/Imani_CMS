@@ -26,6 +26,8 @@ import {
   User, UserRole, AppNotification, Toast, AuditLog, MemberActivity
 } from './types';
 import { Bell, Menu, X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { apiGet } from './src/lib/api';
+import { useAuth } from './src/hooks/useAuth';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>('DASHBOARD');
@@ -102,6 +104,12 @@ const App: React.FC = () => {
   const [events, setEvents] = useState<ChurchEvent[]>([
     { id: 'ev1', title: 'Sunday Worship Service', description: 'Main service of worship.', date: '2024-05-26', time: '09:00 AM', location: 'Main Sanctuary', type: 'WORSHIP', attendance: ['1', '2'] },
   ]);
+
+  useEffect(() => {
+    apiGet<{ data: Member[] }>('/api/members').then(r => setMembers(r.data)).catch(() => {});
+    apiGet<Transaction[]>('/api/transactions').then(setTransactions).catch(() => {});
+    apiGet<ChurchEvent[]>('/api/events').then(setEvents).catch(() => {});
+  }, []);
 
   const handleAddMembersBulk = (importedMembers: Member[]) => {
     setMembers(prev => [...prev, ...importedMembers]);
@@ -264,7 +272,7 @@ const App: React.FC = () => {
       </div>
 
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-      <Sidebar currentView={currentView} setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} currentUser={currentUser} onRoleSwitch={(r) => { setCurrentUser({...currentUser, role: r}); addToast(`Role: ${r}`, "info"); createAudit(`Simulated role switch to ${r}`, 'SETTINGS'); }} onLogout={handleLogout} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar currentView={currentView} setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} currentUser={currentUser} branches={branches} onBranchChange={(b) => setCurrentUser(prev => prev ? {...prev, branch: b} : prev)} onRoleSwitch={(r) => { setCurrentUser({...currentUser, role: r}); addToast(`Role: ${r}`, "info"); createAudit(`Simulated role switch to ${r}`, 'SETTINGS'); }} onLogout={handleLogout} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       
       <main className="flex-1 min-h-screen lg:ml-64 transition-all">
         <header className="h-20 bg-white border-b border-slate-100 px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">

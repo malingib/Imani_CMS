@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
@@ -20,9 +19,9 @@ import {
   CreditCard,
   Globe,
   Receipt,
-  Server,
-  HelpCircle,
-  Network
+  Activity,
+  Mail,
+  DollarSign
 } from 'lucide-react';
 import { AppView, User, UserRole } from '../types';
 
@@ -36,6 +35,9 @@ interface SidebarProps {
   onLogout: () => void;
   isOpen?: boolean;
   onClose?: () => void;
+  churches?: { id: string; name: string }[];
+  activeChurchId?: string | null;
+  onChurchSwitch?: (id: string | null) => void;
 }
 
 export const ImaniLogoIcon = ({ className = "w-full h-full" }: { className?: string }) => (
@@ -58,47 +60,47 @@ const Sidebar: React.FC<SidebarProps> = ({
   onRoleSwitch, 
   onLogout,
   isOpen,
-  onClose 
+  onClose,
+  churches,
+  activeChurchId,
+  onChurchSwitch,
 }) => {
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
+  const [isChurchMenuOpen, setIsChurchMenuOpen] = useState(false);
 
-  // OWNER-SPECIFIC NAVIGATION (Enterprise Grade)
-  const ownerItems = [
-    { id: 'OWNER_DASHBOARD' as AppView, label: 'Platform Hub', icon: Globe },
-    { id: 'PARISH_REGISTRY' as AppView, label: 'Tenant Registry', icon: Network },
-    { id: 'FINANCE' as AppView, label: 'Global Revenue', icon: Receipt },
-    { id: 'INFRASTRUCTURE' as AppView, label: 'Nodes & Health', icon: Server },
-    { id: 'PLATFORM_SUPPORT' as AppView, label: 'Support Desk', icon: HelpCircle },
-    { id: 'AUDIT_LOGS' as AppView, label: 'System Audit', icon: ShieldCheck },
+  const isSuperAdmin = currentUser.role === UserRole.SUPER_ADMIN;
+
+  const platformItems = [
+    { id: 'PLATFORM_DASHBOARD', label: 'Platform Overview', icon: Activity },
+    { id: 'TENANTS', label: 'Tenants', icon: Building2 },
+    { id: 'INVITATIONS', label: 'Invitations', icon: Mail },
+    { id: 'BILLING', label: 'Billing', icon: DollarSign },
+    { id: 'PLATFORM_SETTINGS', label: 'Platform Settings', icon: Globe },
   ];
 
-  // ADMIN/PASTOR NAVIGATION (Church Grade)
   const adminItems = [
-    { id: 'DASHBOARD', label: 'Command Center', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'FINANCE', label: 'Finance Hub', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER] },
-    { id: 'EVENTS', label: 'Church Life', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'COMMUNICATION', label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY] },
-    { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'ANALYTICS', label: 'Intelligence', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'SERMONS', label: 'Word Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR] },
-    { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN] },
+    { id: 'DASHBOARD', label: 'Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
+    { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
+    { id: 'FINANCE', label: 'Finance Hub', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER, UserRole.SUPER_ADMIN] },
+    { id: 'EVENTS', label: 'Calendar', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
+    { id: 'COMMUNICATION', label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
+    { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
+    { id: 'REPORTS', label: 'Reports', icon: BarChart3, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
+    { id: 'ANALYTICS', label: 'Analytics', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
+    { id: 'SERMONS', label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
+    { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
     { id: 'BILLING', label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
   ];
 
   const memberItems = [
-    { id: 'MY_PORTAL' as AppView, label: 'My Sanctuary', icon: Sparkles, roles: [UserRole.MEMBER] },
-    { id: 'SERMONS' as AppView, label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.MEMBER] },
-    { id: 'MY_GIVING' as AppView, label: 'Stewardship', icon: Wallet, roles: [UserRole.MEMBER] },
+    { id: 'MY_PORTAL', label: 'My Sanctuary', icon: Sparkles, roles: [UserRole.MEMBER] },
+    { id: 'SERMONS', label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.MEMBER] },
+    { id: 'MY_GIVING', label: 'Stewardship', icon: Wallet, roles: [UserRole.MEMBER] },
   ];
 
-  const getFilteredItems = () => {
-    if (currentUser.role === UserRole.SYSTEM_OWNER) return ownerItems;
-    if (currentUser.role === UserRole.MEMBER) return memberItems;
-    return adminItems.filter(item => item.roles?.includes(currentUser.role));
-  };
-
-  const filteredItems = getFilteredItems();
+  const menuItems = currentUser.role === UserRole.MEMBER ? memberItems : adminItems;
+  const filteredItems = menuItems.filter(item => item.roles.includes(currentUser.role));
+  const activeChurch = churches?.find(c => c.id === activeChurchId);
 
   return (
     <aside className={`
@@ -112,14 +114,46 @@ const Sidebar: React.FC<SidebarProps> = ({
               <ImaniLogoIcon />
             </div>
             <div>
-              <h1 className="text-lg font-black tracking-tight text-brand-primary uppercase leading-none">Imani CMS</h1>
-              <p className="text-[8px] text-slate-400 uppercase tracking-widest font-black mt-1">Enterprise SaaS</p>
+              <h1 className="text-lg font-black tracking-tight text-brand-primary uppercase">Imani CMS</h1>
+              <p className="text-[8px] text-slate-400 uppercase tracking-widest font-black">Enterprise SaaS</p>
             </div>
           </div>
           <button onClick={onClose} className="lg:hidden p-2 text-slate-400"><X size={20} /></button>
         </div>
 
-        {currentUser.role !== UserRole.MEMBER && currentUser.role !== UserRole.SYSTEM_OWNER && (
+        {isSuperAdmin && churches && (
+          <div className="mb-6 relative">
+            <button 
+              onClick={() => setIsChurchMenuOpen(!isChurchMenuOpen)}
+              className="w-full flex items-center justify-between p-3 bg-brand-indigo/5 border border-brand-indigo/20 rounded-2xl group hover:border-brand-indigo transition-all"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <Building2 size={16} className="text-brand-indigo"/>
+                <div className="text-left min-w-0">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Viewing Church</p>
+                  <p className="text-xs font-bold text-brand-indigo truncate">{activeChurch?.name || 'All Churches'}</p>
+                </div>
+              </div>
+              <ChevronDown size={14} className={`text-slate-300 transition-transform ${isChurchMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isChurchMenuOpen && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                <button onClick={() => { onChurchSwitch?.(null); setIsChurchMenuOpen(false); }}
+                  className={`w-full text-left px-4 py-3 text-xs font-bold border-b border-slate-50 ${!activeChurchId ? 'bg-slate-100 text-brand-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
+                  All Churches (Platform View)
+                </button>
+                {churches.map(church => (
+                  <button key={church.id} onClick={() => { onChurchSwitch?.(church.id); setIsChurchMenuOpen(false); }}
+                    className={`w-full text-left px-4 py-3 text-xs font-bold border-b last:border-0 border-slate-50 ${activeChurchId === church.id ? 'bg-slate-100 text-brand-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
+                    {church.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!isSuperAdmin && currentUser.role !== UserRole.MEMBER && (
           <div className="mb-6 relative">
             <button 
               onClick={() => setIsBranchMenuOpen(!isBranchMenuOpen)}
@@ -128,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="flex items-center gap-3 min-w-0">
                 <Building2 size={16} className="text-brand-primary"/>
                 <div className="text-left min-w-0">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Instance</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Parish</p>
                   <p className="text-xs font-bold text-slate-700 truncate">{currentUser.branch || branches[0]}</p>
                 </div>
               </div>
@@ -137,13 +171,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             {isBranchMenuOpen && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
                 {branches.map((branch) => (
-                  <button
-                    key={branch}
-                    onClick={() => { onBranchChange(branch); setIsBranchMenuOpen(false); }}
-                    className={`w-full text-left px-4 py-3 text-xs font-bold border-b last:border-0 border-slate-50 ${
-                      currentUser.branch === branch ? 'bg-slate-100 text-brand-primary' : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
+                  <button key={branch} onClick={() => { onBranchChange(branch); setIsBranchMenuOpen(false); }}
+                    className={`w-full text-left px-4 py-3 text-xs font-bold border-b last:border-0 border-slate-50 ${currentUser.branch === branch ? 'bg-slate-100 text-brand-primary' : 'text-slate-600 hover:bg-slate-50'}`}>
                     {branch}
                   </button>
                 ))}
@@ -151,33 +180,53 @@ const Sidebar: React.FC<SidebarProps> = ({
             )}
           </div>
         )}
-
-        {currentUser.role === UserRole.SYSTEM_OWNER && (
-          <div className="mb-6 p-4 bg-brand-primary text-white rounded-2xl shadow-lg relative overflow-hidden ring-4 ring-indigo-50 border border-indigo-100">
-             <div className="relative z-10">
-                <p className="text-[9px] font-black uppercase tracking-widest text-brand-gold mb-1">Global Owner</p>
-                <p className="text-xs font-black">Mobiwave Portal</p>
-             </div>
-             <Globe size={48} className="absolute -right-4 -bottom-4 text-white/5" />
-          </div>
-        )}
       </div>
       
       <nav className="flex-1 px-4 space-y-1 overflow-y-auto no-scrollbar">
-        <div className="px-4 py-2">
-           <p className="text-[8px] font-black uppercase text-slate-300 tracking-[0.3em] mb-4">Navigation Hub</p>
-        </div>
+        {isSuperAdmin && !activeChurchId && (
+          <>
+            <p className="px-4 pt-2 pb-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">Platform</p>
+            {platformItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
+              return (
+                <button key={item.id} onClick={() => setView(item.id as AppView)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
+                    isActive ? 'bg-brand-indigo/10 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'
+                  }`}>
+                  <Icon size={18} className={isActive ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
+                  <span className="text-sm">{item.label}</span>
+                </button>
+              );
+            })}
+            <div className="my-3 mx-4 border-t border-slate-100" />
+          </>
+        )}
+
+        {isSuperAdmin && activeChurchId && (
+          <div className="px-4 py-2 mb-1">
+            <button onClick={() => onChurchSwitch?.(null)} className="text-[10px] font-bold text-brand-indigo hover:underline flex items-center gap-1">
+              ← Back to Platform
+            </button>
+          </div>
+        )}
+
+        {isSuperAdmin && activeChurchId && (
+          <p className="px-4 pt-1 pb-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">{activeChurch?.name || 'Church'}</p>
+        )}
+
+        {!isSuperAdmin && (
+          <p className="px-4 pt-2 pb-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">Navigation</p>
+        )}
+
         {filteredItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
           return (
-            <button
-              key={item.id}
-              onClick={() => setView(item.id as AppView)}
+            <button key={item.id} onClick={() => setView(item.id as AppView)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
                 isActive ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'
-              }`}
-            >
+              }`}>
               <Icon size={18} className={isActive ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
               <span className="text-sm">{item.label}</span>
             </button>
@@ -204,13 +253,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {currentUser.role !== UserRole.MEMBER && (
-          <button 
-            onClick={() => setView('SETTINGS')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}
-          >
+        { !isSuperAdmin && currentUser.role !== UserRole.MEMBER && (
+          <button onClick={() => setView('SETTINGS')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}>
             <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
-            <span className="text-sm">{currentUser.role === UserRole.SYSTEM_OWNER ? 'Global Config' : 'Parish Settings'}</span>
+            <span className="text-sm">Platform Settings</span>
           </button>
         )}
         

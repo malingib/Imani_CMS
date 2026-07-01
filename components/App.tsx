@@ -19,6 +19,10 @@ import MemberPortal from './MemberPortal';
 import MyGiving from './MyGiving';
 import AuditLogs from './AuditLogs';
 import Billing from './Billing';
+import PlatformDashboard from './PlatformDashboard';
+import TenantsList from './TenantsList';
+import PlatformSettings from './PlatformSettings';
+import BillingOverview from './BillingOverview';
 import { 
   AppView, Member, MemberStatus, Transaction, 
   ChurchEvent, MaritalStatus, MembershipType,
@@ -26,9 +30,11 @@ import {
 } from '../types';
 import { Bell, Menu, X, Loader2 } from 'lucide-react';
 import { supabase, useSession } from '../src/lib/supabase-auth';
+import { ChurchProvider, useChurch } from '../src/lib/church-context';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
+  const { activeChurchId, setActiveChurchId, churches, fetchChurches } = useChurch();
   const [currentView, setCurrentView] = useState<AppView>('DASHBOARD');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -39,7 +45,6 @@ const App: React.FC = () => {
   const [branches] = useState(['Nairobi Central', 'Mombasa Branch', 'Kisumu Branch', 'Nakuru Branch']);
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const addToast = (message: string, type: Toast['type'] = 'success') => {
@@ -47,6 +52,11 @@ const App: React.FC = () => {
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => { setToasts(prev => prev.filter(t => t.id !== id)); }, 4000);
   };
+
+  const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
+  const viewingPlatform = isSuperAdmin && !activeChurchId;
+  const viewingChurch = isSuperAdmin && !!activeChurchId;
+  const churchId = activeChurchId || (currentUser?.churchId as string) || null;
 
   const createAudit = useCallback(async (action: string, module: AppView, severity: AuditLog['severity'] = 'INFO') => {
     if (!currentUser) return;
@@ -59,9 +69,10 @@ const App: React.FC = () => {
         action,
         module,
         severity,
+        church_id: churchId,
       }]);
     } catch {}
-  }, [currentUser]);
+  }, [currentUser, churchId]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated && supabaseUser) {
@@ -73,24 +84,35 @@ const App: React.FC = () => {
         name: (meta.name as string) || supabaseUser.email?.split('@')[0] || 'User',
         role,
         avatar: (meta.avatar_url as string) || `https://ui-avatars.com/api/?name=${encodeURIComponent((meta.name as string) || 'U')}&background=6366f1&color=fff`,
+        churchId: appMeta.church_id as string || undefined,
       });
+      if (role === UserRole.SUPER_ADMIN) {
+        fetchChurches();
+      }
     } else if (!authLoading && !isAuthenticated) {
       setCurrentUser(null);
     }
-  }, [authLoading, isAuthenticated, supabaseUser]);
+  }, [authLoading, isAuthenticated, supabaseUser, fetchChurches]);
 
   const [members, setMembers] = useState<Member[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [events, setEvents] = useState<ChurchEvent[]>([]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      setDataLoading(false);
+    if (!isAuthenticated || viewingPlatform) {
+      if (!isAuthenticated) setDataLoading(false);
       return;
     }
     setDataLoading(true);
 
-    const fetchMembers = supabase.from('members').select('*').then(({ data, error }) => {
+    const queryChurch = churchId;
+    const baseQuery = <T extends any[]>(table: string, select = '*') => {
+      let q = supabase.from(table).select(select);
+      if (queryChurch) q = q.eq('church_id', queryChurch);
+      return q;
+    };
+
+    const fetchMembers = baseQuery('members', '*').then(({ data, error }) => {
       if (!error && data) {
         return data.map((r: any) => ({
           id: r.id,
@@ -113,7 +135,7 @@ const App: React.FC = () => {
       return [];
     });
 
-    const fetchTransactions = supabase.from('transactions').select('*').then(({ data, error }) => {
+    const fetchTransactions = baseQuery('transactions', '*').then(({ data, error }) => {
       if (!error && data) {
         return data.map((r: any) => ({
           id: r.id,
@@ -133,7 +155,7 @@ const App: React.FC = () => {
       return [];
     });
 
-    const fetchEvents = supabase.from('church_events').select('*').then(({ data, error }) => {
+    const fetchEvents = baseQuery('church_events', '*').then(({ data, error }) => {
       if (!error && data) {
         return data.map((r: any) => ({
           id: r.id,
@@ -152,7 +174,7 @@ const App: React.FC = () => {
       return [];
     });
 
-    const fetchAuditLogs = supabase.from('audit_logs').select('*').then(({ data, error }) => {
+    const fetchAuditLogs = baseQuery('audit_logs', '*').then(({ data, error }) => {
       if (!error && data) {
         return data.map((r: any) => ({
           id: r.id,
@@ -175,12 +197,12 @@ const App: React.FC = () => {
         setAuditLogs(a as AuditLog[]);
         setDataLoading(false);
       });
-  }, [isAuthenticated]);
+  }, [isAuthenticated, churchId, viewingPlatform]);
 
   const handleLogin = (user: User) => {
     const userWithBranch = { ...user, branch: user.branch || branches[0] };
     setCurrentUser(userWithBranch);
-    setCurrentView(user.role === UserRole.MEMBER ? 'MY_PORTAL' : 'DASHBOARD');
+    setCurrentView(user.role === UserRole.MEMBER ? 'MY_PORTAL' : (user.role === UserRole.SUPER_ADMIN ? 'PLATFORM_DASHBOARD' : 'DASHBOARD'));
     addToast(`Logged in successfully as ${user.name}`);
     createAudit('Login success', 'DASHBOARD');
   };
@@ -198,12 +220,32 @@ const App: React.FC = () => {
     createAudit(`Bulk imported ${importedMembers.length} members`, 'MEMBERS');
   };
 
+  const handleSelectChurch = (id: string) => {
+    setActiveChurchId(id);
+    setCurrentView('DASHBOARD');
+  };
+
   const renderView = () => {
     if (currentView === 'PRIVACY') return <PrivacyPolicy onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
     if (currentView === 'COMPLIANCE') return <CompliancePortal onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
     if (currentView === 'SECURITY') return <SecurityOverview onBack={() => isLoggedIn ? setCurrentView('SETTINGS') : setCurrentView('DASHBOARD')} />;
 
     if (!isLoggedIn || !currentUser) return null;
+
+    if (isSuperAdmin && viewingPlatform) {
+      switch (currentView) {
+        case 'PLATFORM_DASHBOARD': return <PlatformDashboard />;
+        case 'TENANTS': return <TenantsList onNavigate={setCurrentView} onSelectChurch={handleSelectChurch} />;
+        case 'INVITATIONS': return <div className="p-10 text-center text-slate-400 font-bold"><p>Invitations management coming soon</p></div>;
+        case 'BILLING': return <BillingOverview />;
+        case 'PLATFORM_SETTINGS': return <PlatformSettings />;
+        default: return <PlatformDashboard />;
+      }
+    }
+
+    if (viewingChurch) {
+      setCurrentView('DASHBOARD');
+    }
 
     switch (currentView) {
       case 'DASHBOARD':
@@ -282,7 +324,7 @@ const App: React.FC = () => {
       </div>
 
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-      <Sidebar currentView={currentView} setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} currentUser={currentUser} branches={branches} onBranchChange={() => {}} onRoleSwitch={(r) => { setCurrentUser({...currentUser, role: r}); addToast(`Role: ${r}`, "info"); createAudit(`Simulated role switch to ${r}`, 'SETTINGS'); }} onLogout={handleLogout} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Sidebar currentView={currentView} setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} currentUser={currentUser} branches={branches} onBranchChange={() => {}} onRoleSwitch={(r) => { setCurrentUser({...currentUser, role: r}); addToast(`Role: ${r}`, "info"); createAudit(`Simulated role switch to ${r}`, 'SETTINGS'); }} onLogout={handleLogout} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} churches={churches} activeChurchId={activeChurchId} onChurchSwitch={(id) => { setActiveChurchId(id); if (!id) setCurrentView('PLATFORM_DASHBOARD'); }} />
       
       <main className="flex-1 min-h-screen lg:ml-64 transition-all">
         <header className="h-20 bg-white border-b border-slate-100 px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">
@@ -290,7 +332,7 @@ const App: React.FC = () => {
             <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg"><Menu size={22} /></button>
             <div className="lg:hidden w-10 h-10"><ImaniLogoIcon /></div>
             <p className="text-[10px] font-black uppercase tracking-widest text-brand-primary opacity-60 truncate hidden sm:block">
-              Imani Enterprise • {currentUser.branch}
+              Imani Enterprise {churchId ? '• Viewing Church' : ''}
             </p>
           </div>
           <div className="flex items-center gap-4 relative">
@@ -312,6 +354,30 @@ const App: React.FC = () => {
         <div className="p-10 max-w-[1600px] mx-auto pb-20">{renderView()}</div>
       </main>
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  const { user: supabaseUser, isLoading } = useSession();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="animate-spin text-brand-primary mx-auto" size={40} />
+          <p className="text-slate-400 font-bold text-sm">Loading Imani CMS...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const appMeta = supabaseUser?.app_metadata || {};
+  const churchId = (appMeta.church_id as string) || null;
+
+  return (
+    <ChurchProvider churchId={churchId}>
+      <AppContent />
+    </ChurchProvider>
   );
 };
 

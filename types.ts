@@ -39,6 +39,7 @@ export interface User {
   avatar: string;
   memberId?: string;
   branch?: string;
+  churchId?: string;
 }
 
 export interface Member {
@@ -167,7 +168,11 @@ export type AppView =
   | 'MY_GIVING' 
   | 'PRIVACY' 
   | 'COMPLIANCE' 
-  | 'SECURITY';
+  | 'SECURITY'
+  | 'PLATFORM_DASHBOARD'
+  | 'TENANTS'
+  | 'INVITATIONS'
+  | 'PLATFORM_SETTINGS';
 
 export interface Toast {
   id: string;

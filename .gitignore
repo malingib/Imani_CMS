@@ -25,3 +25,6 @@ dist-ssr
 
 server/dist
 server/node_modules
+
+# Supabase
+.supabase

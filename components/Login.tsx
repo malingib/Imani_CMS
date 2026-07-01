@@ -8,7 +8,7 @@ import {
 import { User as UserType, UserRole, AppView } from '../types';
 import { generateDailyVerse } from '../services/geminiService';
 import { ImaniLogoIcon } from './Sidebar';
-import { useAuth } from '../src/hooks/useAuth';
+import { useAuth } from '../src/lib/supabase-auth';
 
 interface LoginProps {
   onLogin: (user: UserType) => void;
@@ -91,11 +91,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
     setError('');
     try {
       const result = await login(email, password);
+      const meta = result.user.user_metadata || {};
       onLogin({
         id: result.user.id,
-        name: result.user.name,
-        role: (result.user as any).role || UserRole.ADMIN,
-        avatar: result.user.image || 'https://i.pravatar.cc/100?img=12',
+        name: (meta.name as string) || email.split("@")[0],
+        role: (meta.role as UserRole) || UserRole.ADMIN,
+        avatar: (meta.avatar_url as string) || `https://ui-avatars.com/api/?name=${encodeURIComponent((meta.name as string) || "U")}&background=6366f1&color=fff`,
       });
     } catch (err: any) {
       setError(err?.message || 'Login failed');

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useSession } from "../lib/supabase-auth";
 
 interface Props { children: React.ReactNode; }
 
 export default function ProtectedRoute({ children }: Props) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useSession();
   const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {

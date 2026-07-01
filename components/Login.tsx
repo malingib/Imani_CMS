@@ -291,25 +291,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
 
           {mode === 'LOGIN' && (
             <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col items-center">
-              <p className="text-[11px] font-black uppercase text-slate-400 tracking-[0.25em] mb-6">Simulation Accounts</p>
               <div className="flex flex-wrap justify-center gap-3 mb-6">
                 <button 
-                  onClick={() => { setEmail('admin@imani.org'); setPassword('admin'); }} 
+                  onClick={() => { setEmail('malingib9@gmail.com'); setPassword(''); document.querySelector<HTMLInputElement>('input[type=password]')?.focus(); }} 
                   className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
                 >
                   Admin
-                </button>
-                <button 
-                  onClick={() => { setEmail('pastor@imani.org'); setPassword('pastor'); }} 
-                  className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
-                >
-                  Pastor
-                </button>
-                <button 
-                  onClick={() => { setEmail('member@imani.org'); setPassword('member'); }} 
-                  className="px-10 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-black text-brand-primary hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm"
-                >
-                  Member
                 </button>
               </div>
               <p className="text-[11px] text-slate-400 font-black tracking-tight opacity-80 uppercase">

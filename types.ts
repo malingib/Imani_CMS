@@ -24,20 +24,12 @@ export enum MembershipType {
 }
 
 export enum UserRole {
-  SYSTEM_OWNER = 'SYSTEM_OWNER',
+  SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
   PASTOR = 'PASTOR',
   TREASURER = 'TREASURER',
   SECRETARY = 'SECRETARY',
   MEMBER = 'MEMBER'
-}
-
-// Add Modality enum for Gemini API consistency
-export enum Modality {
-  TEXT = 'TEXT',
-  IMAGE = 'IMAGE',
-  AUDIO = 'AUDIO',
-  VIDEO = 'VIDEO'
 }
 
 export interface User {
@@ -85,37 +77,6 @@ export interface Transaction {
   source: 'MANUAL' | 'INTEGRATED';
 }
 
-export interface Tenant {
-  id: string;
-  name: string;
-  subdomain: string;
-  plan: 'Basic' | 'Pro' | 'Enterprise';
-  status: 'Active' | 'Suspended' | 'Trialing' | 'Past Due';
-  ownerEmail: string;
-  region: string;
-  memberCount: number;
-  mrr: number;
-  renewalDate: string;
-  healthScore: number;
-  usageMetrics?: {
-    cpu: number;
-    memory: number;
-    dbConnections: number;
-    smsSent: number;
-  };
-}
-
-export interface SupportTicket {
-  id: string;
-  tenantName: string;
-  subject: string;
-  description: string;
-  status: 'Open' | 'Pending' | 'Resolved';
-  priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  createdAt: string;
-  lastUpdate: string;
-}
-
 export interface StewardshipPledge {
   id: string;
   memberId: string;
@@ -154,7 +115,17 @@ export interface AuditLog {
   metadata?: any;
 }
 
-export type ChurchEvent = {
+export type ChurchEventType = 
+  | 'WORSHIP' 
+  | 'BIBLE_STUDY' 
+  | 'PRAYER' 
+  | 'OUTREACH' 
+  | 'YOUTH' 
+  | 'OTHER';
+
+export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ANNUALLY';
+
+export interface ChurchEvent {
   id: string;
   title: string;
   description: string;
@@ -169,16 +140,6 @@ export type ChurchEvent = {
   recurrence?: RecurrenceType;
   coordinates?: { lat: number; lng: number };
 }
-
-export type ChurchEventType = 
-  | 'WORSHIP' 
-  | 'BIBLE_STUDY' 
-  | 'PRAYER' 
-  | 'OUTREACH' 
-  | 'YOUTH' 
-  | 'OTHER';
-
-export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ANNUALLY';
 
 export interface AppNotification {
   id: string;
@@ -206,11 +167,7 @@ export type AppView =
   | 'MY_GIVING' 
   | 'PRIVACY' 
   | 'COMPLIANCE' 
-  | 'SECURITY'
-  | 'OWNER_DASHBOARD'
-  | 'PARISH_REGISTRY'
-  | 'PLATFORM_SUPPORT'
-  | 'INFRASTRUCTURE';
+  | 'SECURITY';
 
 export interface Toast {
   id: string;
@@ -255,22 +212,9 @@ export interface SystemRole {
 export interface RecurringExpense {
   id: string;
   category: string;
-  recipient: string;
   amount: number;
   frequency: 'Weekly' | 'Monthly' | 'Quarterly' | 'Yearly';
   nextDate: string;
-  status: 'ACTIVE' | 'PAUSED';
-}
-
-export interface RecurringContribution {
-  id: string;
-  memberId: string;
-  memberName: string;
-  type: TransactionType;
-  amount: number;
-  frequency: 'Monthly' | 'Yearly';
-  nextDueDate: string;
-  status: 'ACTIVE' | 'CANCELLED';
 }
 
 export interface Sermon {
@@ -283,13 +227,4 @@ export interface Sermon {
   event: string;
   eventId: string;
   transcript: string;
-}
-
-export interface ApiKey {
-  id: string;
-  name: string;
-  key: string;
-  createdAt: string;
-  lastUsed: string;
-  status: 'ACTIVE' | 'REVOKED';
 }

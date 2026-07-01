@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar, { ImaniLogoIcon } from './Sidebar';
 import Dashboard from './Dashboard';
 import Membership from './Membership';
@@ -25,25 +24,23 @@ import {
   ChurchEvent, MaritalStatus, MembershipType,
   User, UserRole, AppNotification, Toast, AuditLog
 } from '../types';
-import { Bell, Menu, X, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { Bell, Menu, X, Loader2 } from 'lucide-react';
+import { supabase, useSession } from '../src/lib/supabase-auth';
 
 const App: React.FC = () => {
+  const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
   const [currentView, setCurrentView] = useState<AppView>('DASHBOARD');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
   
   const [branches] = useState(['Nairobi Central', 'Mombasa Branch', 'Kisumu Branch', 'Nakuru Branch']);
 
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([
-    { id: '1', userId: 'u1', userName: 'Pastor John', action: 'Login successful', module: 'DASHBOARD', timestamp: new Date().toISOString(), severity: 'INFO' }
-  ]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
 
-  const [notifications] = useState<AppNotification[]>([
-    { id: 'n1', title: 'M-Pesa Transaction', message: 'New Tithe received from Mary Wambui: KES 12,000.', time: '2 mins ago', type: 'MPESA', read: false }
-  ]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const addToast = (message: string, type: Toast['type'] = 'success') => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -51,54 +48,151 @@ const App: React.FC = () => {
     setTimeout(() => { setToasts(prev => prev.filter(t => t.id !== id)); }, 4000);
   };
 
-  const createAudit = (action: string, module: AppView, severity: AuditLog['severity'] = 'INFO') => {
+  const createAudit = useCallback(async (action: string, module: AppView, severity: AuditLog['severity'] = 'INFO') => {
     if (!currentUser) return;
     const log: AuditLog = { id: Date.now().toString(), userId: currentUser.id, userName: currentUser.name, action, module, timestamp: new Date().toISOString(), severity };
     setAuditLogs(prev => [log, ...prev]);
-  };
+    try {
+      await supabase.from('audit_logs').insert([{
+        user_id: currentUser.id,
+        user_name: currentUser.name,
+        action,
+        module,
+        severity,
+      }]);
+    } catch {}
+  }, [currentUser]);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('imani_user');
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setCurrentUser(parsedUser);
-      setIsLoggedIn(true);
-      if (parsedUser.role === UserRole.MEMBER) setCurrentView('MY_PORTAL');
+    if (!authLoading && isAuthenticated && supabaseUser) {
+      const meta = supabaseUser.user_metadata || {};
+      const appMeta = supabaseUser.app_metadata || {};
+      const role = (meta.role as UserRole) || (appMeta.role as UserRole) || UserRole.ADMIN;
+      setCurrentUser({
+        id: supabaseUser.id,
+        name: (meta.name as string) || supabaseUser.email?.split('@')[0] || 'User',
+        role,
+        avatar: (meta.avatar_url as string) || `https://ui-avatars.com/api/?name=${encodeURIComponent((meta.name as string) || 'U')}&background=6366f1&color=fff`,
+      });
+    } else if (!authLoading && !isAuthenticated) {
+      setCurrentUser(null);
     }
-  }, []);
+  }, [authLoading, isAuthenticated, supabaseUser]);
+
+  const [members, setMembers] = useState<Member[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [events, setEvents] = useState<ChurchEvent[]>([]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setDataLoading(false);
+      return;
+    }
+    setDataLoading(true);
+
+    const fetchMembers = supabase.from('members').select('*').then(({ data, error }) => {
+      if (!error && data) {
+        return data.map((r: any) => ({
+          id: r.id,
+          firstName: r.first_name,
+          lastName: r.last_name,
+          phone: r.phone || '',
+          email: r.email || '',
+          location: r.location || '',
+          groups: r.groups || [],
+          status: r.status as MemberStatus || MemberStatus.ACTIVE,
+          joinDate: r.join_date || '',
+          gender: r.gender || undefined,
+          maritalStatus: r.marital_status as MaritalStatus || undefined,
+          membershipType: r.membership_type as MembershipType || undefined,
+          age: r.age || undefined,
+          photo: r.photo || undefined,
+          stewardshipScore: r.stewardship_score || undefined,
+        }));
+      }
+      return [];
+    });
+
+    const fetchTransactions = supabase.from('transactions').select('*').then(({ data, error }) => {
+      if (!error && data) {
+        return data.map((r: any) => ({
+          id: r.id,
+          memberId: r.member_id || undefined,
+          memberName: r.member_name || '',
+          amount: r.amount,
+          type: r.type,
+          paymentMethod: r.payment_method,
+          date: r.date,
+          reference: r.reference,
+          category: r.category,
+          notes: r.notes || undefined,
+          phoneNumber: r.phone_number || undefined,
+          source: r.source || 'MANUAL',
+        }));
+      }
+      return [];
+    });
+
+    const fetchEvents = supabase.from('church_events').select('*').then(({ data, error }) => {
+      if (!error && data) {
+        return data.map((r: any) => ({
+          id: r.id,
+          title: r.title,
+          description: r.description,
+          date: r.date,
+          time: r.time,
+          location: r.location,
+          type: r.type,
+          coordinator: r.coordinator || undefined,
+          attendance: r.attendance || [],
+          contactPerson: r.contact_person || undefined,
+          rsvpDeadline: r.rsvp_deadline || undefined,
+        }));
+      }
+      return [];
+    });
+
+    const fetchAuditLogs = supabase.from('audit_logs').select('*').then(({ data, error }) => {
+      if (!error && data) {
+        return data.map((r: any) => ({
+          id: r.id,
+          userId: r.user_id,
+          userName: r.user_name,
+          action: r.action,
+          module: r.module as AppView,
+          timestamp: r.timestamp || new Date().toISOString(),
+          severity: r.severity as AuditLog['severity'] || 'INFO',
+        }));
+      }
+      return [];
+    });
+
+    Promise.all([fetchMembers, fetchTransactions, fetchEvents, fetchAuditLogs])
+      .then(([m, t, e, a]) => {
+        setMembers(m as Member[]);
+        setTransactions(t as Transaction[]);
+        setEvents(e as ChurchEvent[]);
+        setAuditLogs(a as AuditLog[]);
+        setDataLoading(false);
+      });
+  }, [isAuthenticated]);
 
   const handleLogin = (user: User) => {
     const userWithBranch = { ...user, branch: user.branch || branches[0] };
     setCurrentUser(userWithBranch);
-    setIsLoggedIn(true);
-    localStorage.setItem('imani_user', JSON.stringify(userWithBranch));
     setCurrentView(user.role === UserRole.MEMBER ? 'MY_PORTAL' : 'DASHBOARD');
     addToast(`Logged in successfully as ${user.name}`);
     createAudit('Login success', 'DASHBOARD');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     createAudit('Logout', 'DASHBOARD');
-    setIsLoggedIn(false);
+    await supabase.auth.signOut();
     setCurrentUser(null);
-    localStorage.removeItem('imani_user');
     addToast("Logged out successfully", "info");
   };
 
-  const [members, setMembers] = useState<Member[]>([
-    { id: '1', firstName: 'David', lastName: 'Ochieng', phone: '0712345678', email: 'david@example.com', location: 'Nairobi West', groups: ['Youth Fellowship', 'Media & Tech'], status: MemberStatus.ACTIVE, joinDate: '2023-01-15', maritalStatus: MaritalStatus.SINGLE, membershipType: MembershipType.FULL, age: 24, gender: 'Male' },
-    { id: '2', firstName: 'Mary', lastName: 'Wambui', phone: '0722111222', email: 'mary@example.com', location: 'Kileleshwa', groups: ['Women of Grace'], status: MemberStatus.ACTIVE, joinDate: '2022-11-20', maritalStatus: MaritalStatus.MARRIED, membershipType: MembershipType.FULL, age: 38, gender: 'Female' },
-  ]);
-
-  const [transactions, setTransactions] = useState<Transaction[]>([
-    { id: 'trx1', memberId: '1', memberName: 'David Ochieng', amount: 5000, type: 'Tithe', paymentMethod: 'M-Pesa', date: '2024-05-19', reference: 'QSG812L90P', category: 'Income', source: 'MANUAL' },
-  ]);
-
-  const [events, setEvents] = useState<ChurchEvent[]>([
-    { id: 'ev1', title: 'Sunday Worship Service', description: 'Main service of worship.', date: '2024-05-26', time: '09:00 AM', location: 'Main Sanctuary', type: 'WORSHIP', attendance: ['1', '2'] },
-  ]);
-
-  const handleAddMembersBulk = (importedMembers: Member[]) => {
+  const handleAddMembersBulk = async (importedMembers: Member[]) => {
     setMembers(prev => [...prev, ...importedMembers]);
     addToast(`Successfully imported ${importedMembers.length} members`, 'success');
     createAudit(`Bulk imported ${importedMembers.length} members`, 'MEMBERS');
@@ -153,6 +247,19 @@ const App: React.FC = () => {
         return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => {}} onSendSMS={() => {}} onNavigate={setCurrentView} />;
     }
   };
+
+  const isLoggedIn = isAuthenticated && !!currentUser;
+
+  if (authLoading || dataLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="animate-spin text-brand-primary mx-auto" size={40} />
+          <p className="text-slate-400 font-bold text-sm">Loading Imani CMS...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isLoggedIn || !currentUser) {
     if (['PRIVACY', 'COMPLIANCE', 'SECURITY'].includes(currentView)) return renderView();

@@ -257,7 +257,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <button onClick={() => setView('SETTINGS')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}>
             <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
-            <span className="text-sm">Platform Settings</span>
+            <span className="text-sm">Church Settings</span>
           </button>
         )}
         

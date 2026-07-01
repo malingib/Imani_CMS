@@ -23,6 +23,7 @@ import PlatformDashboard from './PlatformDashboard';
 import TenantsList from './TenantsList';
 import PlatformSettings from './PlatformSettings';
 import BillingOverview from './BillingOverview';
+import InvitationsManager from './InvitationsManager';
 import { 
   AppView, Member, MemberStatus, Transaction, 
   ChurchEvent, MaritalStatus, MembershipType,
@@ -31,6 +32,7 @@ import {
 import { Bell, Menu, X, Loader2 } from 'lucide-react';
 import { supabase, useSession } from '../src/lib/supabase-auth';
 import { ChurchProvider, useChurch } from '../src/lib/church-context';
+import { mapMember, mapTransaction, mapEvent, mapAuditLog } from '../src/lib/mappers';
 
 const AppContent: React.FC = () => {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
@@ -57,6 +59,14 @@ const AppContent: React.FC = () => {
   const viewingPlatform = isSuperAdmin && !activeChurchId;
   const viewingChurch = isSuperAdmin && !!activeChurchId;
   const churchId = activeChurchId || (currentUser?.churchId as string) || null;
+
+  useEffect(() => {
+    if (viewingChurch) {
+      if (currentView === 'PLATFORM_DASHBOARD' || currentView === 'TENANTS' || currentView === 'INVITATIONS' || currentView === 'BILLING' || currentView === 'PLATFORM_SETTINGS') {
+        setCurrentView('DASHBOARD');
+      }
+    }
+  }, [viewingChurch, currentView]);
 
   const createAudit = useCallback(async (action: string, module: AppView, severity: AuditLog['severity'] = 'INFO') => {
     if (!currentUser) return;
@@ -105,96 +115,31 @@ const AppContent: React.FC = () => {
     }
     setDataLoading(true);
 
-    const queryChurch = churchId;
-    const baseQuery = <T extends any[]>(table: string, select = '*') => {
+    const baseQuery = (table: string, select = '*') => {
       let q = supabase.from(table).select(select);
-      if (queryChurch) q = q.eq('church_id', queryChurch);
+      if (churchId) q = q.eq('church_id', churchId);
       return q;
     };
 
-    const fetchMembers = baseQuery('members', '*').then(({ data, error }) => {
-      if (!error && data) {
-        return data.map((r: any) => ({
-          id: r.id,
-          firstName: r.first_name,
-          lastName: r.last_name,
-          phone: r.phone || '',
-          email: r.email || '',
-          location: r.location || '',
-          groups: r.groups || [],
-          status: r.status as MemberStatus || MemberStatus.ACTIVE,
-          joinDate: r.join_date || '',
-          gender: r.gender || undefined,
-          maritalStatus: r.marital_status as MaritalStatus || undefined,
-          membershipType: r.membership_type as MembershipType || undefined,
-          age: r.age || undefined,
-          photo: r.photo || undefined,
-          stewardshipScore: r.stewardship_score || undefined,
-        }));
-      }
-      return [];
-    });
+    const fMembers = baseQuery('members', '*').then(({ data, error }) =>
+      !error && data ? data.map(mapMember) : []
+    );
+    const fTransactions = baseQuery('transactions', '*').then(({ data, error }) =>
+      !error && data ? data.map(mapTransaction) : []
+    );
+    const fEvents = baseQuery('church_events', '*').then(({ data, error }) =>
+      !error && data ? data.map(mapEvent) : []
+    );
+    const fAuditLogs = baseQuery('audit_logs', '*').then(({ data, error }) =>
+      !error && data ? data.map(mapAuditLog) : []
+    );
 
-    const fetchTransactions = baseQuery('transactions', '*').then(({ data, error }) => {
-      if (!error && data) {
-        return data.map((r: any) => ({
-          id: r.id,
-          memberId: r.member_id || undefined,
-          memberName: r.member_name || '',
-          amount: r.amount,
-          type: r.type,
-          paymentMethod: r.payment_method,
-          date: r.date,
-          reference: r.reference,
-          category: r.category,
-          notes: r.notes || undefined,
-          phoneNumber: r.phone_number || undefined,
-          source: r.source || 'MANUAL',
-        }));
-      }
-      return [];
-    });
-
-    const fetchEvents = baseQuery('church_events', '*').then(({ data, error }) => {
-      if (!error && data) {
-        return data.map((r: any) => ({
-          id: r.id,
-          title: r.title,
-          description: r.description,
-          date: r.date,
-          time: r.time,
-          location: r.location,
-          type: r.type,
-          coordinator: r.coordinator || undefined,
-          attendance: r.attendance || [],
-          contactPerson: r.contact_person || undefined,
-          rsvpDeadline: r.rsvp_deadline || undefined,
-        }));
-      }
-      return [];
-    });
-
-    const fetchAuditLogs = baseQuery('audit_logs', '*').then(({ data, error }) => {
-      if (!error && data) {
-        return data.map((r: any) => ({
-          id: r.id,
-          userId: r.user_id,
-          userName: r.user_name,
-          action: r.action,
-          module: r.module as AppView,
-          timestamp: r.timestamp || new Date().toISOString(),
-          severity: r.severity as AuditLog['severity'] || 'INFO',
-        }));
-      }
-      return [];
-    });
-
-    Promise.all([fetchMembers, fetchTransactions, fetchEvents, fetchAuditLogs])
+    Promise.all([fMembers, fTransactions, fEvents, fAuditLogs])
       .then(([m, t, e, a]) => {
-        setMembers(m as Member[]);
-        setTransactions(t as Transaction[]);
-        setEvents(e as ChurchEvent[]);
-        setAuditLogs(a as AuditLog[]);
+        setMembers(m);
+        setTransactions(t);
+        setEvents(e);
+        setAuditLogs(a);
         setDataLoading(false);
       });
   }, [isAuthenticated, churchId, viewingPlatform]);
@@ -236,15 +181,11 @@ const AppContent: React.FC = () => {
       switch (currentView) {
         case 'PLATFORM_DASHBOARD': return <PlatformDashboard />;
         case 'TENANTS': return <TenantsList onNavigate={setCurrentView} onSelectChurch={handleSelectChurch} />;
-        case 'INVITATIONS': return <div className="p-10 text-center text-slate-400 font-bold"><p>Invitations management coming soon</p></div>;
+        case 'INVITATIONS': return <InvitationsManager />;
         case 'BILLING': return <BillingOverview />;
         case 'PLATFORM_SETTINGS': return <PlatformSettings />;
         default: return <PlatformDashboard />;
       }
-    }
-
-    if (viewingChurch) {
-      setCurrentView('DASHBOARD');
     }
 
     switch (currentView) {

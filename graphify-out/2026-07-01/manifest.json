@@ -1,0 +1,1347 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1782904649.6513658,
+    "ast_hash": "e51077b6a7f1f67afc748f1a32a1557d",
+    "semantic_hash": ""
+  },
+  "components/AISermonAssistant.tsx": {
+    "mtime": 1767348522.0,
+    "ast_hash": "8fa750a28d8db9ec062edf59d694b390",
+    "semantic_hash": ""
+  },
+  "components/App.tsx": {
+    "mtime": 1782909809.5969868,
+    "ast_hash": "fddf2a2045b9c4d6588e8216d55c474e",
+    "semantic_hash": ""
+  },
+  "components/AuditLogs.tsx": {
+    "mtime": 1782751666.6294203,
+    "ast_hash": "5feaf73e912a87bb2f4b87c419a520aa",
+    "semantic_hash": ""
+  },
+  "components/Billing.tsx": {
+    "mtime": 1782751691.017431,
+    "ast_hash": "7d7224419e030a8766c92259a3bf10da",
+    "semantic_hash": ""
+  },
+  "components/BillingOverview.tsx": {
+    "mtime": 1782899675.6791952,
+    "ast_hash": "33681339df5dbd631eb9363958f680e8",
+    "semantic_hash": ""
+  },
+  "components/CommunicationCenter.tsx": {
+    "mtime": 1782751336.5242727,
+    "ast_hash": "3dc7dfce509ce341fdd5d8bb083d3163",
+    "semantic_hash": ""
+  },
+  "components/CompliancePortal.tsx": {
+    "mtime": 1782751522.1561086,
+    "ast_hash": "7291c00a0560f15423c69fb06c0eebc8",
+    "semantic_hash": ""
+  },
+  "components/Dashboard.tsx": {
+    "mtime": 1782750967.372114,
+    "ast_hash": "9f3cadc6df36a14d4adfcb2facee3388",
+    "semantic_hash": ""
+  },
+  "components/DemographicsAnalysis.tsx": {
+    "mtime": 1782751744.0434546,
+    "ast_hash": "1bb67bbed0f5385c951a19d48eb668a1",
+    "semantic_hash": ""
+  },
+  "components/EventsManagement.tsx": {
+    "mtime": 1782857593.2167025,
+    "ast_hash": "45abd744177e943782b283ac2832ccd1",
+    "semantic_hash": ""
+  },
+  "components/FinanceReporting.tsx": {
+    "mtime": 1782751347.2892776,
+    "ast_hash": "7302275b5b5fc3b431dcfcb41f47f9de",
+    "semantic_hash": ""
+  },
+  "components/GroupsManagement.tsx": {
+    "mtime": 1782751709.3524392,
+    "ast_hash": "353618c3bff54baff446a10a5a77e9a7",
+    "semantic_hash": ""
+  },
+  "components/InvitationsManager.tsx": {
+    "mtime": 1782900523.356226,
+    "ast_hash": "2b3ca64a51c6e0fa29615864319bf869",
+    "semantic_hash": ""
+  },
+  "components/Login.tsx": {
+    "mtime": 1782876037.4742348,
+    "ast_hash": "e5c80530f48edc971c6607ef93e97037",
+    "semantic_hash": ""
+  },
+  "components/MemberPortal.tsx": {
+    "mtime": 1782751527.698358,
+    "ast_hash": "bbeaa2b3ac8f1cd3e79cc9266ee23770",
+    "semantic_hash": ""
+  },
+  "components/Membership.tsx": {
+    "mtime": 1782764062.7969546,
+    "ast_hash": "ed221a3c4c6cb4a4341813ebdf67e755",
+    "semantic_hash": ""
+  },
+  "components/MyGiving.tsx": {
+    "mtime": 1782751546.1333663,
+    "ast_hash": "0ba76824b1fb7437169b11d71d1a6802",
+    "semantic_hash": ""
+  },
+  "components/NotificationsPanel.tsx": {
+    "mtime": 1767348522.0,
+    "ast_hash": "84f73e41f09620bb3f121040f078a3f3",
+    "semantic_hash": ""
+  },
+  "components/PlatformDashboard.tsx": {
+    "mtime": 1782899629.514204,
+    "ast_hash": "991ca13d0639de3adedb791846b7d186",
+    "semantic_hash": ""
+  },
+  "components/PlatformSettings.tsx": {
+    "mtime": 1782900544.243036,
+    "ast_hash": "805e24ac2f4c5c5a914aa521eacdbfb0",
+    "semantic_hash": ""
+  },
+  "components/PrivacyPolicy.tsx": {
+    "mtime": 1782751674.7184741,
+    "ast_hash": "27011a30c9c6ca17ab80931b9bb19595",
+    "semantic_hash": ""
+  },
+  "components/ReportsCenter.tsx": {
+    "mtime": 1782751584.827088,
+    "ast_hash": "d07c01c6d23ea2bde12143256d43bd04",
+    "semantic_hash": ""
+  },
+  "components/SecurityOverview.tsx": {
+    "mtime": 1782751550.3893683,
+    "ast_hash": "19a1455451e174ef6e51bca58e6e3f39",
+    "semantic_hash": ""
+  },
+  "components/SermonHistory.tsx": {
+    "mtime": 1782751612.517396,
+    "ast_hash": "104e8629dae5c41d8b4798cae8f8b4d2",
+    "semantic_hash": ""
+  },
+  "components/Settings.tsx": {
+    "mtime": 1782751427.8163135,
+    "ast_hash": "048f07db594ca07a7e7cb03f7e9c7515",
+    "semantic_hash": ""
+  },
+  "components/Sidebar.tsx": {
+    "mtime": 1782909750.1597912,
+    "ast_hash": "9bc00334a5f52923f6d1da90626d5d71",
+    "semantic_hash": ""
+  },
+  "components/TenantsList.tsx": {
+    "mtime": 1782900588.1183336,
+    "ast_hash": "b8e175edd208aa23ffe6ba75cef3b174",
+    "semantic_hash": ""
+  },
+  "e2e/fixtures/mock-data.ts": {
+    "mtime": 1782902491.1519437,
+    "ast_hash": "c7de601c6893305f267cac34a1dedd70",
+    "semantic_hash": ""
+  },
+  "e2e/fixtures/supabase-mock.ts": {
+    "mtime": 1782902491.1827836,
+    "ast_hash": "7956a937ad1169d267cc62310a39cdf5",
+    "semantic_hash": ""
+  },
+  "e2e/pages/login-page.ts": {
+    "mtime": 1782901123.8137522,
+    "ast_hash": "ceffbce7435b4f0b3aa56c7342be7f94",
+    "semantic_hash": ""
+  },
+  "e2e/pages/platform-page.ts": {
+    "mtime": 1782901666.9818244,
+    "ast_hash": "0108371efc004c5a782c7dfa78b5d32d",
+    "semantic_hash": ""
+  },
+  "e2e/specs/login.spec.ts": {
+    "mtime": 1782901882.418398,
+    "ast_hash": "73673e05467f03a8b1ca674c0743d77c",
+    "semantic_hash": ""
+  },
+  "e2e/specs/platform.spec.ts": {
+    "mtime": 1782902038.7778141,
+    "ast_hash": "b63c0ff574d0e2d8236e1e9193dd401a",
+    "semantic_hash": ""
+  },
+  "e2e/specs/tenants.spec.ts": {
+    "mtime": 1782902126.4637268,
+    "ast_hash": "f5fd6a839d022856614c544bfe1cd25e",
+    "semantic_hash": ""
+  },
+  "e2e/tsconfig.json": {
+    "mtime": 1782901278.178848,
+    "ast_hash": "d1ab3fd6a18d17522c2b2e7ec84785ff",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Ai/Agents/BibleReflectionAgent.php": {
+    "mtime": 1782934041.7215185,
+    "ast_hash": "d6c5e4cfbd9321eca4c4b9b20abc7e86",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Ai/Agents/DailyVerseAgent.php": {
+    "mtime": 1782934044.59855,
+    "ast_hash": "6d9b4a9615090f383a1ccea2b6b78c52",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Ai/Agents/FinanceAnalysisAgent.php": {
+    "mtime": 1782934047.7445848,
+    "ast_hash": "d2feebeafdbfaa45cf066716f46c4be8",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Ai/Agents/InspirationalMessageAgent.php": {
+    "mtime": 1782934043.3045359,
+    "ast_hash": "adf32ffbe4241eb767353cb5654a2747",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Ai/Agents/OutreachScoutAgent.php": {
+    "mtime": 1782934046.0515661,
+    "ast_hash": "dae77b5fca006ead3bf3693ac60d2eab",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Ai/Agents/SermonOutlineAgent.php": {
+    "mtime": 1782934040.0084996,
+    "ast_hash": "f82457925956838dcf5fc41afcbafe6b",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/ActivityType.php": {
+    "mtime": 1782933959.5924377,
+    "ast_hash": "2f0fb29ed0d41a2378267bfc80a53a3b",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/AppView.php": {
+    "mtime": 1782933962.093821,
+    "ast_hash": "fae7ab1433c26d64c8c84e43b3680c44",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/ChurchEventType.php": {
+    "mtime": 1782933957.7236304,
+    "ast_hash": "c218e7bde3a108c6c9c5263fce60c1c5",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/CommunicationStatus.php": {
+    "mtime": 1782933959.1316414,
+    "ast_hash": "fe5864bf6335212f13bc0ba8c905d903",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/CommunicationType.php": {
+    "mtime": 1782933958.6695745,
+    "ast_hash": "3abd609be76e3177f26f5402db6d385d",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/Frequency.php": {
+    "mtime": 1782933957.4536276,
+    "ast_hash": "b8d9a4dbafb99a71b7e51214e3faa148",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/MaritalStatus.php": {
+    "mtime": 1782933953.3878062,
+    "ast_hash": "bd0daf8faad9dd16dee2fb0e4693b57a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/MemberStatus.php": {
+    "mtime": 1782933952.7859876,
+    "ast_hash": "c6df6fdc456db4b2b29fe64b78a161ea",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/MembershipType.php": {
+    "mtime": 1782933953.9384856,
+    "ast_hash": "7969955ab1c22d6a5c4d5b9b170bf048",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/MpesaPurpose.php": {
+    "mtime": 1782937456.8333085,
+    "ast_hash": "3efcd4added4c77b56235ef596aa6584",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/MpesaStatus.php": {
+    "mtime": 1782937456.8333085,
+    "ast_hash": "8e44cf33b86580bf859c438a5bea7996",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/NotificationType.php": {
+    "mtime": 1782933961.1366658,
+    "ast_hash": "06bc18c26eec5c16ae74a7513545e473",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/PaymentMethod.php": {
+    "mtime": 1782933957.159388,
+    "ast_hash": "13e4b49b644e2618162ca8d8766435ee",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/RecurrenceType.php": {
+    "mtime": 1782933958.1838899,
+    "ast_hash": "4ecb774696de0a139a3f1b2d80499934",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/Severity.php": {
+    "mtime": 1782933961.1376657,
+    "ast_hash": "eed0aa41df508582f82400b751571c41",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/TransactionCategory.php": {
+    "mtime": 1782933957.1607516,
+    "ast_hash": "535debbba0449b87f0f2a9c19ec8e2dc",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/TransactionSource.php": {
+    "mtime": 1782933957.1616244,
+    "ast_hash": "8397a384bd28ff65f536f97e04c7cb21",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/TransactionType.php": {
+    "mtime": 1782933955.76661,
+    "ast_hash": "66f1fb74c8d651688d5ca6fcd5215df1",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Enums/UserRole.php": {
+    "mtime": 1782933952.207626,
+    "ast_hash": "c928648c58b2ad901573324f4c9c51cb",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/AiController.php": {
+    "mtime": 1782937398.4328594,
+    "ast_hash": "de3c79f17c194b28ab954efe9f68d7c7",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/AnalyticsController.php": {
+    "mtime": 1782937397.54085,
+    "ast_hash": "70b608148cbb270a97bc375e49980b3e",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/AuditLogController.php": {
+    "mtime": 1782937397.6738513,
+    "ast_hash": "24882025f41002e69513853b254c398c",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/BillingController.php": {
+    "mtime": 1782937514.1451013,
+    "ast_hash": "1451ea4004a13c743157e0947d2628cb",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/ChurchContextController.php": {
+    "mtime": 1782937398.010855,
+    "ast_hash": "8681a3c4a1dcf5d984204a6c6cfa4abd",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/CommunicationController.php": {
+    "mtime": 1782937397.3428478,
+    "ast_hash": "777eb48998720a8c763dd8cebd124825",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/Concerns/MapsDomainData.php": {
+    "mtime": 1782937396.7778416,
+    "ast_hash": "d8666ab9c9549cc6569ce6aef03a83a3",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/Controller.php": {
+    "mtime": 1782937396.9278433,
+    "ast_hash": "39e1ff6843e48de717fb4a41eadd86b7",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/DashboardController.php": {
+    "mtime": 1782937396.996844,
+    "ast_hash": "7889dd380f92a94cdb1a61f10f27696a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/EventController.php": {
+    "mtime": 1782937397.2148464,
+    "ast_hash": "c597bbed71d27e4cfeb9037eeb7207ee",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/FinanceController.php": {
+    "mtime": 1782937397.1288455,
+    "ast_hash": "0f7369f57f2f4a55f0a5c20e360af2b2",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/GivingController.php": {
+    "mtime": 1782937397.9008536,
+    "ast_hash": "16da14ec92e6a84d4c4ab662a56d5164",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/GroupController.php": {
+    "mtime": 1782937397.3988483,
+    "ast_hash": "6db1e561e4b51294ed2e75e445fcf3ca",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/LegalController.php": {
+    "mtime": 1782937397.9598544,
+    "ast_hash": "469b88aa1eea800877d92c65c25737ec",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/MemberController.php": {
+    "mtime": 1782937397.0598447,
+    "ast_hash": "0073849d022018576e9058614a349d59",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/MemberPortalController.php": {
+    "mtime": 1782937397.8468533,
+    "ast_hash": "5db0f01faf0c54f4c694857af85c4c9e",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/MpesaController.php": {
+    "mtime": 1782937504.062993,
+    "ast_hash": "962edef132a0a6598a13d78859332c2f",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/Platform/BillingController.php": {
+    "mtime": 1782937398.2578576,
+    "ast_hash": "f55853d879799f9a4e269b1efca51dae",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/Platform/DashboardController.php": {
+    "mtime": 1782937398.0658555,
+    "ast_hash": "01814028f7c67feff129a192bc3f0aca",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/Platform/InvitationController.php": {
+    "mtime": 1782937398.193857,
+    "ast_hash": "340943d508d648670db21e83e2e43830",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/Platform/SettingsController.php": {
+    "mtime": 1782937398.312858,
+    "ast_hash": "8eddbabc5f9c91d7f35b553c5001b6b3",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/Platform/TenantController.php": {
+    "mtime": 1782937398.1348562,
+    "ast_hash": "6fca4f43f990fb274b1ef0d0cd7dd9dc",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/ReportController.php": {
+    "mtime": 1782937397.479849,
+    "ast_hash": "647014b1b629c1be6f5fcbddd6c0b46b",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/SermonController.php": {
+    "mtime": 1782937397.6178508,
+    "ast_hash": "f5d094bf976642fb8f348ed4b67d7e42",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Controllers/SettingsController.php": {
+    "mtime": 1782937397.7898526,
+    "ast_hash": "8c2f30ec683e5fc7350a43a7fbe4a93e",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Middleware/EnsureChurchContext.php": {
+    "mtime": 1782934013.426926,
+    "ast_hash": "1e8aab5f29cbc7b7a1584b0f39807eb4",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Middleware/EnsureRole.php": {
+    "mtime": 1782934014.6175737,
+    "ast_hash": "f52abcdb8670eb9d7d243b5443b48510",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Middleware/EnsureSuperAdmin.php": {
+    "mtime": 1782934012.0588713,
+    "ast_hash": "2acadb90c77a5e476619300f9c6a05cc",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Http/Middleware/HandleInertiaRequests.php": {
+    "mtime": 1782934018.9756813,
+    "ast_hash": "7724311c3ec764adf4a3e9946311c3fb",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Activity.php": {
+    "mtime": 1782934002.144339,
+    "ast_hash": "06fd4ab56288aa357bf3a23d6c347548",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/AuditLog.php": {
+    "mtime": 1782937397.2798817,
+    "ast_hash": "1123e697e3ee2fc3c0b1b1dd94f5f15a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/BaseModel.php": {
+    "mtime": 1782933985.0327988,
+    "ast_hash": "9f4aa9ac2d5870629b37cfee1cceb2bd",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Budget.php": {
+    "mtime": 1782933998.1283011,
+    "ast_hash": "951c3692d536319d9d6e72c58fd950e8",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Church.php": {
+    "mtime": 1782937506.2669384,
+    "ast_hash": "6fd4b3fdcdf362ae939038d4b2d33866",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/ChurchEvent.php": {
+    "mtime": 1782933995.2320201,
+    "ast_hash": "5345640d46855c5339e556fe42de0b7c",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Communication.php": {
+    "mtime": 1782934000.1370711,
+    "ast_hash": "3f1faa5e86ff60a81f16add9ed8a46cc",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/EventAttendance.php": {
+    "mtime": 1782934105.2326984,
+    "ast_hash": "d74e9906f677490342cfa674975daec3",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Group.php": {
+    "mtime": 1782933997.3349657,
+    "ast_hash": "dd19f9c17cafa1eba476aaec53e74d06",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/GroupMember.php": {
+    "mtime": 1782934106.8962352,
+    "ast_hash": "3284a1b0edbe0460919b3b8699187910",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Invitation.php": {
+    "mtime": 1782934006.4445164,
+    "ast_hash": "1ed4ea78682c64429680cb984de1afe9",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Invoice.php": {
+    "mtime": 1782934005.8136003,
+    "ast_hash": "01ecde5d159ab281d24e68dde0ee8e9e",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Member.php": {
+    "mtime": 1782933991.4663062,
+    "ast_hash": "2d56679d984503bc5ecbdfb44b6c8a1b",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/MpesaTransaction.php": {
+    "mtime": 1782937460.9758813,
+    "ast_hash": "4e93081d6ff0353f3aabed1859313e58",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Notification.php": {
+    "mtime": 1782934002.9531004,
+    "ast_hash": "81582c8c2ec6b12deff20eba518bf97d",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/PlatformSetting.php": {
+    "mtime": 1782934007.3971467,
+    "ast_hash": "366c65b2af80ab571d265434ebab89ae",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/RecurringExpense.php": {
+    "mtime": 1782933998.9195905,
+    "ast_hash": "b9bc2408a3f9d32b44602767e52e5f90",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Sermon.php": {
+    "mtime": 1782934001.0140803,
+    "ast_hash": "06f69bbcc6b1a767d7c33a7ca572719d",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Subscription.php": {
+    "mtime": 1782937506.2106268,
+    "ast_hash": "e1202207577b56584c12079810d1399a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/Transaction.php": {
+    "mtime": 1782933992.8843322,
+    "ast_hash": "bb810bc6c3b821a648ed4d91bd736019",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Models/User.php": {
+    "mtime": 1782933987.2319744,
+    "ast_hash": "88ff0f5f6efb8e92c72cb63089b37c2b",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Policies/ChurchPolicy.php": {
+    "mtime": 1782934021.8383,
+    "ast_hash": "af36f9fee7b0dd084d365ee48f95cd06",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Policies/TenantPolicy.php": {
+    "mtime": 1782934020.5315459,
+    "ast_hash": "4897e66ef7083b78f7f2b6248da8b721",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Providers/AppServiceProvider.php": {
+    "mtime": 1782934101.0672874,
+    "ast_hash": "4e3e72d2b505c415efa6ca8cc2e991df",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Providers/FortifyServiceProvider.php": {
+    "mtime": 1782937398.6729493,
+    "ast_hash": "1c5dd6b8e29065536ece29939213adfb",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Services/AuditLogger.php": {
+    "mtime": 1782937396.8555603,
+    "ast_hash": "31373556f67ba3b80aad5cfd29da4729",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Services/GeminiService.php": {
+    "mtime": 1782937398.3738587,
+    "ast_hash": "4d692cf908c55074acc500760cab7b26",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Services/MpesaService.php": {
+    "mtime": 1782937568.8969471,
+    "ast_hash": "e305276395fa24e0564e82ce1390ac6c",
+    "semantic_hash": ""
+  },
+  "imani-laravel/app/Traits/BelongsToChurch.php": {
+    "mtime": 1782933982.5266573,
+    "ast_hash": "9ba023c0ee18d996a7179266e0bf8ca2",
+    "semantic_hash": ""
+  },
+  "imani-laravel/artisan": {
+    "mtime": 1782933938.3186839,
+    "ast_hash": "d2bb551c34298302a4d39ef76ec2ccb4",
+    "semantic_hash": ""
+  },
+  "imani-laravel/bootstrap/app.php": {
+    "mtime": 1782937504.8283699,
+    "ast_hash": "93567f3ffc935e5da133af808e4a4440",
+    "semantic_hash": ""
+  },
+  "imani-laravel/bootstrap/providers.php": {
+    "mtime": 1782933938.2934284,
+    "ast_hash": "4ba78d7e82d32a70a50b93507f7ecb47",
+    "semantic_hash": ""
+  },
+  "imani-laravel/composer.json": {
+    "mtime": 1782937563.2954218,
+    "ast_hash": "c63d3ae521e453b4e2d5ce2851285662",
+    "semantic_hash": ""
+  },
+  "imani-laravel/config/ai.php": {
+    "mtime": 1782934086.1850073,
+    "ast_hash": "c82c2627fedb1c4c83ffa8ee2b53f5dc",
+    "semantic_hash": ""
+  },
+  "imani-laravel/config/app.php": {
+    "mtime": 1782934080.854553,
+    "ast_hash": "7735670d0dd92f7de4676395ee72eaef",
+    "semantic_hash": ""
+  },
+  "imani-laravel/config/auth.php": {
+    "mtime": 1782934082.2789645,
+    "ast_hash": "c56ff4dc63754ec44eab0eb912edcac4",
+    "semantic_hash": ""
+  },
+  "imani-laravel/config/database.php": {
+    "mtime": 1782934084.8036425,
+    "ast_hash": "90233d54730a652797977b106dfae6f5",
+    "semantic_hash": ""
+  },
+  "imani-laravel/config/fortify.php": {
+    "mtime": 1782934053.0546432,
+    "ast_hash": "281d5c626b1a04d53a13b71048e6d86c",
+    "semantic_hash": ""
+  },
+  "imani-laravel/config/mpesa.php": {
+    "mtime": 1782937504.2609951,
+    "ast_hash": "7fd9d25f3841bf4cc31c5aeabce97bf7",
+    "semantic_hash": ""
+  },
+  "imani-laravel/config/services.php": {
+    "mtime": 1782937398.5207899,
+    "ast_hash": "1a370bad136ae5da2cd0bbd1b4af4e14",
+    "semantic_hash": ""
+  },
+  "imani-laravel/database/migrations/2024_01_01_000001_create_churches_table.php": {
+    "mtime": 1782933968.4467576,
+    "ast_hash": "a11fd68c8238d8799790b33e465a040d",
+    "semantic_hash": ""
+  },
+  "imani-laravel/database/migrations/2024_01_01_000002_create_domain_tables.php": {
+    "mtime": 1782933977.2044594,
+    "ast_hash": "e415f35b9e99fac7df2d0b3278475b0a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/database/migrations/2024_01_01_000003_add_role_to_users_table.php": {
+    "mtime": 1782933980.763702,
+    "ast_hash": "b56fceac3c4eec1f9031be690381d41b",
+    "semantic_hash": ""
+  },
+  "imani-laravel/database/migrations/2024_01_01_000004_create_mpesa_transactions_table.php": {
+    "mtime": 1782937458.9037206,
+    "ast_hash": "f1cc1af07a7460e0146506e93f0c0cda",
+    "semantic_hash": ""
+  },
+  "imani-laravel/database/seeders/DatabaseSeeder.php": {
+    "mtime": 1782934105.0156453,
+    "ast_hash": "8c569ca7eeccd8995af793a1be4b5608",
+    "semantic_hash": ""
+  },
+  "imani-laravel/package.json": {
+    "mtime": 1782933928.4049323,
+    "ast_hash": "c2ce6229e1ad67bf1999909c182f995e",
+    "semantic_hash": ""
+  },
+  "imani-laravel/public/index.php": {
+    "mtime": 1782933938.4759653,
+    "ast_hash": "0aa71f35c1a08cbc40cd40d9fcdd7f9d",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/app.tsx": {
+    "mtime": 1782933941.4574614,
+    "ast_hash": "0f1353317e43736eb62e31378b92b218",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/components/AppSidebar.tsx": {
+    "mtime": 1782937398.9078646,
+    "ast_hash": "8a3b38d81a3f1b117fb908817190e8d5",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/components/NotificationsPanel.tsx": {
+    "mtime": 1782933989.0259557,
+    "ast_hash": "f899207e6b8aae20ac60ac1eaa07feb1",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/components/StubPage.tsx": {
+    "mtime": 1782934188.5951335,
+    "ast_hash": "994336f3ad14ff09b9f5552ad54b6627",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/components/ToastProvider.tsx": {
+    "mtime": 1782933955.4226065,
+    "ast_hash": "0420f9a26a4ab0f399dea2671f2471dc",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/components/brand/ImaniLogoIcon.tsx": {
+    "mtime": 1782933952.3625746,
+    "ast_hash": "f8d96a665a773988c5603a0c5fa2818a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/layouts/AppLayout.tsx": {
+    "mtime": 1782933981.1368737,
+    "ast_hash": "f07dbf70b3273dfa11b704ab19b8ffe5",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/layouts/AuthLayout.tsx": {
+    "mtime": 1782933981.7038796,
+    "ast_hash": "17b108e8e51966abdd8140442ba25622",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/AISermonAssistant.tsx": {
+    "mtime": 1782934500.4685612,
+    "ast_hash": "2fb5086d85d30752ed7333d709510e38",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/AuditLogs.tsx": {
+    "mtime": 1782934500.4895377,
+    "ast_hash": "2a118cb14bca234df6dc2d86ab161fcc",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/Billing.tsx": {
+    "mtime": 1782937610.647137,
+    "ast_hash": "5bebd3193d7aecd482847464c473cb8d",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/BillingOverview.tsx": {
+    "mtime": 1782937400.6818836,
+    "ast_hash": "15ae81c33506131796f1f01bc62642f3",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/CommunicationCenter.tsx": {
+    "mtime": 1782934500.5648184,
+    "ast_hash": "f13d1affe191f621c4cf9cb7d6dda22a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/CompliancePortal.tsx": {
+    "mtime": 1782934500.5835268,
+    "ast_hash": "7291c00a0560f15423c69fb06c0eebc8",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/DemographicsAnalysis.tsx": {
+    "mtime": 1782934500.6163957,
+    "ast_hash": "6b42f3818f66c578799368de19ebee32",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/GroupsManagement.tsx": {
+    "mtime": 1782934500.6424806,
+    "ast_hash": "0ff32f7f24a63efe52fd6edad7025a5e",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/InvitationsManager.tsx": {
+    "mtime": 1782937400.7768846,
+    "ast_hash": "6b32d71a1ae2728adf336868f08b93ec",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/MemberPortal.tsx": {
+    "mtime": 1782934500.687952,
+    "ast_hash": "b5832b3df3309f83dd08476316950b30",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/MyGiving.tsx": {
+    "mtime": 1782937560.4165978,
+    "ast_hash": "a40ad4c68ab4d358deb2b703258492cb",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/PlatformDashboard.tsx": {
+    "mtime": 1782937400.6098828,
+    "ast_hash": "a23d70bb787a11c0de281e5304065777",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/PlatformSettings.tsx": {
+    "mtime": 1782937400.8818858,
+    "ast_hash": "0843fc2228b48a0962dcf1f1331b7d67",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/PrivacyPolicy.tsx": {
+    "mtime": 1782934500.787566,
+    "ast_hash": "27011a30c9c6ca17ab80931b9bb19595",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/ReportsCenter.tsx": {
+    "mtime": 1782934500.8244653,
+    "ast_hash": "c2068b04228f281c6b2a145fe9b8c46a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/SecurityOverview.tsx": {
+    "mtime": 1782934500.8567662,
+    "ast_hash": "19a1455451e174ef6e51bca58e6e3f39",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/SermonHistory.tsx": {
+    "mtime": 1782934500.8899086,
+    "ast_hash": "03724b78bdd1d4a48f9428a267fc6f34",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/Settings.tsx": {
+    "mtime": 1782934500.9235675,
+    "ast_hash": "e95b2760b8cbc2687903ac28f1f3af64",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/TenantsList.tsx": {
+    "mtime": 1782937400.529882,
+    "ast_hash": "e251465f91c3836f56812703bf069b67",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/legacy/geminiBridge.ts": {
+    "mtime": 1782937398.9948654,
+    "ast_hash": "45a46d7d466302a657daaff500a0570e",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/lib/ai.ts": {
+    "mtime": 1782937398.7398627,
+    "ast_hash": "5afa590164eed89f9d1ebee602db1c72",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/lib/mpesa.ts": {
+    "mtime": 1782937516.9811316,
+    "ast_hash": "197f631d2d1ae5b3aaa1eff0cd2c8bf9",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Analytics/Index.tsx": {
+    "mtime": 1782937399.3688695,
+    "ast_hash": "ae7c324cf273402b4a59f8fec4ee4d3c",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/AuditLogs/Index.tsx": {
+    "mtime": 1782937399.518871,
+    "ast_hash": "1405447db0419ab2082d330e9a82c9fa",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Auth/Login.tsx": {
+    "mtime": 1782934018.407262,
+    "ast_hash": "fe517f56571f0f8ff22915b83caf434f",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Billing/Index.tsx": {
+    "mtime": 1782937611.6541476,
+    "ast_hash": "3b7c6c548bb366a1563c5c46de26bea0",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Communication/Index.tsx": {
+    "mtime": 1782937399.0918665,
+    "ast_hash": "c0faaecf7863595811935aa7a21d8483",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Dashboard.tsx": {
+    "mtime": 1782934022.5965097,
+    "ast_hash": "cf4b3118b762cfb6e1ecda7e45df24c8",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Events/Index.tsx": {
+    "mtime": 1782934188.5941334,
+    "ast_hash": "562401eb4d156c22d30941cb486a0f46",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Finance/Index.tsx": {
+    "mtime": 1782934186.7781134,
+    "ast_hash": "bce1e7128fcd0329edd7f05a09eaa527",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Giving/Index.tsx": {
+    "mtime": 1782937611.2021427,
+    "ast_hash": "a9e6615d0ee62933eb5e1a40d694b0aa",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Groups/Index.tsx": {
+    "mtime": 1782937399.2028677,
+    "ast_hash": "52975ee09c60579505102f5c1d29f548",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Legal/Compliance.tsx": {
+    "mtime": 1782937400.3908803,
+    "ast_hash": "f1690ec9ed8a448409da5ee66dacee00",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Legal/Privacy.tsx": {
+    "mtime": 1782937400.3218796,
+    "ast_hash": "66cb02cb2b7611b638ebbeb653c6e77a",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Legal/Security.tsx": {
+    "mtime": 1782937400.4598813,
+    "ast_hash": "7a153749a3fc8e8180040f82a7dde7fc",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Members/Index.tsx": {
+    "mtime": 1782934232.4566157,
+    "ast_hash": "a96c22e16f7844c946ed4cc2cf77f5e8",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Platform/Billing.tsx": {
+    "mtime": 1782937400.1518779,
+    "ast_hash": "fa358bbf154c8661deeb6dbeea3ed67f",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Platform/Index.tsx": {
+    "mtime": 1782937399.8568747,
+    "ast_hash": "7206f263db03f178a81b5e57bbb732c8",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Platform/Invitations.tsx": {
+    "mtime": 1782937400.0498767,
+    "ast_hash": "f9e2a7d17b6814971132138457733054",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Platform/Settings.tsx": {
+    "mtime": 1782937400.2218785,
+    "ast_hash": "9e5c12f277b58dc11408b9d4632f48ee",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Platform/Tenants.tsx": {
+    "mtime": 1782937399.9168754,
+    "ast_hash": "05d0d5f837267c9c041068f949252537",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Portal/Index.tsx": {
+    "mtime": 1782937399.707873,
+    "ast_hash": "c15396f6cfcfe6c13544563baf48e594",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Reports/Index.tsx": {
+    "mtime": 1782937399.2908688,
+    "ast_hash": "ede42cfe5b692cdd0d09f2babe6774f2",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Sermons/Index.tsx": {
+    "mtime": 1782937399.4418702,
+    "ast_hash": "f3fd381bea0601a874d4ba8b529d08b8",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/pages/Settings/Index.tsx": {
+    "mtime": 1782937399.6398723,
+    "ast_hash": "f886bf61f8a0898b98944fed91c1fb66",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/types/index.ts": {
+    "mtime": 1782933941.7114782,
+    "ast_hash": "d33ddde4df6f8ca7f5038a801db03994",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/types/inertia.ts": {
+    "mtime": 1782933950.5345557,
+    "ast_hash": "859642807a961ae730fa2272141847aa",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/js/vite-env.d.ts": {
+    "mtime": 1782934072.517857,
+    "ast_hash": "a5beb1145db4d90b6c168e891b217030",
+    "semantic_hash": ""
+  },
+  "imani-laravel/resources/views/app.blade.php": {
+    "mtime": 1782934053.4656477,
+    "ast_hash": "1f7fe966e04bd123442606f620f13738",
+    "semantic_hash": ""
+  },
+  "imani-laravel/routes/console.php": {
+    "mtime": 1782933940.2683933,
+    "ast_hash": "3c6ce2e6d16444282b24a9aa63885563",
+    "semantic_hash": ""
+  },
+  "imani-laravel/routes/web.php": {
+    "mtime": 1782937510.4085073,
+    "ast_hash": "ff47fa0b66309e41c7315744461da022",
+    "semantic_hash": ""
+  },
+  "imani-laravel/scripts/port-components.mjs": {
+    "mtime": 1782937398.8158636,
+    "ast_hash": "ad4f8afb8075adebdcc4c406bdc83b1e",
+    "semantic_hash": ""
+  },
+  "imani-laravel/tailwind.config.js": {
+    "mtime": 1782933931.6372905,
+    "ast_hash": "03c9fcc2f8f6d1de503e81cfbad3bb92",
+    "semantic_hash": ""
+  },
+  "imani-laravel/tsconfig.json": {
+    "mtime": 1782934182.931071,
+    "ast_hash": "a1e6b6de66ce49820a3fd58204a9d4e8",
+    "semantic_hash": ""
+  },
+  "imani-laravel/vite.config.js": {
+    "mtime": 1782933929.1582322,
+    "ast_hash": "42fbf1f74e7ebff7c62b4f27caacdda1",
+    "semantic_hash": ""
+  },
+  "index.tsx": {
+    "mtime": 1782875121.8070507,
+    "ast_hash": "e7efe130ec96962bb3f9dbfc7f209808",
+    "semantic_hash": ""
+  },
+  "metadata.json": {
+    "mtime": 1767348522.0,
+    "ast_hash": "e265822920aa0f6e540dc4fba7ec7a91",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1782901074.5365293,
+    "ast_hash": "644f757ab18f50db6ab353cb2503025b",
+    "semantic_hash": ""
+  },
+  "playwright.config.ts": {
+    "mtime": 1782901086.4505832,
+    "ast_hash": "0e8d156380a6b11fefa68e6b53211faa",
+    "semantic_hash": ""
+  },
+  "services/geminiService.ts": {
+    "mtime": 1782905670.9588203,
+    "ast_hash": "7bd7614bcb59855d7755ae25aef062cd",
+    "semantic_hash": ""
+  },
+  "src/components/ProtectedRoute.tsx": {
+    "mtime": 1782874845.3943543,
+    "ast_hash": "ca1ff89269d9ab9239b10bc13830b8d3",
+    "semantic_hash": ""
+  },
+  "src/lib/church-context.tsx": {
+    "mtime": 1782899616.3432064,
+    "ast_hash": "32326acc71f885ecc41ec63ff09a1963",
+    "semantic_hash": ""
+  },
+  "src/lib/mappers.ts": {
+    "mtime": 1782900461.0563974,
+    "ast_hash": "9754b13fd5191b8100d3dd4874cf89ec",
+    "semantic_hash": ""
+  },
+  "src/lib/persistence.ts": {
+    "mtime": 1782909809.5939867,
+    "ast_hash": "56b361461c7fa464b41f7e3eda1d2201",
+    "semantic_hash": ""
+  },
+  "src/lib/supabase-auth.ts": {
+    "mtime": 1782874834.2393262,
+    "ast_hash": "6c63aed90cbc51079390206e42529ea6",
+    "semantic_hash": ""
+  },
+  "src/lib/supabase.ts": {
+    "mtime": 1782874701.2949915,
+    "ast_hash": "5347cda1f2329944db3673368c0d3dfb",
+    "semantic_hash": ""
+  },
+  "src/vite-env.d.ts": {
+    "mtime": 1782875049.6358688,
+    "ast_hash": "0352474ba2918efe13895edbc3780d94",
+    "semantic_hash": ""
+  },
+  "supabase/functions/_shared/cors.ts": {
+    "mtime": 1782874782.7881968,
+    "ast_hash": "2d70627075e1ec4cfb4d97da8423be25",
+    "semantic_hash": ""
+  },
+  "supabase/functions/gemini/index.ts": {
+    "mtime": 1782874790.4842162,
+    "ast_hash": "2b9d0047d290e032fad800c1eb3a5e15",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/00001_domain_tables.sql": {
+    "mtime": 1782874766.162155,
+    "ast_hash": "f61a991f6c9e2699bc1eeee98fb8a6ee",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/00002_multi_tenant.sql": {
+    "mtime": 1782913106.3866205,
+    "ast_hash": "1726b4d81d1411e60c78eebf216f6c8f",
+    "semantic_hash": ""
+  },
+  "supabase/seed.sql": {
+    "mtime": 1782875835.8340228,
+    "ast_hash": "4d00bb63871d92c20bd202ca3f7cb5c6",
+    "semantic_hash": ""
+  },
+  "test-results/.last-run.json": {
+    "mtime": 1782909950.5487847,
+    "ast_hash": "f196824657d8858bc7fa44eecbba38b1",
+    "semantic_hash": ""
+  },
+  "tsconfig.json": {
+    "mtime": 1782875055.4858837,
+    "ast_hash": "7ad5c57777359922a082b92709315d0b",
+    "semantic_hash": ""
+  },
+  "types.ts": {
+    "mtime": 1782899761.6577957,
+    "ast_hash": "d33ddde4df6f8ca7f5038a801db03994",
+    "semantic_hash": ""
+  },
+  "vercel.json": {
+    "mtime": 1782874876.918434,
+    "ast_hash": "ded0b04edc8941c3e8fa851382c63aa3",
+    "semantic_hash": ""
+  },
+  "vite.config.ts": {
+    "mtime": 1782905634.6886399,
+    "ast_hash": "add96dc38d779b86841989c209122bd1",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/progress.md": {
+    "mtime": 1782856352.680562,
+    "ast_hash": "fbf510de9e844979649d8e1bcc2c9dae",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-1-base.txt": {
+    "mtime": 1782854830.594028,
+    "ast_hash": "dd07d246e18732bfc5b2b09da9c65ecd",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-1-brief.md": {
+    "mtime": 1782854817.778996,
+    "ast_hash": "096bfe2303f7eeb44a52912db80d3bbb",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-1-report.md": {
+    "mtime": 1782854989.3694222,
+    "ast_hash": "a98906addd40c4c20b5307496b2c652c",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-10-base.txt": {
+    "mtime": 1782856114.6203794,
+    "ast_hash": "df091f999a1d2cd1e640ec692795a3fb",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-10-brief.md": {
+    "mtime": 1782856114.6393795,
+    "ast_hash": "c63c2e0ef68c41d03fe56b03506673e8",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-10-report.md": {
+    "mtime": 1782856342.1775541,
+    "ast_hash": "ec2dfc41148c2608bc3b511dba9a34ff",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-11-base.txt": {
+    "mtime": 1782856352.683562,
+    "ast_hash": "f76e423287a21fc9aba524db1b487647",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-11-brief.md": {
+    "mtime": 1782856352.703562,
+    "ast_hash": "d3beb3c0b4eb23f4b1d05503d9933cde",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-11-report.md": {
+    "mtime": 1782856412.2156076,
+    "ast_hash": "11c2d37170d12ec317da596ca8c063e5",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-2-base.txt": {
+    "mtime": 1782855023.603507,
+    "ast_hash": "712db09d5dc15eaf4479db6388d63ee2",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-2-brief.md": {
+    "mtime": 1782855018.0654933,
+    "ast_hash": "49c09f731f1ccbf044d1fc9ed2927c50",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-2-report.md": {
+    "mtime": 1782855064.4046085,
+    "ast_hash": "a08c1ad64ae86dc24bef991be3383613",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-3-base.txt": {
+    "mtime": 1782855084.825659,
+    "ast_hash": "aa1489fc45f4e2013f2341ef72773859",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-3-brief.md": {
+    "mtime": 1782855080.1036475,
+    "ast_hash": "52c610ebee2f338e6c884b1921103daa",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-3-report.md": {
+    "mtime": 1782855130.1227715,
+    "ast_hash": "8478e379a6d9ea761155e13b372269f6",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-4-base.txt": {
+    "mtime": 1782855140.1597965,
+    "ast_hash": "ffd70aecbfa8cc69774dadf7de1d8744",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-4-brief.md": {
+    "mtime": 1782855140.1947966,
+    "ast_hash": "57868b5ad3a7eb468c3684d99c09b3d4",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-4-report.md": {
+    "mtime": 1782855185.467909,
+    "ast_hash": "42724a99859c94ed7be971b78118bfde",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-5-base.txt": {
+    "mtime": 1782855194.6389318,
+    "ast_hash": "58ce79371cfdf88a7c8ffb1ffda4ea4e",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-5-brief.md": {
+    "mtime": 1782855194.6589317,
+    "ast_hash": "dd3678c1c5d52cf3a2e26706c5bf3879",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-5-report.md": {
+    "mtime": 1782855405.5524554,
+    "ast_hash": "c184f052ceb5605f9665a1add059b627",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-6-base.txt": {
+    "mtime": 1782855430.5515175,
+    "ast_hash": "a4eef7ead9edf4a16994c50ca9267ce7",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-6-brief.md": {
+    "mtime": 1782855430.5715175,
+    "ast_hash": "65687aef972cdd8d248b266c4b101a1d",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-6-report.md": {
+    "mtime": 1782855498.6586866,
+    "ast_hash": "e3f8561f7601578785ed97f38e16b3bf",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-7-base.txt": {
+    "mtime": 1782855510.2467153,
+    "ast_hash": "a1ac5eb9d2839f58d71d1a38124b901f",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-7-brief.md": {
+    "mtime": 1782855510.2657154,
+    "ast_hash": "7bbe0f7da0ea0cc0f11445313bc1b3b3",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-7-report.md": {
+    "mtime": 1782855779.5271225,
+    "ast_hash": "9d49d1aed9ab73fce78a59035a333aa4",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-8-base.txt": {
+    "mtime": 1782855789.6431303,
+    "ast_hash": "f5f6dfd6e230ffe1bd608cbc8b1e8ad3",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-8-brief.md": {
+    "mtime": 1782855789.6631303,
+    "ast_hash": "c013ceed23722a96d031d1426334835c",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-8-report.md": {
+    "mtime": 1782855835.2971654,
+    "ast_hash": "59ea53870760093e3697b605205c6020",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-9-base.txt": {
+    "mtime": 1782855844.1251721,
+    "ast_hash": "539106650bd06d08f102573376d8d1a0",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-9-brief.md": {
+    "mtime": 1782855844.145172,
+    "ast_hash": "0dab2e6c0f44fab976910ced54245776",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/task-9-report.md": {
+    "mtime": 1782856031.3073156,
+    "ast_hash": "65fa92c91d1c7250c1d9f15c11cdcde6",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1782904630.2415006,
+    "ast_hash": "24c14b764a0536ba282fd396ef3b3714",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1782904649.6509006,
+    "ast_hash": "82efb97a359f5c7290bf2513d14686be",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1767348522.0,
+    "ast_hash": "773f4e7f84aa9eb759d81843f736ea1a",
+    "semantic_hash": ""
+  },
+  "docs/laravel-migration-plan.md": {
+    "mtime": 1782937396.6857986,
+    "ast_hash": "ec7ac553cc309bb0658f2c837f96d748",
+    "semantic_hash": ""
+  },
+  "docs/launch-readiness-checklist.md": {
+    "mtime": 1782905407.9866614,
+    "ast_hash": "1311cd627dc6041fcea1e0e04bca55aa",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-06-30-backend-integration.md": {
+    "mtime": 1782854019.4728396,
+    "ast_hash": "5a3d65069c11e64a04b9942085550ba8",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-07-01-multi-tenant-superadmin.md": {
+    "mtime": 1782899542.947209,
+    "ast_hash": "bfe7ff98f1953426e32067fbc8998f04",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-06-30-backend-integration-design.md": {
+    "mtime": 1782853848.8713646,
+    "ast_hash": "f7c815bfa9aa3f6b64d77f71bfaef9f5",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-01-multi-tenant-superadmin-design.md": {
+    "mtime": 1782899435.8828099,
+    "ast_hash": "1e7c5aea8f4f6ea6918f9645b796c858",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-07-01-supabase-migration-design.md": {
+    "mtime": 1782874664.8038995,
+    "ast_hash": "fb7a6b57d44aa97eaf74482561d489f4",
+    "semantic_hash": ""
+  },
+  "e2e-report/index.html": {
+    "mtime": 1782909950.5464504,
+    "ast_hash": "07d9a91dcabfcf039d4618c05f8c85db",
+    "semantic_hash": ""
+  },
+  "imani-laravel/README.md": {
+    "mtime": 1782937400.9658866,
+    "ast_hash": "ebd5e8c7db5fe71aa86af7a4038a07d8",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1782763708.2635498,
+    "ast_hash": "4fde375f5579ab608f3ffb0ecb2ac0c5",
+    "semantic_hash": ""
+  }
+}

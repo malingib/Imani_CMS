@@ -31,7 +31,6 @@ interface SidebarProps {
   currentUser: User;
   branches: string[];
   onBranchChange: (branch: string) => void;
-  onRoleSwitch: (role: UserRole) => void;
   onLogout: () => void;
   isOpen?: boolean;
   onClose?: () => void;
@@ -57,7 +56,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   currentUser, 
   branches,
   onBranchChange,
-  onRoleSwitch, 
   onLogout,
   isOpen,
   onClose,
@@ -235,24 +233,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       <div className="p-4 border-t border-slate-100 space-y-2">
-        <div className="px-4 py-2">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Simulate Role</p>
-          <div className="relative">
-            <select 
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold py-2 px-3 outline-none appearance-none cursor-pointer focus:border-brand-indigo transition-all"
-              value={currentUser.role}
-              onChange={(e) => onRoleSwitch(e.target.value as UserRole)}
-            >
-              {Object.values(UserRole).map(role => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-               <ChevronDown size={10} />
-            </div>
-          </div>
-        </div>
-
         { !isSuperAdmin && currentUser.role !== UserRole.MEMBER && (
           <button onClick={() => setView('SETTINGS')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}>

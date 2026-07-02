@@ -33,6 +33,18 @@ import { Bell, Menu, X, Loader2 } from 'lucide-react';
 import { supabase, useSession } from '../src/lib/supabase-auth';
 import { ChurchProvider, useChurch } from '../src/lib/church-context';
 import { mapMember, mapTransaction, mapEvent, mapAuditLog } from '../src/lib/mappers';
+import {
+  createEvent,
+  createMember,
+  createMembers,
+  createTransaction,
+  deleteEvent,
+  deleteMember,
+  deleteTransaction,
+  replaceEventAttendance,
+  updateMember,
+  updateTransaction,
+} from '../src/lib/persistence';
 
 const AppContent: React.FC = () => {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
@@ -43,6 +55,7 @@ const AppContent: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
   
   const [branches] = useState(['Nairobi Central', 'Mombasa Branch', 'Kisumu Branch', 'Nakuru Branch']);
 
@@ -53,6 +66,11 @@ const AppContent: React.FC = () => {
     const id = Math.random().toString(36).substr(2, 9);
     setToasts(prev => [...prev, { id, message, type }]);
     setTimeout(() => { setToasts(prev => prev.filter(t => t.id !== id)); }, 4000);
+  };
+
+  const requireChurchId = () => {
+    if (!churchId) throw new Error('Select a church before making changes.');
+    return churchId;
   };
 
   const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
@@ -110,10 +128,12 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated || viewingPlatform) {
-      if (!isAuthenticated) setDataLoading(false);
+      setDataLoading(false);
+      setDataError(null);
       return;
     }
     setDataLoading(true);
+    setDataError(null);
 
     const baseQuery = (table: string, select = '*') => {
       let q = supabase.from(table).select(select);
@@ -121,27 +141,46 @@ const AppContent: React.FC = () => {
       return q;
     };
 
-    const fMembers = baseQuery('members', '*').then(({ data, error }) =>
-      !error && data ? data.map(mapMember) : []
-    );
-    const fTransactions = baseQuery('transactions', '*').then(({ data, error }) =>
-      !error && data ? data.map(mapTransaction) : []
-    );
-    const fEvents = baseQuery('church_events', '*').then(({ data, error }) =>
-      !error && data ? data.map(mapEvent) : []
-    );
-    const fAuditLogs = baseQuery('audit_logs', '*').then(({ data, error }) =>
-      !error && data ? data.map(mapAuditLog) : []
-    );
+    const fMembers = baseQuery('members', '*').then(({ data, error }) => {
+      if (error) throw error;
+      return data ? data.map(mapMember) : [];
+    });
+    const fTransactions = baseQuery('transactions', '*').then(({ data, error }) => {
+      if (error) throw error;
+      return data ? data.map(mapTransaction) : [];
+    });
+    const fEvents = baseQuery('church_events', '*').then(({ data, error }) => {
+      if (error) throw error;
+      return data ? data.map(mapEvent) : [];
+    });
+    const fAttendance = baseQuery('event_attendance', 'event_id, member_id').then(({ data, error }) => {
+      if (error) throw error;
+      return data || [];
+    });
+    const fAuditLogs = baseQuery('audit_logs', '*').then(({ data, error }) => {
+      if (error) throw error;
+      return data ? data.map(mapAuditLog) : [];
+    });
 
-    Promise.all([fMembers, fTransactions, fEvents, fAuditLogs])
-      .then(([m, t, e, a]) => {
+    Promise.all([fMembers, fTransactions, fEvents, fAttendance, fAuditLogs])
+      .then(([m, t, e, attendanceRows, a]) => {
+        const attendanceByEvent = new Map<string, string[]>();
+        attendanceRows.forEach((row: any) => {
+          const eventAttendance = attendanceByEvent.get(row.event_id) || [];
+          eventAttendance.push(row.member_id);
+          attendanceByEvent.set(row.event_id, eventAttendance);
+        });
         setMembers(m);
         setTransactions(t);
-        setEvents(e);
+        setEvents(e.map(event => ({ ...event, attendance: attendanceByEvent.get(event.id) || [] })));
         setAuditLogs(a);
-        setDataLoading(false);
-      });
+      })
+      .catch((error) => {
+        const message = error?.message || 'Failed to load church data.';
+        setDataError(message);
+        addToast(message, 'error');
+      })
+      .finally(() => setDataLoading(false));
   }, [isAuthenticated, churchId, viewingPlatform]);
 
   const handleLogin = (user: User) => {
@@ -160,9 +199,145 @@ const AppContent: React.FC = () => {
   };
 
   const handleAddMembersBulk = async (importedMembers: Member[]) => {
-    setMembers(prev => [...prev, ...importedMembers]);
-    addToast(`Successfully imported ${importedMembers.length} members`, 'success');
-    createAudit(`Bulk imported ${importedMembers.length} members`, 'MEMBERS');
+    try {
+      const saved = await createMembers(importedMembers, requireChurchId());
+      setMembers(prev => [...prev, ...saved]);
+      addToast(`Successfully imported ${saved.length} members`, 'success');
+      createAudit(`Bulk imported ${saved.length} members`, 'MEMBERS');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to import members', 'error');
+    }
+  };
+
+  const handleAddMember = async (member: Member) => {
+    try {
+      const saved = await createMember(member, requireChurchId());
+      setMembers(prev => [...prev, saved]);
+      createAudit(`Added member ${saved.firstName}`, 'MEMBERS');
+      addToast('Member saved');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to add member', 'error');
+    }
+  };
+
+  const handleUpdateMember = async (member: Member) => {
+    try {
+      const saved = await updateMember(member, requireChurchId());
+      setMembers(prev => prev.map(p => p.id === saved.id ? saved : p));
+      createAudit(`Updated member ${saved.firstName}`, 'MEMBERS');
+      addToast('Member updated');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to update member', 'error');
+    }
+  };
+
+  const handleDeleteMember = async (id: string) => {
+    try {
+      await deleteMember(id, requireChurchId());
+      setMembers(prev => prev.filter(m => m.id !== id));
+      createAudit(`Deleted member ${id}`, 'MEMBERS', 'CRITICAL');
+      addToast('Member deleted', 'info');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to delete member', 'error');
+    }
+  };
+
+  const handleAddTransaction = async (transaction: Transaction) => {
+    try {
+      const saved = await createTransaction(transaction, requireChurchId());
+      setTransactions(prev => [saved, ...prev]);
+      createAudit(`Recorded transaction ${saved.reference}`, 'FINANCE');
+      addToast('Transaction saved');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to save transaction', 'error');
+    }
+  };
+
+  const handleUpdateTransaction = async (transaction: Transaction) => {
+    try {
+      const saved = await updateTransaction(transaction, requireChurchId());
+      setTransactions(prev => prev.map(t => t.id === saved.id ? saved : t));
+      createAudit(`Updated transaction ${saved.reference}`, 'FINANCE');
+      addToast('Transaction updated');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to update transaction', 'error');
+    }
+  };
+
+  const handleDeleteTransaction = async (id: string) => {
+    try {
+      await deleteTransaction(id, requireChurchId());
+      setTransactions(prev => prev.filter(t => t.id !== id));
+      createAudit(`Deleted transaction ${id}`, 'FINANCE', 'CRITICAL');
+      addToast('Transaction deleted', 'info');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to delete transaction', 'error');
+    }
+  };
+
+  const handleAddEvent = async (event: ChurchEvent) => {
+    try {
+      const saved = await createEvent(event, requireChurchId());
+      setEvents(prev => [...prev, saved]);
+      createAudit(`Scheduled event ${saved.title}`, 'EVENTS');
+      addToast('Event scheduled');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to schedule event', 'error');
+    }
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    try {
+      await deleteEvent(id, requireChurchId());
+      setEvents(prev => prev.filter(e => e.id !== id));
+      createAudit(`Deleted event ${id}`, 'EVENTS', 'WARN');
+      addToast('Event deleted', 'info');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to delete event', 'error');
+    }
+  };
+
+  const handleUpdateAttendance = async (eventId: string, memberIds: string[]) => {
+    try {
+      await replaceEventAttendance(eventId, memberIds, requireChurchId());
+      setEvents(prev => prev.map(e => e.id === eventId ? { ...e, attendance: memberIds } : e));
+      createAudit(`Updated attendance for ${eventId}`, 'EVENTS');
+      addToast('Attendance updated');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to update attendance', 'error');
+    }
+  };
+
+  const handleRSVP = async (eventId: string, isRSVPing: boolean) => {
+    try {
+      const memberId = currentUser?.memberId;
+      if (!memberId) throw new Error('Only member accounts can RSVP.');
+      const event = events.find(item => item.id === eventId);
+      if (!event) throw new Error('Event not found.');
+      const nextAttendance = isRSVPing
+        ? Array.from(new Set([...event.attendance, memberId]))
+        : event.attendance.filter(id => id !== memberId);
+      await replaceEventAttendance(eventId, nextAttendance, requireChurchId());
+      setEvents(prev => prev.map(item => item.id === eventId ? { ...item, attendance: nextAttendance } : item));
+      createAudit(`${isRSVPing ? 'RSVPd for' : 'Cancelled RSVP for'} ${eventId}`, 'EVENTS');
+      addToast(isRSVPing ? 'RSVP saved' : 'RSVP removed');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to update RSVP', 'error');
+    }
+  };
+
+  const handleUpdateProfile = async (member: Member) => {
+    try {
+      const saved = await updateMember(member, requireChurchId());
+      setMembers(prev => prev.map(item => item.id === saved.id ? saved : item));
+      if (currentUser?.memberId === saved.id) {
+        setCurrentUser(prev => prev ? { ...prev, name: `${saved.firstName} ${saved.lastName}`.trim(), avatar: saved.photo || prev.avatar } : prev);
+      }
+      createAudit('Updated profile', 'MY_PORTAL');
+      addToast('Profile updated');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to update profile', 'error');
+    }
   };
 
   const handleSelectChurch = (id: string) => {
@@ -192,30 +367,30 @@ const AppContent: React.FC = () => {
       case 'DASHBOARD':
         return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => setCurrentView('MEMBERS')} onSendSMS={() => setCurrentView('COMMUNICATION')} onNavigate={setCurrentView} />;
       case 'MY_PORTAL':
-        return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} activities={[]} onNavigate={setCurrentView} onUpdateProfile={(m) => { setMembers(prev => prev.map(p => p.id === m.id ? m : p)); addToast('Profile updated'); createAudit('Updated profile', 'MY_PORTAL'); }} onRSVP={() => {}} />;
+        return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} activities={[]} onNavigate={setCurrentView} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />;
       case 'MY_GIVING':
         return <MyGiving member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} onGive={() => { addToast('STK Push Sent'); createAudit('Initiated Giving STK', 'MY_GIVING'); }} />;
       case 'MEMBERS':
         return (
           <Membership 
             members={members} 
-            onAddMember={(m) => { setMembers(prev => [...prev, m]); createAudit(`Added member ${m.firstName}`, 'MEMBERS'); }} 
+            onAddMember={handleAddMember} 
             onAddMembersBulk={handleAddMembersBulk}
-            onUpdateMember={(m) => { setMembers(prev => prev.map(p => p.id === m.id ? m : p)); createAudit(`Updated member ${m.firstName}`, 'MEMBERS'); }} 
-            onDeleteMember={(id) => { setMembers(prev => prev.filter(m => m.id !== id)); createAudit(`Deleted member ${id}`, 'MEMBERS', 'CRITICAL'); }} 
+            onUpdateMember={handleUpdateMember} 
+            onDeleteMember={handleDeleteMember} 
             transactions={transactions} 
             events={events} 
             currentUserRole={currentUser.role} 
           />
         );
       case 'FINANCE':
-        return <FinanceReporting transactions={transactions} members={members} onAddTransaction={(t) => { setTransactions(prev => [t, ...prev]); createAudit(`Recorded transaction ${t.reference}`, 'FINANCE'); }} onUpdateTransaction={() => {}} onDeleteTransaction={() => {}} budgets={[]} onSetBudget={() => {}} recurringExpenses={[]} onAddRecurring={() => {}} currentUserRole={currentUser.role} />;
+        return <FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={[]} onSetBudget={() => {}} recurringExpenses={[]} onAddRecurring={() => {}} currentUserRole={currentUser.role} />;
       case 'COMMUNICATION':
         return <CommunicationCenter members={members} logs={[]} onSendBroadcast={(log) => { addToast('Broadcast sent'); createAudit(`Sent ${log.type} broadcast to ${log.targetGroupName}`, 'COMMUNICATION'); }} currentUser={currentUser} />;
       case 'GROUPS':
         return <GroupsManagement members={members} />;
       case 'EVENTS':
-        return <EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={() => {}} onAddEvent={(e) => { setEvents(prev => [...prev, e]); createAudit(`Scheduled event ${e.title}`, 'EVENTS'); }} onDeleteEvent={(id) => setEvents(prev => prev.filter(e => e.id !== id))} onUpdateAttendance={(id, ids) => setEvents(prev => prev.map(e => e.id === id ? {...e, attendance: ids} : e))} />;
+        return <EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />;
       case 'ANALYTICS':
         return <DemographicsAnalysis members={members} />;
       case 'REPORTS':
@@ -265,7 +440,7 @@ const AppContent: React.FC = () => {
       </div>
 
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-      <Sidebar currentView={currentView} setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} currentUser={currentUser} branches={branches} onBranchChange={() => {}} onRoleSwitch={(r) => { setCurrentUser({...currentUser, role: r}); addToast(`Role: ${r}`, "info"); createAudit(`Simulated role switch to ${r}`, 'SETTINGS'); }} onLogout={handleLogout} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} churches={churches} activeChurchId={activeChurchId} onChurchSwitch={(id) => { setActiveChurchId(id); if (!id) setCurrentView('PLATFORM_DASHBOARD'); }} />
+      <Sidebar currentView={currentView} setView={(v) => { setCurrentView(v); setIsSidebarOpen(false); }} currentUser={currentUser} branches={branches} onBranchChange={() => {}} onLogout={handleLogout} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} churches={churches} activeChurchId={activeChurchId} onChurchSwitch={(id) => { setActiveChurchId(id); if (!id) setCurrentView('PLATFORM_DASHBOARD'); }} />
       
       <main className="flex-1 min-h-screen lg:ml-64 transition-all">
         <header className="h-20 bg-white border-b border-slate-100 px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">

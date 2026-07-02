@@ -9,6 +9,7 @@ import { User as UserType, UserRole, AppView } from '../types';
 import { generateDailyVerse } from '../services/geminiService';
 import { ImaniLogoIcon } from './Sidebar';
 import { useAuth } from '../src/lib/supabase-auth';
+import { LoginFormSchema, SignupFormSchema, PasswordResetSchema, validateFormData } from '../src/lib/validation';
 
 interface LoginProps {
   onLogin: (user: UserType) => void;
@@ -89,6 +90,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    
+    // Validate form data
+    const { data, errors } = validateFormData(LoginFormSchema, { email, password });
+    if (!data) {
+      setError(Object.values(errors)[0] || 'Invalid input');
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const result = await login(email, password);
       const meta = result.user.user_metadata || {};
@@ -109,6 +119,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    
+    // Validate form data
+    const { data, errors } = validateFormData(SignupFormSchema, { name, email, password, confirmPassword: password });
+    if (!data) {
+      setError(Object.values(errors)[0] || 'Invalid input');
+      setIsLoading(false);
+      return;
+    }
+    
     setTimeout(() => {
       setSuccess('Your registration request has been sent to the church admin for approval.');
       setIsLoading(false);
@@ -119,6 +138,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    
+    // Validate email
+    const { data, errors } = validateFormData(PasswordResetSchema, { email });
+    if (!data) {
+      setError(Object.values(errors)[0] || 'Invalid email');
+      setIsLoading(false);
+      return;
+    }
+    
     setTimeout(() => {
       setSuccess(`Password reset instructions have been sent to ${email}`);
       setIsLoading(false);

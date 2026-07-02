@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Home, Shield, Settings2, Bell, Globe, 
   Smartphone, Save, Camera, RefreshCcw,
@@ -12,14 +12,27 @@ import {
   ShieldQuestion, AlertCircle
 } from 'lucide-react';
 import { SystemRole, UserRole } from '../types';
+import { createPlatformSettingsService } from '../src/lib/platform-settings-service';
+import { supabase } from '../src/lib/supabase';
+
+const platformSettingsService = createPlatformSettingsService(supabase);
+
+const DEFAULT_INTEGRATIONS = {
+  mpesaEnabled: true,
+  paystackEnabled: false,
+  mpesaEnv: 'Sandbox',
+  mpesaShortcode: '174379',
+  paystackPubKey: '',
+};
 
 interface SettingsProps {
   currentUserRole: UserRole;
+  churchId: string;
 }
 
 type SettingTab = 'PROFILE' | 'ROLES' | 'PREFERENCES' | 'INTEGRATIONS';
 
-const Settings: React.FC<SettingsProps> = ({ currentUserRole }) => {
+const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   // Define tab permissions
   const availableTabs = useMemo(() => {
     const tabs: { id: SettingTab; label: string; icon: any }[] = [
@@ -42,7 +55,6 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole }) => {
   const [activeTab, setActiveTab] = useState<SettingTab>('PROFILE');
   const [selectedRoleId, setSelectedRoleId] = useState('role-1');
   const [isSaving, setIsSaving] = useState(false);
-  const [showSecrets, setShowSecrets] = useState(false);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
 
   const [churchInfo, setChurchInfo] = useState({
@@ -62,17 +74,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole }) => {
     mpesaConfirmationsEmail: true
   });
 
-  const [integrations, setIntegrations] = useState({
-    mpesaEnabled: true,
-    paystackEnabled: false,
-    mpesaEnv: 'Sandbox',
-    mpesaShortcode: '174379',
-    mpesaConsumerKey: 'K9jH7s2D1f9G8h3J4kL5mN6pQ7rT8uV9',
-    mpesaConsumerSecret: 'P8rL5k4J3h2G1fD9s8A7q6W5e4R3t2Y1',
-    mpesaPasskey: 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
-    paystackPubKey: 'pk_test_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6',
-    paystackSecKey: 'sk_test_q1w2e3r4t5y6u7i8o9p0a1s2d3f4g5h6'
-  });
+  const [integrations, setIntegrations] = useState(DEFAULT_INTEGRATIONS);
 
   const roles: SystemRole[] = [
     { id: 'role-1', name: 'Finance Team', memberCount: 3, description: 'Manage treasury records.', modules: [] },
@@ -96,6 +98,19 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole }) => {
 
   const isAdmin = currentUserRole === UserRole.ADMIN;
   const isFinance = currentUserRole === UserRole.TREASURER || isAdmin;
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const saved = await platformSettingsService.getSetting('integrations', DEFAULT_INTEGRATIONS);
+        if (saved) {
+          setIntegrations(prev => ({ ...prev, ...saved }));
+        }
+      } catch {
+        // fallback to defaults
+      }
+    })();
+  }, []);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 max-w-[1200px] mx-auto pb-12">
@@ -187,16 +202,11 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole }) => {
                       <div className="flex items-center gap-3">
                          <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Zap size={24}/></div>
                          <h4 className="text-xl font-black uppercase tracking-tight">Payment Integration</h4>
-                      </div>
-                      <p className="text-indigo-100 text-sm font-medium leading-relaxed">
-                        Authorize <span className="text-white font-black">Direct M-Pesa</span> and <span className="text-white font-black">Paystack Africa</span>. Requires C2B/B2C credentials from Daraja portal.
-                      </p>
-                      <button 
-                        onClick={() => setShowSecrets(!showSecrets)}
-                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-brand-gold hover:text-white transition-colors"
-                      >
-                        {showSecrets ? <EyeOff size={14}/> : <Eye size={14}/>} {showSecrets ? 'Mask Keys' : 'Reveal Secrets'}
-                      </button>
+                       </div>
+                       <p className="text-indigo-100 text-sm font-medium leading-relaxed">
+                         Authorize <span className="text-white font-black">Direct M-Pesa</span> and <span className="text-white font-black">Paystack Africa</span>. Requires C2B/B2C credentials from Daraja portal.
+                       </p>
+                       <p className="text-brand-gold/70 text-[10px] font-black uppercase tracking-widest">Secrets managed in deployment config, not in-browser.</p>
                    </div>
                    <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
                 </div>
@@ -268,66 +278,73 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole }) => {
                             <input type="text" className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-sm focus:ring-2 focus:ring-brand-primary outline-none shadow-inner" value={integrations.mpesaShortcode} onChange={e => setIntegrations({...integrations, mpesaShortcode: e.target.value})} />
                          </div>
                       </div>
-                      <div className="md:col-span-2 space-y-2">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Consumer Key</label>
-                         <div className="relative group">
-                            <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18}/>
-                            <input 
-                              type={showSecrets ? "text" : "password"} 
-                              className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-mono text-xs focus:ring-2 focus:ring-brand-primary outline-none shadow-inner" 
-                              value={integrations.mpesaConsumerKey} 
-                              onChange={e => setIntegrations({...integrations, mpesaConsumerKey: e.target.value})} 
-                            />
-                         </div>
-                      </div>
-                      <div className="md:col-span-2 space-y-2">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Consumer Secret</label>
-                         <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18}/>
-                            <input 
-                              type={showSecrets ? "text" : "password"} 
-                              className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-mono text-xs focus:ring-2 focus:ring-brand-primary outline-none shadow-inner" 
-                              value={integrations.mpesaConsumerSecret} 
-                              onChange={e => setIntegrations({...integrations, mpesaConsumerSecret: e.target.value})} 
-                            />
-                         </div>
-                      </div>
-                      <div className="md:col-span-2 space-y-2">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-2">LNM Online Passkey</label>
-                         <div className="relative">
-                            <ShieldAlert className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18}/>
-                            <input 
-                              type={showSecrets ? "text" : "password"} 
-                              className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-mono text-xs focus:ring-2 focus:ring-brand-primary outline-none shadow-inner" 
-                              value={integrations.mpesaPasskey} 
-                              onChange={e => setIntegrations({...integrations, mpesaPasskey: e.target.value})} 
-                            />
-                         </div>
-                      </div>
+                       <div className="md:col-span-2 space-y-2">
+                          <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Consumer Key</label>
+                          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-xs font-bold text-slate-500">
+                            Secret keys are managed outside the browser in secure server environment variables.
+                          </div>
+                       </div>
+                       <div className="md:col-span-2 space-y-2">
+                          <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Consumer Secret</label>
+                          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-xs font-bold text-slate-500">
+                            Stored securely on the backend. Rotate through deployment secrets, not this page.
+                          </div>
+                       </div>
+                       <div className="md:col-span-2 space-y-2">
+                          <label className="text-[10px] font-black uppercase text-slate-400 ml-2">LNM Online Passkey</label>
+                          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-xs font-bold text-slate-500">
+                            Hidden by design. Keep production passkeys in Supabase or deployment secrets.
+                          </div>
+                       </div>
                    </div>
 
-                   <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-6">
-                      <div className="flex items-center gap-3">
-                         <button 
-                           onClick={handleTestConnection}
-                           disabled={isTestingConnection}
-                           className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2"
-                         >
-                            {isTestingConnection ? <Loader2 className="animate-spin" size={14}/> : <Activity size={14}/>}
-                            {isTestingConnection ? 'Testing...' : 'Test Connection'}
-                         </button>
-                         <div className="flex items-center gap-2 text-slate-400">
-                            <Database size={14}/>
-                            <span className="text-[10px] font-black uppercase">Connected</span>
-                         </div>
-                      </div>
-                      <button 
-                        onClick={() => setIntegrations({...integrations, mpesaEnabled: !integrations.mpesaEnabled})}
-                        className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl ${integrations.mpesaEnabled ? 'bg-slate-900 text-white hover:bg-rose-600' : 'bg-brand-emerald text-white hover:shadow-emerald-100'}`}
-                      >
-                         {integrations.mpesaEnabled ? 'Revoke Gateway Access' : 'Initialize Direct Bridge'}
-                      </button>
-                   </div>
+                    <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-6">
+                       <div className="flex items-center gap-3">
+                          <button 
+                            onClick={handleTestConnection}
+                            disabled={isTestingConnection}
+                            className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2"
+                          >
+                             {isTestingConnection ? <Loader2 className="animate-spin" size={14}/> : <Activity size={14}/>}
+                             {isTestingConnection ? 'Testing...' : 'Test Connection'}
+                          </button>
+                          <div className="flex items-center gap-2 text-slate-400">
+                             <Database size={14}/>
+                             <span className="text-[10px] font-black uppercase">Connected</span>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-3">
+                          <button
+                            onClick={async () => {
+                              setIsSaving(true);
+                              try {
+                                 await platformSettingsService.saveSetting('integrations', {
+                                   mpesaEnabled: integrations.mpesaEnabled,
+                                   paystackEnabled: integrations.paystackEnabled,
+                                   mpesaEnv: integrations.mpesaEnv,
+                                   mpesaShortcode: integrations.mpesaShortcode,
+                                   paystackPubKey: integrations.paystackPubKey,
+                                 });
+                              } catch {
+                                // persist failure
+                              } finally {
+                                setIsSaving(false);
+                              }
+                            }}
+                            disabled={isSaving}
+                            className="px-6 py-3 bg-brand-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-indigo transition-all flex items-center gap-2 disabled:opacity-50"
+                          >
+                            {isSaving ? <Loader2 className="animate-spin" size={14}/> : <Save size={14}/>}
+                            {isSaving ? 'Saving...' : 'Save Settings'}
+                          </button>
+                          <button 
+                            onClick={() => setIntegrations({...integrations, mpesaEnabled: !integrations.mpesaEnabled})}
+                            className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl ${integrations.mpesaEnabled ? 'bg-slate-900 text-white hover:bg-rose-600' : 'bg-brand-emerald text-white hover:shadow-emerald-100'}`}
+                          >
+                            {integrations.mpesaEnabled ? 'Revoke Gateway Access' : 'Initialize Direct Bridge'}
+                          </button>
+                       </div>
+                    </div>
                 </div>
 
                 {/* Alternative Gateway: Paystack */}
@@ -355,7 +372,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole }) => {
                         </div>
                         <div className="space-y-2">
                            <label className="text-[9px] font-black uppercase text-slate-400 ml-2">Secret Key</label>
-                           <input type="password" readOnly className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl font-mono text-xs text-slate-400" value={integrations.paystackSecKey} />
+                            <div className="w-full rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 font-mono text-xs text-slate-400">Managed in server secrets</div>
                         </div>
                      </div>
                    ) : (

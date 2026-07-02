@@ -31,22 +31,36 @@ import {
 } from 'lucide-react';
 import { Member, Transaction, ChurchEvent, AppView, MemberActivity } from '../types';
 import { generateDailyVerse } from '../services/geminiService';
+import { getActivities } from '../src/lib/persistence';
 
 interface MemberPortalProps {
   member: Member;
   transactions: Transaction[];
   events: ChurchEvent[];
   activities: MemberActivity[];
+  churchId: string;
   onNavigate: (view: AppView) => void;
   onUpdateProfile: (member: Member) => void;
   onRSVP: (eventId: string, isRSVPing: boolean) => void;
 }
 
-const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, events, activities, onNavigate, onUpdateProfile, onRSVP }) => {
+const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, events, activities: _initialActivities, churchId, onNavigate, onUpdateProfile, onRSVP }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Member>({ ...member });
   const [dailyVerse, setDailyVerse] = useState({ text: 'Loading inspirational word...', ref: '' });
   const [eventFilter, setEventFilter] = useState<'ALL' | 'REGISTERED'>('ALL');
+  const [activities, setActivities] = useState<MemberActivity[]>(_initialActivities);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getActivities(member.id, churchId);
+        setActivities(data);
+      } catch {
+        setActivities([]);
+      }
+    })();
+  }, [member.id, churchId]);
 
   const myTransactions = useMemo(() => transactions.filter(t => t.memberId === member.id), [transactions, member.id]);
   const totalGiving = myTransactions.reduce((sum, t) => sum + t.amount, 0);

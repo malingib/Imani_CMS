@@ -1,35 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
+import { createInvitationsService, type ChurchOption, type InvitationRecord } from '../src/lib/invitations-service';
 import { Mail, Send, CheckCircle2, XCircle, Clock, RefreshCw } from 'lucide-react';
 
-interface Invitation {
-  id: string;
-  church_id: string;
-  email: string;
-  role: string;
-  token: string;
-  expires_at: string;
-  accepted_at: string | null;
-  created_at: string;
-  church_name?: string;
-}
+const invitationsService = createInvitationsService(supabase);
 
 const InvitationsManager: React.FC = () => {
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [invitations, setInvitations] = useState<InvitationRecord[]>([]);
   const [showSend, setShowSend] = useState(false);
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('ADMIN');
   const [churchId, setChurchId] = useState('');
-  const [churches, setChurches] = useState<{ id: string; name: string }[]>([]);
+  const [churches, setChurches] = useState<ChurchOption[]>([]);
   const [sending, setSending] = useState(false);
 
   const fetch = async () => {
-    const [{ data: invs }, { data: chs }] = await Promise.all([
-      supabase.from('invitations').select('*, churches(name)').order('created_at', { ascending: false }),
-      supabase.from('churches').select('id, name').order('name'),
+    const [nextInvitations, nextChurches] = await Promise.all([
+      invitationsService.listInvitationsWithChurchNames(),
+      invitationsService.listChurchOptions(),
     ]);
-    if (invs) setInvitations(invs.map((i: any) => ({ ...i, church_name: i.churches?.name })));
-    if (chs) { setChurches(chs as { id: string; name: string }[]); if (!churchId && chs.length > 0) setChurchId(chs[0].id); }
+    setInvitations(nextInvitations);
+    setChurches(nextChurches);
+    if (!churchId && nextChurches.length > 0) setChurchId(nextChurches[0].id);
   };
 
   useEffect(() => { fetch(); }, []);
@@ -37,35 +29,28 @@ const InvitationsManager: React.FC = () => {
   const sendInvite = async () => {
     if (!email || !churchId) return;
     setSending(true);
-    const token = crypto.randomUUID();
-    const { error } = await supabase.from('invitations').insert([{
-      church_id: churchId, email, role, token,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    }]);
-    if (!error) {
+    try {
+      await invitationsService.sendInvitation({ churchId, email, role });
       setShowSend(false);
       setEmail('');
-      fetch();
+      await fetch();
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
   const cancelInvite = async (id: string) => {
-    await supabase.from('invitations').delete().eq('id', id);
+    await invitationsService.cancelInvitation(id);
     fetch();
   };
 
-  const statusIcon = (inv: Invitation) => {
+  const statusIcon = (inv: InvitationRecord) => {
     if (inv.accepted_at) return <CheckCircle2 size={16} className="text-green-500" />;
     if (new Date(inv.expires_at) < new Date()) return <XCircle size={16} className="text-red-400" />;
     return <Clock size={16} className="text-amber-400" />;
   };
 
-  const statusLabel = (inv: Invitation) => {
-    if (inv.accepted_at) return 'Accepted';
-    if (new Date(inv.expires_at) < new Date()) return 'Expired';
-    return 'Pending';
-  };
+  const statusLabel = (inv: InvitationRecord) => invitationsService.getInvitationStatus(inv);
 
   return (
     <div className="space-y-6">

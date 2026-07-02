@@ -180,6 +180,37 @@ export interface Toast {
   type: 'success' | 'error' | 'info';
 }
 
+export interface Tenant {
+  id: string;
+  name: string;
+  subdomain: string;
+  plan: 'Basic' | 'Pro' | 'Enterprise';
+  status: 'Active' | 'Suspended' | 'Trialing' | 'Past Due';
+  ownerEmail: string;
+  region: string;
+  memberCount: number;
+  mrr: number;
+  renewalDate: string;
+  healthScore: number;
+  usageMetrics?: {
+    cpu: number;
+    memory: number;
+    dbConnections: number;
+    smsSent: number;
+  };
+}
+
+export interface SupportTicket {
+  id: string;
+  tenantName: string;
+  subject: string;
+  description: string;
+  status: 'Open' | 'Pending' | 'Resolved';
+  priority: 'Low' | 'Medium' | 'High' | 'Critical';
+  createdAt: string;
+  lastUpdate: string;
+}
+
 export interface CommunicationLog {
   id: string;
   type: 'SMS' | 'Email' | 'WhatsApp';
@@ -232,4 +263,14 @@ export interface Sermon {
   event: string;
   eventId: string;
   transcript: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  description: string;
+  memberCount: number;
+  churchId?: string;
+  createdAt: string;
+  updatedAt: string;
 }

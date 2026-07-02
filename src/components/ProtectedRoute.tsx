@@ -25,7 +25,7 @@ export default function ProtectedRoute({ children }: Props) {
   }
 
   if (timedOut || !isAuthenticated) {
-    window.location.href = "/login";
+    window.location.href = "/";
     return null;
   }
 

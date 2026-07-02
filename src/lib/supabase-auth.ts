@@ -15,12 +15,16 @@ export function useAuth() {
     return data;
   }, []);
 
-  const logout = useCallback(async () => {
-    await supabase.auth.signOut();
-    window.location.href = "/login";
+  const requestPasswordReset = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw new Error(error.message);
   }, []);
 
-  return { login, signup, logout };
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+  }, []);
+
+  return { login, signup, requestPasswordReset, logout };
 }
 
 export function useSession() {

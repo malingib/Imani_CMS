@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Sidebar, { ImaniLogoIcon } from './Sidebar';
-import Dashboard from './Dashboard';
+const Dashboard = React.lazy(() => import('./Dashboard'));
 import Membership from './Membership';
-import SermonHistory from './SermonHistory';
 import EventsManagement from './EventsManagement';
-import FinanceReporting from './FinanceReporting';
+const FinanceReporting = React.lazy(() => import('./FinanceReporting'));
 import CommunicationCenter from './CommunicationCenter';
-import DemographicsAnalysis from './DemographicsAnalysis';
+const DemographicsAnalysis = React.lazy(() => import('./DemographicsAnalysis'));
 import GroupsManagement from './GroupsManagement';
-import ReportsCenter from './ReportsCenter';
+const ReportsCenter = React.lazy(() => import('./ReportsCenter'));
 import Settings from './Settings';
 import Login from './Login';
 import PrivacyPolicy from './PrivacyPolicy';
@@ -16,35 +15,48 @@ import CompliancePortal from './CompliancePortal';
 import SecurityOverview from './SecurityOverview';
 import NotificationsPanel from './NotificationsPanel';
 import MemberPortal from './MemberPortal';
-import MyGiving from './MyGiving';
+const MyGiving = React.lazy(() => import('./MyGiving'));
 import AuditLogs from './AuditLogs';
 import Billing from './Billing';
 import PlatformDashboard from './PlatformDashboard';
-import TenantsList from './TenantsList';
+import TenantRegistry from './TenantRegistry';
 import PlatformSettings from './PlatformSettings';
 import BillingOverview from './BillingOverview';
 import InvitationsManager from './InvitationsManager';
 import { 
   AppView, Member, MemberStatus, Transaction, 
   ChurchEvent, MaritalStatus, MembershipType,
-  User, UserRole, AppNotification, Toast, AuditLog
+  User, UserRole, AppNotification, Toast, AuditLog,
+  Budget, CommunicationLog, RecurringExpense
 } from '../types';
 import { Bell, Menu, X, Loader2 } from 'lucide-react';
 import { supabase, useSession } from '../src/lib/supabase-auth';
 import { ChurchProvider, useChurch } from '../src/lib/church-context';
-import { mapMember, mapTransaction, mapEvent, mapAuditLog } from '../src/lib/mappers';
+import { createChurchAppDataService } from '../src/lib/app-data';
+import { getDefaultViewForUserRole, mapSupabaseUserToAppUser } from '../src/lib/app-user';
+import { createToastRecord, normalizePlatformView } from '../src/lib/view-routing';
 import {
+  createBudget,
+  createCommunication,
   createEvent,
   createMember,
   createMembers,
+  createRecurringExpense,
   createTransaction,
   deleteEvent,
   deleteMember,
+  deleteNotification,
   deleteTransaction,
+  markAllNotificationsRead,
   replaceEventAttendance,
+  updateBudget,
   updateMember,
+  updateNotificationRead,
   updateTransaction,
 } from '../src/lib/persistence';
+import { countUnread } from '../src/lib/notification-service';
+
+const appDataService = createChurchAppDataService(supabase);
 
 const AppContent: React.FC = () => {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
@@ -64,7 +76,7 @@ const AppContent: React.FC = () => {
 
   const addToast = (message: string, type: Toast['type'] = 'success') => {
     const id = Math.random().toString(36).substr(2, 9);
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts(prev => [...prev, createToastRecord(id, message, type)]);
     setTimeout(() => { setToasts(prev => prev.filter(t => t.id !== id)); }, 4000);
   };
 
@@ -79,10 +91,9 @@ const AppContent: React.FC = () => {
   const churchId = activeChurchId || (currentUser?.churchId as string) || null;
 
   useEffect(() => {
-    if (viewingChurch) {
-      if (currentView === 'PLATFORM_DASHBOARD' || currentView === 'TENANTS' || currentView === 'INVITATIONS' || currentView === 'BILLING' || currentView === 'PLATFORM_SETTINGS') {
-        setCurrentView('DASHBOARD');
-      }
+    const normalizedView = normalizePlatformView(viewingChurch, currentView);
+    if (normalizedView !== currentView) {
+      setCurrentView(normalizedView);
     }
   }, [viewingChurch, currentView]);
 
@@ -91,30 +102,22 @@ const AppContent: React.FC = () => {
     const log: AuditLog = { id: Date.now().toString(), userId: currentUser.id, userName: currentUser.name, action, module, timestamp: new Date().toISOString(), severity };
     setAuditLogs(prev => [log, ...prev]);
     try {
-      await supabase.from('audit_logs').insert([{
-        user_id: currentUser.id,
-        user_name: currentUser.name,
+      await appDataService.createAuditLog({
+        userId: currentUser.id,
+        userName: currentUser.name,
         action,
         module,
         severity,
-        church_id: churchId,
-      }]);
+        churchId,
+      });
     } catch {}
-  }, [currentUser, churchId]);
+  }, [appDataService, currentUser, churchId]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated && supabaseUser) {
-      const meta = supabaseUser.user_metadata || {};
-      const appMeta = supabaseUser.app_metadata || {};
-      const role = (meta.role as UserRole) || (appMeta.role as UserRole) || UserRole.ADMIN;
-      setCurrentUser({
-        id: supabaseUser.id,
-        name: (meta.name as string) || supabaseUser.email?.split('@')[0] || 'User',
-        role,
-        avatar: (meta.avatar_url as string) || `https://ui-avatars.com/api/?name=${encodeURIComponent((meta.name as string) || 'U')}&background=6366f1&color=fff`,
-        churchId: appMeta.church_id as string || undefined,
-      });
-      if (role === UserRole.SUPER_ADMIN) {
+      const nextUser = mapSupabaseUserToAppUser(supabaseUser);
+      setCurrentUser(nextUser);
+      if (nextUser.role === UserRole.SUPER_ADMIN) {
         fetchChurches();
       }
     } else if (!authLoading && !isAuthenticated) {
@@ -125,6 +128,9 @@ const AppContent: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [events, setEvents] = useState<ChurchEvent[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([]);
+  const [communications, setCommunications] = useState<CommunicationLog[]>([]);
 
   useEffect(() => {
     if (!isAuthenticated || viewingPlatform) {
@@ -135,45 +141,16 @@ const AppContent: React.FC = () => {
     setDataLoading(true);
     setDataError(null);
 
-    const baseQuery = (table: string, select = '*') => {
-      let q = supabase.from(table).select(select);
-      if (churchId) q = q.eq('church_id', churchId);
-      return q;
-    };
-
-    const fMembers = baseQuery('members', '*').then(({ data, error }) => {
-      if (error) throw error;
-      return data ? data.map(mapMember) : [];
-    });
-    const fTransactions = baseQuery('transactions', '*').then(({ data, error }) => {
-      if (error) throw error;
-      return data ? data.map(mapTransaction) : [];
-    });
-    const fEvents = baseQuery('church_events', '*').then(({ data, error }) => {
-      if (error) throw error;
-      return data ? data.map(mapEvent) : [];
-    });
-    const fAttendance = baseQuery('event_attendance', 'event_id, member_id').then(({ data, error }) => {
-      if (error) throw error;
-      return data || [];
-    });
-    const fAuditLogs = baseQuery('audit_logs', '*').then(({ data, error }) => {
-      if (error) throw error;
-      return data ? data.map(mapAuditLog) : [];
-    });
-
-    Promise.all([fMembers, fTransactions, fEvents, fAttendance, fAuditLogs])
-      .then(([m, t, e, attendanceRows, a]) => {
-        const attendanceByEvent = new Map<string, string[]>();
-        attendanceRows.forEach((row: any) => {
-          const eventAttendance = attendanceByEvent.get(row.event_id) || [];
-          eventAttendance.push(row.member_id);
-          attendanceByEvent.set(row.event_id, eventAttendance);
-        });
-        setMembers(m);
-        setTransactions(t);
-        setEvents(e.map(event => ({ ...event, attendance: attendanceByEvent.get(event.id) || [] })));
-        setAuditLogs(a);
+    appDataService.loadChurchAppData(churchId)
+      .then(({ members: loadedMembers, transactions: loadedTransactions, events: loadedEvents, budgets: loadedBudgets, recurringExpenses: loadedRecurringExpenses, communications: loadedCommunications, notifications: loadedNotifications, auditLogs: loadedAuditLogs }) => {
+        setMembers(loadedMembers);
+        setTransactions(loadedTransactions);
+        setEvents(loadedEvents);
+        setBudgets(loadedBudgets);
+        setRecurringExpenses(loadedRecurringExpenses);
+        setCommunications(loadedCommunications);
+        setNotifications(loadedNotifications);
+        setAuditLogs(loadedAuditLogs);
       })
       .catch((error) => {
         const message = error?.message || 'Failed to load church data.';
@@ -181,12 +158,12 @@ const AppContent: React.FC = () => {
         addToast(message, 'error');
       })
       .finally(() => setDataLoading(false));
-  }, [isAuthenticated, churchId, viewingPlatform]);
+  }, [appDataService, isAuthenticated, churchId, viewingPlatform]);
 
   const handleLogin = (user: User) => {
     const userWithBranch = { ...user, branch: user.branch || branches[0] };
     setCurrentUser(userWithBranch);
-    setCurrentView(user.role === UserRole.MEMBER ? 'MY_PORTAL' : (user.role === UserRole.SUPER_ADMIN ? 'PLATFORM_DASHBOARD' : 'DASHBOARD'));
+    setCurrentView(getDefaultViewForUserRole(user.role));
     addToast(`Logged in successfully as ${user.name}`);
     createAudit('Login success', 'DASHBOARD');
   };
@@ -340,6 +317,65 @@ const AppContent: React.FC = () => {
     }
   };
 
+  const handleSetBudget = async (budget: Budget) => {
+    try {
+      const saved = budget.id && budgets.some(b => b.id === budget.id)
+        ? await updateBudget(budget, requireChurchId())
+        : await createBudget(budget, requireChurchId());
+      setBudgets(prev => {
+        const exists = prev.some(b => b.id === saved.id);
+        return exists ? prev.map(b => b.id === saved.id ? saved : b) : [...prev, saved];
+      });
+      createAudit(`Set budget for ${saved.category}`, 'FINANCE');
+      addToast('Budget saved');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to save budget', 'error');
+    }
+  };
+
+  const handleAddRecurring = async (expense: RecurringExpense) => {
+    try {
+      const saved = await createRecurringExpense(expense, requireChurchId());
+      setRecurringExpenses(prev => [...prev, saved]);
+      createAudit(`Added recurring expense ${saved.category}`, 'FINANCE');
+      addToast('Recurring expense saved');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to save recurring expense', 'error');
+    }
+  };
+
+  const handleSendBroadcast = async (log: CommunicationLog) => {
+    try {
+      const saved = await createCommunication(log, requireChurchId());
+      setCommunications(prev => [saved, ...prev]);
+      createAudit(`Sent ${saved.type} broadcast to ${saved.targetGroupName}`, 'COMMUNICATION');
+      addToast('Broadcast saved');
+    } catch (error: any) {
+      addToast(error?.message || 'Failed to send broadcast', 'error');
+    }
+  };
+
+  const handleMarkNotificationRead = async (id: string) => {
+    try {
+      const saved = await updateNotificationRead(id, true, requireChurchId());
+      setNotifications(prev => prev.map(n => n.id === saved.id ? saved : n));
+    } catch {}
+  };
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await markAllNotificationsRead(requireChurchId());
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    } catch {}
+  };
+
+  const handleDeleteNotification = async (id: string) => {
+    try {
+      await deleteNotification(id, requireChurchId());
+      setNotifications(prev => prev.filter(n => n.id !== id));
+    } catch {}
+  };
+
   const handleSelectChurch = (id: string) => {
     setActiveChurchId(id);
     setCurrentView('DASHBOARD');
@@ -355,7 +391,7 @@ const AppContent: React.FC = () => {
     if (isSuperAdmin && viewingPlatform) {
       switch (currentView) {
         case 'PLATFORM_DASHBOARD': return <PlatformDashboard />;
-        case 'TENANTS': return <TenantsList onNavigate={setCurrentView} onSelectChurch={handleSelectChurch} />;
+        case 'TENANTS': return <TenantRegistry onImpersonate={(id) => { setActiveChurchId(id); setCurrentView('DASHBOARD'); }} />;
         case 'INVITATIONS': return <InvitationsManager />;
         case 'BILLING': return <BillingOverview />;
         case 'PLATFORM_SETTINGS': return <PlatformSettings />;
@@ -367,7 +403,7 @@ const AppContent: React.FC = () => {
       case 'DASHBOARD':
         return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => setCurrentView('MEMBERS')} onSendSMS={() => setCurrentView('COMMUNICATION')} onNavigate={setCurrentView} />;
       case 'MY_PORTAL':
-        return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} activities={[]} onNavigate={setCurrentView} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />;
+        return <MemberPortal member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} events={events} activities={[]} churchId={churchId || ''} onNavigate={setCurrentView} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />;
       case 'MY_GIVING':
         return <MyGiving member={members.find(m => m.id === currentUser.memberId) || members[0]} transactions={transactions} onGive={() => { addToast('STK Push Sent'); createAudit('Initiated Giving STK', 'MY_GIVING'); }} />;
       case 'MEMBERS':
@@ -384,9 +420,9 @@ const AppContent: React.FC = () => {
           />
         );
       case 'FINANCE':
-        return <FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={[]} onSetBudget={() => {}} recurringExpenses={[]} onAddRecurring={() => {}} currentUserRole={currentUser.role} />;
+        return <FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />;
       case 'COMMUNICATION':
-        return <CommunicationCenter members={members} logs={[]} onSendBroadcast={(log) => { addToast('Broadcast sent'); createAudit(`Sent ${log.type} broadcast to ${log.targetGroupName}`, 'COMMUNICATION'); }} currentUser={currentUser} />;
+        return <CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} />;
       case 'GROUPS':
         return <GroupsManagement members={members} />;
       case 'EVENTS':
@@ -400,7 +436,7 @@ const AppContent: React.FC = () => {
       case 'BILLING':
         return <Billing />;
       case 'SETTINGS':
-        return <Settings currentUserRole={currentUser.role} />;
+        return <Settings currentUserRole={currentUser.role} churchId={churchId || ''} />;
       default:
         return <Dashboard members={members} transactions={transactions} events={events} onAddMember={() => {}} onSendSMS={() => {}} onNavigate={setCurrentView} />;
     }
@@ -454,9 +490,11 @@ const AppContent: React.FC = () => {
           <div className="flex items-center gap-4 relative">
             <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className={`relative p-2 rounded-xl transition-all ${isNotificationsOpen ? 'bg-slate-100 text-brand-primary' : 'text-slate-400 hover:text-brand-primary hover:bg-slate-50'}`}>
               <Bell size={22} />
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-primary rounded-full border-2 border-white animate-pulse" />
+              {countUnread(notifications) > 0 && (
+                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-primary rounded-full border-2 border-white animate-pulse" />
+              )}
             </button>
-            {isNotificationsOpen && <NotificationsPanel notifications={notifications} onClose={() => setIsNotificationsOpen(false)} onMarkAsRead={() => {}} onMarkAllAsRead={() => {}} onDelete={() => {}} />}
+            {isNotificationsOpen && <NotificationsPanel notifications={notifications} onClose={() => setIsNotificationsOpen(false)} onMarkAsRead={handleMarkNotificationRead} onMarkAllAsRead={handleMarkAllNotificationsRead} onDelete={handleDeleteNotification} />}
             <div className="w-px h-8 bg-slate-100 mx-1 hidden sm:block" />
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
@@ -467,7 +505,11 @@ const AppContent: React.FC = () => {
             </div>
           </div>
         </header>
-        <div className="p-10 max-w-[1600px] mx-auto pb-20">{renderView()}</div>
+        <div className="p-10 max-w-[1600px] mx-auto pb-20">
+          <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading...</div>}>
+            {renderView()}
+          </Suspense>
+        </div>
       </main>
     </div>
   );

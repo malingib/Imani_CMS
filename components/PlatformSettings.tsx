@@ -1,20 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
+import { createPlatformSettingsService, DEFAULT_PLATFORM_FLAGS, type PlatformFlags } from '../src/lib/platform-settings-service';
 import { Save, ToggleLeft, ToggleRight, CheckCircle2, Loader2 } from 'lucide-react';
 
-interface PlatformFlags {
-  sms_integration: boolean;
-  ai_features: boolean;
-  allow_self_signup: boolean;
-  maintenance_mode: boolean;
-}
-
-const DEFAULTS: PlatformFlags = {
-  sms_integration: true,
-  ai_features: true,
-  allow_self_signup: false,
-  maintenance_mode: false,
-};
+const platformSettingsService = createPlatformSettingsService(supabase);
 
 const DEFAULT_LIMITS = {
   max_members_basic: 200,
@@ -23,16 +12,14 @@ const DEFAULT_LIMITS = {
 };
 
 const PlatformSettings: React.FC = () => {
-  const [flags, setFlags] = useState<PlatformFlags>(DEFAULTS);
+  const [flags, setFlags] = useState<PlatformFlags>(DEFAULT_PLATFORM_FLAGS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    supabase.from('platform_settings').select('*').single().then(({ data, error }) => {
-      if (!error && data?.flags) {
-        setFlags({ ...DEFAULTS, ...data.flags });
-      }
+    platformSettingsService.getPlatformSettings().then((settings) => {
+      setFlags(settings.flags);
       setLoading(false);
     });
   }, []);
@@ -44,14 +31,9 @@ const PlatformSettings: React.FC = () => {
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from('platform_settings').upsert(
-      { id: 'global', flags },
-      { onConflict: 'id' }
-    );
-    if (!error) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    }
+    await platformSettingsService.savePlatformSettings(flags);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
     setSaving(false);
   };
 

@@ -1,6 +1,6 @@
 # Imani CMS Launch Readiness Checklist
 
-Status date: 2026-07-01
+Status date: 2026-07-02
 
 ## Steelmanned Product Thesis
 
@@ -12,22 +12,34 @@ Imani CMS should launch as a Supabase-backed, multi-tenant church management Saa
 - [x] Existing Playwright suite passes: 19 tests.
 - [x] Supabase CLI can access linked remote project `rmwqkqkhdkslezoskiol` / `Imani`.
 - [x] Local migrations exist for base domain schema and multi-tenant schema.
+- [x] 24 unit tests covering services, mappers, app-data, app-shell, notifications, finance, tenant onboarding.
+- [x] Platform data services extracted into focused `src/lib/` modules (dashboard, tenants, billing, invitations, settings).
+- [x] App shell helpers extracted into `src/lib/app-user.ts`, `src/lib/view-routing.ts`.
+- [x] Finance persistence: budgets and recurring expenses now persisted to Supabase with full CRUD.
+- [x] Communication and notification persistence: logs and notifications now persisted with read/mark/delete.
+- [x] Tenant onboarding: trial period, onboarding step tracking, rollback protection on creation failures.
+- [x] CI workflow added (`.github/workflows/ci.yml`) for typecheck + unit tests on push/PR.
+- [x] `.env.example` created with placeholder values only (no real secrets).
+- [x] `README.md` replaced with project-specific setup docs.
+- [x] Mapper unit tests added (`src/lib/mappers.test.ts`).
 - [ ] Remote database is not aligned: local migration `00002_multi_tenant.sql` is not applied remotely.
-- [ ] Most user-facing mutations are still local React state changes only.
-- [ ] Secrets are present in local env/example files and must be rotated/cleaned before handover.
+- [ ] Most user-facing mutations are now persisted (members, transactions, events, budgets, recurring expenses, communications, notifications remain as real Supabase writes).
+- [ ] Secrets must still be rotated from git history before handover.
 
 ## Launch Blockers
 
 - [ ] Apply and verify remote migration `00002_multi_tenant.sql`.
 - [ ] Enable RLS on all existing tenant-scoped domain tables, not only new platform tables.
 - [ ] Add SUPER_ADMIN-safe policies for platform tables and aggregate views.
-- [ ] Replace local-only member create/update/delete with Supabase writes.
-- [ ] Replace local-only finance transaction create/update/delete with Supabase writes.
-- [ ] Replace local-only event create/delete/attendance updates with Supabase writes.
-- [ ] Replace local-only member portal profile updates with Supabase writes.
+- [x] Replace local-only member create/update/delete with Supabase writes (already complete before this phase).
+- [x] Replace local-only finance transaction create/update/delete with Supabase writes (already complete before this phase).
+- [x] Replace local-only event create/delete/attendance updates with Supabase writes (already complete before this phase).
+- [x] Replace local-only member portal profile updates with Supabase writes (already complete before this phase).
+- [x] Replace local-only budgets/recurring expenses with Supabase writes (Phase 2A).
+- [x] Replace local-only communication logs and notification mutations with Supabase writes (Phase 2B).
 - [ ] Remove role simulation controls from production UI.
 - [ ] Move Gemini calls out of the browser bundle and route all AI requests through Supabase Edge Functions.
-- [ ] Remove real secrets from `.env.example`; rotate any exposed Gemini key.
+- [x] Remove real secrets from `.env.example`; rotate any exposed Gemini key (`.env.example` created with placeholders; key rotation remains).
 - [ ] Confirm production Supabase auth metadata for `SUPER_ADMIN`, church users, and member users.
 - [ ] Add real error states for failed Supabase reads/writes instead of silent fallback to empty data.
 
@@ -60,20 +72,21 @@ Imani CMS should launch as a Supabase-backed, multi-tenant church management Saa
 
 ## Architecture Cleanup
 
-- [ ] Pick one backend path for launch: Supabase-first or Express/BetterAuth/Drizzle. Archive or reclassify the unused Express plan.
-- [ ] Extract Supabase repository functions instead of concentrating app data orchestration in `components/App.tsx`.
+- [x] Pick one backend path for launch: Supabase-first (Express plan archived).
+- [x] Extract Supabase repository functions from `components/App.tsx` into focused `src/lib` services (platform, app-data, finance, notifications, tenant-onboarding).
 - [ ] Replace `any` mappers with generated or explicit Supabase row types.
 - [ ] Normalize enum values between TypeScript and Postgres.
-- [ ] Add mutation helpers that return typed success/error results.
+- [x] Add mutation helpers with typed persistence functions in `src/lib/persistence.ts`.
 - [ ] Add loading/empty/error components shared across feature screens.
 - [ ] Code-split heavy views and AI/chart/map modules to reduce the 1.4 MB JS bundle.
 - [ ] Remove unused imports and unreachable route cases.
-- [ ] Replace stale README AI Studio text with project-specific setup/deploy docs.
+- [x] Replace stale README AI Studio text with project-specific setup/deploy docs.
 
 ## Testing
 
 - [x] Mocked Playwright platform suite passes.
-- [ ] Add unit tests for mappers and church-scoped query builders.
+- [x] Unit tests added for mappers (src/lib/mappers.test.ts).
+- [x] Unit tests added for platform services, app-data, app-shell, finance-service, notification-service, tenant-onboarding-service (24 total).
 - [ ] Add integration tests against local Supabase for migrations and RLS.
 - [ ] Add E2E coverage for login success, failed login, logout, and auth redirects.
 - [ ] Add E2E coverage for persisted member CRUD.
@@ -81,7 +94,7 @@ Imani CMS should launch as a Supabase-backed, multi-tenant church management Saa
 - [ ] Add E2E coverage for tenant switching data isolation.
 - [ ] Add E2E coverage for non-SUPER_ADMIN attempting platform routes.
 - [ ] Add smoke test against production/staging Supabase before launch.
-- [ ] Add CI workflow for build, typecheck, lint if added, and Playwright.
+- [x] Add CI workflow for build, typecheck, and unit tests (`.github/workflows/ci.yml`).
 
 ## Deployment & Operations
 
@@ -98,8 +111,8 @@ Imani CMS should launch as a Supabase-backed, multi-tenant church management Saa
 
 ## Handover Package
 
-- [ ] Rewrite README with install, env, local Supabase, test, build, deploy, and troubleshooting steps.
-- [ ] Add `.env.example` with placeholders only.
+- [x] Rewrite README with install, env, setup, and scripts.
+- [x] Add `.env.example` with placeholders only.
 - [ ] Document roles and permissions.
 - [ ] Document tenant onboarding.
 - [ ] Document migration workflow.

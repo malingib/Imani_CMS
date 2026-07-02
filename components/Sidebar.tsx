@@ -217,7 +217,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <p className="px-4 pt-2 pb-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">Navigation</p>
         )}
 
-        {filteredItems.map((item) => {
+        {!(isSuperAdmin && !activeChurchId) && filteredItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
           return (

@@ -1,42 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
+import { createBillingService, type BillingInvoice, type BillingSubscription } from '../src/lib/billing-service';
 import { CreditCard, DollarSign, CheckCircle2, AlertTriangle } from 'lucide-react';
 
-interface Subscription {
-  id: string;
-  church_id: string;
-  tier: string;
-  status: string;
-  start_date: string;
-  end_date: string | null;
-  church_name?: string;
-}
-
-interface Invoice {
-  id: string;
-  church_id: string;
-  amount: number;
-  status: string;
-  due_date: string;
-  paid_at: string | null;
-  church_name?: string;
-}
+const billingService = createBillingService(supabase);
 
 const BillingOverview: React.FC = () => {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [subscriptions, setSubscriptions] = useState<BillingSubscription[]>([]);
+  const [invoices, setInvoices] = useState<BillingInvoice[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     const fetch = async () => {
-      const [{ data: subs }, { data: invs }, { data: txns }] = await Promise.all([
-        supabase.from('subscriptions').select('*, churches(name)'),
-        supabase.from('invoices').select('*, churches(name)').order('due_date', { ascending: false }),
-        supabase.from('transactions').select('amount').eq('category', 'Income'),
-      ]);
-      if (subs) setSubscriptions(subs.map((s: any) => ({ ...s, church_name: s.churches?.name })));
-      if (invs) setInvoices(invs.map((i: any) => ({ ...i, church_name: i.churches?.name })));
-      if (txns) setTotalRevenue((txns as any[]).reduce((s, t) => s + Number(t.amount), 0));
+      const overview = await billingService.getBillingOverview();
+      setSubscriptions(overview.subscriptions);
+      setInvoices(overview.invoices);
+      setTotalRevenue(overview.totalRevenue);
     };
     fetch();
   }, []);

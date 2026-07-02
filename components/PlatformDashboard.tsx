@@ -1,43 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
+import { createPlatformDashboardService, type PlatformDashboardStats } from '../src/lib/platform-dashboard-service';
 import { Building2, Users, DollarSign, Activity, TrendingUp, AlertCircle } from 'lucide-react';
 
-interface AggregatedStats {
-  totalChurches: number;
-  activeChurches: number;
-  totalMembers: number;
-  totalRevenue: number;
-  totalChurchesChange: number;
-  totalMembersChange: number;
-  totalRevenueChange: number;
-}
+const platformDashboardService = createPlatformDashboardService(supabase);
 
 const PlatformDashboard: React.FC = () => {
-  const [stats, setStats] = useState<AggregatedStats>({
+  const [stats, setStats] = useState<PlatformDashboardStats>({
     totalChurches: 0, activeChurches: 0, totalMembers: 0, totalRevenue: 0,
     totalChurchesChange: 0, totalMembersChange: 0, totalRevenueChange: 0,
   });
 
   useEffect(() => {
     const fetch = async () => {
-      const [{ count: churches }, { count: activeChurches }, { count: members }, { data: txns }] = await Promise.all([
-        supabase.from('churches').select('*', { count: 'exact', head: true }),
-        supabase.from('churches').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-        supabase.from('members').select('*', { count: 'exact', head: true }),
-        supabase.from('transactions').select('amount, category').eq('category', 'Income'),
-      ]);
-
-      const revenue = (txns || []).reduce((sum: number, t: any) => sum + Number(t.amount), 0);
-
-      setStats({
-        totalChurches: churches || 0,
-        activeChurches: activeChurches || 0,
-        totalMembers: members || 0,
-        totalRevenue: revenue,
-        totalChurchesChange: 0,
-        totalMembersChange: 0,
-        totalRevenueChange: 0,
-      });
+      const nextStats = await platformDashboardService.getStats();
+      setStats(nextStats);
     };
     fetch();
   }, []);

@@ -9,6 +9,10 @@ export default defineConfig(() => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      test: {
+        include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+        exclude: ['e2e/**', 'node_modules/**'],
       }
     };
 });

@@ -2,13 +2,19 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig(() => {
+export default defineConfig(({ command }) => {
     return {
       plugins: [react()],
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      define: {
+        'process.env': process.env,
+      },
+      server: {
+        middlewareMode: false,
       },
       test: {
         include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],

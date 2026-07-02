@@ -88,11 +88,11 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       };
     },
 
-    async createAuditLog(input: CreateAuditLogInput): Promise<void> {
+    async createAuditLog(input: CreateAuditLogInput): Promise<AuditLog> {
       const insert = client.from("audit_logs").insert;
       if (!insert) throw new Error("Audit log client does not support inserts.");
 
-      const { error } = await insert([
+      const { data, error } = await insert([
         {
           user_id: input.userId,
           user_name: input.userName,
@@ -101,8 +101,13 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
           severity: input.severity,
           church_id: input.churchId,
         },
-      ]);
+      ]).select();
+      
       if (error) throw new Error(error.message);
+      if (!data || !data[0]) throw new Error('Failed to create audit log');
+      
+      // Return the created log mapped to AuditLog type
+      return mapAuditLog(data[0]);
     },
   };
 }

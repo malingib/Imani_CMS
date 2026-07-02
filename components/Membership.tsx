@@ -10,6 +10,7 @@ import {
   Layers
 } from 'lucide-react';
 import { Member, MemberStatus, MembershipType, MaritalStatus, Transaction, ChurchEvent, UserRole } from '../types';
+import { CsvMemberSchema, MemberFormSchema, validateFormData } from '../src/lib/validation';
 
 interface MembershipProps {
   members: Member[];
@@ -96,57 +97,105 @@ const Membership: React.FC<MembershipProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size exceeds 5MB limit. Please use a smaller file.');
+      return;
+    }
+
     const reader = new FileReader();
+    reader.onerror = () => {
+      alert('Failed to read file. Please ensure it is a valid CSV file.');
+    };
+
     reader.onload = (event) => {
-      const text = event.target?.result as string;
-      const lines = text.split('\n');
-      const header = lines[0].split(',').map(h => h.trim().toLowerCase());
-      
-      // Fix: Explicitly type the map callback return as Member | null to ensure compatibility with Member type predicate
-      const importedMembers: Member[] = lines.slice(1)
-        .filter(line => line.trim() !== '')
-        .map((line): Member | null => {
-          const values = line.split(',').map(v => v.trim());
-          const obj: any = {};
-          header.forEach((h, i) => {
-            if (h === 'groups') {
-              obj[h] = values[i] ? values[i].split(';').map(g => g.trim()).filter(g => g !== '') : [];
-            } else {
-              obj[h] = values[i] === '' ? null : values[i];
+      try {
+        const text = event.target?.result as string;
+        const lines = text.split('\n');
+        
+        if (lines.length < 2) {
+          alert('CSV file is empty. Please add at least one member row.');
+          return;
+        }
+
+        const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+        
+        const importedMembers: Member[] = [];
+        const errors: string[] = [];
+
+        lines.slice(1).forEach((line, rowIndex) => {
+          const trimmedLine = line.trim();
+          if (!trimmedLine) return; // Skip empty rows
+
+          try {
+            const values = line.split(',').map(v => v.trim());
+            const obj: any = {};
+            
+            header.forEach((h, i) => {
+              if (h === 'groups') {
+                obj[h] = values[i] ? values[i].split(';').map(g => g.trim()).filter(g => g !== '') : [];
+              } else {
+                obj[h] = values[i] === '' ? null : values[i];
+              }
+            });
+
+            // Validate required fields with Zod
+            const validationResult = validateFormData(CsvMemberSchema, obj);
+            if (!validationResult.data) {
+              errors.push(`Row ${rowIndex + 2}: ${Object.values(validationResult.errors)[0]}`);
+              return;
             }
-          });
 
-          // Mandatory fields check: Name, Location, Phone
-          if (!obj['firstname'] || !obj['lastname'] || !obj['phone'] || !obj['location']) {
-            return null;
+            // Map to Member with defaults
+            const member: Member = {
+              id: Math.random().toString(36).substr(2, 9),
+              firstName: validationResult.data.firstname,
+              lastName: validationResult.data.lastname,
+              phone: validationResult.data.phone,
+              email: validationResult.data.email || '',
+              location: validationResult.data.location,
+              groups: validationResult.data.groups 
+                ? validationResult.data.groups.split(';').map(g => g.trim()).filter(g => g) 
+                : ['General'],
+              status: (validationResult.data.status as MemberStatus) || MemberStatus.ACTIVE,
+              joinDate: validationResult.data.joindate || new Date().toISOString().split('T')[0],
+              membershipType: (validationResult.data.membershiptype as MembershipType) || MembershipType.FULL,
+              maritalStatus: (validationResult.data.maritalstatus as MaritalStatus) || MaritalStatus.SINGLE,
+              age: validationResult.data.age ? parseInt(validationResult.data.age) : undefined,
+              gender: (validationResult.data.gender as 'Male' | 'Female' | 'Other') || undefined
+            };
+
+            importedMembers.push(member);
+          } catch (err) {
+            errors.push(`Row ${rowIndex + 2}: Invalid data format`);
           }
+        });
 
-          return {
-            id: Math.random().toString(36).substr(2, 9),
-            firstName: obj['firstname'],
-            lastName: obj['lastname'],
-            phone: obj['phone'],
-            email: obj['email'] || '',
-            location: obj['location'],
-            groups: obj['groups'] && obj['groups'].length > 0 ? obj['groups'] : ['General'],
-            status: (obj['status'] as MemberStatus) || MemberStatus.ACTIVE,
-            joinDate: obj['joindate'] || new Date().toISOString().split('T')[0],
-            membershipType: (obj['membershiptype'] as MembershipType) || MembershipType.FULL,
-            maritalStatus: (obj['maritalstatus'] as MaritalStatus) || MaritalStatus.SINGLE,
-            age: obj['age'] ? parseInt(obj['age']) : undefined,
-            gender: obj['gender'] as 'Male' | 'Female' | 'Other'
-          };
-        })
-        .filter((m): m is Member => m !== null);
+        if (importedMembers.length === 0) {
+          alert(`Import failed. ${errors.length > 0 ? 'Errors: ' + errors.slice(0, 5).join('; ') : 'No valid records found.'}`);
+          return;
+        }
 
-      if (importedMembers.length > 0) {
+        if (errors.length > 0) {
+          const errorMsg = `Imported ${importedMembers.length} records with ${errors.length} errors.\n\nFirst errors:\n${errors.slice(0, 3).join('\n')}`;
+          console.warn(errorMsg);
+        }
+
         onAddMembersBulk(importedMembers);
         setShowBulkModal(false);
-      } else {
-        alert("Import failed. Ensure mandatory columns (Firstname, Lastname, Phone, Location) are filled for each row.");
+        
+        if (errors.length > 0) {
+          alert(`Successfully imported ${importedMembers.length} members. ${errors.length} rows had errors and were skipped.`);
+        }
+      } catch (error) {
+        console.error('CSV import error:', error);
+        alert('An error occurred while processing the CSV file. Please check the file format and try again.');
       }
     };
+
     reader.readAsText(file);
+    // Reset input so same file can be imported again
+    e.target.value = '';
   };
 
   const handleExportCSV = () => {
@@ -179,18 +228,35 @@ const Membership: React.FC<MembershipProps> = ({
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const validationData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      email: formData.email,
+      location: formData.location,
+      groups: formData.groups || [],
+      status: formData.status,
+      joinDate: formData.joinDate || new Date().toISOString().split('T')[0],
+      birthday: formData.birthday,
+      age: formData.age,
+      gender: formData.gender,
+      maritalStatus: formData.maritalStatus,
+      membershipType: formData.membershipType,
+    };
+    
+    const { data, errors } = validateFormData(MemberFormSchema, validationData);
+    if (!data) {
+      alert('Validation error: ' + Object.values(errors)[0]);
+      return;
+    }
+    
     setIsSaving(true);
     setTimeout(() => {
       const newM: Member = {
-        ...formData as Member,
+        ...data,
         id: Math.random().toString(36).substr(2, 9),
-        firstName: formData.firstName || '',
-        lastName: formData.lastName || '',
-        phone: formData.phone || '',
-        email: formData.email || '',
-        location: formData.location || '',
-        groups: formData.groups && formData.groups.length > 0 ? formData.groups : ['General'],
-        joinDate: new Date().toISOString().split('T')[0],
         photo: photo || undefined
       };
       onAddMember(newM);
@@ -204,13 +270,36 @@ const Membership: React.FC<MembershipProps> = ({
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!showEditModal) return;
+    
+    // Validate form data
+    const validationData = {
+      firstName: formData.firstName || showEditModal.firstName,
+      lastName: formData.lastName || showEditModal.lastName,
+      phone: formData.phone || showEditModal.phone,
+      email: formData.email || showEditModal.email,
+      location: formData.location || showEditModal.location,
+      groups: (formData.groups && formData.groups.length > 0) ? formData.groups : showEditModal.groups,
+      status: formData.status || showEditModal.status,
+      joinDate: formData.joinDate || showEditModal.joinDate,
+      birthday: formData.birthday || showEditModal.birthday,
+      age: formData.age || showEditModal.age,
+      gender: formData.gender || showEditModal.gender,
+      maritalStatus: formData.maritalStatus || showEditModal.maritalStatus,
+      membershipType: formData.membershipType || showEditModal.membershipType,
+    };
+    
+    const { data, errors } = validateFormData(MemberFormSchema, validationData);
+    if (!data) {
+      alert('Validation error: ' + Object.values(errors)[0]);
+      return;
+    }
+    
     setIsSaving(true);
     setTimeout(() => {
       onUpdateMember({ 
-        ...showEditModal, 
-        ...formData, 
+        ...showEditModal,
+        ...data,
         photo: photo || showEditModal.photo,
-        groups: formData.groups && formData.groups.length > 0 ? formData.groups : showEditModal.groups
       } as Member);
       setIsSaving(false);
       setShowEditModal(null);

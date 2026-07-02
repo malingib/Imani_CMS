@@ -73,6 +73,9 @@ const AppContent: React.FC = () => {
 
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  
+  // Track pending operations to prevent concurrent duplicates
+  const [pendingOperations, setPendingOperations] = useState<Set<string>>(new Set());
 
   const addToast = (message: string, type: Toast['type'] = 'success') => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -88,7 +91,7 @@ const AppContent: React.FC = () => {
   const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
   const viewingPlatform = isSuperAdmin && !activeChurchId;
   const viewingChurch = isSuperAdmin && !!activeChurchId;
-  const churchId = activeChurchId || (currentUser?.churchId as string) || null;
+  const churchId = activeChurchId ?? currentUser?.churchId ?? null;
 
   useEffect(() => {
     const normalizedView = normalizePlatformView(viewingChurch, currentView);
@@ -99,10 +102,8 @@ const AppContent: React.FC = () => {
 
   const createAudit = useCallback(async (action: string, module: AppView, severity: AuditLog['severity'] = 'INFO') => {
     if (!currentUser) return;
-    const log: AuditLog = { id: Date.now().toString(), userId: currentUser.id, userName: currentUser.name, action, module, timestamp: new Date().toISOString(), severity };
-    setAuditLogs(prev => [log, ...prev]);
     try {
-      await appDataService.createAuditLog({
+      const savedLog = await appDataService.createAuditLog({
         userId: currentUser.id,
         userName: currentUser.name,
         action,
@@ -110,7 +111,11 @@ const AppContent: React.FC = () => {
         severity,
         churchId,
       });
-    } catch {}
+      setAuditLogs(prev => [savedLog, ...prev]);
+    } catch (error) {
+      console.error('Failed to create audit log:', error);
+      addToast('Failed to log action', 'error');
+    }
   }, [appDataService, currentUser, churchId]);
 
   useEffect(() => {
@@ -187,6 +192,18 @@ const AppContent: React.FC = () => {
   };
 
   const handleAddMember = async (member: Member) => {
+    // Create idempotency key from member data to prevent duplicates
+    const idempotencyKey = `add-member-${member.firstName}-${member.lastName}-${member.phone}`;
+    
+    // Check if operation is already pending
+    if (pendingOperations.has(idempotencyKey)) {
+      addToast('Member is already being added', 'info');
+      return;
+    }
+    
+    // Mark operation as pending
+    setPendingOperations(prev => new Set([...prev, idempotencyKey]));
+    
     try {
       const saved = await createMember(member, requireChurchId());
       setMembers(prev => [...prev, saved]);
@@ -194,6 +211,13 @@ const AppContent: React.FC = () => {
       addToast('Member saved');
     } catch (error: any) {
       addToast(error?.message || 'Failed to add member', 'error');
+    } finally {
+      // Remove operation from pending set
+      setPendingOperations(prev => {
+        const updated = new Set(prev);
+        updated.delete(idempotencyKey);
+        return updated;
+      });
     }
   };
 

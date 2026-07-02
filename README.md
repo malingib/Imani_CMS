@@ -1,6 +1,7 @@
 # Imani CMS
 
-Church management platform with Supabase backend, AI-powered insights, and multi‑tenant platform operations.
+Church management platform with Supabase backend, AI-powered insights, and multi
+‑tenant platform operations.
 
 ## Setup
 
@@ -38,7 +39,7 @@ See `.env.example` for required variables.
 |------|-------|-------------|
 | SUPER_ADMIN | Platform-wide | Create churches, manage platform settings, view all tenants |
 | ADMIN | Church-wide | Manage members, events, finances, groups, settings |
-| PASTOR | Church-wide (limited) | Manage members, sermons, groups; view finances |
+| PASTOR | Church-wide (limited) | Manage members, sermons, groups; view finance s |
 | STAFF | Church-wide (operational) | Manage events, groups, communications |
 | MEMBER | Self-service | View profile, activities, own giving |
 
@@ -49,8 +50,8 @@ RLS enforces this at the database level using `app_role()` and `app_church_id()`
 1. Church admin visits `/signup`, fills in church details + admin account
 2. System creates a `churches` row with `status: 'trialing'` and `trial_end_date` = now + 30 days
 3. Admin user is created with role `ADMIN`
-4. Onboarding steps tracked in `churches.onboarding_step`: `profile` → `members` → `service` → `billing`
-5. After trial, church enters an active subscription or is paused
+4. Subsequent users are invited by existing admins
+5. Or create manually via the Supabase Dashboard SQL Editor
 
 ## Migration Workflow
 

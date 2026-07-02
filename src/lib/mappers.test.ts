@@ -97,4 +97,56 @@ describe("mappers", () => {
     expect(result.userName).toBe("Admin");
     expect(result.module).toBe("DASHBOARD");
   });
+
+  it("maps empty status to Active", () => {
+    const row = {
+      id: "m-1",
+      first_name: "John",
+      last_name: "Doe",
+      phone: "0700000000",
+      email: "john@test.com",
+      location: "Nairobi",
+      groups: [],
+      status: "",
+      join_date: "2026-01-01",
+    };
+    const result = mapMember(row as any);
+    expect(result.status).toBe("Active");
+  });
+
+  it("does not crash on null or missing optional fields", () => {
+    const row = {
+      id: "m-1",
+      first_name: "Jane",
+      last_name: "Smith",
+      phone: null,
+      email: null,
+      location: null,
+      groups: null,
+      status: "Active",
+      join_date: null,
+    };
+    const result = mapMember(row as any);
+    expect(result.phone).toBe("");
+    expect(result.email).toBe("");
+    expect(result.location).toBe("");
+    expect(result.groups).toEqual([]);
+    expect(result.joinDate).toBe("");
+  });
+
+  it("does not crash on invalid date strings", () => {
+    const row = {
+      id: "m-1",
+      first_name: "Bob",
+      last_name: "Brown",
+      phone: "0700000000",
+      email: "bob@test.com",
+      location: "Mombasa",
+      groups: [],
+      status: "Active",
+      join_date: "not-a-date",
+    };
+    const result = mapMember(row as any);
+    expect(result.joinDate).toBe("not-a-date");
+  });
 });

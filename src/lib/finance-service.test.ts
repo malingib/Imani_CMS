@@ -35,6 +35,15 @@ describe("finance service", () => {
     expect(result).toEqual([]);
   });
 
+  it("returns zero totals for empty transactions", () => {
+    const result = generateFinanceSummary([], []);
+    expect(result.totalIncome).toBe(0);
+    expect(result.totalExpenses).toBe(0);
+    expect(result.netPosition).toBe(0);
+    expect(result.expenseRatio).toBe(0);
+    expect(result.budgetVariance).toEqual([]);
+  });
+
   it("sorts upcoming recurring expenses by nextDate ascending", () => {
     const expenses: RecurringExpense[] = [
       { id: "r2", category: "Internet", amount: 5000, frequency: "Monthly", nextDate: "2026-08-01" },

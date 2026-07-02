@@ -47,35 +47,31 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
 
   const handleSend = () => {
     if (!content) return;
-    setIsSending(true);
 
-    setTimeout(() => {
-      const isScheduled = !!(scheduledDate && scheduledTime);
-      const targetCount = members.length;
-      
-      const newLog: CommunicationLog = {
-        id: Date.now().toString(),
-        type: messageType,
-        recipientCount: targetCount,
-        targetGroupName: broadcastTarget,
-        subject: subject || `${messageType} Broadcast`,
-        content,
-        date: new Date().toISOString().split('T')[0],
-        scheduledFor: isScheduled ? `${scheduledDate} ${scheduledTime}` : undefined,
-        status: isScheduled ? 'Scheduled' : 'Sent',
-        sender: currentUser.name,
-        deliveryBreakdown: isScheduled ? undefined : {
-          delivered: targetCount,
-          opened: Math.floor(targetCount * (messageType === 'Email' ? 0.35 : 0.85)),
-          failed: 0
-        }
-      };
+    const isScheduled = !!(scheduledDate && scheduledTime);
+    const targetCount = members.length;
+    
+    const newLog: CommunicationLog = {
+      id: Date.now().toString(),
+      type: messageType,
+      recipientCount: targetCount,
+      targetGroupName: broadcastTarget,
+      subject: subject || `${messageType} Broadcast`,
+      content,
+      date: new Date().toISOString().split('T')[0],
+      scheduledFor: isScheduled ? `${scheduledDate} ${scheduledTime}` : undefined,
+      status: isScheduled ? 'Scheduled' : 'Sent',
+      sender: currentUser.name,
+      deliveryBreakdown: isScheduled ? undefined : {
+        delivered: targetCount,
+        opened: Math.floor(targetCount * (messageType === 'Email' ? 0.35 : 0.85)),
+        failed: 0
+      }
+    };
 
-      onSendBroadcast(newLog);
-      setIsSending(false);
-      setActiveTab('LOGS');
-      resetForm();
-    }, 1500);
+    onSendBroadcast(newLog);
+    setActiveTab('LOGS');
+    resetForm();
   };
 
   const useTemplate = (t: CommunicationTemplate) => {

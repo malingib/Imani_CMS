@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createChurchAppDataService } from "./app-data";
 
-type QueryResult = { data: unknown[] | null; error: { message: string } | null };
+type QueryResult = { data: unknown[] | null; count: number | null; error: { message: string } | null };
 
 function createQuery(data: unknown[], table: string, calls: string[]) {
+  let isHeadQuery = false;
   const query = {
-    select(columns = "*") {
+    select(columns = "*", opts?: { count?: string; head?: boolean }) {
+      if (opts?.head) isHeadQuery = true;
       calls.push(`${table}.select:${columns}`);
       return query;
     },
@@ -13,11 +15,42 @@ function createQuery(data: unknown[], table: string, calls: string[]) {
       calls.push(`${table}.eq:${column}:${value}`);
       return query;
     },
+    order(column: string, { ascending }: { ascending: boolean }) {
+      calls.push(`${table}.order:${column}:${ascending ? "asc" : "desc"}`);
+      return query;
+    },
+    range(start: number, end: number) {
+      calls.push(`${table}.range:${start}:${end}`);
+      return query;
+    },
     then(resolve: (result: QueryResult) => unknown) {
-      return Promise.resolve(resolve({ data, error: null }));
+      if (isHeadQuery) {
+        return Promise.resolve(resolve({ data: null, count: data.length, error: null }));
+      }
+      return Promise.resolve(resolve({ data, count: null, error: null }));
     },
   };
   return query;
+}
+
+function createFailingQuery(errorMessage: string) {
+  return {
+    select(_columns = "*") {
+      return this;
+    },
+    eq(_column: string, _value: string) {
+      return this;
+    },
+    order() {
+      return this;
+    },
+    range() {
+      return this;
+    },
+    then(resolve: (result: QueryResult) => unknown) {
+      return Promise.resolve(resolve({ data: null, count: null, error: { message: errorMessage } }));
+    },
+  };
 }
 
 function createInsertQuery(insertedRows: unknown[]) {
@@ -30,7 +63,7 @@ function createInsertQuery(insertedRows: unknown[]) {
 }
 
 describe("createChurchAppDataService", () => {
-  it("loads church-scoped data and merges attendance rows into events", async () => {
+  it("loads church-scoped data, applies pagination, and merges attendance rows into events", async () => {
     const calls: string[] = [];
     const rowsByTable: Record<string, unknown[]> = {
       members: [
@@ -109,6 +142,9 @@ describe("createChurchAppDataService", () => {
       from(table: string) {
         return createQuery(rowsByTable[table] ?? [], table, calls);
       },
+      rpc() {
+        return { then() { return Promise.resolve({ data: null, error: null }); } };
+      },
     };
 
     const service = createChurchAppDataService(client);
@@ -122,10 +158,20 @@ describe("createChurchAppDataService", () => {
     expect(result.recurringExpenses[0].frequency).toBe("Monthly");
     expect(result.auditLogs).toHaveLength(1);
     expect(result.events[0].attendance).toEqual(["member-1", "member-2"]);
+    expect(result.totalMembers).toBe(1);
+    expect(result.totalTransactions).toBe(1);
+    expect(result.totalEvents).toBe(1);
+    expect(result.totalBudgets).toBe(1);
+    expect(result.totalRecurringExpenses).toBe(1);
+    expect(result.totalAuditLogs).toBe(1);
     expect(calls).toContain("members.eq:church_id:church-1");
     expect(calls).toContain("budgets.eq:church_id:church-1");
     expect(calls).toContain("recurring_expenses.eq:church_id:church-1");
     expect(calls).toContain("event_attendance.select:event_id, member_id");
+    expect(calls).toContain("members.range:0:99");
+    expect(calls).toContain("members.order:created_at:desc");
+    expect(calls).toContain("budgets.range:0:99");
+    expect(calls).toContain("budgets.order:created_at:desc");
   });
 
   it("writes audit logs with the supplied church scope", async () => {
@@ -134,6 +180,9 @@ describe("createChurchAppDataService", () => {
       from(table: string) {
         expect(table).toBe("audit_logs");
         return createInsertQuery(insertedRows);
+      },
+      rpc() {
+        return { then() { return Promise.resolve({ data: null, error: null }); } };
       },
     };
     const service = createChurchAppDataService(client);
@@ -157,5 +206,18 @@ describe("createChurchAppDataService", () => {
         church_id: "church-1",
       },
     ]);
+  });
+
+  it("throws when query fails", async () => {
+    const client = {
+      from(_table: string) {
+        return createFailingQuery("Database connection failed");
+      },
+      rpc() {
+        return { then() { return Promise.resolve({ data: null, error: null }); } };
+      },
+    };
+    const service = createChurchAppDataService(client);
+    await expect(service.loadChurchAppData("church-1")).rejects.toThrow("Database connection failed");
   });
 });

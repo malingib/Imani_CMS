@@ -31,7 +31,9 @@ import {
 } from 'lucide-react';
 import { Member, Transaction, ChurchEvent, AppView, MemberActivity } from '../types';
 import { generateDailyVerse } from '../services/geminiService';
-import { getActivities } from '../src/lib/persistence';
+import { createPersistenceService } from '../src/lib/persistence';
+import { supabase } from '../src/lib/supabase-auth';
+const persistence = createPersistenceService(supabase);
 
 interface MemberPortalProps {
   member: Member;
@@ -54,7 +56,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
   useEffect(() => {
     (async () => {
       try {
-        const data = await getActivities(member.id, churchId);
+        const data = await persistence.getActivities(member.id, churchId);
         setActivities(data);
       } catch {
         setActivities([]);

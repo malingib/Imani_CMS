@@ -12,6 +12,7 @@ import { Member, UserRole } from '../types';
 
 interface GroupsManagementProps {
   members: Member[];
+  onCreateGroup?: (group: ChurchGroup) => void;
 }
 
 interface ChurchGroup {
@@ -25,7 +26,7 @@ interface ChurchGroup {
   target: number;
 }
 
-const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
+const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, onCreateGroup }) => {
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -69,24 +70,24 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
   };
 
   const handleCreateGroup = () => {
-    setIsSubmitting(true);
-    setTimeout(() => {
-      const group: ChurchGroup = {
-        id: `g${Date.now()}`,
-        name: newGroup.name || 'Untitled Group',
-        category: newGroup.category as any,
-        leader: newGroup.leader || 'Unassigned',
-        leaderAvatar: `https://i.pravatar.cc/100?u=${newGroup.name}`,
-        meetingDay: newGroup.meetingDay || 'TBD',
-        location: newGroup.location || 'TBD',
-        target: newGroup.target || 50
-      };
+    const group: ChurchGroup = {
+      id: `g${Date.now()}`,
+      name: newGroup.name || 'Untitled Group',
+      category: newGroup.category as any,
+      leader: newGroup.leader || 'Unassigned',
+      leaderAvatar: `https://i.pravatar.cc/100?u=${newGroup.name}`,
+      meetingDay: newGroup.meetingDay || 'TBD',
+      location: newGroup.location || 'TBD',
+      target: newGroup.target || 50
+    };
+    if (onCreateGroup) {
+      onCreateGroup(group);
+    } else {
       setGroups(prev => [...prev, group]);
-      setIsSubmitting(false);
-      setShowCreateModal(false);
-      setSuccessMessage(`"${group.name}" created successfully!`);
-      setTimeout(() => setSuccessMessage(null), 3000);
-    }, 1000);
+    }
+    setShowCreateModal(false);
+    setSuccessMessage(`"${group.name}" created successfully!`);
+    setTimeout(() => setSuccessMessage(null), 3000);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -342,8 +343,8 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members }) => {
               <textarea className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[2rem] font-bold text-slate-700 outline-none resize-none focus:ring-2 focus:ring-brand-primary" rows={5} placeholder="Hello members, this is a reminder..."/>
               <div className="flex gap-4">
                  <button onClick={() => setMessagingGroup(null)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Discard</button>
-                 <button onClick={() => { setIsSubmitting(true); setTimeout(() => { setIsSubmitting(false); setMessagingGroup(null); setSuccessMessage(`SMS Broadcast sent to ${messagingGroup.name}`); setTimeout(() => setSuccessMessage(null), 3000); }, 1500); }} disabled={isSubmitting} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
-                   {isSubmitting ? <Loader2 className="animate-spin" size={18}/> : <Send size={18}/>} {isSubmitting ? 'Sending...' : 'Send'}
+                  <button onClick={() => { setMessagingGroup(null); setSuccessMessage(`SMS Broadcast sent to ${messagingGroup.name}`); setTimeout(() => setSuccessMessage(null), 3000); }} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3">
+                    <Send size={18}/> Send
                  </button>
               </div>
             </div>

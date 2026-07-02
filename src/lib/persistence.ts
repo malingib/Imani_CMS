@@ -1,6 +1,10 @@
-import { supabase } from "./supabase";
 import { mapActivity, mapBudget, mapCommunication, mapEvent, mapGroup, mapMember, mapNotification, mapRecurringExpense, mapTransaction } from "./mappers";
 import type { AppNotification, Budget, ChurchEvent, CommunicationLog, Group, Member, MemberActivity, RecurringExpense, Transaction } from "../../types";
+
+export type SupabaseLikeClient = {
+  from(table: string): any;
+  rpc(fn: string, params: any): any;
+};
 
 const isUuid = (value: string | undefined) =>
   !!value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -62,98 +66,6 @@ export function eventToRow(event: ChurchEvent, churchId: string, includeId = fal
   };
 }
 
-export async function createMember(member: Member, churchId: string) {
-  const { data, error } = await supabase
-    .from("members")
-    .insert(memberToRow(member, churchId))
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapMember(data);
-}
-
-export async function createMembers(members: Member[], churchId: string) {
-  const rows = members.map((member) => memberToRow(member, churchId));
-  const { data, error } = await supabase.from("members").insert(rows).select("*");
-  if (error) throw new Error(error.message);
-  return (data || []).map(mapMember);
-}
-
-export async function updateMember(member: Member, churchId: string) {
-  const { data, error } = await supabase
-    .from("members")
-    .update(memberToRow(member, churchId))
-    .eq("id", member.id)
-    .eq("church_id", churchId)
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapMember(data);
-}
-
-export async function deleteMember(id: string, churchId: string) {
-  const { error } = await supabase.from("members").delete().eq("id", id).eq("church_id", churchId);
-  if (error) throw new Error(error.message);
-}
-
-export async function createTransaction(transaction: Transaction, churchId: string) {
-  const { data, error } = await supabase
-    .from("transactions")
-    .insert(transactionToRow(transaction, churchId))
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapTransaction(data);
-}
-
-export async function updateTransaction(transaction: Transaction, churchId: string) {
-  const { data, error } = await supabase
-    .from("transactions")
-    .update(transactionToRow(transaction, churchId))
-    .eq("id", transaction.id)
-    .eq("church_id", churchId)
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapTransaction(data);
-}
-
-export async function deleteTransaction(id: string, churchId: string) {
-  const { error } = await supabase.from("transactions").delete().eq("id", id).eq("church_id", churchId);
-  if (error) throw new Error(error.message);
-}
-
-export async function createEvent(event: ChurchEvent, churchId: string) {
-  const { data, error } = await supabase
-    .from("church_events")
-    .insert(eventToRow(event, churchId))
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return { ...mapEvent(data), attendance: [] };
-}
-
-export async function deleteEvent(id: string, churchId: string) {
-  const { error } = await supabase.from("church_events").delete().eq("id", id).eq("church_id", churchId);
-  if (error) throw new Error(error.message);
-}
-
-export async function replaceEventAttendance(eventId: string, memberIds: string[], churchId: string) {
-  const { error: deleteError } = await supabase.from("event_attendance").delete().eq("event_id", eventId).eq("church_id", churchId);
-  if (deleteError) throw new Error(deleteError.message);
-
-  if (memberIds.length === 0) return;
-
-  const { error } = await supabase.from("event_attendance").insert(
-    memberIds.map((memberId) => ({
-      event_id: eventId,
-      member_id: memberId,
-      church_id: churchId,
-    }))
-  );
-  if (error) throw new Error(error.message);
-}
-
 export function budgetToRow(budget: Budget, churchId: string, includeId = false) {
   return {
     ...(includeId && isUuid(budget.id) ? { id: budget.id } : {}),
@@ -176,38 +88,6 @@ export function recurringExpenseToRow(expense: RecurringExpense, churchId: strin
   };
 }
 
-export async function createBudget(budget: Budget, churchId: string) {
-  const { data, error } = await supabase
-    .from("budgets")
-    .insert(budgetToRow(budget, churchId))
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapBudget(data);
-}
-
-export async function updateBudget(budget: Budget, churchId: string) {
-  const { data, error } = await supabase
-    .from("budgets")
-    .update(budgetToRow(budget, churchId, true))
-    .eq("id", budget.id)
-    .eq("church_id", churchId)
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapBudget(data);
-}
-
-export async function createRecurringExpense(expense: RecurringExpense, churchId: string) {
-  const { data, error } = await supabase
-    .from("recurring_expenses")
-    .insert(recurringExpenseToRow(expense, churchId))
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapRecurringExpense(data);
-}
-
 export function communicationToRow(log: CommunicationLog, churchId: string, includeId = false) {
   return {
     ...(includeId && isUuid(log.id) ? { id: log.id } : {}),
@@ -225,9 +105,10 @@ export function communicationToRow(log: CommunicationLog, churchId: string, incl
   };
 }
 
-export function notificationToRow(notification: AppNotification, churchId: string) {
+export function notificationToRow(notification: AppNotification, churchId: string, userId?: string) {
   return {
     church_id: churchId,
+    user_id: userId || null,
     title: notification.title,
     message: notification.message,
     time: notification.time,
@@ -235,58 +116,6 @@ export function notificationToRow(notification: AppNotification, churchId: strin
     read: notification.read,
   };
 }
-
-export async function createCommunication(log: CommunicationLog, churchId: string) {
-  const { data, error } = await supabase
-    .from("communications")
-    .insert(communicationToRow(log, churchId))
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapCommunication(data);
-}
-
-export async function createNotification(notification: AppNotification, churchId: string) {
-  const { data, error } = await supabase
-    .from("notifications")
-    .insert(notificationToRow(notification, churchId))
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapNotification(data);
-}
-
-export async function updateNotificationRead(id: string, read: boolean, churchId: string) {
-  const { data, error } = await supabase
-    .from("notifications")
-    .update({ read })
-    .eq("id", id)
-    .eq("church_id", churchId)
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapNotification(data);
-}
-
-export async function markAllNotificationsRead(churchId: string) {
-  const { error } = await supabase
-    .from("notifications")
-    .update({ read: true })
-    .eq("church_id", churchId)
-    .eq("read", false);
-  if (error) throw new Error(error.message);
-}
-
-export async function deleteNotification(id: string, churchId: string) {
-  const { error } = await supabase
-    .from("notifications")
-    .delete()
-    .eq("id", id)
-    .eq("church_id", churchId);
-  if (error) throw new Error(error.message);
-}
-
-// ── Groups ──────────────────────────────────────────────
 
 export function groupToRow(group: Group, churchId: string, includeId = false) {
   return {
@@ -298,124 +127,373 @@ export function groupToRow(group: Group, churchId: string, includeId = false) {
   };
 }
 
-export async function createGroup(group: Group, churchId: string) {
-  const { data, error } = await supabase
-    .from("groups")
-    .insert(groupToRow(group, churchId))
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapGroup(data);
-}
+export function createPersistenceService(client: SupabaseLikeClient) {
+  return {
+    async createMember(member: Member, churchId: string) {
+      const { data, error } = await client
+        .from("members")
+        .insert(memberToRow(member, churchId))
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapMember(data);
+    },
 
-export async function getGroups(churchId: string) {
-  const { data, error } = await supabase
-    .from("groups")
-    .select("*")
-    .eq("church_id", churchId)
-    .order("name");
-  if (error) throw new Error(error.message);
-  return (data || []).map(mapGroup);
-}
+    async createMembers(members: Member[], churchId: string) {
+      const rows = members.map((member) => memberToRow(member, churchId));
+      const { data, error } = await client.from("members").insert(rows).select("*");
+      if (error) throw new Error(error.message);
+      return (data || []).map(mapMember);
+    },
 
-export async function getGroup(id: string, churchId: string) {
-  const { data, error } = await supabase
-    .from("groups")
-    .select("*")
-    .eq("id", id)
-    .eq("church_id", churchId)
-    .single();
-  if (error) throw new Error(error.message);
-  return mapGroup(data);
-}
+    async updateMember(member: Member, churchId: string) {
+      const { data, error } = await client
+        .from("members")
+        .update(memberToRow(member, churchId))
+        .eq("id", member.id)
+        .eq("church_id", churchId)
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapMember(data);
+    },
 
-export async function updateGroup(group: Group, churchId: string) {
-  const { data, error } = await supabase
-    .from("groups")
-    .update(groupToRow(group, churchId, true))
-    .eq("id", group.id)
-    .eq("church_id", churchId)
-    .select("*")
-    .single();
-  if (error) throw new Error(error.message);
-  return mapGroup(data);
-}
+    async deleteMember(id: string, churchId: string) {
+      const { error } = await client.from("members").delete().eq("id", id).eq("church_id", churchId);
+      if (error) throw new Error(error.message);
+    },
 
-export async function deleteGroup(id: string, churchId: string) {
-  const { error } = await supabase
-    .from("groups")
-    .delete()
-    .eq("id", id)
-    .eq("church_id", churchId);
-  if (error) throw new Error(error.message);
-}
+    async createTransaction(transaction: Transaction, churchId: string) {
+      const { data, error } = await client
+        .from("transactions")
+        .insert(transactionToRow(transaction, churchId))
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapTransaction(data);
+    },
 
-export async function getGroupMembers(groupId: string) {
-  const { data, error } = await supabase
-    .from("group_members")
-    .select("member_id")
-    .eq("group_id", groupId);
-  if (error) throw new Error(error.message);
-  return (data || []).map((r: any) => r.member_id as string);
-}
+    async updateTransaction(transaction: Transaction, churchId: string) {
+      const { data, error } = await client
+        .from("transactions")
+        .update(transactionToRow(transaction, churchId))
+        .eq("id", transaction.id)
+        .eq("church_id", churchId)
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapTransaction(data);
+    },
 
-export async function addGroupMember(groupId: string, memberId: string, churchId: string) {
-  const { error } = await supabase
-    .from("group_members")
-    .insert({ group_id: groupId, member_id: memberId, church_id: churchId });
-  if (error) throw new Error(error.message);
-}
+    async deleteTransaction(id: string, churchId: string) {
+      const { error } = await client.from("transactions").delete().eq("id", id).eq("church_id", churchId);
+      if (error) throw new Error(error.message);
+    },
 
-export async function removeGroupMember(groupId: string, memberId: string) {
-  const { error } = await supabase
-    .from("group_members")
-    .delete()
-    .eq("group_id", groupId)
-    .eq("member_id", memberId);
-  if (error) throw new Error(error.message);
-}
+    async createEvent(event: ChurchEvent, churchId: string) {
+      const { data, error } = await client
+        .from("church_events")
+        .insert(eventToRow(event, churchId))
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return { ...mapEvent(data), attendance: [] };
+    },
 
-// ── Activities ──────────────────────────────────────────
+    async updateEvent(event: ChurchEvent, churchId: string) {
+      const { data, error } = await client
+        .from("church_events")
+        .update(eventToRow(event, churchId))
+        .eq("id", event.id)
+        .eq("church_id", churchId)
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return { ...mapEvent(data), attendance: event.attendance || [] };
+    },
 
-export async function getActivities(memberId: string, churchId: string) {
-  const { data, error } = await supabase
-    .from("activities")
-    .select("*")
-    .eq("member_id", memberId)
-    .eq("church_id", churchId)
-    .order("created_at", { ascending: false })
-    .limit(20);
-  if (error) throw new Error(error.message);
-  return (data || []).map(mapActivity);
-}
+    async deleteEvent(id: string, churchId: string) {
+      const { error } = await client.from("church_events").delete().eq("id", id).eq("church_id", churchId);
+      if (error) throw new Error(error.message);
+    },
 
-// ── Platform Settings ───────────────────────────────────
+    async replaceEventAttendance(eventId: string, memberIds: string[], churchId: string) {
+      const { error: deleteError } = await client.from("event_attendance").delete().eq("event_id", eventId).eq("church_id", churchId);
+      if (deleteError) throw new Error(deleteError.message);
 
-export async function getPlatformSetting(category: string, key: string) {
-  const { data, error } = await supabase
-    .from("platform_settings")
-    .select("flags")
-    .eq("id", "global")
-    .single();
-  if (error && error.code !== "PGRST116") throw new Error(error.message);
-  return data?.flags?.[category]?.[key] ?? null;
-}
+      if (memberIds.length === 0) return;
 
-export async function setPlatformSetting(category: string, key: string, value: unknown) {
-  const { data: current, error: currentError } = await supabase
-    .from("platform_settings")
-    .select("flags")
-    .eq("id", "global")
-    .single();
-  if (currentError && currentError.code !== "PGRST116") throw new Error(currentError.message);
+      const { error } = await client.from("event_attendance").insert(
+        memberIds.map((memberId) => ({
+          event_id: eventId,
+          member_id: memberId,
+          church_id: churchId,
+        }))
+      );
+      if (error) throw new Error(error.message);
+    },
 
-  const flags = { ...(current?.flags || {}) };
-  const categoryFlags = { ...((flags[category] as Record<string, unknown>) || {}) };
-  categoryFlags[key] = value;
-  flags[category] = categoryFlags;
+    async createBudget(budget: Budget, churchId: string) {
+      const { data, error } = await client
+        .from("budgets")
+        .insert(budgetToRow(budget, churchId))
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapBudget(data);
+    },
 
-  const { error } = await supabase
-    .from("platform_settings")
-    .upsert({ id: "global", flags }, { onConflict: "id" });
-  if (error) throw new Error(error.message);
+    async updateBudget(budget: Budget, churchId: string) {
+      const { data, error } = await client
+        .from("budgets")
+        .update(budgetToRow(budget, churchId, true))
+        .eq("id", budget.id)
+        .eq("church_id", churchId)
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapBudget(data);
+    },
+
+    async deleteBudget(id: string, churchId: string) {
+      const { error } = await client
+        .from("budgets")
+        .delete()
+        .eq("id", id)
+        .eq("church_id", churchId);
+      if (error) throw new Error(error.message);
+    },
+
+    async createRecurringExpense(expense: RecurringExpense, churchId: string) {
+      const { data, error } = await client
+        .from("recurring_expenses")
+        .insert(recurringExpenseToRow(expense, churchId))
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapRecurringExpense(data);
+    },
+
+    async updateRecurringExpense(expense: RecurringExpense, churchId: string) {
+      const { data, error } = await client
+        .from("recurring_expenses")
+        .update(recurringExpenseToRow(expense, churchId, true))
+        .eq("id", expense.id)
+        .eq("church_id", churchId)
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapRecurringExpense(data);
+    },
+
+    async deleteRecurringExpense(id: string, churchId: string) {
+      const { error } = await client
+        .from("recurring_expenses")
+        .delete()
+        .eq("id", id)
+        .eq("church_id", churchId);
+      if (error) throw new Error(error.message);
+    },
+
+    async createCommunication(log: CommunicationLog, churchId: string) {
+      const { data, error } = await client
+        .from("communications")
+        .insert(communicationToRow(log, churchId))
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapCommunication(data);
+    },
+
+    async deleteCommunication(id: string, churchId: string) {
+      const { error } = await client
+        .from("communications")
+        .delete()
+        .eq("id", id)
+        .eq("church_id", churchId);
+      if (error) throw new Error(error.message);
+    },
+
+    async createNotification(notification: AppNotification, churchId: string, userId?: string) {
+      const { data, error } = await client
+        .from("notifications")
+        .insert(notificationToRow(notification, churchId, userId))
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapNotification(data);
+    },
+
+    async updateNotificationRead(id: string, read: boolean, churchId: string, userId?: string) {
+      let query = client
+        .from("notifications")
+        .update({ read })
+        .eq("id", id)
+        .eq("church_id", churchId);
+      if (userId) query = query.eq("user_id", userId);
+      const { data, error } = await query.select("*").single();
+      if (error) throw new Error(error.message);
+      return mapNotification(data);
+    },
+
+    async markAllNotificationsRead(churchId: string, userId?: string) {
+      let query = client
+        .from("notifications")
+        .update({ read: true })
+        .eq("church_id", churchId)
+        .eq("read", false);
+      if (userId) query = query.eq("user_id", userId);
+      const { error } = await query;
+      if (error) throw new Error(error.message);
+    },
+
+    async deleteNotification(id: string, churchId: string, userId?: string) {
+      let query = client
+        .from("notifications")
+        .delete()
+        .eq("id", id)
+        .eq("church_id", churchId);
+      if (userId) query = query.eq("user_id", userId);
+      const { error } = await query;
+      if (error) throw new Error(error.message);
+    },
+
+    async createGroup(group: Group, churchId: string) {
+      const { data, error } = await client
+        .from("groups")
+        .insert(groupToRow(group, churchId))
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapGroup(data);
+    },
+
+    async getGroups(churchId: string) {
+      const { data, error } = await client
+        .from("groups")
+        .select("*")
+        .eq("church_id", churchId)
+        .order("name");
+      if (error) throw new Error(error.message);
+      return (data || []).map(mapGroup);
+    },
+
+    async getGroup(id: string, churchId: string) {
+      const { data, error } = await client
+        .from("groups")
+        .select("*")
+        .eq("id", id)
+        .eq("church_id", churchId)
+        .single();
+      if (error) throw new Error(error.message);
+      return mapGroup(data);
+    },
+
+    async updateGroup(group: Group, churchId: string) {
+      const { data, error } = await client
+        .from("groups")
+        .update(groupToRow(group, churchId, true))
+        .eq("id", group.id)
+        .eq("church_id", churchId)
+        .select("*")
+        .single();
+      if (error) throw new Error(error.message);
+      return mapGroup(data);
+    },
+
+    async deleteGroup(id: string, churchId: string) {
+      const { error } = await client
+        .from("groups")
+        .delete()
+        .eq("id", id)
+        .eq("church_id", churchId);
+      if (error) throw new Error(error.message);
+    },
+
+    async getGroupMembers(groupId: string) {
+      const { data, error } = await client
+        .from("group_members")
+        .select("member_id")
+        .eq("group_id", groupId);
+      if (error) throw new Error(error.message);
+      return (data || []).map((r: any) => r.member_id as string);
+    },
+
+    async addGroupMember(groupId: string, memberId: string, churchId: string) {
+      const { error } = await client
+        .from("group_members")
+        .insert({ group_id: groupId, member_id: memberId, church_id: churchId });
+      if (error) throw new Error(error.message);
+    },
+
+    async removeGroupMember(groupId: string, memberId: string) {
+      const { error } = await client
+        .from("group_members")
+        .delete()
+        .eq("group_id", groupId)
+        .eq("member_id", memberId);
+      if (error) throw new Error(error.message);
+    },
+
+    async getActivities(memberId: string, churchId: string) {
+      const { data, error } = await client
+        .from("activities")
+        .select("*")
+        .eq("member_id", memberId)
+        .eq("church_id", churchId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (error) throw new Error(error.message);
+      return (data || []).map(mapActivity);
+    },
+
+    async getMembers(churchId: string) {
+      const { data, error } = await client
+        .from("members")
+        .select("*")
+        .eq("church_id", churchId)
+        .order("created_at", { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data || []).map(mapMember);
+    },
+
+    async getTransactions(churchId: string) {
+      const { data, error } = await client
+        .from("transactions")
+        .select("*")
+        .eq("church_id", churchId)
+        .order("created_at", { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data || []).map(mapTransaction);
+    },
+
+    async getPlatformSetting(category: string, key: string) {
+      const { data, error } = await client
+        .from("platform_settings")
+        .select("flags")
+        .eq("id", "global")
+        .single();
+      if (error && error.code !== "PGRST116") throw new Error(error.message);
+      return data?.flags?.[category]?.[key] ?? null;
+    },
+
+    async setPlatformSetting(category: string, key: string, value: unknown) {
+      const { data: current, error: currentError } = await client
+        .from("platform_settings")
+        .select("flags")
+        .eq("id", "global")
+        .single();
+      if (currentError && currentError.code !== "PGRST116") throw new Error(currentError.message);
+
+      const flags = { ...(current?.flags || {}) };
+      const categoryFlags = { ...((flags[category] as Record<string, unknown>) || {}) };
+      categoryFlags[key] = value;
+      flags[category] = categoryFlags;
+
+      const { error } = await client
+        .from("platform_settings")
+        .upsert({ id: "global", flags }, { onConflict: "id" });
+      if (error) throw new Error(error.message);
+    },
+  };
 }

@@ -1,9 +1,10 @@
 import type { AppNotification, AuditLog, AppView, Budget, ChurchEvent, CommunicationLog, Member, RecurringExpense, Transaction } from "../../types";
 import { mapAuditLog, mapBudget, mapCommunication, mapEvent, mapMember, mapNotification, mapRecurringExpense, mapTransaction } from "./mappers";
 
-type QueryResult<T> = { data: T[] | null; error: { message: string } | null };
+type QueryResult<T> = { data: T[] | null; count: number | null; error: { message: string } | null };
 export type SupabaseLikeClient = {
   from(table: string): any;
+  rpc(fn: string, params: any): any;
 };
 
 export type ChurchAppData = {
@@ -17,6 +18,17 @@ export type ChurchAppData = {
   auditLogs: AuditLog[];
 };
 
+export type PaginatedChurchAppData = ChurchAppData & {
+  totalMembers: number;
+  totalTransactions: number;
+  totalEvents: number;
+  totalBudgets: number;
+  totalRecurringExpenses: number;
+  totalCommunications: number;
+  totalNotifications: number;
+  totalAuditLogs: number;
+};
+
 export type CreateAuditLogInput = {
   userId: string;
   userName: string;
@@ -26,9 +38,17 @@ export type CreateAuditLogInput = {
   churchId?: string | null;
 };
 
-function scopedQuery(client: SupabaseLikeClient, table: string, churchId?: string | null, select = "*"): PromiseLike<QueryResult<unknown>> {
+function scopedQuery(
+  client: SupabaseLikeClient,
+  table: string,
+  churchId?: string | null,
+  select = "*",
+  options?: { range?: { start: number; end: number }; order?: { column: string; ascending: boolean } }
+): PromiseLike<QueryResult<unknown>> {
   let query = client.from(table).select(select);
   if (churchId) query = query.eq("church_id", churchId);
+  if (options?.order) query = query.order(options.order.column, { ascending: options.order.ascending });
+  if (options?.range) query = query.range(options.range.start, options.range.end);
   return query;
 }
 
@@ -36,6 +56,14 @@ async function runQuery<T>(query: PromiseLike<QueryResult<unknown>>, mapRow: (ro
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   return (data || []).map(mapRow);
+}
+
+async function getCount(client: SupabaseLikeClient, table: string, churchId?: string | null): Promise<number> {
+  let query = client.from(table).select("*", { count: "exact", head: true });
+  if (churchId) query = query.eq("church_id", churchId);
+  const { count, error } = await query;
+  if (error) throw new Error(error.message);
+  return count ?? 0;
 }
 
 function mergeEventAttendance(events: ChurchEvent[], attendanceRows: unknown[]) {
@@ -52,18 +80,31 @@ function mergeEventAttendance(events: ChurchEvent[], attendanceRows: unknown[]) 
 
 export function createChurchAppDataService(client: SupabaseLikeClient) {
   return {
-    async loadChurchAppData(churchId?: string | null): Promise<ChurchAppData> {
-      const members = runQuery(scopedQuery(client, "members", churchId), mapMember);
-      const transactions = runQuery(scopedQuery(client, "transactions", churchId), mapTransaction);
-      const events = runQuery(scopedQuery(client, "church_events", churchId), mapEvent);
-      const attendance = scopedQuery(client, "event_attendance", churchId, "event_id, member_id");
-      const budgets = runQuery(scopedQuery(client, "budgets", churchId), mapBudget);
-      const recurringExpenses = runQuery(scopedQuery(client, "recurring_expenses", churchId), mapRecurringExpense);
-      const communications = runQuery(scopedQuery(client, "communications", churchId), mapCommunication);
-      const notifications = runQuery(scopedQuery(client, "notifications", churchId), mapNotification);
-      const auditLogs = runQuery(scopedQuery(client, "audit_logs", churchId), mapAuditLog);
+    async loadChurchAppData(churchId?: string | null, page = 0, pageSize = 100): Promise<PaginatedChurchAppData> {
+      const start = page * pageSize;
+      const end = start + pageSize - 1;
+      const paginationOpts = { range: { start, end }, order: { column: "created_at", ascending: false } };
 
-      const [loadedMembers, loadedTransactions, loadedEvents, attendanceResult, loadedBudgets, loadedRecurringExpenses, loadedCommunications, loadedNotifications, loadedAuditLogs] = await Promise.all([
+      const members = runQuery(scopedQuery(client, "members", churchId, "*", paginationOpts), mapMember);
+      const transactions = runQuery(scopedQuery(client, "transactions", churchId, "*", paginationOpts), mapTransaction);
+      const events = runQuery(scopedQuery(client, "church_events", churchId, "*", paginationOpts), mapEvent);
+      const attendance = scopedQuery(client, "event_attendance", churchId, "event_id, member_id", paginationOpts);
+      const budgets = runQuery(scopedQuery(client, "budgets", churchId, "*", paginationOpts), mapBudget);
+      const recurringExpenses = runQuery(scopedQuery(client, "recurring_expenses", churchId, "*", paginationOpts), mapRecurringExpense);
+      const communications = runQuery(scopedQuery(client, "communications", churchId, "*", paginationOpts), mapCommunication);
+      const notifications = runQuery(scopedQuery(client, "notifications", churchId, "*", paginationOpts), mapNotification);
+      const auditLogs = runQuery(scopedQuery(client, "audit_logs", churchId, "*", paginationOpts), mapAuditLog);
+
+      const countMembers = getCount(client, "members", churchId);
+      const countTransactions = getCount(client, "transactions", churchId);
+      const countEvents = getCount(client, "church_events", churchId);
+      const countBudgets = getCount(client, "budgets", churchId);
+      const countRecurringExpenses = getCount(client, "recurring_expenses", churchId);
+      const countCommunications = getCount(client, "communications", churchId);
+      const countNotifications = getCount(client, "notifications", churchId);
+      const countAuditLogs = getCount(client, "audit_logs", churchId);
+
+      const [loadedMembers, loadedTransactions, loadedEvents, attendanceResult, loadedBudgets, loadedRecurringExpenses, loadedCommunications, loadedNotifications, loadedAuditLogs, totalMembers, totalTransactions, totalEvents, totalBudgets, totalRecurringExpenses, totalCommunications, totalNotifications, totalAuditLogs] = await Promise.all([
         members,
         transactions,
         events,
@@ -73,6 +114,14 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
         communications,
         notifications,
         auditLogs,
+        countMembers,
+        countTransactions,
+        countEvents,
+        countBudgets,
+        countRecurringExpenses,
+        countCommunications,
+        countNotifications,
+        countAuditLogs,
       ]);
       if (attendanceResult.error) throw new Error(attendanceResult.error.message);
 
@@ -85,6 +134,14 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
         communications: loadedCommunications,
         notifications: loadedNotifications,
         auditLogs: loadedAuditLogs,
+        totalMembers,
+        totalTransactions,
+        totalEvents,
+        totalBudgets,
+        totalRecurringExpenses,
+        totalCommunications,
+        totalNotifications,
+        totalAuditLogs,
       };
     },
 

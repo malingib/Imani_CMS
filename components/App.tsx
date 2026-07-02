@@ -35,28 +35,11 @@ import { ChurchProvider, useChurch } from '../src/lib/church-context';
 import { createChurchAppDataService } from '../src/lib/app-data';
 import { getDefaultViewForUserRole, mapSupabaseUserToAppUser } from '../src/lib/app-user';
 import { createToastRecord, normalizePlatformView } from '../src/lib/view-routing';
-import {
-  createBudget,
-  createCommunication,
-  createEvent,
-  createMember,
-  createMembers,
-  createRecurringExpense,
-  createTransaction,
-  deleteEvent,
-  deleteMember,
-  deleteNotification,
-  deleteTransaction,
-  markAllNotificationsRead,
-  replaceEventAttendance,
-  updateBudget,
-  updateMember,
-  updateNotificationRead,
-  updateTransaction,
-} from '../src/lib/persistence';
+import { createPersistenceService } from '../src/lib/persistence';
 import { countUnread } from '../src/lib/notification-service';
 
 const appDataService = createChurchAppDataService(supabase);
+const persistence = createPersistenceService(supabase);
 
 const AppContent: React.FC = () => {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
@@ -182,7 +165,7 @@ const AppContent: React.FC = () => {
 
   const handleAddMembersBulk = async (importedMembers: Member[]) => {
     try {
-      const saved = await createMembers(importedMembers, requireChurchId());
+      const saved = await persistence.createMembers(importedMembers, requireChurchId());
       setMembers(prev => [...prev, ...saved]);
       addToast(`Successfully imported ${saved.length} members`, 'success');
       createAudit(`Bulk imported ${saved.length} members`, 'MEMBERS');
@@ -205,7 +188,7 @@ const AppContent: React.FC = () => {
     setPendingOperations(prev => new Set([...prev, idempotencyKey]));
     
     try {
-      const saved = await createMember(member, requireChurchId());
+      const saved = await persistence.createMember(member, requireChurchId());
       setMembers(prev => [...prev, saved]);
       createAudit(`Added member ${saved.firstName}`, 'MEMBERS');
       addToast('Member saved');
@@ -223,7 +206,7 @@ const AppContent: React.FC = () => {
 
   const handleUpdateMember = async (member: Member) => {
     try {
-      const saved = await updateMember(member, requireChurchId());
+      const saved = await persistence.updateMember(member, requireChurchId());
       setMembers(prev => prev.map(p => p.id === saved.id ? saved : p));
       createAudit(`Updated member ${saved.firstName}`, 'MEMBERS');
       addToast('Member updated');
@@ -234,7 +217,7 @@ const AppContent: React.FC = () => {
 
   const handleDeleteMember = async (id: string) => {
     try {
-      await deleteMember(id, requireChurchId());
+      await persistence.deleteMember(id, requireChurchId());
       setMembers(prev => prev.filter(m => m.id !== id));
       createAudit(`Deleted member ${id}`, 'MEMBERS', 'CRITICAL');
       addToast('Member deleted', 'info');
@@ -245,7 +228,7 @@ const AppContent: React.FC = () => {
 
   const handleAddTransaction = async (transaction: Transaction) => {
     try {
-      const saved = await createTransaction(transaction, requireChurchId());
+      const saved = await persistence.createTransaction(transaction, requireChurchId());
       setTransactions(prev => [saved, ...prev]);
       createAudit(`Recorded transaction ${saved.reference}`, 'FINANCE');
       addToast('Transaction saved');
@@ -256,7 +239,7 @@ const AppContent: React.FC = () => {
 
   const handleUpdateTransaction = async (transaction: Transaction) => {
     try {
-      const saved = await updateTransaction(transaction, requireChurchId());
+      const saved = await persistence.updateTransaction(transaction, requireChurchId());
       setTransactions(prev => prev.map(t => t.id === saved.id ? saved : t));
       createAudit(`Updated transaction ${saved.reference}`, 'FINANCE');
       addToast('Transaction updated');
@@ -267,7 +250,7 @@ const AppContent: React.FC = () => {
 
   const handleDeleteTransaction = async (id: string) => {
     try {
-      await deleteTransaction(id, requireChurchId());
+      await persistence.deleteTransaction(id, requireChurchId());
       setTransactions(prev => prev.filter(t => t.id !== id));
       createAudit(`Deleted transaction ${id}`, 'FINANCE', 'CRITICAL');
       addToast('Transaction deleted', 'info');
@@ -278,7 +261,7 @@ const AppContent: React.FC = () => {
 
   const handleAddEvent = async (event: ChurchEvent) => {
     try {
-      const saved = await createEvent(event, requireChurchId());
+      const saved = await persistence.createEvent(event, requireChurchId());
       setEvents(prev => [...prev, saved]);
       createAudit(`Scheduled event ${saved.title}`, 'EVENTS');
       addToast('Event scheduled');
@@ -289,7 +272,7 @@ const AppContent: React.FC = () => {
 
   const handleDeleteEvent = async (id: string) => {
     try {
-      await deleteEvent(id, requireChurchId());
+      await persistence.deleteEvent(id, requireChurchId());
       setEvents(prev => prev.filter(e => e.id !== id));
       createAudit(`Deleted event ${id}`, 'EVENTS', 'WARN');
       addToast('Event deleted', 'info');
@@ -300,7 +283,7 @@ const AppContent: React.FC = () => {
 
   const handleUpdateAttendance = async (eventId: string, memberIds: string[]) => {
     try {
-      await replaceEventAttendance(eventId, memberIds, requireChurchId());
+      await persistence.replaceEventAttendance(eventId, memberIds, requireChurchId());
       setEvents(prev => prev.map(e => e.id === eventId ? { ...e, attendance: memberIds } : e));
       createAudit(`Updated attendance for ${eventId}`, 'EVENTS');
       addToast('Attendance updated');
@@ -318,7 +301,7 @@ const AppContent: React.FC = () => {
       const nextAttendance = isRSVPing
         ? Array.from(new Set([...event.attendance, memberId]))
         : event.attendance.filter(id => id !== memberId);
-      await replaceEventAttendance(eventId, nextAttendance, requireChurchId());
+      await persistence.replaceEventAttendance(eventId, nextAttendance, requireChurchId());
       setEvents(prev => prev.map(item => item.id === eventId ? { ...item, attendance: nextAttendance } : item));
       createAudit(`${isRSVPing ? 'RSVPd for' : 'Cancelled RSVP for'} ${eventId}`, 'EVENTS');
       addToast(isRSVPing ? 'RSVP saved' : 'RSVP removed');
@@ -329,7 +312,7 @@ const AppContent: React.FC = () => {
 
   const handleUpdateProfile = async (member: Member) => {
     try {
-      const saved = await updateMember(member, requireChurchId());
+      const saved = await persistence.updateMember(member, requireChurchId());
       setMembers(prev => prev.map(item => item.id === saved.id ? saved : item));
       if (currentUser?.memberId === saved.id) {
         setCurrentUser(prev => prev ? { ...prev, name: `${saved.firstName} ${saved.lastName}`.trim(), avatar: saved.photo || prev.avatar } : prev);
@@ -344,8 +327,8 @@ const AppContent: React.FC = () => {
   const handleSetBudget = async (budget: Budget) => {
     try {
       const saved = budget.id && budgets.some(b => b.id === budget.id)
-        ? await updateBudget(budget, requireChurchId())
-        : await createBudget(budget, requireChurchId());
+        ? await persistence.updateBudget(budget, requireChurchId())
+        : await persistence.createBudget(budget, requireChurchId());
       setBudgets(prev => {
         const exists = prev.some(b => b.id === saved.id);
         return exists ? prev.map(b => b.id === saved.id ? saved : b) : [...prev, saved];
@@ -359,7 +342,7 @@ const AppContent: React.FC = () => {
 
   const handleAddRecurring = async (expense: RecurringExpense) => {
     try {
-      const saved = await createRecurringExpense(expense, requireChurchId());
+      const saved = await persistence.createRecurringExpense(expense, requireChurchId());
       setRecurringExpenses(prev => [...prev, saved]);
       createAudit(`Added recurring expense ${saved.category}`, 'FINANCE');
       addToast('Recurring expense saved');
@@ -370,7 +353,7 @@ const AppContent: React.FC = () => {
 
   const handleSendBroadcast = async (log: CommunicationLog) => {
     try {
-      const saved = await createCommunication(log, requireChurchId());
+      const saved = await persistence.createCommunication(log, requireChurchId());
       setCommunications(prev => [saved, ...prev]);
       createAudit(`Sent ${saved.type} broadcast to ${saved.targetGroupName}`, 'COMMUNICATION');
       addToast('Broadcast saved');
@@ -381,21 +364,21 @@ const AppContent: React.FC = () => {
 
   const handleMarkNotificationRead = async (id: string) => {
     try {
-      const saved = await updateNotificationRead(id, true, requireChurchId());
+      const saved = await persistence.updateNotificationRead(id, true, requireChurchId());
       setNotifications(prev => prev.map(n => n.id === saved.id ? saved : n));
     } catch {}
   };
 
   const handleMarkAllNotificationsRead = async () => {
     try {
-      await markAllNotificationsRead(requireChurchId());
+      await persistence.markAllNotificationsRead(requireChurchId());
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch {}
   };
 
   const handleDeleteNotification = async (id: string) => {
     try {
-      await deleteNotification(id, requireChurchId());
+      await persistence.deleteNotification(id, requireChurchId());
       setNotifications(prev => prev.filter(n => n.id !== id));
     } catch {}
   };

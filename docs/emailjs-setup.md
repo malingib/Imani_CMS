@@ -22,6 +22,13 @@ Create a `.env` or set Vite env vars in your deployment with the following keys 
 - `VITE_EMAILJS_TEMPLATE_PASSWORD_RESET_ID` — EmailJS template id for password resets (optional)
 - `VITE_APP_URL` — public URL for the app (used to build invite links)
 
+For the Supabase service role key, store it separately as a backend-only secret named `SERVICE_ROLE_KEY`.
+
+This project also uses a Supabase Edge Function at `supabase/functions/password-reset` to:
+
+- generate a password recovery link with the Supabase admin API, and
+- send the custom reset email through EmailJS.
+
 Example `.env`:
 
 ```
@@ -30,6 +37,7 @@ VITE_EMAILJS_SERVICE_ID=service_xxx
 VITE_EMAILJS_TEMPLATE_INVITE_ID=template_invite_xxx
 VITE_EMAILJS_TEMPLATE_PASSWORD_RESET_ID=template_reset_xxx
 VITE_APP_URL=https://your-app.example.com
+SERVICE_ROLE_KEY=your_service_role_key
 ```
 
 After changing env, restart the dev server.

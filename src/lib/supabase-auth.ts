@@ -16,8 +16,13 @@ export function useAuth() {
   }, []);
 
   const requestPasswordReset = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { data, error } = await supabase.functions.invoke('password-reset', {
+      body: { email },
+    });
     if (error) throw new Error(error.message);
+    if (!data || (data as any).success !== true) {
+      throw new Error((data as any)?.error || 'Unable to send password reset email');
+    }
   }, []);
 
   const logout = useCallback(async () => {

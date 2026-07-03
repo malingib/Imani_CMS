@@ -50,7 +50,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  const { login } = useAuth();
+  const { login, requestPasswordReset } = useAuth();
   
   const [currentVerse, setCurrentVerse] = useState({ 
     text: FALLBACK_VERSES[0].text, 
@@ -134,7 +134,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
     }, 2000);
   };
 
-  const handleReset = (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
@@ -147,10 +147,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
       return;
     }
     
-    setTimeout(() => {
+    try {
+      await requestPasswordReset(email);
       setSuccess(`Password reset instructions have been sent to ${email}`);
+    } catch (err: any) {
+      setError(err?.message || 'Unable to send password reset email');
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (

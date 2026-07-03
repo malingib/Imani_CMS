@@ -87,13 +87,37 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
 -- Create helper functions for RLS policies (if using custom auth)
 -- Note: These should be called in your RLS policy definitions
 
-CREATE OR REPLACE FUNCTION app_role() RETURNS TEXT AS $$
-  SELECT current_setting('request.jwt.claims', true)::jsonb->>'role'
-$$ LANGUAGE SQL SECURITY DEFINER;
+DO $body$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = current_schema()
+      AND p.proname = 'app_role'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    CREATE FUNCTION app_role() RETURNS TEXT AS $func$
+      SELECT current_setting('request.jwt.claims', true)::jsonb->>'role'
+    $func$ LANGUAGE SQL SECURITY DEFINER;
+  END IF;
+END$body$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION app_church_id() RETURNS TEXT AS $$
-  SELECT current_setting('request.jwt.claims', true)::jsonb->>'church_id'
-$$ LANGUAGE SQL SECURITY DEFINER;
+DO $body$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = current_schema()
+      AND p.proname = 'app_church_id'
+      AND pg_get_function_identity_arguments(p.oid) = ''
+  ) THEN
+    CREATE FUNCTION app_church_id() RETURNS TEXT AS $func$
+      SELECT current_setting('request.jwt.claims', true)::jsonb->>'church_id'
+    $func$ LANGUAGE SQL SECURITY DEFINER;
+  END IF;
+END$body$ LANGUAGE plpgsql;
 
 -- ============================================================================
 -- 7. MEMBER PHOTO STORAGE DOCUMENTATION

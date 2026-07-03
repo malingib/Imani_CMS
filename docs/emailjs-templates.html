@@ -1,0 +1,140 @@
+<!-- TEMPLATE 1: INVITATION EMAIL -->
+<!-- Subject: You've been invited to join {{church_name}} on IMANI CMS -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .header h1 { color: white; margin: 0; font-size: 28px; font-weight: 700; }
+    .content { background: #f9fafb; padding: 40px 30px; }
+    .content h2 { color: #1e40af; font-size: 20px; margin-top: 0; }
+    .details { background: white; padding: 20px; border-left: 4px solid #1e40af; margin: 20px 0; border-radius: 4px; }
+    .detail-row { margin: 12px 0; font-size: 14px; }
+    .detail-label { font-weight: 600; color: #1e40af; display: inline-block; width: 100px; }
+    .detail-value { color: #333; }
+    .cta-button { display: inline-block; background: #1e40af; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; font-size: 16px; }
+    .cta-button:hover { background: #1e3a8a; }
+    .footer { background: #f3f4f6; padding: 20px 30px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px; }
+    .footer a { color: #1e40af; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>IMANI CMS</h1>
+    </div>
+    <div class="content">
+      <h2>Welcome! 🎉</h2>
+      <p>You've been invited to join <strong>{{church_name}}</strong> on IMANI CMS, the platform built for churches to manage their community, finances, and growth.</p>
+      
+      <div class="details">
+        <div class="detail-row">
+          <span class="detail-label">Email:</span>
+          <span class="detail-value">{{to_email}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Role:</span>
+          <span class="detail-value"><strong>{{role}}</strong></span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Church:</span>
+          <span class="detail-value">{{church_name}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Expires:</span>
+          <span class="detail-value">7 days from now</span>
+        </div>
+      </div>
+
+      <p style="margin-top: 30px; text-align: center;">
+        <a href="{{invite_link}}" class="cta-button">Accept Invitation</a>
+      </p>
+
+      <p style="font-size: 14px; color: #666; margin-top: 25px;">
+        If the button above doesn't work, copy and paste this link into your browser:<br>
+        <code style="background: #f3f4f6; padding: 8px 12px; border-radius: 4px; display: block; word-break: break-all; margin-top: 8px;">{{invite_link}}</code>
+      </p>
+
+      <p style="font-size: 13px; color: #999; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        This invitation expires in 7 days. If you believe you received this email in error, please ignore it.
+      </p>
+    </div>
+    <div class="footer">
+      <p style="margin: 0;">© 2026 Mobiwave Innovations. All rights reserved.</p>
+      <p style="margin: 8px 0 0 0;"><a href="#">Visit IMANI CMS</a> • <a href="#">Contact Support</a></p>
+    </div>
+  </div>
+</body>
+</html>
+
+
+<!-- ================================================================ -->
+<!-- TEMPLATE 2: PASSWORD RESET EMAIL -->
+<!-- Subject: Reset your IMANI CMS password -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .header h1 { color: white; margin: 0; font-size: 28px; font-weight: 700; }
+    .content { background: #f9fafb; padding: 40px 30px; }
+    .warning { background: #fef2f2; border-left: 4px solid #dc2626; padding: 16px; border-radius: 4px; margin: 20px 0; }
+    .warning p { margin: 0; color: #7f1d1d; font-size: 14px; }
+    .cta-button { display: inline-block; background: #dc2626; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 20px 0; font-size: 16px; }
+    .cta-button:hover { background: #991b1b; }
+    .footer { background: #f3f4f6; padding: 20px 30px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px; }
+    .footer a { color: #dc2626; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>IMANI CMS</h1>
+    </div>
+    <div class="content">
+      <h2>Reset your password</h2>
+      <p>We received a request to reset the password for your IMANI CMS account associated with <strong>{{to_email}}</strong>.</p>
+
+      <div class="warning">
+        <p><strong>⚠️ Security Note:</strong> This link expires in 24 hours. If you didn't request this, you can safely ignore this email.</p>
+      </div>
+
+      <p style="margin-top: 30px; text-align: center;">
+        <a href="{{reset_link}}" class="cta-button">Reset Password</a>
+      </p>
+
+      <p style="font-size: 14px; color: #666; margin-top: 25px;">
+        If the button above doesn't work, copy and paste this link into your browser:<br>
+        <code style="background: #f3f4f6; padding: 8px 12px; border-radius: 4px; display: block; word-break: break-all; margin-top: 8px; font-size: 12px;">{{reset_link}}</code>
+      </p>
+
+      <h3 style="font-size: 16px; margin-top: 30px; color: #1f2937;">What to do next:</h3>
+      <ol style="color: #666; font-size: 14px;">
+        <li>Click the button above to reset your password</li>
+        <li>Create a strong, unique password</li>
+        <li>Confirm your new password</li>
+        <li>You're all set! Log in with your new credentials</li>
+      </ol>
+
+      <p style="font-size: 13px; color: #999; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        <strong>Questions about your account security?</strong><br>
+        If you didn't request this password reset or have concerns about your account, please <a href="#" style="color: #dc2626;">contact our support team</a> immediately.
+      </p>
+    </div>
+    <div class="footer">
+      <p style="margin: 0;">© 2026 Mobiwave Innovations. All rights reserved.</p>
+      <p style="margin: 8px 0 0 0;"><a href="#">Visit IMANI CMS</a> • <a href="#">Security Policy</a> • <a href="#">Contact Support</a></p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,5 +1,7 @@
 type SupabaseLikeClient = { from(table: string): any };
 
+import { sendInviteEmail } from './emailService';
+
 export type InvitationRecord = {
   id: string;
   church_id: string;
@@ -29,14 +31,28 @@ export function createInvitationsService(client: SupabaseLikeClient) {
     },
 
     async sendInvitation(input: { churchId: string; email: string; role: string }): Promise<void> {
-      const { error } = await client.from('invitations').insert([{
+      const token = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data, error } = await client.from('invitations').insert([{
         church_id: input.churchId,
         email: input.email,
         role: input.role,
-        token: crypto.randomUUID(),
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        token,
+        expires_at: expiresAt,
       }]);
       if (error) throw new Error(error.message);
+
+      try {
+        const inserted = Array.isArray(data) && data[0] ? data[0] : undefined;
+        const inviteToken = inserted?.token ?? token;
+        const churchName = inserted?.church_name ?? undefined;
+        const origin = (typeof window !== 'undefined' && (window.location as any)?.origin) || (import.meta.env.VITE_APP_URL as string) || '';
+        const inviteLink = origin ? `${origin}/accept-invite?token=${inviteToken}` : '';
+
+        await sendInviteEmail({ to_email: input.email, token: inviteToken, church_name: churchName, role: input.role, invite_link: inviteLink });
+      } catch (err) {
+        console.error('failed to send invite email', err);
+      }
     },
 
     async cancelInvitation(id: string): Promise<void> {

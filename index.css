@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'DM Sans', 'Inter', sans-serif;
+  --font-sans: 'Oak & Grid', serif;
 
   --color-brand-primary: #1E293B;
   --color-brand-primary-50: #F8FAFC;

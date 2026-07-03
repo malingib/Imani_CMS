@@ -18,6 +18,7 @@ dist-ssr
 !.env.example
 !.env.sample
 !.env.template
+!.env.production
 *.pem
 *.key
 *.p12
@@ -47,3 +48,4 @@ server/node_modules
 
 # Supabase
 .supabase
+.vercel

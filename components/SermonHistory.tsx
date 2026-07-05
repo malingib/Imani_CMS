@@ -11,9 +11,10 @@ import { getBibleScriptureAndReflection } from '../services/geminiService';
 
 interface SermonHistoryProps {
   events: ChurchEvent[];
+  sermons?: Sermon[];
 }
 
-const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
+const SermonHistory: React.FC<SermonHistoryProps> = ({ events, sermons: propSermons }) => {
   const [activeTab, setActiveTab] = useState<'HISTORY' | 'BIBLE'>('HISTORY');
   const [searchTerm, setSearchTerm] = useState('');
   const [viewingSermon, setViewingSermon] = useState<Sermon | null>(null);
@@ -23,19 +24,7 @@ const SermonHistory: React.FC<SermonHistoryProps> = ({ events }) => {
   const [bibleContent, setBibleContent] = useState<{ text: string, reflection: string } | null>(null);
   const [isSearchingBible, setIsSearchingBible] = useState(false);
 
-  const [sermons] = useState<Sermon[]>([
-    {
-      id: '1',
-      title: 'Divine Favor in Your Work',
-      speaker: 'Pastor John Kamau',
-      date: '2023-10-25',
-      time: '09:00 AM',
-      scripture: 'Psalm 90:17',
-      event: 'Sunday Morning Worship',
-      eventId: 'ev1',
-      transcript: 'Today we discuss the favor of God in our daily labor. The Bible says in Psalm 90:17: "Let the favor of the Lord our God be upon us, and establish the work of our hands upon us; yes, establish the work of our hands!" \n\nIn our Kenyan context, we often face challenges in business, job security, and career growth. But we must remember that it is the Lord who establishes our work. When we put God first in our professional lives, His favor opens doors that no man can shut. \n\nConclusion: Let us commit our jobs and businesses to Him this week, trusting His favor is more than enough.'
-    }
-  ]);
+  const sermons = propSermons || [];
 
   const filteredSermons = sermons.filter(s => 
     s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

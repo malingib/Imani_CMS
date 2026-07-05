@@ -49,3 +49,9 @@ server/node_modules
 # Supabase
 .supabase
 .vercel
+
+# Test artifacts
+test-results/
+e2e-report/
+playwright-report/
+playwright/.cache/

@@ -23,11 +23,12 @@ import TenantRegistry from './TenantRegistry';
 import PlatformSettings from './PlatformSettings';
 import BillingOverview from './BillingOverview';
 import InvitationsManager from './InvitationsManager';
+import SermonHistory from './SermonHistory';
 import { 
   AppView, Member, MemberStatus, Transaction, 
   ChurchEvent, MaritalStatus, MembershipType,
   User, UserRole, AppNotification, Toast, AuditLog,
-  Budget, CommunicationLog, RecurringExpense
+  Budget, CommunicationLog, RecurringExpense, Group, Sermon
 } from '../types';
 import { Bell, Menu, X, Loader2 } from 'lucide-react';
 import { supabase, useSession } from '../src/lib/supabase-auth';
@@ -119,6 +120,8 @@ const AppContent: React.FC = () => {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([]);
   const [communications, setCommunications] = useState<CommunicationLog[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [sermons, setSermons] = useState<Sermon[]>([]);
 
   useEffect(() => {
     if (!isAuthenticated || viewingPlatform) {
@@ -130,7 +133,7 @@ const AppContent: React.FC = () => {
     setDataError(null);
 
     appDataService.loadChurchAppData(churchId)
-      .then(({ members: loadedMembers, transactions: loadedTransactions, events: loadedEvents, budgets: loadedBudgets, recurringExpenses: loadedRecurringExpenses, communications: loadedCommunications, notifications: loadedNotifications, auditLogs: loadedAuditLogs }) => {
+      .then(({ members: loadedMembers, transactions: loadedTransactions, events: loadedEvents, budgets: loadedBudgets, recurringExpenses: loadedRecurringExpenses, communications: loadedCommunications, notifications: loadedNotifications, auditLogs: loadedAuditLogs, groups: loadedGroups, sermons: loadedSermons }) => {
         setMembers(loadedMembers);
         setTransactions(loadedTransactions);
         setEvents(loadedEvents);
@@ -139,6 +142,8 @@ const AppContent: React.FC = () => {
         setCommunications(loadedCommunications);
         setNotifications(loadedNotifications);
         setAuditLogs(loadedAuditLogs);
+        setGroups(loadedGroups);
+        setSermons(loadedSermons);
       })
       .catch((error) => {
         const message = error?.message || 'Failed to load church data.';
@@ -431,7 +436,9 @@ const AppContent: React.FC = () => {
       case 'COMMUNICATION':
         return <CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} />;
       case 'GROUPS':
-        return <GroupsManagement members={members} />;
+        return <GroupsManagement members={members} groups={groups} />;
+      case 'SERMONS':
+        return <SermonHistory events={events} sermons={sermons} />;
       case 'EVENTS':
         return <EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />;
       case 'ANALYTICS':

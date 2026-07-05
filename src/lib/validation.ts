@@ -29,7 +29,7 @@ export const MemberFormSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
   phone: phoneSchema,
-  email: emailSchema,
+  email: emailSchema.optional().or(z.literal('')),
   location: z.string().min(2, 'Location is required').max(100, 'Location too long'),
   groups: z.array(z.string()).default([]),
   status: z.enum([MemberStatus.ACTIVE, MemberStatus.INACTIVE, MemberStatus.VISITOR, MemberStatus.YOUTH, MemberStatus.DECEASED, MemberStatus.ARCHIVED]).default(MemberStatus.ACTIVE),

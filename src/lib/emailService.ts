@@ -25,12 +25,16 @@ export async function sendInviteEmail(params: InviteParams) {
     console.warn('EmailJS not configured (invite)');
     return;
   }
+  // Send both to_email and email to cover common EmailJS template variable names
   const templateParams = {
     to_email: params.to_email,
+    email: params.to_email,
     token: params.token,
     church_name: params.church_name || '',
+    church: params.church_name || '',
     role: params.role || '',
     invite_link: params.invite_link || '',
+    link: params.invite_link || '',
   };
   try {
     await send(SERVICE_ID, TEMPLATE_INVITE_ID, templateParams, PUBLIC_KEY);

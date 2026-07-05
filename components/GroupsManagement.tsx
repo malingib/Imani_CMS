@@ -1,64 +1,34 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
-  Layers, Users, UserPlus, MessageSquare, 
-  MoreVertical, Search, Plus, Filter, 
+  Layers, Users, MessageSquare, 
+  MoreVertical, Search, Plus, 
   Target, Calendar, Shield, Heart, 
-  Music, MapPin, ChevronRight, Zap, X, 
-  Settings2, UserCheck, Send, CheckCircle2,
-  AlertCircle, Loader2, Save
+  MapPin, Zap, X, 
+  Send, CheckCircle2,
+  Loader2
 } from 'lucide-react';
-import { Member, UserRole } from '../types';
+import { Member, Group } from '../types';
 
 interface GroupsManagementProps {
   members: Member[];
-  onCreateGroup?: (group: ChurchGroup) => void;
+  groups: Group[];
+  onCreateGroup?: (group: Group) => void;
 }
 
-interface ChurchGroup {
-  id: string;
-  name: string;
-  category: 'Fellowship' | 'Department' | 'Ministry';
-  leader: string;
-  leaderAvatar: string;
-  meetingDay: string;
-  location: string;
-  target: number;
-}
-
-const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, onCreateGroup }) => {
-  const [activeCategory, setActiveCategory] = useState<string>('All');
+const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: propGroups, onCreateGroup }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Modal States
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [viewingMembersGroup, setViewingMembersGroup] = useState<ChurchGroup | null>(null);
-  const [messagingGroup, setMessagingGroup] = useState<ChurchGroup | null>(null);
-  
-  // Loading & Feedback States
+  const [viewingMembersGroup, setViewingMembersGroup] = useState<Group | null>(null);
+  const [messagingGroup, setMessagingGroup] = useState<Group | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupDesc, setNewGroupDesc] = useState('');
 
-  const [groups, setGroups] = useState<ChurchGroup[]>([
-    { id: 'g1', name: 'Youth Fellowship', category: 'Fellowship', leader: 'David Ochieng', leaderAvatar: 'https://i.pravatar.cc/100?img=12', meetingDay: 'Fridays, 5:30 PM', location: 'Youth Center', target: 50 },
-    { id: 'g2', name: 'Worship Team', category: 'Department', leader: 'Sarah Mumbua', leaderAvatar: 'https://i.pravatar.cc/100?img=25', meetingDay: 'Wednesdays, 6:00 PM', location: 'Main Sanctuary', target: 30 },
-    { id: 'g3', name: 'Women of Grace', category: 'Fellowship', leader: 'Mary Wambui', leaderAvatar: 'https://i.pravatar.cc/100?img=32', meetingDay: 'Saturdays, 3:00 PM', location: 'Social Hall', target: 100 },
-    { id: 'g4', name: 'Men of Valor', category: 'Fellowship', leader: 'Kennedy Kamau', leaderAvatar: 'https://i.pravatar.cc/100?img=44', meetingDay: 'Saturdays, 7:00 AM', location: 'Basement Room 2', target: 80 },
-    { id: 'g5', name: 'Media & Tech', category: 'Department', leader: 'Eric Otieno', leaderAvatar: 'https://i.pravatar.cc/100?img=51', meetingDay: 'Thursdays, 6:30 PM', location: 'Control Booth', target: 15 },
-    { id: 'g6', name: 'Childrens Ministry', category: 'Ministry', leader: 'Alice Njeri', leaderAvatar: 'https://i.pravatar.cc/100?img=43', meetingDay: 'Sundays, 9:00 AM', location: 'Sunday School Block', target: 150 },
-  ]);
-
-  const [newGroup, setNewGroup] = useState<Partial<ChurchGroup>>({
-    category: 'Fellowship',
-    meetingDay: '',
-    location: '',
-    target: 50
-  });
-
-  const filteredGroups = groups.filter(g => {
-    const matchesCategory = activeCategory === 'All' || g.category === activeCategory;
-    const matchesSearch = g.name.toLowerCase().includes(searchTerm.toLowerCase()) || g.leader.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
+  const filteredGroups = propGroups.filter(g => {
+    const matchesSearch = g.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
   });
 
   const getMemberCount = (groupName: string) => {
@@ -70,33 +40,39 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, onCreateGr
   };
 
   const handleCreateGroup = () => {
-    const group: ChurchGroup = {
+    if (!onCreateGroup) return;
+    const group: Group = {
       id: `g${Date.now()}`,
-      name: newGroup.name || 'Untitled Group',
-      category: newGroup.category as any,
-      leader: newGroup.leader || 'Unassigned',
-      leaderAvatar: `https://i.pravatar.cc/100?u=${newGroup.name}`,
-      meetingDay: newGroup.meetingDay || 'TBD',
-      location: newGroup.location || 'TBD',
-      target: newGroup.target || 50
+      name: newGroupName || 'Untitled Group',
+      description: newGroupDesc || '',
+      memberCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-    if (onCreateGroup) {
-      onCreateGroup(group);
-    } else {
-      setGroups(prev => [...prev, group]);
-    }
+    onCreateGroup(group);
     setShowCreateModal(false);
+    setNewGroupName('');
+    setNewGroupDesc('');
     setSuccessMessage(`"${group.name}" created successfully!`);
     setTimeout(() => setSuccessMessage(null), 3000);
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Fellowship': return <Heart className="text-brand-primary" size={20} />;
-      case 'Department': return <Shield className="text-brand-gold" size={20} />;
-      case 'Ministry': return <Zap className="text-brand-primary" size={20} />;
-      default: return <Layers className="text-slate-500" size={20} />;
-    }
+  const getCategoryIcon = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes('youth') || lower.includes('young')) return <Zap className="text-brand-primary" size={20} />;
+    if (lower.includes('worship') || lower.includes('choir') || lower.includes('music') || lower.includes('media') || lower.includes('tech')) return <Shield className="text-brand-gold" size={20} />;
+    if (lower.includes('women') || lower.includes('men') || lower.includes('grace') || lower.includes('faith') || lower.includes('fellow')) return <Heart className="text-brand-primary" size={20} />;
+    if (lower.includes('children') || lower.includes('kid')) return <Heart className="text-brand-primary" size={20} />;
+    return <Layers className="text-slate-500" size={20} />;
+  };
+
+  const getCategoryLabel = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes('youth') || lower.includes('young')) return 'Fellowship';
+    if (lower.includes('worship') || lower.includes('media') || lower.includes('tech') || lower.includes('choir')) return 'Department';
+    if (lower.includes('children')) return 'Ministry';
+    if (lower.includes('women') || lower.includes('men') || lower.includes('faith')) return 'Fellowship';
+    return 'Fellowship';
   };
 
   return (
@@ -124,22 +100,11 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, onCreateGr
       </header>
 
       <div className="flex flex-wrap items-center justify-between gap-6">
-        <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-200 shadow-sm overflow-x-auto no-scrollbar">
-          {['All', 'Fellowship', 'Department', 'Ministry'].map(cat => (
-            <button 
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2.5 rounded-2xl text-xs font-black transition-all ${activeCategory === cat ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
         <div className="relative w-full md:w-80">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
             type="text" 
-            placeholder="Search groups or leaders..." 
+            placeholder="Search groups..." 
             className="w-full pl-12 pr-6 py-3 bg-white border border-slate-200 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-primary"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
@@ -150,14 +115,15 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, onCreateGr
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredGroups.map(group => {
           const groupMemberCount = getMemberCount(group.name);
-          const progress = Math.min((groupMemberCount / group.target) * 100, 100);
+          const target = Math.max(group.memberCount || 10, 10);
+          const progress = Math.min((groupMemberCount / target) * 100, 100);
 
           return (
             <div key={group.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
               <div className="p-8 space-y-6 flex-1">
                 <div className="flex justify-between items-start">
                   <div className={`p-3 rounded-2xl bg-slate-50`}>
-                    {getCategoryIcon(group.category)}
+                    {getCategoryIcon(group.name)}
                   </div>
                   <button className="p-2 text-slate-300 hover:text-slate-600 transition-colors">
                     <MoreVertical size={20}/>
@@ -166,30 +132,17 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, onCreateGr
 
                 <div>
                   <h3 className="text-2xl font-black text-slate-800 tracking-tight group-hover:text-brand-primary transition-colors uppercase">{group.name}</h3>
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mt-1">{group.category}</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mt-1">{getCategoryLabel(group.name)}</p>
                 </div>
 
-                <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl">
-                   <img src={group.leaderAvatar} alt={group.leader} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
-                   <div>
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Led by</p>
-                      <p className="text-sm font-bold text-slate-700">{group.leader}</p>
-                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-sm text-slate-500 font-medium">
-                    <Calendar size={16} className="text-brand-primary"/> {group.meetingDay}
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-slate-500 font-medium">
-                    <MapPin size={16} className="text-brand-primary"/> {group.location}
-                  </div>
-                </div>
+                {group.description && (
+                  <p className="text-sm text-slate-500 leading-relaxed">{group.description}</p>
+                )}
 
                 <div className="space-y-2">
                    <div className="flex justify-between items-end">
-                      <p className="text-[10px] font-black uppercase text-slate-400">Membership Growth</p>
-                      <p className="text-xs font-black text-slate-800">{groupMemberCount} / {group.target}</p>
+                      <p className="text-[10px] font-black uppercase text-slate-400">Members</p>
+                      <p className="text-xs font-black text-slate-800">{groupMemberCount}</p>
                    </div>
                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div 
@@ -228,44 +181,20 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, onCreateGr
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-rose-500 transition-all"><X size={24}/></button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Group Name</label>
-                  <input type="text" placeholder="e.g. Youth Fellowship" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.name || ''} onChange={e => setNewGroup({...newGroup, name: e.target.value})} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Category</label>
-                  <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.category} onChange={e => setNewGroup({...newGroup, category: e.target.value as any})}>
-                    <option value="Fellowship">Fellowship</option>
-                    <option value="Department">Department</option>
-                    <option value="Ministry">Ministry</option>
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Leader Name</label>
-                  <input type="text" placeholder="Enter leader's name" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.leader || ''} onChange={e => setNewGroup({...newGroup, leader: e.target.value})} />
-                </div>
+            <div className="space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Group Name</label>
+                <input type="text" placeholder="e.g. Youth Fellowship" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroupName} onChange={e => setNewGroupName(e.target.value)} />
               </div>
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Meeting Day & Time</label>
-                  <input type="text" placeholder="e.g. Saturdays, 4:00 PM" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.meetingDay || ''} onChange={e => setNewGroup({...newGroup, meetingDay: e.target.value})} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Primary Location</label>
-                  <input type="text" placeholder="e.g. Youth Center" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none" value={newGroup.location || ''} onChange={e => setNewGroup({...newGroup, location: e.target.value})} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Growth Target</label>
-                  <input type="number" placeholder="50" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" value={newGroup.target || ''} onChange={e => setNewGroup({...newGroup, target: parseInt(e.target.value)})} />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Description</label>
+                <textarea placeholder="Describe the group's purpose..." className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none resize-none" rows={3} value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} />
               </div>
             </div>
 
             <div className="flex gap-4 pt-4">
               <button onClick={() => setShowCreateModal(false)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Cancel</button>
-              <button onClick={handleCreateGroup} disabled={isSubmitting} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+              <button onClick={handleCreateGroup} disabled={isSubmitting || !newGroupName} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
                 {isSubmitting ? <Loader2 className="animate-spin" size={20}/> : <Plus size={20}/>} {isSubmitting ? 'Creating...' : 'Create Group'}
               </button>
             </div>
@@ -279,10 +208,10 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, onCreateGr
           <div className="bg-white rounded-[3rem] w-full max-w-4xl shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200 max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-2xl bg-slate-50`}>{getCategoryIcon(viewingMembersGroup.category)}</div>
+                <div className={`p-4 rounded-2xl bg-slate-50`}>{getCategoryIcon(viewingMembersGroup.name)}</div>
                 <div>
                   <h3 className="text-3xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">{viewingMembersGroup.name} Members</h3>
-                  <p className="text-slate-500 font-medium">Community led by {viewingMembersGroup.leader}</p>
+                  {viewingMembersGroup.description && <p className="text-slate-500 font-medium">{viewingMembersGroup.description}</p>}
                 </div>
               </div>
               <button onClick={() => setViewingMembersGroup(null)} className="text-slate-400 hover:text-rose-500 transition-all"><X size={24}/></button>

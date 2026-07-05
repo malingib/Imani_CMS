@@ -1,6 +1,6 @@
-import type { AppNotification, CommunicationLog, Member, MemberStatus, MaritalStatus, MembershipType, Transaction, TransactionType, ChurchEvent, ChurchEventType, AuditLog, Budget, RecurringExpense, Group, MemberActivity } from '../../types';
+import type { AppNotification, CommunicationLog, Member, MemberStatus, MaritalStatus, MembershipType, Transaction, TransactionType, ChurchEvent, ChurchEventType, AuditLog, Budget, RecurringExpense, Group, MemberActivity, Sermon } from '../../types';
 import type { AppView } from '../../types';
-import type { MemberRow, TransactionRow, ChurchEventRow, BudgetRow, RecurringExpenseRow, CommunicationRow, NotificationRow, GroupRow, ActivityRow, AuditLogRow } from './database.types';
+import type { MemberRow, TransactionRow, ChurchEventRow, BudgetRow, RecurringExpenseRow, CommunicationRow, NotificationRow, GroupRow, ActivityRow, AuditLogRow, SermonRow } from './database.types';
 
 export function mapMember(r: MemberRow): Member {
   return {
@@ -135,5 +135,19 @@ export function mapAuditLog(r: AuditLogRow): AuditLog {
     module: r.module as AppView,
     timestamp: r.timestamp || new Date().toISOString(),
     severity: (r.severity as AuditLog['severity']) || 'INFO',
+  };
+}
+
+export function mapSermon(r: SermonRow): Sermon {
+  return {
+    id: r.id,
+    title: r.title,
+    speaker: r.speaker || '',
+    date: r.date || '',
+    time: r.time || '',
+    scripture: r.scripture || '',
+    event: r.event || '',
+    eventId: r.event_id || '',
+    transcript: r.transcript || '',
   };
 }

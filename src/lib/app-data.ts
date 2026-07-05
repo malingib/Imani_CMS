@@ -1,5 +1,5 @@
-import type { AppNotification, AuditLog, AppView, Budget, ChurchEvent, CommunicationLog, Member, RecurringExpense, Transaction } from "../../types";
-import { mapAuditLog, mapBudget, mapCommunication, mapEvent, mapMember, mapNotification, mapRecurringExpense, mapTransaction } from "./mappers";
+import type { AppNotification, AuditLog, AppView, Budget, ChurchEvent, CommunicationLog, Member, RecurringExpense, Transaction, Group, Sermon } from "../../types";
+import { mapAuditLog, mapBudget, mapCommunication, mapEvent, mapGroup, mapMember, mapNotification, mapRecurringExpense, mapTransaction, mapSermon } from "./mappers";
 
 type QueryResult<T> = { data: T[] | null; count: number | null; error: { message: string } | null };
 export type SupabaseLikeClient = {
@@ -16,6 +16,8 @@ export type ChurchAppData = {
   communications: CommunicationLog[];
   notifications: AppNotification[];
   auditLogs: AuditLog[];
+  groups: Group[];
+  sermons: Sermon[];
 };
 
 export type PaginatedChurchAppData = ChurchAppData & {
@@ -27,6 +29,8 @@ export type PaginatedChurchAppData = ChurchAppData & {
   totalCommunications: number;
   totalNotifications: number;
   totalAuditLogs: number;
+  totalGroups: number;
+  totalSermons: number;
 };
 
 export type CreateAuditLogInput = {
@@ -94,6 +98,8 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       const communications = runQuery(scopedQuery(client, "communications", churchId, "*", paginationOpts), mapCommunication);
       const notifications = runQuery(scopedQuery(client, "notifications", churchId, "*", paginationOpts), mapNotification);
       const auditLogs = runQuery(scopedQuery(client, "audit_logs", churchId, "*", paginationOpts), mapAuditLog);
+      const groups = runQuery(scopedQuery(client, "groups", churchId, "*", paginationOpts), mapGroup);
+      const sermons = runQuery(scopedQuery(client, "sermons", churchId, "*", paginationOpts), mapSermon);
 
       const countMembers = getCount(client, "members", churchId);
       const countTransactions = getCount(client, "transactions", churchId);
@@ -103,8 +109,10 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       const countCommunications = getCount(client, "communications", churchId);
       const countNotifications = getCount(client, "notifications", churchId);
       const countAuditLogs = getCount(client, "audit_logs", churchId);
+      const countGroups = getCount(client, "groups", churchId);
+      const countSermons = getCount(client, "sermons", churchId);
 
-      const [loadedMembers, loadedTransactions, loadedEvents, attendanceResult, loadedBudgets, loadedRecurringExpenses, loadedCommunications, loadedNotifications, loadedAuditLogs, totalMembers, totalTransactions, totalEvents, totalBudgets, totalRecurringExpenses, totalCommunications, totalNotifications, totalAuditLogs] = await Promise.all([
+      const [loadedMembers, loadedTransactions, loadedEvents, attendanceResult, loadedBudgets, loadedRecurringExpenses, loadedCommunications, loadedNotifications, loadedAuditLogs, loadedGroups, loadedSermons, totalMembers, totalTransactions, totalEvents, totalBudgets, totalRecurringExpenses, totalCommunications, totalNotifications, totalAuditLogs, totalGroups, totalSermons] = await Promise.all([
         members,
         transactions,
         events,
@@ -114,6 +122,8 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
         communications,
         notifications,
         auditLogs,
+        groups,
+        sermons,
         countMembers,
         countTransactions,
         countEvents,
@@ -122,6 +132,8 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
         countCommunications,
         countNotifications,
         countAuditLogs,
+        countGroups,
+        countSermons,
       ]);
       if (attendanceResult.error) throw new Error(attendanceResult.error.message);
 
@@ -134,6 +146,8 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
         communications: loadedCommunications,
         notifications: loadedNotifications,
         auditLogs: loadedAuditLogs,
+        groups: loadedGroups,
+        sermons: loadedSermons,
         totalMembers,
         totalTransactions,
         totalEvents,
@@ -142,6 +156,8 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
         totalCommunications,
         totalNotifications,
         totalAuditLogs,
+        totalGroups,
+        totalSermons,
       };
     },
 

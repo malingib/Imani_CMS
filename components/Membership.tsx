@@ -133,7 +133,7 @@ const Membership: React.FC<MembershipProps> = ({
             
             header.forEach((h, i) => {
               if (h === 'groups') {
-                obj[h] = values[i] ? values[i].split(';').map(g => g.trim()).filter(g => g !== '') : [];
+                obj[h] = values[i] ?? '';
               } else {
                 obj[h] = values[i] === '' ? null : values[i];
               }
@@ -749,6 +749,10 @@ const Membership: React.FC<MembershipProps> = ({
                       <div className="space-y-2">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Phone Number</label>
                         <input required className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm" placeholder="07XX XXX XXX" value={formData.phone || ''} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Email Address</label>
+                        <input type="email" className="w-full p-5 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none shadow-sm" placeholder="example@church.org" value={formData.email || ''} onChange={e => setFormData({...formData, email: e.target.value})} />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Location</label>

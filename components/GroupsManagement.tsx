@@ -14,17 +14,22 @@ interface GroupsManagementProps {
   members: Member[];
   groups: Group[];
   onCreateGroup?: (group: Group) => void;
+  onUpdateGroup?: (group: Group) => Promise<void>;
+  onDeleteGroup?: (id: string) => Promise<void>;
 }
 
-const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: propGroups, onCreateGroup }) => {
+const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: propGroups, onCreateGroup, onUpdateGroup, onDeleteGroup }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewingMembersGroup, setViewingMembersGroup] = useState<Group | null>(null);
   const [messagingGroup, setMessagingGroup] = useState<Group | null>(null);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [newGroupName, setNewGroupName] = useState('');
   const [newGroupDesc, setNewGroupDesc] = useState('');
+  const [editGroupName, setEditGroupName] = useState('');
+  const [editGroupDesc, setEditGroupDesc] = useState('');
 
   const filteredGroups = propGroups.filter(g => {
     const matchesSearch = g.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -42,7 +47,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
   const handleCreateGroup = () => {
     if (!onCreateGroup) return;
     const group: Group = {
-      id: `g${Date.now()}`,
+      id: crypto.randomUUID(),
       name: newGroupName || 'Untitled Group',
       description: newGroupDesc || '',
       memberCount: 0,
@@ -121,13 +126,22 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
           return (
             <div key={group.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
               <div className="p-8 space-y-6 flex-1">
-                <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start">
                   <div className={`p-3 rounded-2xl bg-slate-50`}>
                     {getCategoryIcon(group.name)}
                   </div>
-                  <button className="p-2 text-slate-300 hover:text-slate-600 transition-colors">
-                    <MoreVertical size={20}/>
-                  </button>
+                  <div className="flex gap-1">
+                    {onUpdateGroup && (
+                      <button onClick={() => { setEditingGroup(group); setEditGroupName(group.name); setEditGroupDesc(group.description); }} className="p-2 text-slate-300 hover:text-brand-primary transition-colors" title="Edit Group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      </button>
+                    )}
+                    {onDeleteGroup && (
+                      <button onClick={() => { onDeleteGroup(group.id); }} className="p-2 text-slate-300 hover:text-rose-500 transition-colors" title="Delete Group">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -244,6 +258,44 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
             </div>
             <div className="flex justify-end pt-4">
               <button onClick={() => setViewingMembersGroup(null)} className="px-8 py-4 bg-slate-100 text-slate-600 rounded-[1.25rem] font-black hover:bg-slate-200">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Group Modal */}
+      {editingGroup && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200">
+            <div className="flex justify-between items-center">
+              <h3 className="text-3xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Edit Group</h3>
+              <button onClick={() => setEditingGroup(null)} className="text-slate-400 hover:text-rose-500 transition-all"><X size={24}/></button>
+            </div>
+            <div className="space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Group Name</label>
+                <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
+                  value={editGroupName} onChange={e => setEditGroupName(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Description</label>
+                <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none resize-none" rows={3}
+                  value={editGroupDesc} onChange={e => setEditGroupDesc(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex gap-4 pt-4">
+              <button onClick={() => setEditingGroup(null)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Cancel</button>
+              <button onClick={async () => {
+                if (!onUpdateGroup || !editingGroup) return;
+                setIsSubmitting(true);
+                await onUpdateGroup({ ...editingGroup, name: editGroupName, description: editGroupDesc });
+                setIsSubmitting(false);
+                setEditingGroup(null);
+                setSuccessMessage(`"${editGroupName}" updated!`);
+                setTimeout(() => setSuccessMessage(null), 3000);
+              }} disabled={isSubmitting || !editGroupName} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all disabled:opacity-50">
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </button>
             </div>
           </div>
         </div>

@@ -16,9 +16,11 @@ interface CommunicationCenterProps {
   logs: CommunicationLog[];
   onSendBroadcast: (log: CommunicationLog) => void;
   currentUser: { name: string };
+  addToast?: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  smsCredits?: number;
 }
 
-const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs, onSendBroadcast, currentUser }) => {
+const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs, onSendBroadcast, currentUser, addToast, smsCredits = 4280 }) => {
   const [activeTab, setActiveTab] = useState<'LOGS' | 'COMPOSE' | 'AUTOMATION' | 'TEMPLATES'>('LOGS');
   const [searchTerm, setSearchTerm] = useState('');
   const [messageType, setMessageType] = useState<'SMS' | 'Email' | 'WhatsApp'>('SMS');
@@ -39,9 +41,9 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
   ];
 
   // Automation State
-  const [autoVerseEnabled, setAutoVerseEnabled] = useState(true);
-  const [verseFrequency, setVerseFrequency] = useState<'Daily' | 'Weekly'>('Daily');
-  const [verseMode, setVerseMode] = useState<'Auto' | 'Manual'>('Auto');
+  const [autoVerseEnabled, setAutoVerseEnabled] = useState(() => localStorage.getItem('autoVerseEnabled') !== 'false');
+  const [verseFrequency, setVerseFrequency] = useState<'Daily' | 'Weekly'>((localStorage.getItem('verseFrequency') as any) || 'Daily');
+  const [verseMode, setVerseMode] = useState<'Auto' | 'Manual'>((localStorage.getItem('verseMode') as any) || 'Auto');
   const [manualVerse, setManualVerse] = useState('');
   const [isGeneratingSermon, setIsGeneratingSermon] = useState(false);
 
@@ -52,7 +54,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
     const targetCount = members.length;
     
     const newLog: CommunicationLog = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       type: messageType,
       recipientCount: targetCount,
       targetGroupName: broadcastTarget,
@@ -91,7 +93,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
         setActiveTab('COMPOSE');
       }
     } catch (e) {
-      alert('Failed to generate message.');
+      if (addToast) addToast('Failed to generate message.', 'error');
     } finally {
       setIsGeneratingSermon(false);
     }
@@ -143,7 +145,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-2xl"><Sparkles size={24}/></div>
                     <h3 className="text-xl sm:text-2xl font-black text-slate-800">Auto-Verse</h3>
                  </div>
-                 <div className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full p-1 cursor-pointer transition-all ${autoVerseEnabled ? 'bg-brand-primary' : 'bg-slate-200'}`} onClick={() => setAutoVerseEnabled(!autoVerseEnabled)}>
+                  <div className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full p-1 cursor-pointer transition-all ${autoVerseEnabled ? 'bg-brand-primary' : 'bg-slate-200'}`} onClick={() => { const next = !autoVerseEnabled; setAutoVerseEnabled(next); localStorage.setItem('autoVerseEnabled', String(next)); }}>
                     <div className={`w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full shadow-sm transition-all ${autoVerseEnabled ? 'translate-x-6 sm:translate-x-7' : 'translate-x-0'}`} />
                  </div>
               </div>
@@ -369,7 +371,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
              <div className="bg-white p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
                 <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">SMS Credits</h4>
                 <div className="flex items-center justify-between">
-                   <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">4,280</p>
+                    <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">{smsCredits.toLocaleString()}</p>
                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Zap size={20}/></div>
                 </div>
                 <button className="w-full py-4 bg-slate-50 text-brand-indigo rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">Top Up Balance</button>

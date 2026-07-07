@@ -148,7 +148,7 @@ const Membership: React.FC<MembershipProps> = ({
 
             // Map to Member with defaults
             const member: Member = {
-              id: Math.random().toString(36).substr(2, 9),
+              id: crypto.randomUUID(),
               firstName: validationResult.data.firstname,
               lastName: validationResult.data.lastname,
               phone: validationResult.data.phone,
@@ -257,7 +257,7 @@ const Membership: React.FC<MembershipProps> = ({
       const newM: Member = {
         ...data,
         email: data.email || '',
-        id: Math.random().toString(36).substr(2, 9),
+        id: crypto.randomUUID(),
         photo: photo || undefined
       };
       onAddMember(newM);

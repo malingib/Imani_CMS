@@ -12,7 +12,7 @@ export interface Route {
 }
 
 // Define all available routes
-const ROUTES: Record<AppView, Route> = {
+export const ROUTES: Record<AppView, Route> = {
   DASHBOARD: { view: 'DASHBOARD', path: '/dashboard', label: 'Dashboard' },
   MEMBERS: { view: 'MEMBERS', path: '/members', label: 'Members' },
   FINANCE: { view: 'FINANCE', path: '/finance', label: 'Finance' },

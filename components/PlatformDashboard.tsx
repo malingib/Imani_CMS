@@ -19,11 +19,16 @@ const PlatformDashboard: React.FC = () => {
     fetch();
   }, []);
 
+  const healthPct = stats.totalChurches > 0 ? (stats.activeChurches / stats.totalChurches) * 100 : 100;
+  const healthLabel = healthPct >= 90 ? 'Good' : healthPct >= 70 ? 'Fair' : 'Degraded';
+  const healthColor = healthPct >= 90 ? 'bg-brand-emerald' : healthPct >= 70 ? 'bg-brand-gold' : 'bg-rose-500';
+  const healthSub = `${stats.activeChurches}/${stats.totalChurches} churches active`;
+
   const cards = [
     { label: 'Total Churches', value: stats.totalChurches, sub: `${stats.activeChurches} active`, icon: Building2, color: 'bg-brand-indigo' },
     { label: 'Total Members', value: stats.totalMembers, sub: 'across all churches', icon: Users, color: 'bg-brand-primary' },
     { label: 'Total Revenue', value: `KES ${(stats.totalRevenue / 1000).toFixed(0)}K`, sub: 'all time', icon: TrendingUp, color: 'bg-brand-emerald' },
-    { label: 'System Health', value: 'Good', sub: 'all systems operational', icon: Activity, color: 'bg-brand-gold' },
+    { label: 'System Health', value: healthLabel, sub: healthSub, icon: Activity, color: healthColor },
   ];
 
   return (

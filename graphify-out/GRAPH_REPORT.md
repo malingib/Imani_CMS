@@ -1,12 +1,12 @@
 # Graph Report - imani-cms  (2026-07-07)
 
 ## Corpus Check
-- 162 files · ~109,668 words
+- 185 files · ~111,155 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1397 nodes · 1798 edges · 184 communities (100 shown, 84 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
+- 1447 nodes · 1880 edges · 198 communities (113 shown, 85 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -162,6 +162,11 @@
 - [[_COMMUNITY_Community 146|Community 146]]
 - [[_COMMUNITY_Community 147|Community 147]]
 - [[_COMMUNITY_Community 149|Community 149]]
+- [[_COMMUNITY_Community 153|Community 153]]
+- [[_COMMUNITY_Community 154|Community 154]]
+- [[_COMMUNITY_Community 155|Community 155]]
+- [[_COMMUNITY_Community 156|Community 156]]
+- [[_COMMUNITY_Community 157|Community 157]]
 - [[_COMMUNITY_Community 158|Community 158]]
 - [[_COMMUNITY_Community 159|Community 159]]
 - [[_COMMUNITY_Community 160|Community 160]]
@@ -170,6 +175,7 @@
 - [[_COMMUNITY_Community 163|Community 163]]
 - [[_COMMUNITY_Community 164|Community 164]]
 - [[_COMMUNITY_Community 165|Community 165]]
+- [[_COMMUNITY_Community 166|Community 166]]
 - [[_COMMUNITY_Community 167|Community 167]]
 - [[_COMMUNITY_Community 168|Community 168]]
 - [[_COMMUNITY_Community 169|Community 169]]
@@ -192,18 +198,22 @@
 - [[_COMMUNITY_Community 186|Community 186]]
 - [[_COMMUNITY_Community 187|Community 187]]
 - [[_COMMUNITY_Community 188|Community 188]]
+- [[_COMMUNITY_Community 189|Community 189]]
+- [[_COMMUNITY_Community 190|Community 190]]
+- [[_COMMUNITY_Community 192|Community 192]]
+- [[_COMMUNITY_Community 193|Community 193]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Member` - 31 edges
-2. `Transaction` - 25 edges
-3. `ChurchEvent` - 23 edges
-4. `AppView` - 20 edges
-5. `Imani CMS - Comprehensive Code Review & Analysis` - 19 edges
-6. `Imani CMS Deployment Guide` - 17 edges
-7. `compilerOptions` - 16 edges
-8. `Imani CMS - Complete Deployment Status` - 16 edges
-9. `UserRole` - 15 edges
-10. `Budget` - 15 edges
+1. `useAppState()` - 38 edges
+2. `Member` - 31 edges
+3. `Transaction` - 25 edges
+4. `ChurchEvent` - 23 edges
+5. `AppView` - 20 edges
+6. `Imani CMS - Comprehensive Code Review & Analysis` - 19 edges
+7. `UserRole` - 17 edges
+8. `Imani CMS Deployment Guide` - 17 edges
+9. `compilerOptions` - 16 edges
+10. `Imani CMS - Complete Deployment Status` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `DemographicsAnalysisProps` --references--> `Member`  [EXTRACTED]
@@ -224,7 +234,7 @@
 - **Backend Security Middleware Stack** — cors_middleware, csrf_protection, requireauth_middleware, ratelimit_middleware, helmet_security [EXTRACTED 1.00]
 - **Domain Entity Modules** — members_module, transactions_module, events_module, groups_module, communications_module, activities_module, budgets_module, sermons_module, notifications_module, audit_logs_module [EXTRACTED 1.00]
 
-## Communities (184 total, 84 thin omitted)
+## Communities (198 total, 85 thin omitted)
 
 ### Community 0 - "Core UI Components"
 Cohesion: 0.15
@@ -243,12 +253,12 @@ Cohesion: 0.11
 Nodes (18): compilerOptions, allowImportingTsExtensions, allowJs, experimentalDecorators, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 6 - "Auth & Dashboard"
-Cohesion: 0.14
-Nodes (20): LoginProps, ImaniLogoIcon(), SidebarProps, appDataService, AppStateContext, AppStateContextType, branches, persistence (+12 more)
+Cohesion: 0.18
+Nodes (9): getDefaultViewForUserRole(), mapSupabaseUserToAppUser(), resolveUserRole(), SupabaseUserLike, VALID_USER_ROLES, AppView, PUBLIC_ROUTES, Route (+1 more)
 
 ### Community 7 - "Route Protection & Supabase Auth"
-Cohesion: 0.14
-Nodes (16): App(), AppContent(), appDataService, Dashboard, DemographicsAnalysis, FinanceReporting, MyGiving, persistence (+8 more)
+Cohesion: 0.12
+Nodes (14): appDataService, Dashboard, DemographicsAnalysis, FinanceReporting, MyGiving, persistence, ReportsCenter, MessagingTarget (+6 more)
 
 ### Community 8 - "Legal & Entry Point"
 Cohesion: 0.04
@@ -300,7 +310,7 @@ Nodes (12): CacheEntry, CacheInvalidator, cacheInvalidators, CacheOptions, clear
 
 ### Community 25 - "Community 25"
 Cohesion: 0.15
-Nodes (10): EVENT_TYPE_CONFIG, MessagingTarget, ChurchEventType, MaritalStatus, MembershipType, MemberStatus, RecurrenceType, StewardshipPledge (+2 more)
+Nodes (10): EVENT_TYPE_CONFIG, FinanceReportingProps, ChurchEventType, RecurrenceType, RecurringExpense, StewardshipPledge, SupportTicket, Tenant (+2 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.10
@@ -311,24 +321,24 @@ Cohesion: 0.11
 Nodes (18): Check Indexes Created, Check New Columns, Column Already Exists, 🚀 Deploy Migrations in 3 Steps, Migration Contents Summary, Need Help?, Permission Denied, Query Timeout (+10 more)
 
 ### Community 28 - "Community 28"
-Cohesion: 0.05
-Nodes (53): ChurchAppData, CreateAuditLogInput, createChurchAppDataService(), PaginatedChurchAppData, QueryResult, SupabaseLikeClient, createFailingQuery(), createInsertQuery() (+45 more)
+Cohesion: 0.07
+Nodes (44): ChurchAppData, CreateAuditLogInput, PaginatedChurchAppData, QueryResult, SupabaseLikeClient, ActivityRow, AuditLogRow, BudgetRow (+36 more)
 
 ### Community 29 - "Community 29"
-Cohesion: 0.21
-Nodes (11): AppViewRouterProps, FinanceReportingProps, BudgetVsActual, CATEGORY_MAP, computeBudgetVsActuals(), FinanceSummary, generateFinanceSummary(), getUpcomingRecurringExpenses() (+3 more)
+Cohesion: 0.31
+Nodes (7): BudgetVsActual, CATEGORY_MAP, computeBudgetVsActuals(), FinanceSummary, generateFinanceSummary(), getUpcomingRecurringExpenses(), Budget
 
 ### Community 30 - "Community 30"
 Cohesion: 0.16
 Nodes (10): AriaAttributes, AriaLabel, AriaLiveRegion, FocusManagement, getContrastRatio(), getLuminance(), hexToRgb(), meetsWcagAA() (+2 more)
 
 ### Community 31 - "Community 31"
-Cohesion: 0.05
-Nodes (41): billingService, invitationsService, platformDashboardService, DEFAULT_LIMITS, platformSettingsService, DEFAULT_INTEGRATIONS, platformSettingsService, SettingsProps (+33 more)
+Cohesion: 0.19
+Nodes (10): Church, ChurchContext, ChurchContextType, ChurchProvider(), useData(), supabase, supabaseAnonKey, supabaseUrl (+2 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.15
-Nodes (13): 1. Church App Data Service, 4. Church Context, 5. Data Context (New), 6. Church Data Hook (New), `ChurchProvider` Component, Core Services, `createAuditLog(input: CreateAuditLogInput): Promise<AuditLog>`, `DataProvider` Component (+5 more)
+Cohesion: 0.25
+Nodes (8): 4. Church Context, 5. Data Context (New), 6. Church Data Hook (New), `ChurchProvider` Component, Core Services, `DataProvider` Component, `useChurch()` Hook, `useData()` Hook
 
 ### Community 33 - "Community 33"
 Cohesion: 0.23
@@ -355,8 +365,8 @@ Cohesion: 0.13
 Nodes (14): Added, Architecture Changes, Auth, Changed, Data Flow, Database Tables (migrated from Drizzle), Edge Functions, Environment Variables (+6 more)
 
 ### Community 39 - "Community 39"
-Cohesion: 0.22
-Nodes (9): 2. Persistence Layer, Budget Operations, `createBudget(budget: Budget, churchId: string): Promise<Budget>`, `createEvent(event: ChurchEvent, churchId: string): Promise<ChurchEvent>`, `deleteEvent(id: string, churchId: string): Promise<void>`, Event Operations, Other Operations, `replaceEventAttendance(eventId: string, memberIds: string[], churchId: string): Promise<void>` (+1 more)
+Cohesion: 0.15
+Nodes (13): 2. Persistence Layer, Budget Operations, `createBudget(budget: Budget, churchId: string): Promise<Budget>`, `createEvent(event: ChurchEvent, churchId: string): Promise<ChurchEvent>`, `createTransaction(transaction: Transaction, churchId: string): Promise<Transaction>`, `deleteEvent(id: string, churchId: string): Promise<void>`, `deleteTransaction(id: string, churchId: string): Promise<void>`, Event Operations (+5 more)
 
 ### Community 40 - "Community 40"
 Cohesion: 0.22
@@ -475,8 +485,8 @@ Cohesion: 0.40
 Nodes (5): `createMember(member: Member, churchId: string): Promise<Member>`, `createMembers(members: Member[], churchId: string): Promise<Member[]>`, `deleteMember(id: string, churchId: string): Promise<void>`, Member Operations, `updateMember(member: Member, churchId: string): Promise<Member>`
 
 ### Community 70 - "Community 70"
-Cohesion: 0.50
-Nodes (3): CommunicationCenterProps, CommunicationLog, CommunicationTemplate
+Cohesion: 0.08
+Nodes (19): useAppState(), AnalyticsPage(), AuditLogsPage(), CommunicationPage(), CompliancePage(), DashboardPage(), EventsPage(), FinancePage() (+11 more)
 
 ### Community 71 - "Community 71"
 Cohesion: 0.40
@@ -487,8 +497,8 @@ Cohesion: 0.40
 Nodes (5): 1. Connect Repository, 2. Configure Project, 3. Deploy, 4. Monitor Deployment, Vercel Deployment (Recommended)
 
 ### Community 73 - "Community 73"
-Cohesion: 0.50
-Nodes (4): `createTransaction(transaction: Transaction, churchId: string): Promise<Transaction>`, `deleteTransaction(id: string, churchId: string): Promise<void>`, Transaction Operations, `updateTransaction(transaction: Transaction, churchId: string): Promise<Transaction>`
+Cohesion: 0.31
+Nodes (6): AppViewRouterProps, LoginProps, SidebarProps, AppShell(), AppView, User
 
 ### Community 74 - "Community 74"
 Cohesion: 0.50
@@ -568,11 +578,11 @@ Nodes (4): Changes Made, Status: Complete, Task 8 Report: Gemini Service Route, 
 
 ### Community 93 - "Community 93"
 Cohesion: 0.09
-Nodes (13): Dashboard, DemographicsAnalysis, FinanceReporting, MyGiving, ReportsCenter, AuditLogsProps, CompliancePortalProps, GroupsManagementProps (+5 more)
+Nodes (14): Dashboard, DemographicsAnalysis, FinanceReporting, MyGiving, ReportsCenter, AuditLogsProps, CommunicationCenterProps, CompliancePortalProps (+6 more)
 
 ### Community 94 - "Community 94"
-Cohesion: 0.36
-Nodes (5): NotificationsPanelProps, BadgeInfo, countUnread(), getNotificationBadge(), AppNotification
+Cohesion: 0.18
+Nodes (12): NotificationsPanelProps, createChurchAppDataService(), appDataService, AppStateContext, AppStateContextType, branches, persistence, BadgeInfo (+4 more)
 
 ### Community 97 - "Community 97"
 Cohesion: 0.67
@@ -598,22 +608,58 @@ Nodes (3): Data Recovery, Database Backup Strategy, Disaster Recovery
 Cohesion: 0.67
 Nodes (3): Load Testing, Smoke Tests, Testing in Production
 
+### Community 153 - "Community 153"
+Cohesion: 0.31
+Nodes (7): App(), AppContent(), Props, ProtectedRoute(), AppStateProvider(), useChurch(), useSession()
+
+### Community 154 - "Community 154"
+Cohesion: 0.31
+Nodes (6): invitationsService, sendInviteEmail(), ChurchOption, createInvitationsService(), InvitationRecord, SupabaseLikeClient
+
+### Community 155 - "Community 155"
+Cohesion: 0.33
+Nodes (6): platformDashboardService, createPlatformDashboardService(), PlatformDashboardStats, SupabaseLikeClient, createQuery(), from()
+
+### Community 156 - "Community 156"
+Cohesion: 0.31
+Nodes (6): DEFAULT_LIMITS, platformSettingsService, createPlatformSettingsService(), DEFAULT_PLATFORM_FLAGS, PlatformFlags, SupabaseLikeClient
+
+### Community 157 - "Community 157"
+Cohesion: 0.36
+Nodes (5): billingService, BillingInvoice, BillingSubscription, createBillingService(), SupabaseLikeClient
+
+### Community 166 - "Community 166"
+Cohesion: 0.25
+Nodes (6): InviteParams, PasswordResetParams, PUBLIC_KEY, SERVICE_ID, TEMPLATE_INVITE_ID, TEMPLATE_PASSWORD_RESET_ID
+
+### Community 189 - "Community 189"
+Cohesion: 0.29
+Nodes (5): DEFAULT_INTEGRATIONS, platformSettingsService, SettingsProps, SettingTab, SystemRole
+
+### Community 190 - "Community 190"
+Cohesion: 0.43
+Nodes (5): createFailingQuery(), createInsertQuery(), createQuery(), from(), QueryResult
+
+### Community 192 - "Community 192"
+Cohesion: 0.40
+Nodes (5): 1. Church App Data Service, `createAuditLog(input: CreateAuditLogInput): Promise<AuditLog>`, Key Methods, `loadChurchAppData(churchId?: string | null): Promise<ChurchAppData>`, Purpose
+
 ## Knowledge Gaps
-- **796 isolated node(s):** `Dashboard`, `FinanceReporting`, `DemographicsAnalysis`, `ReportsCenter`, `MyGiving` (+791 more)
+- **799 isolated node(s):** `Dashboard`, `FinanceReporting`, `DemographicsAnalysis`, `ReportsCenter`, `MyGiving` (+794 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **84 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **85 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `AppView` connect `Auth & Dashboard` to `Core UI Components`, `Feature Modules`, `Community 37`, `Route Protection & Supabase Auth`, `Community 93`, `Community 25`, `Community 28`, `Community 29`?**
+- **Why does `AppView` connect `Community 73` to `Core UI Components`, `Feature Modules`, `Community 37`, `Auth & Dashboard`, `Route Protection & Supabase Auth`, `Community 25`, `Community 28`, `Community 93`, `Community 94`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `useAppState()` connect `Community 70` to `Community 73`, `Community 94`, `Community 25`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `Member` connect `Core UI Components` to `Feature Modules`, `Community 70`, `Route Protection & Supabase Auth`, `Auth & Dashboard`, `Community 93`, `Community 25`, `Community 28`, `Community 29`?**
+- **Why does `Member` connect `Core UI Components` to `Community 193`, `Feature Modules`, `Route Protection & Supabase Auth`, `Community 73`, `Community 25`, `Community 28`, `Community 93`, `Community 94`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `Imani CMS - Comprehensive Code Review & Analysis` connect `Community 40` to `Community 97`, `Community 98`, `Community 71`, `Community 74`, `Community 78`, `Community 79`, `Community 80`, `Community 81`, `Community 82`, `Community 51`, `Community 53`, `Community 59`, `Community 60`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
 - **What connects `Dashboard`, `FinanceReporting`, `DemographicsAnalysis` to the rest of the system?**
-  _802 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _805 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Feature Modules` be split into smaller, more focused modules?**
   _Cohesion score 0.05612244897959184 - nodes in this community are weakly interconnected._
 - **Should `Project Dependencies` be split into smaller, more focused modules?**

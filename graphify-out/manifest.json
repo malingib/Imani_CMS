@@ -230,8 +230,8 @@
     "semantic_hash": ""
   },
   "index.tsx": {
-    "mtime": 1782951000.46731,
-    "ast_hash": "e7efe130ec96962bb3f9dbfc7f209808",
+    "mtime": 1783372848.621899,
+    "ast_hash": "a0edb9a6b0a3663a728afd4019bd0f23",
     "semantic_hash": ""
   },
   "metadata.json": {
@@ -470,8 +470,8 @@
     "semantic_hash": ""
   },
   "src/lib/view-routing.ts": {
-    "mtime": 1782985422.70044,
-    "ast_hash": "21afe9631c94b2b027514782535dae36",
+    "mtime": 1783372518.579117,
+    "ast_hash": "768f2e5377a19d4e2e6e503a160b6caa",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -887,6 +887,121 @@
   "index.html": {
     "mtime": 1783079152.8942292,
     "ast_hash": "a6c9577cf409b4b68f8c1cd4c51c87d1",
+    "semantic_hash": ""
+  },
+  "src/AppRouter.tsx": {
+    "mtime": 1783372825.360703,
+    "ast_hash": "f9f04ee5a3d6a7f8699a3080c2a0fa4c",
+    "semantic_hash": ""
+  },
+  "src/pages/AnalyticsPage.tsx": {
+    "mtime": 1783372562.8024898,
+    "ast_hash": "262cc47147041bc71a40648ef3132a85",
+    "semantic_hash": ""
+  },
+  "src/pages/AuditLogsPage.tsx": {
+    "mtime": 1783372562.8064897,
+    "ast_hash": "5ea2edb96eebaecfc9915682dfa2e793",
+    "semantic_hash": ""
+  },
+  "src/pages/BillingOverviewPage.tsx": {
+    "mtime": 1783373011.3052702,
+    "ast_hash": "1621accf4dd474c9128ec8b6100668a9",
+    "semantic_hash": ""
+  },
+  "src/pages/BillingPage.tsx": {
+    "mtime": 1783372562.8084898,
+    "ast_hash": "996157e8a43d601a355d390d1508b4cf",
+    "semantic_hash": ""
+  },
+  "src/pages/CommunicationPage.tsx": {
+    "mtime": 1783372562.7944896,
+    "ast_hash": "cb6a06874bf25b6620f61bf781907ca0",
+    "semantic_hash": ""
+  },
+  "src/pages/CompliancePage.tsx": {
+    "mtime": 1783372562.81949,
+    "ast_hash": "fbbd39708ea9508b7df3ee2c84fd06fd",
+    "semantic_hash": ""
+  },
+  "src/pages/DashboardPage.tsx": {
+    "mtime": 1783372562.7874897,
+    "ast_hash": "85f798311f3be6c4220412375f78dfa2",
+    "semantic_hash": ""
+  },
+  "src/pages/EventsPage.tsx": {
+    "mtime": 1783372562.7914896,
+    "ast_hash": "6277b9b925c471aa2b31dc4ffa37db93",
+    "semantic_hash": ""
+  },
+  "src/pages/FinancePage.tsx": {
+    "mtime": 1783372562.7924898,
+    "ast_hash": "0b0f3733016a362d82608051617e97f3",
+    "semantic_hash": ""
+  },
+  "src/pages/GroupsPage.tsx": {
+    "mtime": 1783372562.7974896,
+    "ast_hash": "a0079156693fba7a8713f653b82706ec",
+    "semantic_hash": ""
+  },
+  "src/pages/InvitationsPage.tsx": {
+    "mtime": 1783373011.2832701,
+    "ast_hash": "7683091d115b7569f93b9f5dfc04cedd",
+    "semantic_hash": ""
+  },
+  "src/pages/MembersPage.tsx": {
+    "mtime": 1783372562.7894897,
+    "ast_hash": "d28f65d3333d6dae68c5d1017d399191",
+    "semantic_hash": ""
+  },
+  "src/pages/MyGivingPage.tsx": {
+    "mtime": 1783373011.2892702,
+    "ast_hash": "ba790e794b3196afad97e891565af080",
+    "semantic_hash": ""
+  },
+  "src/pages/MyPortalPage.tsx": {
+    "mtime": 1783373011.27827,
+    "ast_hash": "63f5cccc7c05ad12b690684e549aa890",
+    "semantic_hash": ""
+  },
+  "src/pages/PlatformDashboardPage.tsx": {
+    "mtime": 1783373011.3032703,
+    "ast_hash": "0767be7fe4df86253e0b03272b60b840",
+    "semantic_hash": ""
+  },
+  "src/pages/PlatformSettingsPage.tsx": {
+    "mtime": 1783373011.2952702,
+    "ast_hash": "c76d0bb544a0007edd903efc61ca6a49",
+    "semantic_hash": ""
+  },
+  "src/pages/PrivacyPage.tsx": {
+    "mtime": 1783372562.81649,
+    "ast_hash": "804a3fa485b3814a0375b6271a76f394",
+    "semantic_hash": ""
+  },
+  "src/pages/ReportsPage.tsx": {
+    "mtime": 1783372562.8044899,
+    "ast_hash": "2ed8f15b65c1cc34d210a86f40682848",
+    "semantic_hash": ""
+  },
+  "src/pages/SecurityPage.tsx": {
+    "mtime": 1783372562.82149,
+    "ast_hash": "6f162057f409d93a41626a842b06b84d",
+    "semantic_hash": ""
+  },
+  "src/pages/SermonsPage.tsx": {
+    "mtime": 1783372562.7994897,
+    "ast_hash": "af00bc979b789c1e3ad05c7a5904bf04",
+    "semantic_hash": ""
+  },
+  "src/pages/SettingsPage.tsx": {
+    "mtime": 1783372562.8094897,
+    "ast_hash": "c7e968174e9d3a5a295f213b5775a01e",
+    "semantic_hash": ""
+  },
+  "src/pages/TenantsPage.tsx": {
+    "mtime": 1783373011.27027,
+    "ast_hash": "f90c1706974c5de90ed84a275c8df20c",
     "semantic_hash": ""
   }
 }

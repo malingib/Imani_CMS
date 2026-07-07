@@ -14,7 +14,7 @@ export default defineConfig(({ command }) => {
         middlewareMode: false,
       },
       test: {
-        include: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
+        include: ['src/**/*.test.ts', 'src/**/*.spec.ts', 'src/**/*.test.tsx', 'src/**/*.spec.tsx'],
         exclude: ['e2e/**', 'node_modules/**'],
       }
     };

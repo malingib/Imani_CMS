@@ -92,7 +92,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
     if (!suspensionConfirm) return;
     setIsSuspending(true);
     try {
-      await tenantsService.toggleChurchStatus({ id: suspensionConfirm.id, status: 'active' });
+      await tenantsService.toggleChurchStatus(suspensionConfirm);
       fetchChurches();
     } finally {
       setIsSuspending(false);

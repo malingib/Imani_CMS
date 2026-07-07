@@ -54,10 +54,15 @@ function createFailingQuery(errorMessage: string) {
 }
 
 function createInsertQuery(insertedRows: unknown[]) {
+  const result = { data: [] as unknown[], error: null };
+  result.data = [];
+  const insertThen = (resolve: (r: QueryResult) => unknown) =>
+    Promise.resolve(resolve(result as unknown as QueryResult));
   return {
     insert(rows: unknown[]) {
       insertedRows.push(...rows);
-      return Promise.resolve({ data: rows, error: null });
+      result.data = rows;
+      return { select: () => ({ then: insertThen }) };
     },
   };
 }

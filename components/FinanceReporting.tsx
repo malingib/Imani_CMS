@@ -48,6 +48,10 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [openActionId, setOpenActionId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
+  const [showRecurringModal, setShowRecurringModal] = useState(false);
+  const [budgetForm, setBudgetForm] = useState<Budget>({ id: '', category: '', amount: 0, spent: 0, month: new Date().toISOString().slice(0, 7) });
+  const [recurringForm, setRecurringForm] = useState<RecurringExpense>({ id: '', category: '', amount: 0, frequency: 'Monthly', nextDate: new Date().toISOString().split('T')[0] });
 
   // Form State
   const [formData, setFormData] = useState<Partial<Transaction>>({
@@ -72,6 +76,26 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
   const totalIncome = transactions.filter(t => t.category === 'Income').reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = transactions.filter(t => t.category === 'Expense').reduce((sum, t) => sum + t.amount, 0);
 
+  const incomeByType = useMemo(() => {
+    const incomeTxns = transactions.filter(t => t.category === 'Income');
+    const total = incomeTxns.reduce((s, t) => s + t.amount, 0) || 1;
+    const groups: Record<string, number> = {};
+    incomeTxns.forEach(t => { groups[t.type] = (groups[t.type] || 0) + t.amount; });
+    return Object.entries(groups).map(([label, val]) => ({ label, pct: val / total, amount: val }));
+  }, [transactions]);
+
+  const handleSetBudgetAction = () => {
+    onSetBudget({ ...budgetForm, id: budgetForm.id || `budget-${crypto.randomUUID()}` });
+    setShowBudgetModal(false);
+    setBudgetForm({ id: '', category: '', amount: 0, spent: 0, month: new Date().toISOString().slice(0, 7) });
+  };
+
+  const handleAddRecurringAction = () => {
+    onAddRecurring({ ...recurringForm, id: recurringForm.id || `recur-${crypto.randomUUID()}` });
+    setShowRecurringModal(false);
+    setRecurringForm({ id: '', category: '', amount: 0, frequency: 'Monthly', nextDate: new Date().toISOString().split('T')[0] });
+  };
+
   const handleExportCSV = () => {
     const headers = "ID,Date,Reference,Payer/Recipient,Category,Type,Method,Source,Amount\n";
     const rows = filtered.map(t => 
@@ -95,7 +119,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
         amount: 0,
         memberName: '',
         category: mode === 'NEW_INCOME' ? 'Income' : 'Expense',
-        reference: mode === 'NEW_INCOME' ? '' : `EXP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
+        reference: mode === 'NEW_INCOME' ? '' : `EXP-${crypto.randomUUID().slice(0, 6).toUpperCase()}`
       });
       setShowFormModal(mode);
     } else {
@@ -116,11 +140,11 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
         // Create
         const newTrx: Transaction = {
           ...formData as Transaction,
-          id: `trx-${Date.now()}`,
+          id: crypto.randomUUID(),
           source: 'MANUAL', // Manual entries from this form
           reference: formData.paymentMethod === 'Cash' && !formData.reference 
-            ? `CSH-${Math.random().toString(36).substr(2, 6).toUpperCase()}` 
-            : formData.reference || `REF-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
+            ? `CSH-${crypto.randomUUID().slice(0, 6).toUpperCase()}` 
+            : formData.reference || `REF-${crypto.randomUUID().slice(0, 6).toUpperCase()}`
         };
         onAddTransaction(newTrx);
       }
@@ -338,28 +362,79 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
            </div>
 
            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
-              <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
-                  <BarChart3 size={20} className="text-brand-indigo"/> Income Sources
-              </h4>
-              <div className="space-y-6">
-                 {[
-                   { label: 'Tithes', val: 0.65, color: 'brand-primary' },
-                   { label: 'Special Project', val: 0.20, color: 'brand-indigo' },
-                   { label: 'Benevolence', val: 0.10, color: 'brand-emerald' },
-                   { label: 'Other', val: 0.05, color: 'slate-400' }
-                 ].map(s => (
-                   <div key={s.label} className="space-y-2">
-                      <div className="flex justify-between items-end">
-                        <span className="text-xs font-bold text-slate-600">{s.label}</span>
-                        <span className="text-[10px] font-black text-slate-400">{(s.val * 100)}%</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div className={`h-full bg-${s.color} rounded-full`} style={{ width: `${s.val * 100}%` }} />
-                      </div>
-                   </div>
-                 ))}
-              </div>
-           </div>
+               <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
+                   <BarChart3 size={20} className="text-brand-indigo"/> Income Sources
+               </h4>
+               <div className="space-y-6">
+                  {incomeByType.length > 0 ? incomeByType.map(s => (
+                    <div key={s.label} className="space-y-2">
+                       <div className="flex justify-between items-end">
+                         <span className="text-xs font-bold text-slate-600">{s.label}</span>
+                         <span className="text-[10px] font-black text-slate-400">{(s.pct * 100).toFixed(0)}% (KES {s.amount.toLocaleString()})</span>
+                       </div>
+                       <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                         <div className="h-full bg-brand-primary rounded-full" style={{ width: `${s.pct * 100}%` }} />
+                       </div>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-slate-400 font-medium text-center py-4">No income data yet</p>
+                  )}
+               </div>
+            </div>
+
+            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+               <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
+                   <Wallet size={20} className="text-brand-indigo"/> Budgets
+               </h4>
+               {budgets.length > 0 ? (
+                 <div className="space-y-4">
+                   {budgets.map(b => (
+                     <div key={b.id} className="space-y-2">
+                       <div className="flex justify-between items-end">
+                         <span className="text-xs font-bold text-slate-600">{b.category}</span>
+                         <span className="text-[10px] font-black text-slate-400">KES {b.spent.toLocaleString()} / KES {b.amount.toLocaleString()}</span>
+                       </div>
+                       <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                         <div className={`h-full rounded-full ${b.spent > b.amount ? 'bg-brand-gold' : 'bg-brand-emerald'}`}
+                           style={{ width: `${Math.min((b.spent / (b.amount || 1)) * 100, 100)}%` }} />
+                       </div>
+                       <p className="text-[8px] text-slate-400 font-bold uppercase">{b.month}</p>
+                     </div>
+                   ))}
+                 </div>
+               ) : (
+                 <p className="text-sm text-slate-400 font-medium text-center py-4">No budgets set</p>
+               )}
+               <button onClick={() => setShowBudgetModal(true)}
+                 className="w-full py-4 bg-slate-50 text-brand-primary rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">
+                 Set Budget
+               </button>
+            </div>
+
+            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+               <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
+                   <Repeat size={20} className="text-brand-indigo"/> Recurring Expenses
+               </h4>
+               {recurringExpenses.length > 0 ? (
+                 <div className="space-y-4">
+                   {recurringExpenses.map(r => (
+                     <div key={r.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
+                       <div>
+                         <p className="font-black text-slate-700 text-sm">{r.category}</p>
+                         <p className="text-[9px] text-slate-400 font-bold uppercase">{r.frequency} • Next: {r.nextDate}</p>
+                       </div>
+                       <span className="font-black text-slate-800">KES {r.amount.toLocaleString()}</span>
+                     </div>
+                   ))}
+                 </div>
+               ) : (
+                 <p className="text-sm text-slate-400 font-medium text-center py-4">No recurring expenses</p>
+               )}
+               <button onClick={() => setShowRecurringModal(true)}
+                 className="w-full py-4 bg-slate-50 text-brand-primary rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">
+                 Add Recurring
+               </button>
+            </div>
 
            <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-4">
               <Landmark size={48} className="text-slate-200" />
@@ -572,6 +647,81 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                   </button>
                 </div>
              </form>
+          </div>
+        </div>
+      )}
+
+      {/* Budget Modal */}
+      {showBudgetModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Set Budget</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Category</label>
+                <input className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                  value={budgetForm.category} onChange={e => setBudgetForm({...budgetForm, category: e.target.value})} placeholder="e.g. Utilities" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Budget Amount (KES)</label>
+                <input type="number" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                  value={budgetForm.amount || ''} onChange={e => setBudgetForm({...budgetForm, amount: Number(e.target.value)})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Spent So Far</label>
+                <input type="number" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                  value={budgetForm.spent || ''} onChange={e => setBudgetForm({...budgetForm, spent: Number(e.target.value)})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Month (YYYY-MM)</label>
+                <input className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                  value={budgetForm.month} onChange={e => setBudgetForm({...budgetForm, month: e.target.value})} placeholder="2026-07" />
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => setShowBudgetModal(false)} className="flex-1 py-4 font-black text-slate-400 hover:bg-slate-50 rounded-2xl uppercase text-xs">Cancel</button>
+              <button onClick={handleSetBudgetAction} className="flex-[2] py-4 bg-brand-primary text-white rounded-2xl font-black uppercase text-xs shadow-xl hover:bg-brand-indigo transition-all">Save Budget</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Recurring Expense Modal */}
+      {showRecurringModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-200">
+            <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Add Recurring Expense</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Category</label>
+                <input className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                  value={recurringForm.category} onChange={e => setRecurringForm({...recurringForm, category: e.target.value})} placeholder="e.g. Rent" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Amount (KES)</label>
+                <input type="number" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                  value={recurringForm.amount || ''} onChange={e => setRecurringForm({...recurringForm, amount: Number(e.target.value)})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Frequency</label>
+                <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                  value={recurringForm.frequency} onChange={e => setRecurringForm({...recurringForm, frequency: e.target.value as any})}>
+                  <option>Weekly</option>
+                  <option>Monthly</option>
+                  <option>Quarterly</option>
+                  <option>Yearly</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Next Due Date</label>
+                <input type="date" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                  value={recurringForm.nextDate} onChange={e => setRecurringForm({...recurringForm, nextDate: e.target.value})} />
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => setShowRecurringModal(false)} className="flex-1 py-4 font-black text-slate-400 hover:bg-slate-50 rounded-2xl uppercase text-xs">Cancel</button>
+              <button onClick={handleAddRecurringAction} className="flex-[2] py-4 bg-brand-primary text-white rounded-2xl font-black uppercase text-xs shadow-xl hover:bg-brand-indigo transition-all">Save Recurring</button>
+            </div>
           </div>
         </div>
       )}

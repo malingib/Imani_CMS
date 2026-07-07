@@ -256,6 +256,7 @@ const Membership: React.FC<MembershipProps> = ({
     setTimeout(() => {
       const newM: Member = {
         ...data,
+        email: data.email || '',
         id: Math.random().toString(36).substr(2, 9),
         photo: photo || undefined
       };

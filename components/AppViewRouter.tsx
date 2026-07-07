@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { AppView, Member, User, UserRole, AppNotification, AuditLog, Budget, ChurchEvent, Transaction, CommunicationLog, RecurringExpense } from '../types';
+import { AppView, Member, User, UserRole, AppNotification, AuditLog, Budget, ChurchEvent, Transaction, CommunicationLog, RecurringExpense, Group } from '../types';
 import Sidebar from './Sidebar';
 import ErrorBoundary from './shared/ErrorBoundary';
 
@@ -36,6 +36,7 @@ interface AppViewRouterProps {
   currentUser: User | null;
   churchId: string | null;
   members: Member[];
+  groups: Group[];
   transactions: Transaction[];
   events: ChurchEvent[];
   budgets: Budget[];
@@ -65,7 +66,7 @@ interface AppViewRouterProps {
 const AppViewRouter: React.FC<AppViewRouterProps> = ({
   currentView, setCurrentView, setActiveChurchId,
   isSuperAdmin, viewingPlatform, isLoggedIn, currentUser, churchId,
-  members, transactions, events, budgets, recurringExpenses, communications, auditLogs, notifications,
+  members, groups, transactions, events, budgets, recurringExpenses, communications, auditLogs, notifications,
   addToast, createAudit,
   handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember,
   handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction,
@@ -103,7 +104,7 @@ const AppViewRouter: React.FC<AppViewRouterProps> = ({
     case 'COMMUNICATION':
       return <ErrorBoundary key="COMMUNICATION"><CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} /></ErrorBoundary>;
     case 'GROUPS':
-      return <ErrorBoundary key="GROUPS"><GroupsManagement members={members} /></ErrorBoundary>;
+      return <ErrorBoundary key="GROUPS"><GroupsManagement members={members} groups={groups} /></ErrorBoundary>;
     case 'EVENTS':
       return <ErrorBoundary key="EVENTS"><EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} /></ErrorBoundary>;
     case 'ANALYTICS':

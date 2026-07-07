@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MemberStatus, MembershipType, MaritalStatus } from '../../types';
+import { MemberStatus, MembershipType, MaritalStatus, TransactionType } from '../../types';
 
 // Phone number validation regex: +country_code, dashes, parentheses, spaces allowed
 const phoneRegex = /^\+?[\d\s\-()]+$/;
@@ -23,6 +23,9 @@ const nameSchema = z
   .min(2, 'Name must be at least 2 characters')
   .max(100, 'Name must not exceed 100 characters')
   .trim();
+
+// Amount validation
+const amountSchema = z.number().positive('Amount must be positive').finite('Amount must be a finite number');
 
 // Member form validation
 export const MemberFormSchema = z.object({
@@ -87,6 +90,66 @@ export const PasswordResetSchema = z.object({
 });
 
 export type PasswordResetData = z.infer<typeof PasswordResetSchema>;
+
+// Transaction form validation
+export const TransactionFormSchema = z.object({
+  memberId: z.string().optional(),
+  memberName: nameSchema,
+  amount: amountSchema,
+  type: z.enum(['Tithe', 'Offering', 'Project', 'Harambee', 'Benevolence', 'Expense', 'Salary', 'Utility', 'Maintenance']),
+  paymentMethod: z.enum(['M-Pesa', 'Cash', 'Bank Transfer', 'Cheque']),
+  date: z.string().min(1, 'Date is required'),
+  reference: z.string().min(1, 'Reference is required').max(50, 'Reference too long'),
+  category: z.enum(['Income', 'Expense']),
+  notes: z.string().optional(),
+  phoneNumber: z.string().optional(),
+});
+
+export type TransactionFormData = z.infer<typeof TransactionFormSchema>;
+
+// M-Pesa specific validation (phone + amount)
+export const MpesaPaymentSchema = z.object({
+  phoneNumber: phoneSchema,
+  amount: amountSchema,
+  accountRef: z.string().min(1, 'Account reference is required').max(12, 'Account ref max 12 chars'),
+  transactionDesc: z.string().min(1).max(50).optional(),
+});
+
+export type MpesaPaymentData = z.infer<typeof MpesaPaymentSchema>;
+
+// Event form validation
+export const EventFormSchema = z.object({
+  title: nameSchema,
+  description: z.string().min(1, 'Description is required').max(500, 'Description too long'),
+  date: z.string().min(1, 'Date is required'),
+  time: z.string().min(1, 'Time is required'),
+  location: z.string().min(2, 'Location is required').max(200, 'Location too long'),
+  type: z.enum(['WORSHIP', 'BIBLE_STUDY', 'PRAYER', 'OUTREACH', 'YOUTH', 'OTHER']),
+  coordinator: z.string().optional(),
+  contactPerson: z.string().optional(),
+  rsvpDeadline: z.string().optional(),
+  recurrence: z.enum(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'ANNUALLY']).optional(),
+});
+
+export type EventFormData = z.infer<typeof EventFormSchema>;
+
+// Group form validation
+export const GroupFormSchema = z.object({
+  name: nameSchema,
+  description: z.string().min(1, 'Description is required').max(500, 'Description too long'),
+});
+
+export type GroupFormData = z.infer<typeof GroupFormSchema>;
+
+// Budget form validation
+export const BudgetFormSchema = z.object({
+  category: nameSchema,
+  amount: amountSchema,
+  spent: z.number().min(0, 'Spent amount cannot be negative').default(0),
+  month: z.string().min(1, 'Month is required'),
+});
+
+export type BudgetFormData = z.infer<typeof BudgetFormSchema>;
 
 // Utility function for form validation with error handling
 export const validateFormData = <T,>(schema: z.ZodSchema<T>, data: unknown): { data: T | null; errors: Record<string, string> } => {

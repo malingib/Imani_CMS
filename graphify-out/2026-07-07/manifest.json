@@ -1,0 +1,47 @@
+{
+  "SCHEMA.md": {
+    "mtime": 1783248805.5571733,
+    "ast_hash": "91de7cdf6c702ecc3e8eae293d7d484f",
+    "semantic_hash": ""
+  },
+  "concepts/candyai-architecture.md": {
+    "mtime": 1783355728.6776438,
+    "ast_hash": "01b9060a1e50454e270fdf46ea2593a7",
+    "semantic_hash": ""
+  },
+  "concepts/second-brain-karpathy.md": {
+    "mtime": 1783248814.1542861,
+    "ast_hash": "f1b29040dc9bb97af62aae3cba941b4f",
+    "semantic_hash": ""
+  },
+  "entities/bright-malingi.md": {
+    "mtime": 1783355697.339304,
+    "ast_hash": "94e75ce7af5e2db07c481810c48d0006",
+    "semantic_hash": ""
+  },
+  "entities/candyai.md": {
+    "mtime": 1783355670.7100153,
+    "ast_hash": "937c6028c3f7cf313742c1da68270b0f",
+    "semantic_hash": ""
+  },
+  "entities/imani-cms.md": {
+    "mtime": 1783355685.7331781,
+    "ast_hash": "374bb8cd0919a2759ea2b62e16e93605",
+    "semantic_hash": ""
+  },
+  "entities/mobiwave-innovations.md": {
+    "mtime": 1783355708.7294276,
+    "ast_hash": "389fda2dfb18ebbb337a17fa6185d92a",
+    "semantic_hash": ""
+  },
+  "index.md": {
+    "mtime": 1783248805.5541732,
+    "ast_hash": "c9c223074cf48b0d22d421fbe7270ab3",
+    "semantic_hash": ""
+  },
+  "log.md": {
+    "mtime": 1783248819.3623545,
+    "ast_hash": "850e3deb59608d16bb6d40b5e9be99ef",
+    "semantic_hash": ""
+  }
+}

@@ -72,10 +72,33 @@ export async function mockSupabase(page: Page, { session = true } = {}) {
     else route.fulfill(json(MOCK_CHURCHES));
   });
 
-  await page.route(matchUrl('/rest/v1/members'), (route: Route) => {
-    const url = route.request().url();
-    if (url.includes('select=count')) route.fulfill(count(MOCK_MEMBERS.length));
-    else route.fulfill(json(MOCK_MEMBERS));
+  let currentMembers = [...MOCK_MEMBERS];
+  let currentInvitations: any[] = [];
+
+  await page.route(matchUrl('/rest/v1/members'), async (route: Route) => {
+    const request = route.request();
+    const url = request.url();
+    const method = request.method();
+
+    if (method === 'GET') {
+      if (url.includes('select=count')) route.fulfill(count(currentMembers.length));
+      else route.fulfill(json(currentMembers));
+      return;
+    }
+
+    if (method === 'POST') {
+      const body = request.postDataJSON();
+      const rows = Array.isArray(body) ? body : [body];
+      const inserted = rows.map((row: any) => ({
+        ...row,
+        id: row.id || `m${Date.now()}${Math.random().toString(36).slice(2, 6)}`,
+      }));
+      currentMembers = [...currentMembers, ...inserted];
+      route.fulfill(json(inserted));
+      return;
+    }
+
+    route.fulfill(json([]));
   });
 
   await page.route(matchUrl('/rest/v1/transactions'), (route: Route) => {
@@ -100,8 +123,43 @@ export async function mockSupabase(page: Page, { session = true } = {}) {
       churches: MOCK_CHURCHES.find(c => c.id === i.church_id) || null,
     })))));
 
-  await page.route(matchUrl('/rest/v1/invitations'), (route: Route) =>
-    route.fulfill(json([])));
+  await page.route(matchUrl('/rest/v1/invitations'), async (route: Route) => {
+    const request = route.request();
+    const url = request.url();
+    const method = request.method();
+
+    if (method === 'GET') {
+      route.fulfill(json(currentInvitations));
+      return;
+    }
+
+    if (method === 'POST') {
+      const body = request.postDataJSON();
+      const rows = Array.isArray(body) ? body : [body];
+      const inserted = rows.map((row: any) => ({
+        ...row,
+        id: row.id || `inv-${Date.now()}${Math.random().toString(36).slice(2, 6)}`,
+        expires_at: row.expires_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        accepted_at: row.accepted_at ?? null,
+        created_at: row.created_at || new Date().toISOString(),
+      }));
+      currentInvitations = [...currentInvitations, ...inserted];
+      route.fulfill(json(inserted));
+      return;
+    }
+
+    if (method === 'DELETE') {
+      const match = url.match(/id=eq\.([^&]+)/);
+      if (match) {
+        const id = decodeURIComponent(match[1]);
+        currentInvitations = currentInvitations.filter(inv => inv.id !== id);
+      }
+      route.fulfill(json([]));
+      return;
+    }
+
+    route.fulfill(json(currentInvitations));
+  });
 
   await page.route(matchUrl('/rest/v1/platform_settings'), (route: Route) =>
     route.fulfill(json(MOCK_PLATFORM_SETTINGS)));

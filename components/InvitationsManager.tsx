@@ -13,6 +13,7 @@ const InvitationsManager: React.FC = () => {
   const [churchId, setChurchId] = useState('');
   const [churches, setChurches] = useState<ChurchOption[]>([]);
   const [sending, setSending] = useState(false);
+  const [resending, setResending] = useState<string | null>(null);
 
   const fetch = async () => {
     const [nextInvitations, nextChurches] = await Promise.all([
@@ -42,6 +43,16 @@ const InvitationsManager: React.FC = () => {
   const cancelInvite = async (id: string) => {
     await invitationsService.cancelInvitation(id);
     fetch();
+  };
+
+  const resendInvite = async (id: string) => {
+    setResending(id);
+    try {
+      await invitationsService.resendInvitation(id);
+      await fetch();
+    } finally {
+      setResending(null);
+    }
   };
 
   const statusIcon = (inv: InvitationRecord) => {
@@ -88,9 +99,14 @@ const InvitationsManager: React.FC = () => {
                   {new Date(inv.created_at).toLocaleDateString()}
                 </span>
                 {!inv.accepted_at && (
-                  <button onClick={() => cancelInvite(inv.id)} className="text-rose-400 hover:text-rose-600 text-[10px] font-black uppercase">
-                    Cancel
-                  </button>
+                  <>
+                    <button onClick={() => resendInvite(inv.id)} disabled={resending === inv.id} className="text-brand-primary hover:text-brand-primary/80 text-[10px] font-black uppercase disabled:opacity-40">
+                      {resending === inv.id ? 'Sending...' : 'Resend'}
+                    </button>
+                    <button onClick={() => cancelInvite(inv.id)} className="text-rose-400 hover:text-rose-600 text-[10px] font-black uppercase">
+                      Cancel
+                    </button>
+                  </>
                 )}
               </div>
             </div>

@@ -55,6 +55,33 @@ export function createInvitationsService(client: SupabaseLikeClient) {
       }
     },
 
+    async resendInvitation(id: string): Promise<void> {
+      const { data, error } = await client.from('invitations').select('*, churches(name)').eq('id', id).single();
+      if (error) throw new Error(error.message);
+      if (!data) throw new Error('Invitation not found');
+      if (data.accepted_at) throw new Error('Cannot resend an accepted invitation');
+
+      const newToken = crypto.randomUUID();
+      const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { error: updateError } = await client.from('invitations').update({
+        token: newToken,
+        expires_at: newExpiresAt,
+      }).eq('id', id);
+      if (updateError) throw new Error(updateError.message);
+
+      const churchName = (data as any).churches?.name;
+      const origin = (typeof window !== 'undefined' && (window.location as any)?.origin) || (import.meta.env.VITE_APP_URL as string) || '';
+      const inviteLink = origin ? `${origin}/accept-invite?token=${newToken}` : '';
+
+      await sendInviteEmail({
+        to_email: data.email,
+        token: newToken,
+        church_name: churchName,
+        role: data.role,
+        invite_link: inviteLink,
+      });
+    },
+
     async cancelInvitation(id: string): Promise<void> {
       const { error } = await client.from('invitations').delete().eq('id', id);
       if (error) throw new Error(error.message);

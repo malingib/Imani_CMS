@@ -1,8 +1,9 @@
 import React, { lazy, useState, Suspense } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import Sidebar, { ImaniLogoIcon } from './Sidebar';
 import { useApp } from '../src/lib/AppProvider';
+import { useChurch } from '../src/lib/church-context';
 import { ROUTES, pathToView } from '../src/lib/router';
 import { AppView } from '../types';
 
@@ -47,14 +48,20 @@ function Protected({ children }: { children: React.ReactNode }) {
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, viewingPlatform, viewingChurch, handleAddGroup, handleUpdateGroup, handleDeleteGroup } = useApp();
+  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, viewingPlatform, viewingChurch, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleSelectChurch } = useApp();
+  const { churches, activeChurchId } = useChurch();
   const location = useLocation();
+  const navigateToPath = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const churchId = currentUser?.churchId ?? null;
+  const churchId = activeChurchId ?? currentUser?.churchId ?? null;
   const currentMember = members.find(m => m.id === currentUser?.memberId);
 
-  const navigate = (v: AppView) => window.history.pushState(null, '', ROUTES[v].path);
+  if (!currentUser) {
+    return null;
+  }
+
+  const navigate = (v: AppView) => navigateToPath(ROUTES[v].path);
 
   const handleLogout = async () => {
     createAudit('Logout', 'DASHBOARD');
@@ -66,7 +73,22 @@ const AccountShell = () => {
     <>
       <div className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}
         onClick={() => setSidebarOpen(false)} />
-      <Sidebar currentView={pathToView(location.pathname) || 'DASHBOARD'} setView={(v) => { navigate(v); setSidebarOpen(false); }} currentUser={currentUser} branches={[]} onBranchChange={() => {}} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} churches={[]} activeChurchId={null} onChurchSwitch={() => navigate('DASHBOARD')} />
+      <Sidebar
+        currentView={pathToView(location.pathname) || 'DASHBOARD'}
+        setView={(v) => { navigate(v); setSidebarOpen(false); }}
+        currentUser={currentUser}
+        branches={[]}
+        onBranchChange={() => {}}
+        onLogout={handleLogout}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        churches={churches}
+        activeChurchId={activeChurchId}
+        onChurchSwitch={(id) => {
+          handleSelectChurch(id);
+          setSidebarOpen(false);
+        }}
+      />
       <main className="flex-1 min-h-screen lg:ml-64 transition-all">
         <header className="h-20 bg-white border-b border-slate-100 px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">
           <div className="flex items-center gap-4">
@@ -106,21 +128,35 @@ const AccountShell = () => {
             </div>
           }>
             <Routes>
-              <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
-              <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
-              <Route path={ROUTES.FINANCE.path} element={<FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
-              <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} />} />
-              <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
-              <Route path={ROUTES.COMMUNICATION.path} element={<CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} addToast={addToast} />} />
-              <Route path={ROUTES.REPORTS.path} element={<ReportsCenter transactions={transactions} members={members} events={events} />} />
-              <Route path={ROUTES.SERMONS.path} element={<SermonHistory events={events} sermons={sermons} />} />
-              <Route path={ROUTES.ANALYTICS.path} element={<DemographicsAnalysis members={members} />} />
-              <Route path={ROUTES.SETTINGS.path} element={<Settings currentUserRole={currentUser.role} churchId={churchId || ''} />} />
-              <Route path={ROUTES.AUDIT_LOGS.path} element={<AuditLogs logs={auditLogs} />} />
-              <Route path={ROUTES.BILLING.path} element={<Billing />} />
-              <Route path={ROUTES.MY_PORTAL.path} element={<MemberPortal member={currentMember || members[0]} transactions={transactions} events={events} activities={[]} churchId={churchId || ''} onNavigate={navigate} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />} />
-              <Route path={ROUTES.MY_GIVING.path} element={<MyGiving member={currentMember || members[0]} transactions={transactions} onGive={() => { addToast('STK Push Sent'); createAudit('Initiated Giving STK', 'MY_GIVING'); }} />} />
-              <Route path="*" element={<Navigate to={ROUTES.DASHBOARD.path} replace />} />
+              {viewingPlatform ? (
+                <>
+                  <Route path={ROUTES.DASHBOARD.path} element={<Navigate to={ROUTES.PLATFORM_DASHBOARD.path} replace />} />
+                  <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={<PlatformDashboard />} />
+                  <Route path={ROUTES.TENANTS.path} element={<TenantRegistry onImpersonate={handleSelectChurch} />} />
+                  <Route path={ROUTES.INVITATIONS.path} element={<InvitationsManager />} />
+                  <Route path={ROUTES.BILLING.path} element={<BillingOverview />} />
+                  <Route path={ROUTES.PLATFORM_SETTINGS.path} element={<PlatformSettings />} />
+                  <Route path="*" element={<Navigate to={ROUTES.PLATFORM_DASHBOARD.path} replace />} />
+                </>
+              ) : (
+                <>
+                  <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
+                  <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
+                  <Route path={ROUTES.FINANCE.path} element={<FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
+                  <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} />} />
+                  <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
+                  <Route path={ROUTES.COMMUNICATION.path} element={<CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} addToast={addToast} />} />
+                  <Route path={ROUTES.REPORTS.path} element={<ReportsCenter transactions={transactions} members={members} events={events} />} />
+                  <Route path={ROUTES.SERMONS.path} element={<SermonHistory events={events} sermons={sermons} />} />
+                  <Route path={ROUTES.ANALYTICS.path} element={<DemographicsAnalysis members={members} />} />
+                  <Route path={ROUTES.SETTINGS.path} element={<Settings currentUserRole={currentUser.role} churchId={churchId || ''} />} />
+                  <Route path={ROUTES.AUDIT_LOGS.path} element={<AuditLogs logs={auditLogs} />} />
+                  <Route path={ROUTES.BILLING.path} element={<Billing />} />
+                  <Route path={ROUTES.MY_PORTAL.path} element={<MemberPortal member={currentMember || members[0]} transactions={transactions} events={events} activities={[]} churchId={churchId || ''} onNavigate={navigate} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />} />
+                  <Route path={ROUTES.MY_GIVING.path} element={<MyGiving member={currentMember || members[0]} transactions={transactions} onGive={() => { addToast('STK Push Sent'); createAudit('Initiated Giving STK', 'MY_GIVING'); }} />} />
+                  <Route path="*" element={<Navigate to={ROUTES.DASHBOARD.path} replace />} />
+                </>
+              )}
             </Routes>
           </Suspense>
         </div>
@@ -132,6 +168,8 @@ const AccountShell = () => {
 export default function AppRoutes() {
   const { currentUser, toasts, viewingPlatform, viewingChurch, handleLogin } = useApp();
   const isLoggedIn = !!currentUser;
+  const landingPath = viewingPlatform ? ROUTES.PLATFORM_DASHBOARD.path : ROUTES.DASHBOARD.path;
+  const accountShellElement = <Protected><AccountShell /></Protected>;
 
   const navigateLegal = (view: AppView) => {
     const path = ROUTES[view]?.path || '/privacy';
@@ -139,9 +177,11 @@ export default function AppRoutes() {
   };
 
   const dashboardElement = isLoggedIn
-    ? viewingPlatform || viewingChurch
-      ? <Navigate to={ROUTES.PLATFORM_DASHBOARD.path} replace />
-      : <Navigate to={ROUTES.DASHBOARD.path} replace />
+    ? <Navigate to={landingPath} replace />
+    : <Login onLogin={handleLogin} onNavigateLegal={navigateLegal} />;
+
+  const fallbackElement = isLoggedIn
+    ? accountShellElement
     : <Login onLogin={handleLogin} onNavigateLegal={navigateLegal} />;
 
   return (
@@ -152,13 +192,9 @@ export default function AppRoutes() {
         ))}
       </div>
       <Routes>
-        <Route path="/" element={<Navigate to={ROUTES.DASHBOARD.path} replace />} />
+        <Route path="/" element={<Navigate to={isLoggedIn ? landingPath : ROUTES.DASHBOARD.path} replace />} />
         <Route path={ROUTES.DASHBOARD.path} element={dashboardElement} />
-        {(viewingPlatform || viewingChurch) && isLoggedIn ? (
-          <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={<PlatformDashboard />} />
-        ) : isLoggedIn ? (
-          <Route path="*" element={<Protected><AccountShell /></Protected>} />
-        ) : null}
+        <Route path="*" element={fallbackElement} />
       </Routes>
     </>
   );

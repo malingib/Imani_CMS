@@ -5,6 +5,7 @@ import {
   LoginFormSchema,
   SignupFormSchema,
   PasswordResetSchema,
+  AcceptInviteFormSchema,
   TransactionFormSchema,
   MpesaPaymentSchema,
   EventFormSchema,
@@ -169,6 +170,38 @@ describe("PasswordResetSchema", () => {
 
   it("rejects invalid email", () => {
     expect(() => PasswordResetSchema.parse({ email: "" })).toThrow();
+  });
+});
+
+describe("AcceptInviteFormSchema", () => {
+  it("accepts valid accept-invite data", () => {
+    const data = { name: "John Kamau", password: "Password1", confirmPassword: "Password1" };
+    const result = AcceptInviteFormSchema.parse(data);
+    expect(result.name).toBe("John Kamau");
+  });
+
+  it("rejects password without uppercase", () => {
+    expect(() =>
+      AcceptInviteFormSchema.parse({ name: "John", password: "password1", confirmPassword: "password1" })
+    ).toThrow();
+  });
+
+  it("rejects password without number", () => {
+    expect(() =>
+      AcceptInviteFormSchema.parse({ name: "John", password: "PasswordA", confirmPassword: "PasswordA" })
+    ).toThrow();
+  });
+
+  it("rejects mismatched passwords", () => {
+    expect(() =>
+      AcceptInviteFormSchema.parse({ name: "John", password: "Password1", confirmPassword: "Password2" })
+    ).toThrow();
+  });
+
+  it("rejects short name", () => {
+    expect(() =>
+      AcceptInviteFormSchema.parse({ name: "J", password: "Password1", confirmPassword: "Password1" })
+    ).toThrow();
   });
 });
 

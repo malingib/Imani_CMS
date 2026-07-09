@@ -91,6 +91,17 @@ export const PasswordResetSchema = z.object({
 
 export type PasswordResetData = z.infer<typeof PasswordResetSchema>;
 
+export const AcceptInviteFormSchema = z.object({
+  name: nameSchema,
+  password: z.string().min(8, 'Password must be at least 8 characters').regex(/[A-Z]/, 'Password must contain uppercase letter').regex(/[0-9]/, 'Password must contain number'),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
+
+export type AcceptInviteFormData = z.infer<typeof AcceptInviteFormSchema>;
+
 // Transaction form validation
 export const TransactionFormSchema = z.object({
   memberId: z.string().optional(),

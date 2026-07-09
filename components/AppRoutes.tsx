@@ -30,6 +30,7 @@ const PlatformSettings = lazy(() => import('./PlatformSettings'));
 const BillingOverview = lazy(() => import('./BillingOverview'));
 const InvitationsManager = lazy(() => import('./InvitationsManager'));
 const SermonHistory = lazy(() => import('./SermonHistory'));
+const AcceptInvite = lazy(() => import('./AcceptInvite'));
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { loading } = useApp();
@@ -194,6 +195,7 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Navigate to={isLoggedIn ? landingPath : ROUTES.DASHBOARD.path} replace />} />
         <Route path={ROUTES.DASHBOARD.path} element={dashboardElement} />
+        <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="*" element={fallbackElement} />
       </Routes>
     </>

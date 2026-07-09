@@ -138,6 +138,12 @@ export default function AppRoutes() {
     window.history.pushState(null, '', path);
   };
 
+  const dashboardElement = isLoggedIn
+    ? viewingPlatform || viewingChurch
+      ? <Navigate to={ROUTES.PLATFORM_DASHBOARD.path} replace />
+      : <Navigate to={ROUTES.DASHBOARD.path} replace />
+    : <Login onLogin={handleLogin} onNavigateLegal={navigateLegal} />;
+
   return (
     <>
       <div className="fixed inset-0 flex items-start justify-center pt-20 pointer-events-none">
@@ -147,7 +153,7 @@ export default function AppRoutes() {
       </div>
       <Routes>
         <Route path="/" element={<Navigate to={ROUTES.DASHBOARD.path} replace />} />
-        <Route path={ROUTES.DASHBOARD.path} element={<Login onLogin={handleLogin} onNavigateLegal={navigateLegal} />} />
+        <Route path={ROUTES.DASHBOARD.path} element={dashboardElement} />
         {(viewingPlatform || viewingChurch) && isLoggedIn ? (
           <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={<PlatformDashboard />} />
         ) : isLoggedIn ? (

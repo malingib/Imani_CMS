@@ -35,3 +35,12 @@
   --color-brand-emerald-600: #059669;
 }
 
+@keyframes retry-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-retry-pulse {
+  animation: retry-pulse 1s ease-in-out infinite;
+}
+

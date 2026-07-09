@@ -1,4 +1,4 @@
-import React, { lazy, useState, Suspense } from 'react';
+import React, { lazy, useState, Suspense, useRef, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import Sidebar, { ImaniLogoIcon } from './Sidebar';
@@ -6,6 +6,8 @@ import { useApp } from '../src/lib/AppProvider';
 import { useChurch } from '../src/lib/church-context';
 import { ROUTES, pathToView } from '../src/lib/router';
 import { AppView } from '../types';
+import { SkeletonBlock, NotFound, ToastContainer, ErrorFallback } from './shared';
+import NotificationsPanel from './NotificationsPanel';
 
 const Login = lazy(() => import('./Login'));
 const Dashboard = lazy(() => import('./Dashboard'));
@@ -31,38 +33,47 @@ const BillingOverview = lazy(() => import('./BillingOverview'));
 const InvitationsManager = lazy(() => import('./InvitationsManager'));
 const SermonHistory = lazy(() => import('./SermonHistory'));
 const AcceptInvite = lazy(() => import('./AcceptInvite'));
+const LandingPage = lazy(() => import('./LandingPage'));
 
 function Protected({ children }: { children: React.ReactNode }) {
-  const { loading } = useApp();
+  const { loading, dataError, refreshData } = useApp();
   if (loading === 'auth-loading' || loading === 'data-loading') return (
-    <div className="space-y-8 animate-pulse p-10">
-      <div className="h-10 bg-slate-200 rounded-2xl w-1/3" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
-        <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
-        <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
-      </div>
-      <div className="h-96 bg-slate-100 rounded-[2.5rem]" />
+    <div className="p-10 max-w-[1600px] mx-auto">
+      <SkeletonBlock />
     </div>
   );
+  if (loading === 'error' && dataError) {
+    return <ErrorFallback error={new Error(dataError)} onRetry={refreshData} fullPage={false} />;
+  }
   return <>{children}</>;
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, viewingPlatform, viewingChurch, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleSelectChurch } = useApp();
+  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, viewingPlatform, viewingChurch, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleSelectChurch, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
   const { churches, activeChurchId } = useChurch();
   const location = useLocation();
   const navigateToPath = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
   const churchId = activeChurchId ?? currentUser?.churchId ?? null;
   const currentMember = members.find(m => m.id === currentUser?.memberId);
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   if (!currentUser) {
     return null;
   }
 
   const navigate = (v: AppView) => navigateToPath(ROUTES[v].path);
+
+  useEffect(() => {
+    if (!notifOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [notifOpen]);
 
   const handleLogout = async () => {
     createAudit('Logout', 'DASHBOARD');
@@ -97,15 +108,25 @@ const AccountShell = () => {
             <div className="lg:hidden w-10 h-10"><ImaniLogoIcon /></div>
           </div>
           <div className="flex items-center gap-4 relative">
-            <button onClick={() => setNotifOpen(!notifOpen)} className="p-2 rounded-xl text-slate-400 hover:text-brand-primary hover:bg-slate-50">
-              <span className="relative"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-primary rounded-full border-2 border-white animate-pulse" /></span>
-            </button>
-            {notifOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 z-50">
-                <div className="p-4 border-b border-slate-100 font-bold text-sm">Notifications</div>
-                <div className="p-6 text-xs text-slate-400 text-center">No notifications</div>
-              </div>
-            )}
+            <div ref={notifRef} className="relative">
+              <button onClick={() => setNotifOpen(!notifOpen)} className="p-2 rounded-xl text-slate-400 hover:text-brand-primary hover:bg-slate-50 relative">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-brand-primary text-white text-[9px] font-black rounded-full border-2 border-white px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+              {notifOpen && (
+                <NotificationsPanel
+                  notifications={notifications}
+                  onClose={() => setNotifOpen(false)}
+                  onMarkAsRead={handleMarkNotificationRead}
+                  onMarkAllAsRead={handleMarkAllNotificationsRead}
+                  onDelete={handleDeleteNotification}
+                />
+              )}
+            </div>
             <div className="w-px h-8 bg-slate-100 mx-1 hidden sm:block" />
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
@@ -171,32 +192,27 @@ export default function AppRoutes() {
   const isLoggedIn = !!currentUser;
   const landingPath = viewingPlatform ? ROUTES.PLATFORM_DASHBOARD.path : ROUTES.DASHBOARD.path;
   const accountShellElement = <Protected><AccountShell /></Protected>;
+  const nav = useNavigate();
 
   const navigateLegal = (view: AppView) => {
     const path = ROUTES[view]?.path || '/privacy';
-    window.history.pushState(null, '', path);
+    nav(path);
   };
 
-  const dashboardElement = isLoggedIn
-    ? <Navigate to={landingPath} replace />
-    : <Login onLogin={handleLogin} onNavigateLegal={navigateLegal} />;
-
-  const fallbackElement = isLoggedIn
-    ? accountShellElement
-    : <Login onLogin={handleLogin} onNavigateLegal={navigateLegal} />;
+  const loginElement = <Login onLogin={handleLogin} onNavigateLegal={navigateLegal} />;
 
   return (
     <>
-      <div className="fixed inset-0 flex items-start justify-center pt-20 pointer-events-none">
-        {toasts.map(t => (
-          <div key={t.id} className={`pointer-events-auto w-full max-w-md px-6 py-4 rounded-2xl shadow-2xl border z-[500] ${t.type === 'success' ? 'bg-brand-primary border-slate-700 text-white' : t.type === 'error' ? 'bg-brand-gold border-brand-gold text-white' : 'bg-brand-indigo border-brand-indigo text-white'}`}>{t.message}</div>
-        ))}
-      </div>
+      <ToastContainer toasts={toasts} />
       <Routes>
-        <Route path="/" element={<Navigate to={isLoggedIn ? landingPath : ROUTES.DASHBOARD.path} replace />} />
-        <Route path={ROUTES.DASHBOARD.path} element={dashboardElement} />
+        <Route path="/" element={isLoggedIn ? <Navigate to={landingPath} replace /> : <LandingPage onGetStarted={() => window.location.href = '/login'} />} />
+        <Route path="/login" element={isLoggedIn ? <Navigate to={landingPath} replace /> : loginElement} />
+        <Route path={ROUTES.DASHBOARD.path} element={isLoggedIn ? accountShellElement : <Navigate to="/login" replace />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
-        <Route path="*" element={fallbackElement} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/compliance" element={<CompliancePortal />} />
+        <Route path="/security" element={<SecurityOverview />} />
+        <Route path="*" element={isLoggedIn ? accountShellElement : <NotFound />} />
       </Routes>
     </>
   );

@@ -55,7 +55,7 @@ describe("ErrorBoundary", () => {
     );
     expect(screen.getByText("Something went wrong")).toBeTruthy();
     expect(screen.getByText("💣")).toBeTruthy();
-    expect(screen.getByText("Reload")).toBeTruthy();
+    expect(screen.getByText("Try Again")).toBeTruthy();
   });
 
   it("reloads page on button click", () => {
@@ -68,7 +68,7 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>
     );
     vi.spyOn(window, "location", "get").mockReturnValue({ reload } as any);
-    act(() => screen.getByText("Reload").click());
+    act(() => screen.getByText("Try Again").click());
     expect(reload).toHaveBeenCalledOnce();
   });
 });

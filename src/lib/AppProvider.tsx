@@ -112,23 +112,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }, 4000);
   }, []);
 
-  const createAudit = useCallback(async (action: string, module: AppView, severity: AuditLog['severity'] = 'INFO') => {
-    if (!state.currentUser) return;
+  const writeAudit = useCallback(async (
+    actor: User,
+    action: string,
+    module: AppView,
+    severity: AuditLog['severity'] = 'INFO',
+    scopedChurchId = churchId ?? actor.churchId,
+  ) => {
+    if (!scopedChurchId) {
+      console.warn('Skipped audit log without church scope:', { action, module });
+      return;
+    }
+
     try {
       const saved = await appDataService.createAuditLog({
-        userId: state.currentUser.id,
-        userName: state.currentUser.name,
+        userId: actor.id,
+        userName: actor.name,
         action,
         module,
         severity,
-        churchId: churchId || undefined,
+        churchId: scopedChurchId,
       });
       setState(prev => ({ ...prev, auditLogs: [saved, ...prev.auditLogs] }));
     } catch (error) {
       console.error('Failed to create audit log:', error);
       addToast('Failed to log action', 'error');
     }
-  }, [state.currentUser, churchId, addToast]);
+  }, [churchId, addToast]);
+
+  const createAudit = useCallback(async (action: string, module: AppView, severity: AuditLog['severity'] = 'INFO') => {
+    if (!state.currentUser) return;
+    await writeAudit(state.currentUser, action, module, severity);
+  }, [state.currentUser, writeAudit]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -163,8 +178,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleLogin = useCallback((_u: User) => {
     addToast(`Logged in successfully as ${_u.name}`);
-    createAudit('Login success', 'DASHBOARD');
-  }, [addToast, createAudit]);
+    void writeAudit(_u, 'Login success', 'DASHBOARD');
+  }, [addToast, writeAudit]);
 
   const requireChurchId = useCallback(() => {
     if (!churchId) throw new Error('Select a church before making changes.');

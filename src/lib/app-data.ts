@@ -162,10 +162,7 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
     },
 
     async createAuditLog(input: CreateAuditLogInput): Promise<AuditLog> {
-      const insert = client.from("audit_logs").insert;
-      if (!insert) throw new Error("Audit log client does not support inserts.");
-
-      const { data, error } = await insert([
+      const { data, error } = await client.from("audit_logs").insert([
         {
           user_id: input.userId,
           user_name: input.userName,

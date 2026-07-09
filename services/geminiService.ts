@@ -13,6 +13,19 @@ function validateInput(input: unknown, name: string): asserts input is string {
   }
 }
 
+async function getFunctionErrorMessage(error: unknown): Promise<string> {
+  const fallback = error instanceof Error ? error.message : "AI request failed";
+  const context = (error as { context?: Response } | null)?.context;
+  if (!context) return fallback;
+
+  try {
+    const payload = (await context.json()) as GeminiResponse;
+    return payload.error || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 async function invokeGemini(message: string): Promise<string> {
   if (!message || message.length > 5000) {
     throw new Error("Request too large");
@@ -22,7 +35,7 @@ async function invokeGemini(message: string): Promise<string> {
     body: { message },
   });
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(await getFunctionErrorMessage(error));
   if (data?.error) throw new Error(data.error);
   if (!data?.response) throw new Error("AI returned an empty response");
 

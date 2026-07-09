@@ -1,5 +1,25 @@
 import { handleCors, corsHeaders } from "../_shared/cors.ts";
 
+function mapGeminiErrorResponse(status: number, bodyText: string): { status: number; error: string } {
+  if (bodyText) {
+    try {
+      const parsed = JSON.parse(bodyText) as { error?: { message?: string } | string };
+      if (typeof parsed.error === "string" && parsed.error.trim()) {
+        return { status, error: parsed.error.trim() };
+      }
+      if (typeof parsed.error === "object" && parsed.error?.message?.trim()) {
+        return { status, error: parsed.error.message.trim() };
+      }
+    } catch {
+      if (bodyText.trim()) {
+        return { status, error: bodyText.trim() };
+      }
+    }
+  }
+
+  return { status, error: "AI service error" };
+}
+
 Deno.serve(async (req) => {
   const cors = handleCors(req);
   if (cors) return cors;
@@ -26,8 +46,10 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       const text = await response.text();
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      const mapped = mapGeminiErrorResponse(response.status, text);
+      console.error("Gemini upstream error", { status: response.status, body: text });
+      return new Response(JSON.stringify({ error: mapped.error }), {
+        status: mapped.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

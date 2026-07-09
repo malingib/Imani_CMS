@@ -107,6 +107,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
         name: (meta.name as string) || email.split("@")[0],
         role: (meta.role as UserRole) || UserRole.ADMIN,
         avatar: (meta.avatar_url as string) || `https://ui-avatars.com/api/?name=${encodeURIComponent((meta.name as string) || "U")}&background=6366f1&color=fff`,
+        churchId: result.user.app_metadata?.church_id as string || undefined,
       });
     } catch (err: any) {
       setError(err?.message || 'Login failed');

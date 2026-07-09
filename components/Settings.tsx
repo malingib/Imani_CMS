@@ -81,9 +81,20 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
     { id: 'role-2', name: 'Administrator', memberCount: 2, description: 'Full system oversight.', modules: [] },
   ];
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     setIsSaving(true);
-    setTimeout(() => setIsSaving(false), 1500);
+    try {
+      await platformSettingsService.saveSetting('church_profiles', { ...churchInfo, churchId });
+    } catch { /* persist silently */ }
+    setIsSaving(false);
+  };
+
+  const handleSaveNotificationPrefs = async () => {
+    setIsSaving(true);
+    try {
+      await platformSettingsService.saveSetting('notification_prefs', notificationPrefs);
+    } catch { /* persist silently */ }
+    setIsSaving(false);
   };
 
   const handleTestConnection = () => {
@@ -102,10 +113,12 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   useEffect(() => {
     (async () => {
       try {
-        const saved = await platformSettingsService.getSetting('integrations', DEFAULT_INTEGRATIONS);
-        if (saved) {
-          setIntegrations(prev => ({ ...prev, ...saved }));
-        }
+        const savedIntegrations = await platformSettingsService.getSetting('integrations', DEFAULT_INTEGRATIONS) as any;
+        if (savedIntegrations) setIntegrations(prev => ({ ...prev, ...savedIntegrations }));
+        const savedProfile = await platformSettingsService.getSetting('church_profiles', {}) as any;
+        if (savedProfile?.name) setChurchInfo(savedProfile);
+        const savedPrefs = await platformSettingsService.getSetting('notification_prefs', {}) as any;
+        if (savedPrefs?.memberJoinsEmail !== undefined) setNotificationPrefs(savedPrefs);
       } catch {
         // fallback to defaults
       }
@@ -496,7 +509,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                </div>
             </div>
             <div className="flex justify-center lg:justify-start pt-6 border-t border-slate-50">
-              <button onClick={handleSaveProfile} disabled={isSaving} className="w-full sm:w-auto px-10 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black flex items-center justify-center gap-2 shadow-xl hover:bg-brand-primary-700 transition-all disabled:opacity-50 text-xs uppercase tracking-widest">
+              <button onClick={handleSaveNotificationPrefs} disabled={isSaving} className="w-full sm:w-auto px-10 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black flex items-center justify-center gap-2 shadow-xl hover:bg-brand-primary-700 transition-all disabled:opacity-50 text-xs uppercase tracking-widest">
                 {isSaving ? <Loader2 className="animate-spin" size={18}/> : <CheckCircle2 size={18}/>} Commit Changes
               </button>
             </div>

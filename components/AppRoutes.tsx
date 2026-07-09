@@ -32,12 +32,22 @@ const SermonHistory = lazy(() => import('./SermonHistory'));
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { loading } = useApp();
-  if (loading === 'auth-loading' || loading === 'data-loading') return null;
+  if (loading === 'auth-loading' || loading === 'data-loading') return (
+    <div className="space-y-8 animate-pulse p-10">
+      <div className="h-10 bg-slate-200 rounded-2xl w-1/3" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
+        <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
+        <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
+      </div>
+      <div className="h-96 bg-slate-100 rounded-[2.5rem]" />
+    </div>
+  );
   return <>{children}</>;
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, viewingPlatform, viewingChurch, handleAddGroup, handleUpdateGroup, handleDeleteGroup } = useApp();
+  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, viewingPlatform, viewingChurch, handleAddGroup, handleUpdateGroup, handleDeleteGroup } = useApp();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -84,13 +94,23 @@ const AccountShell = () => {
           </div>
         </header>
         <div className="p-10 max-w-[1600px] mx-auto pb-20">
-          <Suspense fallback={<div className="p-8 text-center text-gray-500">Loading...</div>}>
+          <Suspense fallback={
+            <div className="space-y-8 animate-pulse p-10">
+              <div className="h-10 bg-slate-200 rounded-2xl w-1/3" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
+                <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
+                <div className="h-40 bg-slate-100 rounded-[2.5rem]" />
+              </div>
+              <div className="h-96 bg-slate-100 rounded-[2.5rem]" />
+            </div>
+          }>
             <Routes>
               <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
               <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
               <Route path={ROUTES.FINANCE.path} element={<FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
               <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} />} />
-              <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
+              <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
               <Route path={ROUTES.COMMUNICATION.path} element={<CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} addToast={addToast} />} />
               <Route path={ROUTES.REPORTS.path} element={<ReportsCenter transactions={transactions} members={members} events={events} />} />
               <Route path={ROUTES.SERMONS.path} element={<SermonHistory events={events} sermons={sermons} />} />

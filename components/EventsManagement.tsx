@@ -19,6 +19,7 @@ interface EventsManagementProps {
   currentUser: UserType | null;
   onRSVP: (eventId: string, isRSVPing: boolean) => void;
   onAddEvent: (event: ChurchEvent) => void;
+  onUpdateEvent: (event: ChurchEvent) => void;
   onDeleteEvent: (id: string) => void;
   onUpdateAttendance: (eventId: string, memberIds: string[]) => void;
 }
@@ -32,12 +33,13 @@ const EVENT_TYPE_CONFIG: Record<ChurchEventType, { icon: any, color: string, lab
   OTHER: { icon: HelpCircle, color: 'bg-slate-600', label: 'Other Event' }
 };
 
-const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, currentUser, onRSVP, onAddEvent, onDeleteEvent, onUpdateAttendance }) => {
+const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, currentUser, onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onUpdateAttendance }) => {
   const [viewMode, setViewMode] = useState<'GRID' | 'CALENDAR'>('GRID');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState<string | null>(null);
   const [showReminderModal, setShowReminderModal] = useState<ChurchEvent | null>(null);
   const [viewingEvent, setViewingEvent] = useState<ChurchEvent | null>(null);
+  const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
   const [showScoutModal, setShowScoutModal] = useState(false);
   
   const [newEvent, setNewEvent] = useState<Partial<ChurchEvent>>({
@@ -86,7 +88,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       const res = await scoutOutreachLocations(scoutQuery, lat, lng);
       setScoutResults(res);
     } catch (e) {
-      alert('AI Scouter error. Please ensure API connectivity.');
+      console.error('AI Scouter error');
     } finally {
       setIsScouting(false);
     }
@@ -155,11 +157,67 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       </div>
 
       {viewMode === 'CALENDAR' ? (
-        <div className="bg-white p-12 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-slate-300 min-h-[500px]">
-           <CalendarClock size={64} className="opacity-20 mb-4"/>
-           <p className="font-black uppercase tracking-widest text-sm">Calendar View Coming Soon</p>
-           <p className="text-xs font-medium text-slate-400 mt-2">Currently available in Cards view.</p>
-        </div>
+        (() => {
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = today.getMonth();
+          const firstDay = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+          const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+          const dayCells: (number | null)[] = Array(firstDay).fill(null);
+          for (let d = 1; d <= daysInMonth; d++) dayCells.push(d);
+
+          const eventsByDate: Record<number, ChurchEvent[]> = {};
+          events.forEach(ev => {
+            const evDate = new Date(ev.date);
+            if (evDate.getMonth() === month && evDate.getFullYear() === year) {
+              const d = evDate.getDate();
+              if (!eventsByDate[d]) eventsByDate[d] = [];
+              eventsByDate[d].push(ev);
+            }
+          });
+
+          return (
+            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
+              <div className="p-8 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
+                <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">{monthNames[month]} {year}</h3>
+                <div className="flex gap-2">
+                  <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
+                  <span className="text-[10px] font-black uppercase text-brand-primary">{events.length} events</span>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-7 gap-1">
+                  {dayNames.map(d => (
+                    <div key={d} className="text-center text-[10px] font-black uppercase text-slate-400 py-2">{d}</div>
+                  ))}
+                  {dayCells.map((d, i) => {
+                    const dayEvents = d ? eventsByDate[d] || [] : [];
+                    const isToday = d === today.getDate();
+                    return (
+                      <div key={i} className={`min-h-[80px] p-1.5 rounded-xl border text-xs transition-all ${d ? (isToday ? 'bg-brand-primary/5 border-brand-primary/20' : 'bg-white border-slate-100') : 'bg-transparent border-transparent'}`}>
+                        {d && (
+                          <>
+                            <span className={`font-black text-sm ${isToday ? 'text-brand-primary' : 'text-slate-700'}`}>{d}</span>
+                            <div className="mt-1 space-y-0.5">
+                              {dayEvents.slice(0, 3).map(ev => (
+                                <div key={ev.id} className="text-[7px] leading-tight px-1 py-0.5 rounded bg-brand-indigo/10 text-brand-indigo font-black truncate">{ev.title}</div>
+                              ))}
+                              {dayEvents.length > 3 && (
+                                <div className="text-[7px] text-slate-400 font-black">+{dayEvents.length - 3} more</div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })()
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {events.map(event => {
@@ -183,6 +241,9 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
 
                   {currentUser?.role !== UserRole.MEMBER && (
                     <>
+                      <button onClick={() => { setEditingEvent(event); setNewEvent({ ...event }); }} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-indigo text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-brand-primary transition-all shadow-xl">
+                        <Edit2 size={16}/> Edit Event
+                      </button>
                       <button onClick={() => setShowAttendanceModal(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-gold text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white transition-all shadow-xl">
                         <UserCheck size={16}/> Mark Attendance
                       </button>
@@ -311,7 +372,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
 
              <div className="flex flex-col gap-3">
                 <button 
-                   onClick={() => { alert('Reminder Armed'); setShowReminderModal(null); }}
+                    onClick={() => { setShowReminderModal(null); }}
                    className="w-full py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3"
                 >
                    <Save size={18}/> Save Reminder
@@ -676,6 +737,84 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                  </button>
                </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Event Modal */}
+      {editingEvent && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
+            <form onSubmit={(e) => { e.preventDefault(); onUpdateEvent(newEvent as ChurchEvent); setEditingEvent(null); }} className="flex flex-col h-full">
+              <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-brand-indigo text-white rounded-2xl shadow-lg"><Edit2 size={24}/></div>
+                  <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Edit Event</h3>
+                </div>
+                <button type="button" onClick={() => setEditingEvent(null)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"><X size={24}/></button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-8 lg:p-10 space-y-8 no-scrollbar">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Event Title</label>
+                      <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none"
+                        value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Location</label>
+                      <input required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none"
+                        value={newEvent.location} onChange={e => setNewEvent({...newEvent, location: e.target.value})} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Date</label>
+                        <input type="date" required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold"
+                          value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Time</label>
+                        <input type="time" required className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold"
+                          value={newEvent.time} onChange={e => setNewEvent({...newEvent, time: e.target.value})} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Event Type</label>
+                      <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none"
+                        value={newEvent.type} onChange={e => setNewEvent({...newEvent, type: e.target.value as ChurchEventType})}>
+                        {Object.keys(EVENT_TYPE_CONFIG).map(t => (
+                          <option key={t} value={t}>{EVENT_TYPE_CONFIG[t as ChurchEventType].label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Description</label>
+                      <textarea rows={3} className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:ring-2 focus:ring-brand-primary outline-none resize-none"
+                        value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Recurrence</label>
+                      <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary"
+                        value={newEvent.recurrence} onChange={e => setNewEvent({...newEvent, recurrence: e.target.value as RecurrenceType})}>
+                        <option value="NONE">One-time</option>
+                        <option value="DAILY">Daily</option>
+                        <option value="WEEKLY">Weekly</option>
+                        <option value="MONTHLY">Monthly</option>
+                        <option value="ANNUALLY">Annual</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-8 border-t border-slate-100 bg-white flex gap-4">
+                <button type="button" onClick={() => setEditingEvent(null)} className="flex-1 py-5 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest">Cancel</button>
+                <button type="submit" className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3">
+                  <CheckCircle2 size={20}/> Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

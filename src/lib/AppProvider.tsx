@@ -45,6 +45,7 @@ interface AppActions {
   handleDeleteMember: (id: string) => Promise<void>;
   handleRSVP: (eventId: string, isRSVPing: boolean) => Promise<void>;
   handleAddEvent: (e: ChurchEvent) => Promise<void>;
+  handleUpdateEvent: (e: ChurchEvent) => Promise<void>;
   handleDeleteEvent: (id: string) => Promise<void>;
   handleUpdateAttendance: (eventId: string, memberIds: string[]) => Promise<void>;
   handleAddTransaction: (t: Transaction) => Promise<void>;
@@ -217,6 +218,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, events: [saved, ...prev.events] }));
       addToast('Event created');
       createAudit('Created event', 'EVENTS');
+    },
+    handleUpdateEvent: async (e) => {
+      const saved = await persistence.updateEvent(e, requireChurchId());
+      setState(prev => ({ ...prev, events: prev.events.map(x => x.id === saved.id ? saved : x) }));
+      addToast('Event updated');
+      createAudit('Updated event', 'EVENTS');
     },
     handleDeleteEvent: async (id) => {
       await persistence.deleteEvent(id, requireChurchId());

@@ -10,6 +10,13 @@ const fakeUser: Partial<SupabaseUser> = {
   app_metadata: { role: "ADMIN", church_id: "c-1" },
 };
 
+const fakeSuperAdmin: Partial<SupabaseUser> = {
+  id: "super-1",
+  email: "owner@imani.test",
+  user_metadata: { name: "Owner", avatar_url: "" },
+  app_metadata: { role: "SUPER_ADMIN" },
+};
+
 const { mockUseSession, mockUseChurch, mockLoadChurchData, mockCreateAuditLog, mockPersistence } = vi.hoisted(() => ({
   mockUseSession: vi.fn(),
   mockUseChurch: vi.fn(),
@@ -164,6 +171,51 @@ describe("AppProvider", () => {
       expect(screen.getByTestId("toasts").textContent).toBe("1");
     });
     expect(mockCreateAuditLog).toHaveBeenCalledWith(expect.objectContaining({ action: "Login success" }));
+  });
+
+  it("does not require a church audit scope for platform super admins", async () => {
+    mockUseSession.mockReturnValue({ user: fakeSuperAdmin, isAuthenticated: true, isLoading: false });
+    mockUseChurch.mockReturnValue({ activeChurchId: null, setActiveChurchId: vi.fn(), churches: [], fetchChurches: vi.fn() });
+    mockLoadChurchData.mockResolvedValue({
+      members: [], transactions: [], events: [], budgets: [],
+      recurringExpenses: [], communications: [], notifications: [],
+      auditLogs: [], groups: [], sermons: [],
+      totalMembers: 0, totalTransactions: 0, totalEvents: 0,
+      totalBudgets: 0, totalRecurringExpenses: 0, totalAuditLogs: 0,
+    });
+
+    function SuperAdminLoginTest() {
+      const { handleLogin, loading, viewingPlatform, toasts } = useApp();
+      return (
+        <div>
+          <span data-testid="loading">{loading}</span>
+          <span data-testid="platform">{String(viewingPlatform)}</span>
+          <span data-testid="toasts">{toasts.length}</span>
+          <button onClick={() => handleLogin({ id: "super-1", name: "Owner", role: "SUPER_ADMIN" as any, avatar: "" })}>
+            Login
+          </button>
+        </div>
+      );
+    }
+
+    render(
+      <AppProvider>
+        <SuperAdminLoginTest />
+      </AppProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("loading").textContent).toBe("ready");
+      expect(screen.getByTestId("platform").textContent).toBe("true");
+    });
+
+    act(() => screen.getByText("Login").click());
+
+    await waitFor(() => {
+      expect(screen.getByTestId("toasts").textContent).toBe("1");
+    });
+    expect(mockLoadChurchData).not.toHaveBeenCalled();
+    expect(mockCreateAuditLog).not.toHaveBeenCalled();
   });
 
   it("handleAddMember calls persistence and updates state", async () => {

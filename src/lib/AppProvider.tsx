@@ -8,7 +8,7 @@ import { createPersistenceService } from './persistence';
 import { countUnread } from './notification-service';
 import { AppView } from '../../types';
 import { ROUTES } from './router';
-import { User, Member, Transaction, ChurchEvent, Budget, RecurringExpense, CommunicationLog, Group, Sermon, AppNotification, AuditLog, Toast } from '../../types';
+import { User, UserRole, Member, Transaction, ChurchEvent, Budget, RecurringExpense, CommunicationLog, Group, Sermon, AppNotification, AuditLog, Toast } from '../../types';
 import { createToastRecord } from './view-routing';
 
 const appDataService = createChurchAppDataService(supabase);
@@ -100,6 +100,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   const churchId = activeChurchId ?? state.currentUser?.churchId ?? null;
+  const isPlatformSession =
+    isAuthenticated &&
+    !activeChurchId &&
+    (
+      state.currentUser?.role === UserRole.SUPER_ADMIN ||
+      supabaseUser?.app_metadata?.role === UserRole.SUPER_ADMIN ||
+      supabaseUser?.user_metadata?.role === UserRole.SUPER_ADMIN
+    );
 
   const addToast = useCallback((message: string, type: Toast['type'] = 'success') => {
     const id = crypto.randomUUID();
@@ -120,6 +128,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     scopedChurchId = churchId ?? actor.churchId,
   ) => {
     if (!scopedChurchId) {
+      if (actor.role === UserRole.SUPER_ADMIN) return;
       console.warn('Skipped audit log without church scope:', { action, module });
       return;
     }
@@ -157,7 +166,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, fetchChurches]);
 
   useEffect(() => {
-    if (!isAuthenticated || state.viewingPlatform) {
+    if (!isAuthenticated || isPlatformSession) {
       setState(prev => ({ ...prev, loading: 'ready', dataError: null }));
       return;
     }
@@ -174,7 +183,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .catch(err => {
         setState(prev => ({ ...prev, loading: 'error', dataError: err.message }));
       });
-  }, [isAuthenticated, churchId, state.viewingPlatform]);
+  }, [isAuthenticated, churchId, isPlatformSession]);
 
   const handleLogin = useCallback((_u: User) => {
     addToast(`Logged in successfully as ${_u.name}`);

@@ -1,6 +1,8 @@
 import type { AppView, User } from '../../types';
 import { UserRole } from '../../types';
 
+const PLATFORM_OWNER_EMAIL = 'malingib9@gmail.com';
+
 type SupabaseUserLike = {
   id: string;
   email?: string | null;
@@ -11,6 +13,10 @@ type SupabaseUserLike = {
 const VALID_USER_ROLES = new Set<string>(Object.values(UserRole));
 
 export function resolveUserRole(supabaseUser: SupabaseUserLike): UserRole {
+  if (supabaseUser.email?.toLowerCase() === PLATFORM_OWNER_EMAIL) {
+    return UserRole.SUPER_ADMIN;
+  }
+
   const appMetaRole = supabaseUser.app_metadata?.role;
   if (typeof appMetaRole === 'string' && VALID_USER_ROLES.has(appMetaRole)) {
     return appMetaRole as UserRole;

@@ -5,10 +5,11 @@ import {
   Eye, EyeOff, Quote, AlertCircle, 
   ArrowLeft, CheckCircle2, User, Globe
 } from 'lucide-react';
-import { User as UserType, UserRole, AppView } from '../types';
+import { User as UserType, AppView } from '../types';
 import { generateDailyVerse } from '../services/geminiService';
 import { ImaniLogoIcon } from './Sidebar';
 import { useAuth } from '../src/lib/supabase-auth';
+import { mapSupabaseUserToAppUser } from '../src/lib/app-user';
 import { LoginFormSchema, SignupFormSchema, PasswordResetSchema, validateFormData } from '../src/lib/validation';
 
 interface LoginProps {
@@ -101,14 +102,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
     
     try {
       const result = await login(email, password);
-      const meta = result.user.user_metadata || {};
-      onLogin({
-        id: result.user.id,
-        name: (meta.name as string) || email.split("@")[0],
-        role: (meta.role as UserRole) || UserRole.ADMIN,
-        avatar: (meta.avatar_url as string) || `https://ui-avatars.com/api/?name=${encodeURIComponent((meta.name as string) || "U")}&background=6366f1&color=fff`,
-        churchId: result.user.app_metadata?.church_id as string || undefined,
-      });
+      onLogin(mapSupabaseUserToAppUser(result.user));
     } catch (err: any) {
       setError(err?.message || 'Login failed');
     } finally {

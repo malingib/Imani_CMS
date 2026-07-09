@@ -40,6 +40,18 @@ describe("app shell helpers", () => {
     expect(fallbackUser.role).toBe(UserRole.MEMBER);
   });
 
+  it("treats the platform owner email as super admin even without metadata", () => {
+    const owner = mapSupabaseUserToAppUser({
+      id: "owner-1",
+      email: "malingib9@gmail.com",
+      user_metadata: { name: "Brighton" },
+      app_metadata: {},
+    });
+
+    expect(owner.role).toBe(UserRole.SUPER_ADMIN);
+    expect(owner.churchId).toBeUndefined();
+  });
+
   it("chooses the correct default view for each role", () => {
     expect(getDefaultViewForUserRole(UserRole.MEMBER)).toBe("MY_PORTAL");
     expect(getDefaultViewForUserRole(UserRole.SUPER_ADMIN)).toBe("PLATFORM_DASHBOARD");

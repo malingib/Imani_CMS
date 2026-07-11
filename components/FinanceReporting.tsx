@@ -65,7 +65,8 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
 
   const filtered = useMemo(() => {
     return transactions.filter(t => {
-      const matchesType = filterType === 'All' || t.type === filterType;
+      const matchesType = filterType === 'All'
+        || (filterType === 'Expense' ? t.category === 'Expense' : t.type === filterType);
       const matchesSearch = 
         t.memberName.toLowerCase().includes(searchTerm.toLowerCase()) || 
         t.reference.toLowerCase().includes(searchTerm.toLowerCase());
@@ -181,11 +182,24 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-        {[
-          { label: 'Total Revenue', val: totalIncome, color: 'emerald', icon: TrendingUp, trend: '+14%' },
-          { label: 'Operating Costs', val: totalExpenses, color: 'gold', icon: TrendingDown, trend: '-2%' },
-          { label: 'Net Cash Position', val: totalIncome - totalExpenses, color: 'primary', icon: Landmark, trend: '+8%' }
-        ].map((c, i) => (
+        {(() => {
+          const thisMonth = new Date().getMonth();
+          const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+          const incomeThis = transactions.filter(t => t.category === 'Income' && new Date(t.date).getMonth() === thisMonth).reduce((s, t) => s + t.amount, 0);
+          const incomeLast = transactions.filter(t => t.category === 'Income' && new Date(t.date).getMonth() === lastMonth).reduce((s, t) => s + t.amount, 0);
+          const expThis = transactions.filter(t => t.category === 'Expense' && new Date(t.date).getMonth() === thisMonth).reduce((s, t) => s + t.amount, 0);
+          const expLast = transactions.filter(t => t.category === 'Expense' && new Date(t.date).getMonth() === lastMonth).reduce((s, t) => s + t.amount, 0);
+          const revenueTrend = incomeLast > 0 ? `${Math.round((incomeThis - incomeLast) / incomeLast * 100)}%` : '—';
+          const expenseTrend = expLast > 0 ? `${Math.round((expThis - expLast) / expLast * 100)}%` : '—';
+          const netThis = incomeThis - expThis;
+          const netLast = incomeLast - expLast;
+          const netTrend = netLast !== 0 ? `${Math.round(Math.abs(netThis - netLast) / Math.abs(netLast) * 100)}%` : '—';
+          return [
+            { label: 'Total Revenue', val: totalIncome, color: 'emerald', icon: TrendingUp, trend: revenueTrend.startsWith('-') ? revenueTrend : `+${revenueTrend.replace('+','')}` },
+            { label: 'Operating Costs', val: totalExpenses, color: 'gold', icon: TrendingDown, trend: expenseTrend.startsWith('-') ? expenseTrend : `+${expenseTrend.replace('+','')}` },
+            { label: 'Net Cash Position', val: totalIncome - totalExpenses, color: 'primary', icon: Landmark, trend: netTrend.startsWith('-') ? `-${netTrend.replace('-','')}` : `+${netTrend.replace('+','')}` }
+          ];
+        })().map((c, i) => (
           <div key={i} className="p-8 sm:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm bg-white relative overflow-hidden group hover:shadow-xl transition-all">
              <div className="relative z-10">
                 <div className="flex justify-between items-start mb-6">
@@ -349,9 +363,15 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                     <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Sparkles size={24}/></div>
                      <h4 className="text-xl font-black uppercase tracking-tight">AI Insights</h4>
                  </div>
-                 <p className="text-indigo-100 text-sm font-medium leading-relaxed">
-                    Current net position is <span className="text-white font-black">strong</span>. Expenses are 32% of total revenue. Consider allocating surplus funds.
-                 </p>
+                  <p className="text-indigo-100 text-sm font-medium leading-relaxed">
+                    {(() => {
+                      const totalRev = totalIncome || 1;
+                      const expPct = Math.round(totalExpenses / totalRev * 100);
+                      const net = totalIncome - totalExpenses;
+                      const status = net > 0 ? 'positive' : 'negative';
+                      return `Current net position is ${status}. Expenses are ${expPct}% of total revenue${net > 0 ? '. Consider allocating surplus funds to outreach and facility improvements.' : '. Review recurring expenses to reduce the gap.'}`;
+                    })()}
+                  </p>
                  <div className="pt-6 border-t border-white/10">
                     <button className="w-full py-4 bg-white text-brand-primary rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-gold transition-all flex items-center justify-center gap-2">
                        Detailed Analysis <ArrowUpRight size={16}/>

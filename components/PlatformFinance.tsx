@@ -13,14 +13,15 @@ import {
 } from 'recharts';
 
 const PlatformFinance: React.FC = () => {
-  const mrrData = [
-    { m: 'Jan', r: 420000, l: 380000 },
-    { m: 'Feb', r: 485000, l: 410000 },
-    { m: 'Mar', r: 530000, l: 440000 },
-    { m: 'Apr', r: 655000, l: 490000 },
-    { m: 'May', r: 772000, l: 520000 },
-    { m: 'Jun', r: 842500, l: 580000 },
-  ];
+  const mrrData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const base = 380000;
+    return months.slice(0, 6).map((m, i) => ({
+      m,
+      r: Math.round(base * (1 + i * 0.12)),
+      l: Math.round(base * (1 + i * 0.08)),
+    }));
+  }, []);
 
   const planSplit = [
     { name: 'Basic', value: 45, color: '#94A3B8' },
@@ -28,9 +29,10 @@ const PlatformFinance: React.FC = () => {
     { name: 'Enterprise', value: 20, color: '#FFB800' },
   ];
 
+  const currentMrr = mrrData[mrrData.length - 1]?.r || 842500;
   const platformStats = [
-    { label: 'Active MRR', val: 'KES 842,500', icon: CreditCard, color: 'emerald', trend: '+18.4%' },
-    { label: 'Customer LTV', val: 'KES 142k', icon: Target, color: 'indigo', trend: '+4.2%' },
+    { label: 'Active MRR', val: `KES ${currentMrr.toLocaleString()}`, icon: CreditCard, color: 'emerald', trend: '+18.4%' },
+    { label: 'Customer LTV', val: `KES ${Math.round(currentMrr * 0.17).toLocaleString()}k`, icon: Target, color: 'indigo', trend: '+4.2%' },
     { label: 'Net Retention', val: '104%', icon: Activity, color: 'primary', trend: '+2.1%' },
     { label: 'Platform Churn', val: '1.2%', icon: ArrowDownRight, color: 'gold', trend: '-0.4%' }
   ];

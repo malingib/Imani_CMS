@@ -158,31 +158,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (authLoading) return;
     if (isAuthenticated && supabaseUser) {
       const nextUser = mapSupabaseUserToAppUser(supabaseUser);
-      setState(prev => ({ ...prev, currentUser: nextUser, viewingPlatform: nextUser.role === 'SUPER_ADMIN' && !activeChurchId, viewingChurch: nextUser.role === 'SUPER_ADMIN' && !!activeChurchId }));
-      if (nextUser.role === 'SUPER_ADMIN') fetchChurches();
+      const isSuperAdmin = nextUser.role === 'SUPER_ADMIN';
+      setState(prev => ({
+        ...prev,
+        currentUser: nextUser,
+        viewingPlatform: isSuperAdmin && !activeChurchId,
+        viewingChurch: isSuperAdmin ? !!activeChurchId : !!nextUser.churchId,
+      }));
+      if (nextUser.role === 'SUPER_ADMIN') {
+        fetchChurches();
+      } else if (!activeChurchId && nextUser.churchId) {
+        setActiveChurchId(nextUser.churchId);
+      }
     } else if (!isAuthenticated) {
       setState(prev => ({ ...prev, currentUser: null, loading: 'ready' }));
     }
-  }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, fetchChurches]);
+  }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, fetchChurches, setActiveChurchId]);
 
   useEffect(() => {
     if (!isAuthenticated || isPlatformSession) {
       setState(prev => ({ ...prev, loading: 'ready', dataError: null }));
       return;
     }
+    if (!churchId) {
+      setState(prev => ({ ...prev, loading: 'ready', dataError: null }));
+      return;
+    }
+    const controller = new AbortController();
     setState(prev => ({ ...prev, loading: 'data-loading', dataError: null }));
     appDataService.loadChurchAppData(churchId)
       .then(data => {
-        setState(prev => ({
-          ...prev,
-          ...data,
-          loading: 'ready',
-          dataError: null,
-        }));
+        if (!controller.signal.aborted) {
+          setState(prev => ({
+            ...prev,
+            ...data,
+            loading: 'ready',
+            dataError: null,
+          }));
+        }
       })
       .catch(err => {
-        setState(prev => ({ ...prev, loading: 'error', dataError: err.message }));
+        if (!controller.signal.aborted) {
+          setState(prev => ({ ...prev, loading: 'error', dataError: err.message }));
+        }
       });
+    return () => controller.abort();
   }, [isAuthenticated, churchId, isPlatformSession]);
 
   const handleLogin = useCallback((_u: User) => {

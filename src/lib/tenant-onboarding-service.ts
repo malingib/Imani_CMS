@@ -83,9 +83,22 @@ export function createTenantOnboardingService(client: SupabaseLikeClient) {
     },
 
     async completeOnboardingStep(churchId: string, stepId: string): Promise<void> {
+      // Fetch current onboarding step from DB to prevent caller from skipping or regressing
+      const { data: church, error: fetchErr } = await client
+        .from("churches")
+        .select("onboarding_step")
+        .eq("id", churchId)
+        .maybeSingle();
+      if (fetchErr) throw new Error(fetchErr.message);
+      if (!church) throw new Error("Church not found");
+
+      const currentStep = (church.onboarding_step as string) || "welcome";
       const stepOrder = DEFAULT_ONBOARDING_STEPS.map((s) => s.id);
-      const currentIdx = stepOrder.indexOf(stepId);
-      if (currentIdx === -1) throw new Error(`Unknown step: ${stepId}`);
+      const currentIdx = stepOrder.indexOf(currentStep);
+      const requestedIdx = stepOrder.indexOf(stepId);
+
+      if (requestedIdx === -1) throw new Error(`Unknown step: ${stepId}`);
+      if (requestedIdx !== currentIdx) throw new Error(`Step "${stepId}" cannot be completed now; current step is "${currentStep}"`);
 
       const nextStep = currentIdx + 1 < stepOrder.length ? stepOrder[currentIdx + 1] : stepOrder[currentIdx];
 

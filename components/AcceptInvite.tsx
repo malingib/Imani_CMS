@@ -4,6 +4,9 @@ import { User, Lock, Eye, EyeOff, ArrowRight, Loader2, CheckCircle2, AlertCircle
 import { supabase } from '../src/lib/supabase';
 import { AcceptInviteFormSchema, validateFormData } from '../src/lib/validation';
 import { ImaniLogoIcon } from './Sidebar';
+import { UserRole } from '../types';
+import { getDefaultViewForUserRole } from '../src/lib/app-user';
+import { ROUTES } from '../src/lib/router';
 
 const AcceptInvite: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -60,7 +63,9 @@ const AcceptInvite: React.FC = () => {
       if (signInResult.error) throw new Error(signInResult.error.message);
 
       setStep('success');
-      setTimeout(() => navigate('/dashboard', { replace: true }), 2000);
+      const role = (claimData?.role as UserRole) || UserRole.MEMBER;
+      const targetPath = ROUTES[getDefaultViewForUserRole(role)].path;
+      setTimeout(() => navigate(targetPath, { replace: true }), 2000);
     } catch (err: any) {
       setError(err?.message || 'Something went wrong');
     } finally {

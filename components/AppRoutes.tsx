@@ -5,9 +5,35 @@ import Sidebar, { ImaniLogoIcon } from './Sidebar';
 import { useApp } from '../src/lib/AppProvider';
 import { useChurch } from '../src/lib/church-context';
 import { ROUTES, pathToView } from '../src/lib/router';
-import { AppView } from '../types';
+import { AppView, UserRole } from '../types';
+import { getDefaultViewForUserRole } from '../src/lib/app-user';
+import { triggerStkPush } from '../src/lib/mpesa-service';
 import { SkeletonBlock, NotFound, ToastContainer, ErrorFallback } from './shared';
 import NotificationsPanel from './NotificationsPanel';
+
+const ADMIN_VIEWS: AppView[] = [
+  'DASHBOARD', 'MEMBERS', 'FINANCE', 'GROUPS', 'EVENTS', 'COMMUNICATION',
+  'REPORTS', 'ANALYTICS', 'SERMONS', 'AUDIT_LOGS', 'BILLING', 'SETTINGS',
+];
+const MEMBER_VIEWS: AppView[] = ['MY_PORTAL', 'MY_GIVING', 'SERMONS'];
+const PLATFORM_VIEWS: AppView[] = [
+  'PLATFORM_DASHBOARD', 'TENANTS', 'INVITATIONS', 'BILLING', 'PLATFORM_SETTINGS',
+];
+
+const ROLE_VIEWS: Record<UserRole, AppView[]> = {
+  SUPER_ADMIN: [...ADMIN_VIEWS, ...PLATFORM_VIEWS],
+  ADMIN: ADMIN_VIEWS,
+  PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS', 'SERMONS'],
+  TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS'],
+  SECRETARY: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION'],
+  MEMBER: MEMBER_VIEWS,
+};
+
+function canAccess(view: AppView, role: UserRole, viewingPlatform: boolean): boolean {
+  if (viewingPlatform && PLATFORM_VIEWS.includes(view)) return role === UserRole.SUPER_ADMIN;
+  const allowed = ROLE_VIEWS[role] || [];
+  return allowed.includes(view);
+}
 
 const Login = lazy(() => import('./Login'));
 const Dashboard = lazy(() => import('./Dashboard'));
@@ -60,11 +86,26 @@ const AccountShell = () => {
   const currentMember = members.find(m => m.id === currentUser?.memberId);
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  const handleGive = async () => {
+    addToast('Initiating STK Push...');
+    createAudit('Initiated Giving STK', 'MY_GIVING');
+    const memberPhone = currentMember?.phone || '';
+    const result = await triggerStkPush(0, memberPhone, 'Tithe', currentMember?.firstName || '');
+    if (result.success) {
+      addToast(result.message);
+    } else {
+      addToast(result.message || 'Payment could not be processed.');
+    }
+  };
+
   if (!currentUser) {
     return null;
   }
 
   const navigate = (v: AppView) => navigateToPath(ROUTES[v].path);
+
+  const currentView = pathToView(location.pathname) || 'DASHBOARD';
+  const viewAllowed = canAccess(currentView, currentUser.role, viewingPlatform);
 
   useEffect(() => {
     if (!notifOpen) return;
@@ -149,6 +190,17 @@ const AccountShell = () => {
               <div className="h-96 bg-slate-100 rounded-[2.5rem]" />
             </div>
           }>
+            {!viewAllowed ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center">
+                  <h2 className="text-2xl font-black text-brand-primary mb-2">Access Restricted</h2>
+                  <p className="text-slate-500 font-medium">Your role does not have permission to view this page.</p>
+                  <button onClick={() => navigate(getDefaultViewForUserRole(currentUser.role))} className="mt-6 px-6 py-3 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary/90 transition-all">
+                    Go to your dashboard
+                  </button>
+                </div>
+              </div>
+            ) : (
             <Routes>
               {viewingPlatform ? (
                 <>
@@ -174,12 +226,13 @@ const AccountShell = () => {
                   <Route path={ROUTES.SETTINGS.path} element={<Settings currentUserRole={currentUser.role} churchId={churchId || ''} />} />
                   <Route path={ROUTES.AUDIT_LOGS.path} element={<AuditLogs logs={auditLogs} />} />
                   <Route path={ROUTES.BILLING.path} element={<Billing />} />
-                  <Route path={ROUTES.MY_PORTAL.path} element={<MemberPortal member={currentMember || members[0]} transactions={transactions} events={events} activities={[]} churchId={churchId || ''} onNavigate={navigate} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />} />
-                  <Route path={ROUTES.MY_GIVING.path} element={<MyGiving member={currentMember || members[0]} transactions={transactions} onGive={() => { addToast('STK Push Sent'); createAudit('Initiated Giving STK', 'MY_GIVING'); }} />} />
+                  <Route path={ROUTES.MY_PORTAL.path} element={<MemberPortal member={currentMember || null} transactions={transactions} events={events} activities={[]} churchId={churchId || ''} onNavigate={navigate} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />} />
+                  <Route path={ROUTES.MY_GIVING.path} element={<MyGiving member={currentMember || null} transactions={transactions} onGive={handleGive} />} />
                   <Route path="*" element={<Navigate to={ROUTES.DASHBOARD.path} replace />} />
                 </>
               )}
             </Routes>
+            )}
           </Suspense>
         </div>
       </main>
@@ -190,7 +243,9 @@ const AccountShell = () => {
 export default function AppRoutes() {
   const { currentUser, toasts, viewingPlatform, viewingChurch, handleLogin } = useApp();
   const isLoggedIn = !!currentUser;
-  const landingPath = viewingPlatform ? ROUTES.PLATFORM_DASHBOARD.path : ROUTES.DASHBOARD.path;
+  const landingPath = viewingPlatform
+    ? ROUTES.PLATFORM_DASHBOARD.path
+    : ROUTES[getDefaultViewForUserRole(currentUser?.role || UserRole.MEMBER)].path;
   const accountShellElement = <Protected><AccountShell /></Protected>;
   const nav = useNavigate();
 
@@ -209,10 +264,10 @@ export default function AppRoutes() {
         <Route path="/login" element={isLoggedIn ? <Navigate to={landingPath} replace /> : loginElement} />
         <Route path={ROUTES.DASHBOARD.path} element={isLoggedIn ? accountShellElement : <Navigate to="/login" replace />} />
         <Route path="/accept-invite" element={<AcceptInvite />} />
-        <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/compliance" element={<CompliancePortal />} />
-        <Route path="/security" element={<SecurityOverview />} />
-        <Route path="*" element={isLoggedIn ? accountShellElement : <NotFound />} />
+        <Route path="/privacy" element={<PrivacyPolicy onBack={() => nav(-1)} />} />
+        <Route path="/compliance" element={<CompliancePortal onBack={() => nav(-1)} />} />
+        <Route path="/security" element={<SecurityOverview onBack={() => nav(-1)} />} />
+        <Route path="*" element={isLoggedIn ? accountShellElement : <Navigate to="/login" replace />} />
       </Routes>
     </>
   );

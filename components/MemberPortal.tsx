@@ -36,7 +36,7 @@ import { supabase } from '../src/lib/supabase-auth';
 const persistence = createPersistenceService(supabase);
 
 interface MemberPortalProps {
-  member: Member;
+  member: Member | null;
   transactions: Transaction[];
   events: ChurchEvent[];
   activities: MemberActivity[];
@@ -47,6 +47,16 @@ interface MemberPortalProps {
 }
 
 const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, events, activities: _initialActivities, churchId, onNavigate, onUpdateProfile, onRSVP }) => {
+  if (!member) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center">
+          <h2 className="text-2xl font-black text-brand-primary mb-2">No Member Record</h2>
+          <p className="text-slate-500 font-medium">Your account is not linked to a church member profile. Contact your church admin to link your account.</p>
+        </div>
+      </div>
+    );
+  }
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Member>({ ...member });
   const [dailyVerse, setDailyVerse] = useState({ text: 'Loading inspirational word...', ref: '' });

@@ -58,13 +58,15 @@ Deno.serve(async (req) => {
 
     const resetJson = await resetResponse.json();
     if (!resetResponse.ok) {
-      const message = resetJson?.error || resetJson?.msg || 'Failed to generate password reset link';
-      return serverError(message);
+      // Return generic success to prevent account enumeration
+      console.warn('password-reset: generate_link failed for', email, resetJson?.error || resetJson?.msg);
+      return new Response(JSON.stringify({ success: true, message: 'If an account exists, a reset link has been sent.' }), { headers: JSON_HEADERS });
     }
 
     const actionLink = resetJson?.data?.properties?.action_link || resetJson?.properties?.action_link;
     if (!actionLink || typeof actionLink !== 'string') {
-      return serverError('Could not generate password reset link');
+      console.warn('password-reset: no action_link in response for', email);
+      return new Response(JSON.stringify({ success: true, message: 'If an account exists, a reset link has been sent.' }), { headers: JSON_HEADERS });
     }
 
     const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {

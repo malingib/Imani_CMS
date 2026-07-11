@@ -27,13 +27,15 @@ function supabaseAdmin(method: string, path: string, body?: unknown) {
   });
 }
 
-async function getUserByEmail(email: string): Promise<{ id: string } | null> {
+async function getUserByEmail(email: string): Promise<{ id: string; churchId?: string } | null> {
   const res = await supabaseAdmin('GET', `users?filter=email=eq.${encodeURIComponent(email)}`);
   if (!res.ok) return null;
   const json = await res.json();
   const users = Array.isArray(json) ? json : json?.users ?? [];
   const user = users.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
-  return user ? { id: user.id } : null;
+  if (!user) return null;
+  const existingChurch = user.app_metadata?.church_id || user.user_metadata?.church_id;
+  return { id: user.id, churchId: existingChurch ? String(existingChurch) : undefined };
 }
 
 Deno.serve(async (req) => {
@@ -108,6 +110,10 @@ Deno.serve(async (req) => {
       if (errMsg.toLowerCase().includes('already exists') || errMsg.toLowerCase().includes('already registered') || createRes.status === 409) {
         const existing = await getUserByEmail(email);
         if (!existing) return serverError('User already registered but could not be found via admin API');
+
+        if (existing.churchId && existing.churchId !== churchId) {
+          return badRequest('This email is already registered to another church. Contact your admin for access.');
+        }
 
         userId = existing.id;
 

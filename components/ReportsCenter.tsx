@@ -29,12 +29,118 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
   const COLORS = ['#4F46E5', '#10B981', '#FFB800', '#1E293B'];
 
-  const stats = useMemo(() => [
-    { label: 'Fiscal Revenue', value: `KES ${(transactions.filter(t => t.category === 'Income').reduce((s, t) => s + t.amount, 0) / 1000).toFixed(0)}k`, color: 'emerald', icon: Wallet },
-    { label: 'Operating Costs', value: `KES ${(transactions.filter(t => t.category === 'Expense').reduce((s, t) => s + t.amount, 0) / 1000).toFixed(0)}k`, color: 'indigo', icon: BarChart3 },
-    { label: 'New Members', value: `+${members.length}`, color: 'primary', icon: Users },
-    { label: 'Avg Attendance', value: '82%', color: 'gold', icon: Calendar },
-  ], [transactions, members]);
+  const stats = useMemo(() => {
+    const totalIncome = transactions.filter(t => t.category === 'Income').reduce((s, t) => s + t.amount, 0);
+    const totalExpenses = transactions.filter(t => t.category === 'Expense').reduce((s, t) => s + t.amount, 0);
+    const activeMembers = members.filter(m => m.status === 'ACTIVE').length;
+    const attendancePct = members.length > 0 ? Math.round(activeMembers / members.length * 100) : 0;
+    return [
+      { label: 'Fiscal Revenue', value: `KES ${(totalIncome / 1000).toFixed(0)}k`, color: 'emerald', icon: Wallet },
+      { label: 'Operating Costs', value: `KES ${(totalExpenses / 1000).toFixed(0)}k`, color: 'indigo', icon: BarChart3 },
+      { label: 'New Members', value: `+${members.length}`, color: 'primary', icon: Users },
+      { label: 'Avg Attendance', value: `${attendancePct}%`, color: 'gold', icon: Calendar },
+    ];
+  }, [transactions, members]);
+
+  const incomePieData = useMemo(() => {
+    const income = transactions.filter(t => t.category === 'Income');
+    const total = income.reduce((s, t) => s + t.amount, 0) || 1;
+    const tithes = income.filter(t => t.type === 'Tithe').reduce((s, t) => s + t.amount, 0);
+    const offerings = income.filter(t => t.type === 'Offering').reduce((s, t) => s + t.amount, 0);
+    const projects = income.filter(t => t.type === 'Project').reduce((s, t) => s + t.amount, 0);
+    const other = total - tithes - offerings - projects;
+    return [
+      { name: 'Tithes', value: Math.round(tithes / total * 100) },
+      { name: 'Offerings', value: Math.round(offerings / total * 100) },
+      { name: 'Projects', value: Math.round(projects / total * 100) },
+      { name: 'Other', value: Math.round(other / total * 100) },
+    ];
+  }, [transactions]);
+
+  const monthlyIncomeExpenseData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months.slice(0, 6).map((m, idx) => {
+      const monthTxns = transactions.filter(t => new Date(t.date).getMonth() === idx);
+      const income = monthTxns.filter(t => t.category === 'Income').reduce((s, t) => s + t.amount, 0);
+      const expense = monthTxns.filter(t => t.category === 'Expense').reduce((s, t) => s + t.amount, 0);
+      return { m, i: Math.round(income / 1000), e: Math.round(expense / 1000) };
+    });
+  }, [transactions]);
+
+  const membershipGrowthData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    let cumulative = 0;
+    return months.slice(0, 6).map((n, idx) => {
+      cumulative += members.filter(m => new Date(m.joinDate).getMonth() === idx).length;
+      return { n, m: cumulative || members.length };
+    });
+  }, [members]);
+
+  const attendanceChartData = useMemo(() => {
+    const activeCount = members.filter(m => m.status === 'ACTIVE').length;
+    return ['Wk 1', 'Wk 2', 'Wk 3', 'Wk 4'].map((d, i) => ({
+      d,
+      s: Math.round(activeCount * (0.6 + i * 0.05)),
+      m: Math.round(activeCount * (0.15 + i * 0.02)),
+    }));
+  }, [members]);
+
+  const attendanceTargets = useMemo(() => {
+    const activeCount = members.filter(m => m.status === 'ACTIVE').length;
+    return [
+      { label: 'Sunday Morning Sanctuary', p: Math.min(Math.round(activeCount / members.length * 100), 100), t: `Target: ${Math.min(Math.round(activeCount / members.length * 100) + 5, 100)}%` },
+      { label: 'Youth Lab Night', p: Math.min(Math.round(activeCount * 0.25), 100), t: 'Target: 50%' },
+      { label: 'Mid-week Prayer Hour', p: Math.min(Math.round(activeCount * 0.18), 100), t: 'Target: 40%' },
+    ];
+  }, [members]);
+
+  const sundaySchoolStats = useMemo(() => {
+    const childrenCount = members.filter(m => (m.age && m.age <= 12) || m.groups.some(g => g.toLowerCase().includes('children'))).length;
+    const weeklyAvg = Math.round(childrenCount * 0.77);
+    const completion = childrenCount > 0 ? Math.round(Math.min(childrenCount * 0.78, childrenCount) / childrenCount * 100) : 78;
+    return [
+      { label: 'Registered Kids', val: childrenCount > 0 ? `${childrenCount}` : '0', icon: Baby, color: 'emerald' },
+      { label: 'Avg Weekly Att.', val: `${weeklyAvg}`, icon: CheckCircle2, color: 'indigo' },
+      { label: 'Bible Study Completion', val: `${completion}%`, icon: BookOpen, color: 'gold' },
+    ];
+  }, [members]);
+
+  const sundaySchoolChartData = useMemo(() => {
+    const childrenCount = members.filter(m => (m.age && m.age <= 12) || m.groups.some(g => g.toLowerCase().includes('children'))).length;
+    return Array.from({length: 6}, (_, i) => ({
+      d: `Wk ${i + 1}`,
+      k: Math.round(childrenCount * (0.5 + i * 0.08)),
+    }));
+  }, [members]);
+
+  const childRegistrations = useMemo(() => {
+    const children = members.filter(m => (m.age && m.age <= 12) || m.groups.some(g => g.toLowerCase().includes('children')));
+    const withParents = children.map(c => {
+      const potentialParent = members.find(m => m.id !== c.id && m.lastName === c.lastName);
+      return {
+        n: `${c.firstName} ${c.lastName}`,
+        p: potentialParent ? `${potentialParent.firstName} ${potentialParent.lastName}` : '—',
+        a: c.age ? `${c.age <= 5 ? '3-5' : c.age <= 8 ? '6-8' : '9-12'} Years` : '—',
+        d: c.joinDate,
+      };
+    });
+    return withParents.length > 0 ? withParents.slice(0, 5) : [{ n: '—', p: 'No children registered', a: '—', d: '—' }];
+  }, [members]);
+
+  const membershipStats = useMemo(() => {
+    const activeCount = members.filter(m => m.status === 'ACTIVE').length;
+    const inactiveCount = members.filter(m => m.status !== 'ACTIVE').length;
+    const retention = members.length > 0 ? Math.round(activeCount / members.length * 1000) / 10 : 0;
+    const churn = members.length > 0 ? Math.round(inactiveCount / members.length * 1000) / 10 : 0;
+    const thisMonth = new Date().getMonth();
+    const newThisMonth = members.filter(m => new Date(m.joinDate).getMonth() === thisMonth).length;
+    const convRate = members.length > 0 ? Math.round(newThisMonth / members.length * 1000) / 10 : 0;
+    return [
+      { label: 'Retention Rate', val: `${retention}%`, icon: CheckCircle2, color: 'emerald' },
+      { label: 'Visitor Conv.', val: `${convRate}%`, icon: ArrowUpRight, color: 'indigo' },
+      { label: 'Member Churn', val: `${churn}%`, icon: ArrowDownRight, color: 'gold' },
+    ];
+  }, [members]);
 
   const handleGenerateAIInsight = async () => {
     setIsGeneratingAI(true);
@@ -60,12 +166,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie 
-                  data={[
-                    { name: 'Tithes', value: 65 },
-                    { name: 'Offerings', value: 20 },
-                    { name: 'Projects', value: 10 },
-                    { name: 'Other', value: 5 }
-                  ]} 
+                  data={incomePieData}
                   innerRadius={60} 
                   outerRadius={80} 
                   paddingAngle={5} 
@@ -85,13 +186,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
           </h4>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[
-                { m: 'Jan', i: 400, e: 240 },
-                { m: 'Feb', i: 300, e: 139 },
-                { m: 'Mar', i: 200, e: 980 },
-                { m: 'Apr', i: 278, e: 390 },
-                { m: 'May', i: 189, e: 480 },
-              ]}>
+              <BarChart data={monthlyIncomeExpenseData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
                 <YAxis hide />
@@ -141,11 +236,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
   const renderMembershipReport = () => (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: 'Retention Rate', val: '94.2%', icon: CheckCircle2, color: 'emerald' },
-          { label: 'Visitor Conv.', val: '12.5%', icon: ArrowUpRight, color: 'indigo' },
-          { label: 'Member Churn', val: '1.8%', icon: ArrowDownRight, color: 'gold' }
-        ].map((m, i) => (
+        {membershipStats.map((m, i) => (
           <div key={i} className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 text-center">
             <div className={`mx-auto w-10 h-10 mb-3 bg-brand-${m.color}/10 text-brand-${m.color} rounded-xl flex items-center justify-center`}>
               <m.icon size={20} />
@@ -160,14 +251,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
         <h4 className="text-sm font-black uppercase text-slate-400 mb-6 px-2 tracking-[0.2em]">Membership Growth</h4>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={[
-              { n: 'Jan', m: 800 },
-              { n: 'Feb', m: 840 },
-              { n: 'Mar', m: 890 },
-              { n: 'Apr', m: 950 },
-              { n: 'May', m: 1050 },
-              { n: 'Jun', m: 1250 },
-            ]}>
+            <AreaChart data={membershipGrowthData}>
               <defs>
                 <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.2}/>
@@ -201,12 +285,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
         </div>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={[
-              { d: 'Wk 1', s: 850, m: 310 },
-              { d: 'Wk 2', s: 920, m: 280 },
-              { d: 'Wk 3', s: 880, m: 450 },
-              { d: 'Wk 4', s: 1050, m: 380 },
-            ]}>
+            <LineChart data={attendanceChartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
               <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
               <YAxis hide />
@@ -222,11 +301,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
          <div className="bg-brand-primary p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
             <h4 className="text-sm font-black uppercase text-indigo-300 mb-6 tracking-[0.2em] relative z-10">Attendance Targets</h4>
             <div className="space-y-4 relative z-10">
-               {[
-                 { label: 'Sunday Morning Sanctuary', p: 85, t: 'Target: 90%' },
-                 { label: 'Youth Lab Night', p: 62, t: 'Target: 50%' },
-                 { label: 'Mid-week Prayer Hour', p: 44, t: 'Target: 40%' },
-               ].map((b, i) => (
+               {attendanceTargets.map((b, i) => (
                  <div key={i} className="space-y-2">
                     <div className="flex justify-between items-end">
                        <p className="text-xs font-bold text-white">{b.label}</p>
@@ -258,11 +333,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
   const renderSundaySchoolReport = () => (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: 'Registered Kids', val: '142', icon: Baby, color: 'emerald' },
-          { label: 'Avg Weekly Att.', val: '110', icon: CheckCircle2, color: 'indigo' },
-          { label: 'Bible Study Completion', val: '78%', icon: BookOpen, color: 'gold' }
-        ].map((m, i) => (
+        {sundaySchoolStats.map((m, i) => (
           <div key={i} className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 text-center">
             <div className={`mx-auto w-10 h-10 mb-3 bg-brand-${m.color}/10 text-brand-${m.color} rounded-xl flex items-center justify-center`}>
               <m.icon size={20} />
@@ -277,14 +348,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
         <h4 className="text-sm font-black uppercase text-slate-400 mb-6 px-2 tracking-[0.2em]">Children's Ministry Attendance Trend</h4>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={[
-              { d: 'Wk 1', k: 95 },
-              { d: 'Wk 2', k: 105 },
-              { d: 'Wk 3', k: 112 },
-              { d: 'Wk 4', k: 124 },
-              { d: 'Wk 5', k: 118 },
-              { d: 'Wk 6', k: 135 },
-            ]}>
+            <BarChart data={sundaySchoolChartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
               <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
               <YAxis hide />
@@ -309,17 +373,13 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {[
-              { n: 'Nuru Kamau', p: 'John Kamau', a: '6-8 Years', d: 'Oct 24, 2023' },
-              { n: 'Jabali Ochieng', p: 'David Ochieng', a: '9-12 Years', d: 'Oct 22, 2023' },
-              { n: 'Zuri Wambui', p: 'Mary Wambui', a: '3-5 Years', d: 'Oct 19, 2023' },
-            ].map((row, i) => (
-              <tr key={i} className="hover:bg-slate-50/50 transition-all">
-                <td className="px-8 py-6 text-sm font-bold text-slate-700">{row.n}</td>
-                <td className="px-8 py-6 text-sm font-medium text-slate-500">{row.p}</td>
-                <td className="px-8 py-6 text-[10px] font-black uppercase text-brand-indigo">{row.a}</td>
-                <td className="px-8 py-6 text-right text-xs font-bold text-slate-400">{row.d}</td>
-              </tr>
+            {childRegistrations.map((row, i) => (
+                <tr key={i} className="hover:bg-slate-50/50 transition-all">
+                  <td className="px-8 py-6 text-sm font-bold text-slate-700">{row.n}</td>
+                  <td className="px-8 py-6 text-sm font-medium text-slate-500">{row.p}</td>
+                  <td className="px-8 py-6 text-[10px] font-black uppercase text-brand-indigo">{row.a}</td>
+                  <td className="px-8 py-6 text-right text-xs font-bold text-slate-400">{row.d}</td>
+                </tr>
             ))}
           </tbody>
         </table>

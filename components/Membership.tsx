@@ -122,6 +122,8 @@ const Membership: React.FC<MembershipProps> = ({
         
         const importedMembers: Member[] = [];
         const errors: string[] = [];
+        const existingPhones = new Set(members.map(m => m.phone));
+        const genId = () => crypto.randomUUID?.() ?? 'id-' + Math.random().toString(36).slice(2, 11);
 
         lines.slice(1).forEach((line, rowIndex) => {
           const trimmedLine = line.trim();
@@ -146,12 +148,20 @@ const Membership: React.FC<MembershipProps> = ({
               return;
             }
 
+            // Deduplicate by phone number
+            const phone = validationResult.data.phone;
+            if (existingPhones.has(phone)) {
+              const dup = members.find(m => m.phone === phone);
+              errors.push(`Row ${rowIndex + 2}: Phone ${phone} already belongs to ${dup?.firstName} ${dup?.lastName} — skipped`);
+              return;
+            }
+
             // Map to Member with defaults
             const member: Member = {
-              id: crypto.randomUUID(),
+              id: genId(),
               firstName: validationResult.data.firstname,
               lastName: validationResult.data.lastname,
-              phone: validationResult.data.phone,
+              phone,
               email: validationResult.data.email || '',
               location: validationResult.data.location,
               groups: validationResult.data.groups 

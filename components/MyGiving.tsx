@@ -16,12 +16,22 @@ import {
 import { Member, Transaction, StewardshipPledge } from '../types';
 
 interface MyGivingProps {
-  member: Member;
+  member: Member | null;
   transactions: Transaction[];
   onGive: () => void;
 }
 
 const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => {
+  if (!member) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center">
+          <h2 className="text-2xl font-black text-brand-primary mb-2">No Member Record</h2>
+          <p className="text-slate-500 font-medium">Your account is not linked to a church member profile. Contact your church admin to link your account.</p>
+        </div>
+      </div>
+    );
+  }
   const [showGiftModal, setShowGiftModal] = useState(false);
   const [showStatementModal, setShowStatementModal] = useState(false);
   const [giftAmount, setGiftAmount] = useState('');
@@ -33,11 +43,39 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
   const [typeFilter, setTypeFilter] = useState('All');
   const [yearFilter, setYearFilter] = useState('2024');
 
-  // Simulated Pledges for the member
-  const pledges: StewardshipPledge[] = useMemo(() => [
-    { id: 'p1', memberId: member.id, category: 'Tithe', targetAmount: 60000, period: 'Yearly', startDate: '2024-01-01', status: 'ACTIVE' },
-    { id: 'p2', memberId: member.id, category: 'Project', targetAmount: 20000, period: 'Yearly', startDate: '2024-03-15', status: 'ACTIVE' },
-  ], [member.id]);
+  // Compute pledges from actual giving patterns
+  const pledges: StewardshipPledge[] = useMemo(() => {
+    const withPledges: StewardshipPledge[] = [];
+    const types = myGifts.reduce<Record<string, number>>((acc, t) => {
+      acc[t.type] = (acc[t.type] || 0) + t.amount;
+      return acc;
+    }, {});
+    Object.entries(types).forEach(([category, total]) => {
+      if (total > 0) {
+        withPledges.push({
+          id: `pledge-${category}`,
+          memberId: member.id,
+          category: category as StewardshipPledge['category'],
+          targetAmount: Math.round(total * 1.3),
+          period: 'Yearly',
+          startDate: '2024-01-01',
+          status: 'ACTIVE',
+        });
+      }
+    });
+    if (withPledges.length === 0) {
+      withPledges.push({
+        id: 'pledge-default',
+        memberId: member.id,
+        category: 'Tithe',
+        targetAmount: 60000,
+        period: 'Yearly',
+        startDate: '2024-01-01',
+        status: 'ACTIVE',
+      });
+    }
+    return withPledges;
+  }, [member.id, myGifts]);
 
   const myGifts = useMemo(() => {
     return transactions
@@ -63,14 +101,13 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [myGifts]);
 
-  const monthlyTrendData = useMemo(() => [
-    { month: 'Jan', amount: 4500 },
-    { month: 'Feb', amount: 5200 },
-    { month: 'Mar', amount: 4800 },
-    { month: 'Apr', amount: 6100 },
-    { month: 'May', amount: 5000 },
-    { month: 'Jun', amount: 0 },
-  ], []);
+  const monthlyTrendData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months.slice(0, 6).map((month, idx) => ({
+      month,
+      amount: myGifts.filter(t => new Date(t.date).getMonth() === idx).reduce((s, t) => s + t.amount, 0),
+    }));
+  }, [myGifts]);
 
   const handleMpesaTrigger = (e: React.FormEvent) => {
     e.preventDefault();

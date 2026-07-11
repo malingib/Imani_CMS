@@ -55,7 +55,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   const [activeTab, setActiveTab] = useState<SettingTab>('PROFILE');
   const [selectedRoleId, setSelectedRoleId] = useState('role-1');
   const [isSaving, setIsSaving] = useState(false);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'connected' | 'failed'>('idle');
 
   const [churchInfo, setChurchInfo] = useState({
     name: 'Imani Central Parish',
@@ -97,9 +97,12 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
     setIsSaving(false);
   };
 
-  const handleTestConnection = () => {
-    setIsTestingConnection(true);
-    setTimeout(() => setIsTestingConnection(false), 2000);
+  const handleTestConnection = async () => {
+    setConnectionStatus('testing');
+    const { testDarajaConnection } = await import('../src/lib/mpesa-service');
+    const ok = await testDarajaConnection();
+    setConnectionStatus(ok ? 'connected' : 'failed');
+    setTimeout(() => setConnectionStatus('idle'), ok ? 3000 : 5000);
   };
 
   const togglePref = (key: keyof typeof notificationPrefs) => {
@@ -315,15 +318,15 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                        <div className="flex items-center gap-3">
                           <button 
                             onClick={handleTestConnection}
-                            disabled={isTestingConnection}
+                            disabled={connectionStatus === 'testing'}
                             className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2"
                           >
-                             {isTestingConnection ? <Loader2 className="animate-spin" size={14}/> : <Activity size={14}/>}
-                             {isTestingConnection ? 'Testing...' : 'Test Connection'}
+                             {connectionStatus === 'testing' ? <Loader2 className="animate-spin" size={14}/> : <Activity size={14}/>}
+                             {connectionStatus === 'testing' ? 'Testing...' : 'Test Connection'}
                           </button>
                           <div className="flex items-center gap-2 text-slate-400">
                              <Database size={14}/>
-                             <span className="text-[10px] font-black uppercase">Connected</span>
+                             <span className="text-[10px] font-black uppercase">{connectionStatus === 'connected' ? 'Connected' : connectionStatus === 'failed' ? 'Failed' : 'Idle'}</span>
                           </div>
                        </div>
                        <div className="flex items-center gap-3">

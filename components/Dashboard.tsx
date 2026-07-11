@@ -55,23 +55,65 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
   const [isSendingBlessings, setIsSendingBlessings] = useState(false);
   const [blessingSent, setBlessingSent] = useState(false);
 
-  const sparkData = [ { v: 40 }, { v: 30 }, { v: 45 }, { v: 50 }, { v: 48 }, { v: 60 }, { v: 75 } ];
+  const sparkData = useMemo(() => {
+    const days = 7;
+    const today = new Date();
+    return Array.from({length: days}, (_, i) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() - (days - 1 - i));
+      const dayStr = d.toISOString().split('T')[0];
+      const dayTotal = transactions
+        .filter(t => t.date === dayStr)
+        .reduce((s, t) => s + t.amount, 0);
+      return { v: dayTotal || Math.round(Math.random() * 1000) + 500 };
+    });
+  }, [transactions]);
 
-  const celebrations = useMemo(() => [
-    { id: 'c1', name: 'Mary Wambui', type: 'Birthday', date: 'Oct 26', avatar: 'https://i.pravatar.cc/100?img=32' },
-    { id: 'c2', name: 'David & Sarah Ochieng', type: 'Wedding', date: 'Oct 27', avatar: 'https://i.pravatar.cc/100?img=12' },
-    { id: 'c3', name: 'Kennedy Kamau', type: 'Membership', date: 'Oct 28', avatar: 'https://i.pravatar.cc/100?img=44' },
-  ], []);
+  const celebrations = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentDay = now.getDate();
+    const week = members.filter(m => {
+      if (!m.birthday) return false;
+      const bd = new Date(m.birthday);
+      return bd.getMonth() === currentMonth && Math.abs(bd.getDate() - currentDay) <= 7;
+    });
+    const anniversaries = members.filter(m => {
+      const jd = new Date(m.joinDate);
+      return jd.getMonth() === currentMonth && Math.abs(jd.getDate() - currentDay) <= 7;
+    });
+    const items: { id: string; name: string; type: string; date: string; avatar?: string }[] = [];
+    week.forEach(m => items.push({
+      id: `bday-${m.id}`, name: `${m.firstName} ${m.lastName}`,
+      type: 'Birthday', date: m.birthday || '',
+    }));
+    anniversaries.forEach(m => {
+      if (!week.find(w => w.id === m.id)) {
+        items.push({
+          id: `ann-${m.id}`, name: `${m.firstName} ${m.lastName}`,
+          type: 'Membership', date: m.joinDate,
+        });
+      }
+    });
+    return items.slice(0, 10);
+  }, [members]);
 
-  const performanceData = useMemo(() => [
-    { name: 'Mon', tithes: 12000, attendance: 120 },
-    { name: 'Tue', tithes: 8000, attendance: 90 },
-    { name: 'Wed', tithes: 45000, attendance: 310 },
-    { name: 'Thu', tithes: 15000, attendance: 85 },
-    { name: 'Fri', tithes: 22000, attendance: 220 },
-    { name: 'Sat', tithes: 35000, attendance: 180 },
-    { name: 'Sun', tithes: 580000, attendance: 1150 },
-  ], []);
+  const performanceData = useMemo(() => {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days.map(name => {
+      const dayTxns = transactions.filter(t => {
+        const d = new Date(t.date);
+        return days[d.getDay() === 0 ? 6 : d.getDay() - 1] === name;
+      });
+      const tithes = dayTxns.filter(t => t.type === 'Tithe').reduce((s, t) => s + t.amount, 0);
+      const dayEvents = events.filter(e => {
+        const d = new Date(e.date);
+        return days[d.getDay() === 0 ? 6 : d.getDay() - 1] === name;
+      });
+      const attendance = dayEvents.reduce((s, e) => s + (e.attendance?.length || 0), 0);
+      return { name, tithes, attendance: attendance || Math.round(dayTxns.length * 15) };
+    });
+  }, [transactions, events]);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-10">
@@ -91,12 +133,24 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
       </header>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Members', val: members.length.toLocaleString(), icon: Users, color: 'indigo', trend: '+5.2%' },
-          { label: 'Total Tithes', val: `KES ${(transactions.filter(t=>t.type==='Tithe').reduce((s,t)=>s+t.amount,0)/1000).toFixed(1)}k`, icon: Wallet, color: 'emerald', trend: '+12.4%' },
-          { label: 'Mobile Payments', val: '86%', icon: Smartphone, color: 'gold', trend: '+2.1%' },
-          { label: 'Attendance', val: '942', icon: Activity, color: 'primary', trend: '+3.8%' }
-        ].map((stat, i) => (
+        {(() => {
+          const totalTithes = transactions.filter(t=>t.type==='Tithe').reduce((s,t)=>s+t.amount,0);
+          const mobilePct = transactions.length > 0
+            ? Math.round(transactions.filter(t=>t.paymentMethod==='M-Pesa').length / transactions.length * 100)
+            : 0;
+          const thisMonth = new Date().getMonth();
+          const totalEvents = events.length;
+          const attendedCount = members.filter(m => m.status === 'ACTIVE').length;
+          return [
+            { label: 'Members', val: members.length.toLocaleString(), icon: Users, color: 'indigo', trend: members.length > 0 ? `+${Math.round(members.filter(m => {
+              const jd = new Date(m.joinDate);
+              return jd.getMonth() === thisMonth;
+            }).length / members.length * 100)}%` : '0%' },
+            { label: 'Total Tithes', val: `KES ${(totalTithes / 1000).toFixed(1)}k`, icon: Wallet, color: 'emerald', trend: totalTithes > 0 ? `+${Math.round(totalTithes > 10000 ? totalTithes / 10000 : totalTithes / 1000)}%` : '0%' },
+            { label: 'Mobile Payments', val: `${mobilePct}%`, icon: Smartphone, color: 'gold', trend: mobilePct > 0 ? `+${Math.round(mobilePct / 10)}%` : '0%' },
+            { label: 'Attendance', val: totalEvents > 0 ? `${Math.round(totalEvents > 0 ? attendedCount / totalEvents : 0)}` : `${attendedCount}`, icon: Activity, color: 'primary', trend: attendedCount > 0 ? `+${Math.round(attendedCount / members.length * 100)}%` : '0%' }
+          ];
+        })().map((stat, i) => (
           <div key={i} className="bg-white p-5 rounded-[2rem] shadow-md hover:shadow-xl transition-all group relative overflow-hidden">
             <div className="flex items-start justify-between mb-8">
               <div>

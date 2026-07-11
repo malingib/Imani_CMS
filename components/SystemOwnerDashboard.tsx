@@ -16,35 +16,57 @@ import {
 } from 'recharts';
 import { Tenant } from '../types';
 
-const SystemOwnerDashboard: React.FC = () => {
+interface SystemOwnerDashboardProps {
+  tenants?: Tenant[];
+  platformEvents?: { id: string; type: string; status: string; msg: string; time: string; }[];
+  currentMrr?: number;
+  activeTenantsCount?: number;
+  totalSouls?: number;
+  isDemo?: boolean;
+}
+
+const SystemOwnerDashboard: React.FC<SystemOwnerDashboardProps> = ({
+  tenants: propTenants,
+  platformEvents: propEvents,
+  currentMrr: propMrr,
+  activeTenantsCount: propActive,
+  totalSouls: propSouls,
+  isDemo = true,
+}) => {
   const [showAddParish, setShowAddParish] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployStep, setDeployStep] = useState('');
   const [showDeployStatus, setShowDeployStatus] = useState(false);
   
+  const currentMrr = propMrr ?? 842500;
+  const activeTenants = propActive ?? 124;
+  const totalSouls = propSouls ?? 418240;
+  
   const platformStats = [
-    { label: 'Total Platform MRR', value: 'KES 842,500', icon: CreditCard, color: 'emerald', trend: '+18.4%' },
-    { label: 'Active Tenant Parishes', value: '124', icon: Network, color: 'indigo', trend: '+12' },
-    { label: 'Global Ecosystem Souls', value: '418,240', icon: Users, color: 'gold', trend: '+2,4k' },
+    { label: 'Total Platform MRR', value: `KES ${currentMrr.toLocaleString()}`, icon: CreditCard, color: 'emerald', trend: '+18.4%' },
+    { label: 'Active Tenant Parishes', value: `${activeTenants}`, icon: Network, color: 'indigo', trend: '+12' },
+    { label: 'Global Ecosystem Souls', value: `${totalSouls.toLocaleString()}`, icon: Users, color: 'gold', trend: '+2,4k' },
     { label: 'Global API Uptime', value: '99.99%', icon: Activity, color: 'primary', trend: 'Optimal' }
   ];
 
-  const growthData = [
-    { month: 'Jan', revenue: 420000, tenants: 80 },
-    { month: 'Feb', revenue: 485000, tenants: 88 },
-    { month: 'Mar', revenue: 530000, tenants: 94 },
-    { month: 'Apr', revenue: 655000, tenants: 102 },
-    { month: 'May', revenue: 772000, tenants: 114 },
-    { month: 'Jun', revenue: 842500, tenants: 124 },
-  ];
+  const growthData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const baseRevenue = 380000;
+    const baseTenants = 70;
+    return months.slice(0, 6).map((month, i) => ({
+      month,
+      revenue: Math.round(baseRevenue * (1 + i * 0.12)),
+      tenants: Math.round(baseTenants * (1 + i * 0.09)),
+    }));
+  }, []);
 
-  const tenants: Tenant[] = [
+  const tenants: Tenant[] = propTenants ?? [
     { id: 'T1', name: 'Nairobi Central Parish', subdomain: 'nairobi-central', plan: 'Enterprise', status: 'Active', ownerEmail: 'admin@imani.org', region: 'Nairobi', memberCount: 4200, mrr: 8500, renewalDate: 'Nov 12, 2024', healthScore: 98, usageMetrics: { cpu: 24, memory: 42, dbConnections: 12, smsSent: 1200 } },
     { id: 'T2', name: 'Mombasa Gateway Church', subdomain: 'mombasa-gateway', plan: 'Pro', status: 'Active', ownerEmail: 'pastor@imani.org', region: 'Coast', memberCount: 1200, mrr: 4500, renewalDate: 'Dec 01, 2024', healthScore: 92, usageMetrics: { cpu: 15, memory: 30, dbConnections: 5, smsSent: 450 } },
     { id: 'T3', name: 'Kisumu Outreach Center', subdomain: 'kisumu-outreach', plan: 'Basic', status: 'Trialing', ownerEmail: 'sec@imani.org', region: 'Western', memberCount: 450, mrr: 1200, renewalDate: 'Oct 28, 2024', healthScore: 85, usageMetrics: { cpu: 8, memory: 12, dbConnections: 2, smsSent: 120 } },
   ];
 
-  const platformEvents = [
+  const platformEvents = propEvents ?? [
     { id: 'pe1', type: 'BILLING', status: 'success', msg: 'MRR Cycle complete for Tier-1 tenants', time: '12 mins ago' },
     { id: 'pe2', type: 'DEPLOY', status: 'info', msg: 'Security patch v2.3 propagated to Coast region', time: '1h ago' },
     { id: 'pe3', type: 'DATABASE', status: 'success', msg: 'Global backup task verified: Nairobi-East', time: '2h ago' },

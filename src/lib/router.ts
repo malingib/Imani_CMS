@@ -1,8 +1,6 @@
 /**
- * Client-side router for Imani CMS
- * Manages navigation between views with URL hash routing and history support
+ * Client-side route definitions for Imani CMS.
  */
-
 import { AppView } from '../../types';
 
 export interface Route {
@@ -11,11 +9,11 @@ export interface Route {
   label: string;
 }
 
-// Define all available routes
 export const ROUTES: Record<AppView, Route> = {
   DASHBOARD: { view: 'DASHBOARD', path: '/dashboard', label: 'Dashboard' },
   MEMBERS: { view: 'MEMBERS', path: '/members', label: 'Members' },
   FINANCE: { view: 'FINANCE', path: '/finance', label: 'Finance' },
+  PROJECTS: { view: 'PROJECTS', path: '/projects', label: 'Projects' },
   GROUPS: { view: 'GROUPS', path: '/groups', label: 'Groups' },
   EVENTS: { view: 'EVENTS', path: '/events', label: 'Events' },
   COMMUNICATION: { view: 'COMMUNICATION', path: '/communication', label: 'Communication' },
@@ -36,63 +34,32 @@ export const ROUTES: Record<AppView, Route> = {
   PLATFORM_SETTINGS: { view: 'PLATFORM_SETTINGS', path: '/platform-settings', label: 'Platform Settings' },
 };
 
-/**
- * Convert path to view (e.g., '/dashboard' -> 'DASHBOARD')
- */
 export function pathToView(path: string): AppView | null {
-  const route = Object.values(ROUTES).find(r => r.path === path);
-  return route?.view ?? null;
+  return Object.values(ROUTES).find(route => route.path === path)?.view ?? null;
 }
 
-/**
- * Convert view to path (e.g., 'DASHBOARD' -> '/dashboard')
- */
 export function viewToPath(view: AppView): string {
   return ROUTES[view]?.path ?? '/dashboard';
 }
 
-/**
- * Get current view from URL hash
- */
 export function getCurrentViewFromHash(): AppView {
-  const hash = window.location.hash.slice(1) || '/dashboard';
-  const view = pathToView(hash);
-  return view ?? 'DASHBOARD';
+  return pathToView(window.location.hash.slice(1) || '/dashboard') ?? 'DASHBOARD';
 }
 
-/**
- * Navigate to a view by updating URL hash
- */
 export function navigateToView(view: AppView): void {
-  const path = viewToPath(view);
-  window.location.hash = path;
+  window.location.hash = viewToPath(view);
 }
 
-/**
- * Listen for URL changes and call callback
- */
 export function onHashChange(callback: (view: AppView) => void): () => void {
-  const handler = () => {
-    const view = getCurrentViewFromHash();
-    callback(view);
-  };
-
+  const handler = () => callback(getCurrentViewFromHash());
   window.addEventListener('hashchange', handler);
-  
-  // Return cleanup function
   return () => window.removeEventListener('hashchange', handler);
 }
 
-/**
- * Get all routes
- */
 export function getAllRoutes(): Route[] {
   return Object.values(ROUTES);
 }
 
-/**
- * Get route by view
- */
 export function getRoute(view: AppView): Route {
   return ROUTES[view];
 }

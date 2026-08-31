@@ -44,13 +44,36 @@ function ProjectsRoute() {
   );
 }
 
+function AppWithProjectShortcut() {
+  const { currentUser } = useApp();
+  const location = useLocation();
+
+  if (currentUser && location.pathname !== '/projects') {
+    return (
+      <>
+        <AppRoutes />
+        {['SUPER_ADMIN', 'ADMIN', 'PASTOR', 'TREASURER'].includes(currentUser.role) && (
+          <Link
+            to="/projects"
+            className="fixed bottom-5 right-5 z-[55] px-4 py-3 rounded-2xl bg-brand-primary text-white text-xs font-black shadow-xl shadow-brand-primary/20 hover:scale-[1.02] transition-transform"
+          >
+            Projects & Giving
+          </Link>
+        )}
+      </>
+    );
+  }
+
+  return <ProjectsRoute />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <ChurchProvider churchId={null}>
         <AppProvider>
           <Suspense fallback={<div>Loading...</div>}>
-            <ProjectsRoute />
+            <AppWithProjectShortcut />
           </Suspense>
         </AppProvider>
       </ChurchProvider>

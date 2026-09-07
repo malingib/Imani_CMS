@@ -5,6 +5,7 @@ const SERVICE_ROLE_KEY = Deno.env.get('SERVICE_ROLE_KEY');
 const ANON_KEY = Deno.env.get('VITE_SUPABASE_ANON_KEY') ?? '';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json', ...corsHeaders };
+const VALID_CHURCH_ROLES = new Set(['ADMIN', 'PASTOR', 'STAFF', 'MEMBER']);
 
 function badRequest(message: string) {
   return new Response(JSON.stringify({ error: message }), { status: 400, headers: JSON_HEADERS });
@@ -34,8 +35,28 @@ async function getUserByEmail(email: string): Promise<{ id: string; churchId?: s
   const users = Array.isArray(json) ? json : json?.users ?? [];
   const user = users.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
   if (!user) return null;
-  const existingChurch = user.app_metadata?.church_id || user.user_metadata?.church_id;
+  const existingChurch = user.app_metadata?.church_id;
   return { id: user.id, churchId: existingChurch ? String(existingChurch) : undefined };
+}
+
+async function provisionMembership(userId: string, churchId: string, role: string) {
+  const res = await fetch(`${SUPABASE_URL!.replace(/\/$/, '')}/rest/v1/church_memberships?on_conflict=user_id,church_id`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SERVICE_ROLE_KEY!,
+      Authorization: `Bearer ${SERVICE_ROLE_KEY!}`,
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify({ user_id: userId, church_id: churchId, role, status: 'active' }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text();
+    console.error('membership provisioning failed', res.status, detail);
+    return false;
+  }
+  return true;
 }
 
 Deno.serve(async (req) => {
@@ -88,8 +109,9 @@ Deno.serve(async (req) => {
     const role: string = invite.role;
     const churchId: string = invite.church_id;
 
+    if (!VALID_CHURCH_ROLES.has(role)) return badRequest('Invitation contains an invalid church role');
+
     let userId: string | null = null;
-    let createdNew = false;
 
     const createRes = await supabaseAdmin('POST', 'users', {
       email,
@@ -102,7 +124,6 @@ Deno.serve(async (req) => {
     if (createRes.ok) {
       const created = await createRes.json();
       userId = created?.id ?? null;
-      createdNew = true;
     } else {
       const createErr = await createRes.json();
       const errMsg = createErr?.msg || createErr?.error || '';
@@ -134,6 +155,12 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (!userId) return serverError('User account was created without an id');
+
+    if (!(await provisionMembership(userId, churchId, role))) {
+      return serverError('Account created but church membership could not be provisioned');
+    }
+
     const acceptRes = await fetch(`${SUPABASE_URL}/rest/v1/invitations?id=eq.${invite.id}`, {
       method: 'PATCH',
       headers: {
@@ -149,7 +176,7 @@ Deno.serve(async (req) => {
       console.error('failed to mark invitation accepted', await acceptRes.text());
     }
 
-    return new Response(JSON.stringify({ success: true, email, userId }), { headers: JSON_HEADERS });
+    return new Response(JSON.stringify({ success: true, email, userId, role }), { headers: JSON_HEADERS });
   } catch (error) {
     console.error('invite-claim function failed', error);
     return serverError('Unable to process invitation');

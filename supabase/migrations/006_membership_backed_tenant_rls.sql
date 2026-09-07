@@ -3,27 +3,6 @@
 -- SUPER_ADMIN remains platform-wide. All other access requires an active
 -- membership in the target church.
 
-DO $$
-DECLARE
-  policy_record RECORD;
-  tenant_tables CONSTANT text[] := ARRAY[
-    'members', 'transactions', 'church_events', 'budgets',
-    'recurring_expenses', 'communications', 'notifications',
-    'audit_logs', 'event_attendance', 'group_members', 'groups',
-    'invitations', 'invoices', 'sermons', 'subscriptions'
-  ];
-BEGIN
-  FOREACH policy_record IN ARRAY (
-    SELECT ARRAY_AGG(row(tablename, policyname))
-    FROM pg_policies
-    WHERE schemaname = 'public'
-      AND tablename = ANY(tenant_tables)
-      AND policyname LIKE '%tenant%'
-  ) LOOP
-    NULL;
-  END LOOP;
-END $$;
-
 -- Replace the existing tenant policies explicitly. Keeping the policy names
 -- stable avoids duplicate policy paths and makes the migration idempotent.
 DROP POLICY IF EXISTS tenant_isolation_members ON public.members;

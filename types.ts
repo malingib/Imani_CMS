@@ -50,7 +50,7 @@ export interface Member {
   email: string;
   location: string;
   groups: string[];
-  status: MemberStatus;
+  status: MemberStatus | 'ACTIVE';
   joinDate: string;
   birthday?: string;
   age?: number;

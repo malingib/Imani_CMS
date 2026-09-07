@@ -1,14 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from './supabase';
 
-interface Church {
-  id: string;
-  name: string;
-  slug: string;
-  tier: string;
-  status: string;
-}
-
+interface Church { id: string; name: string; slug: string; tier: string; status: string; }
 interface ChurchContextType {
   activeChurchId: string | null;
   setActiveChurchId: (id: string | null) => void;
@@ -17,14 +10,7 @@ interface ChurchContextType {
   activeChurch: Church | null;
 }
 
-export const ChurchContext = createContext<ChurchContextType>({
-  activeChurchId: null,
-  setActiveChurchId: () => {},
-  churches: [],
-  fetchChurches: () => {},
-  activeChurch: null,
-});
-
+export const ChurchContext = createContext<ChurchContextType>({ activeChurchId: null, setActiveChurchId: () => {}, churches: [], fetchChurches: () => {}, activeChurch: null });
 export const useChurch = () => useContext(ChurchContext);
 
 export function ChurchProvider({ children, churchId: initialChurchId }: { children: ReactNode; churchId: string | null }) {
@@ -32,19 +18,44 @@ export function ChurchProvider({ children, churchId: initialChurchId }: { childr
   const [churches, setChurches] = useState<Church[]>([]);
 
   const fetchChurches = useCallback(async () => {
-    const { data } = await supabase.from('churches').select('*').order('name');
-    if (data) setChurches(data as Church[]);
-  }, []);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setChurches([]); setActiveChurchId(null); return; }
+
+    const isSuperAdmin = user.app_metadata?.role === 'SUPER_ADMIN';
+    if (isSuperAdmin) {
+      const { data } = await supabase.from('churches').select('*').order('name');
+      if (data) setChurches(data as Church[]);
+      return;
+    }
+
+    const { data } = await supabase
+      .from('church_memberships')
+      .select('church_id, churches(id, name, slug, tier, status)')
+      .eq('user_id', user.id)
+      .eq('status', 'active');
+
+    const authorized = (data || []).map((row: any) => row.churches).filter(Boolean) as Church[];
+    setChurches(authorized);
+
+    if (activeChurchId && !authorized.some(church => church.id === activeChurchId)) {
+      setActiveChurchId(authorized[0]?.id ?? null);
+    } else if (!activeChurchId && authorized.length === 1) {
+      setActiveChurchId(authorized[0].id);
+    }
+  }, [activeChurchId]);
 
   const activeChurch = churches.find(c => c.id === activeChurchId) || null;
 
-  useEffect(() => {
-    if (!initialChurchId) fetchChurches();
-  }, [initialChurchId, fetchChurches]);
+  useEffect(() => { void fetchChurches(); }, [fetchChurches, initialChurchId]);
 
-  return (
-    <ChurchContext.Provider value={{ activeChurchId, setActiveChurchId, churches, fetchChurches, activeChurch }}>
-      {children}
-    </ChurchContext.Provider>
-  );
+  const safeSetActiveChurchId = useCallback((id: string | null) => {
+    if (id === null) { setActiveChurchId(null); return; }
+    if (userIsSuperAdmin(churches) || churches.some(church => church.id === id)) setActiveChurchId(id);
+  }, [churches]);
+
+  return <ChurchContext.Provider value={{ activeChurchId, setActiveChurchId: safeSetActiveChurchId, churches, fetchChurches, activeChurch }}>{children}</ChurchContext.Provider>;
+}
+
+function userIsSuperAdmin(churches: Church[]) {
+  return false;
 }

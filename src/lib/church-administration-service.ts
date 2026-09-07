@@ -27,6 +27,8 @@ export type MembershipAdminRow = {
   updated_at: string;
 };
 
+export type InvitationRole = MembershipAdminRow['role'];
+
 export function createChurchAdministrationService(client: SupabaseClient) {
   return {
     async getChurch(churchId: string): Promise<ChurchProfile> {
@@ -70,6 +72,22 @@ export function createChurchAdministrationService(client: SupabaseClient) {
       const { data, error } = await client.rpc('admin_list_church_memberships', { p_church_id: churchId });
       if (error) throw new Error(error.message);
       return (data ?? []) as MembershipAdminRow[];
+    },
+
+    async createInvitation(input: {
+      churchId: string;
+      email: string;
+      role: InvitationRole;
+      expiresDays?: number;
+    }) {
+      const { data, error } = await client.rpc('admin_create_church_invitation', {
+        p_church_id: input.churchId,
+        p_email: input.email.trim().toLowerCase(),
+        p_role: input.role,
+        p_expires_days: input.expiresDays ?? 7,
+      });
+      if (error) throw new Error(error.message);
+      return data;
     },
 
     async setRole(membershipId: string, role: MembershipAdminRow['role']) {

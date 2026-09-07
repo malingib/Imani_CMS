@@ -1,8 +1,6 @@
 import type { AppView, User } from '../../types';
 import { UserRole } from '../../types';
 
-const PLATFORM_OWNER_EMAIL = 'malingib9@gmail.com';
-
 type SupabaseUserLike = {
   id: string;
   email?: string | null;
@@ -12,19 +10,17 @@ type SupabaseUserLike = {
 
 const VALID_USER_ROLES = new Set<string>(Object.values(UserRole));
 
+/**
+ * Resolve only trusted authorization metadata.
+ *
+ * Roles must be provisioned server-side in app_metadata (or by a server-side
+ * profile/RPC in a future revision). user_metadata is user-editable and must
+ * never grant privileges.
+ */
 export function resolveUserRole(supabaseUser: SupabaseUserLike): UserRole {
-  if (supabaseUser.email?.toLowerCase() === PLATFORM_OWNER_EMAIL) {
-    return UserRole.SUPER_ADMIN;
-  }
-
   const appMetaRole = supabaseUser.app_metadata?.role;
   if (typeof appMetaRole === 'string' && VALID_USER_ROLES.has(appMetaRole)) {
     return appMetaRole as UserRole;
-  }
-
-  const userMetaRole = supabaseUser.user_metadata?.role;
-  if (typeof userMetaRole === 'string' && VALID_USER_ROLES.has(userMetaRole)) {
-    return userMetaRole as UserRole;
   }
 
   return UserRole.MEMBER;

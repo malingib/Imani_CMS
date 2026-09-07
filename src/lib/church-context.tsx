@@ -21,27 +21,18 @@ export function ChurchProvider({ children, churchId: initialChurchId }: { childr
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setChurches([]); setActiveChurchId(null); return; }
 
-    const isSuperAdmin = user.app_metadata?.role === 'SUPER_ADMIN';
-    if (isSuperAdmin) {
+    if (user.app_metadata?.role === 'SUPER_ADMIN') {
       const { data } = await supabase.from('churches').select('*').order('name');
       if (data) setChurches(data as Church[]);
       return;
     }
 
-    const { data } = await supabase
-      .from('church_memberships')
-      .select('church_id, churches(id, name, slug, tier, status)')
-      .eq('user_id', user.id)
-      .eq('status', 'active');
-
+    const { data } = await supabase.from('church_memberships').select('church_id, churches(id, name, slug, tier, status)').eq('user_id', user.id).eq('status', 'active');
     const authorized = (data || []).map((row: any) => row.churches).filter(Boolean) as Church[];
     setChurches(authorized);
 
-    if (activeChurchId && !authorized.some(church => church.id === activeChurchId)) {
-      setActiveChurchId(authorized[0]?.id ?? null);
-    } else if (!activeChurchId && authorized.length === 1) {
-      setActiveChurchId(authorized[0].id);
-    }
+    if (activeChurchId && !authorized.some(church => church.id === activeChurchId)) setActiveChurchId(authorized[0]?.id ?? null);
+    else if (!activeChurchId && authorized.length === 1) setActiveChurchId(authorized[0].id);
   }, [activeChurchId]);
 
   const activeChurch = churches.find(c => c.id === activeChurchId) || null;
@@ -50,12 +41,10 @@ export function ChurchProvider({ children, churchId: initialChurchId }: { childr
 
   const safeSetActiveChurchId = useCallback((id: string | null) => {
     if (id === null) { setActiveChurchId(null); return; }
-    if (userIsSuperAdmin(churches) || churches.some(church => church.id === id)) setActiveChurchId(id);
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.app_metadata?.role === 'SUPER_ADMIN' || churches.some(church => church.id === id)) setActiveChurchId(id);
+    });
   }, [churches]);
 
   return <ChurchContext.Provider value={{ activeChurchId, setActiveChurchId: safeSetActiveChurchId, churches, fetchChurches, activeChurch }}>{children}</ChurchContext.Provider>;
-}
-
-function userIsSuperAdmin(churches: Church[]) {
-  return false;
 }

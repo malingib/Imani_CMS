@@ -40,15 +40,15 @@ describe("app shell helpers", () => {
     expect(fallbackUser.role).toBe(UserRole.MEMBER);
   });
 
-  it("treats the platform owner email as super admin even without metadata", () => {
+  it("does not elevate a user from email or user metadata alone", () => {
     const owner = mapSupabaseUserToAppUser({
       id: "owner-1",
-      email: "malingib9@gmail.com",
-      user_metadata: { name: "Brighton" },
+      email: "platform-owner@example.com",
+      user_metadata: { name: "Platform Owner", role: UserRole.SUPER_ADMIN },
       app_metadata: {},
     });
 
-    expect(owner.role).toBe(UserRole.SUPER_ADMIN);
+    expect(owner.role).toBe(UserRole.MEMBER);
     expect(owner.churchId).toBeUndefined();
   });
 

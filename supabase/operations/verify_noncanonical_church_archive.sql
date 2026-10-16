@@ -34,6 +34,7 @@ do $verify$
 declare
   canonical_id constant uuid := '00000000-0000-0000-0000-000000000001';
   t record;
+  pk_expression text;
   verify_sql text;
 begin
   for t in
@@ -47,6 +48,23 @@ begin
       and c.column_name = 'church_id'
     order by c.table_name
   loop
+    select string_agg(
+      format('%L, to_jsonb(src)->%L', a.attname, a.attname),
+      ', ' order by k.ord
+    )
+    into pk_expression
+    from pg_index i
+    cross join lateral unnest(i.indkey) with ordinality as k(attnum, ord)
+    join pg_attribute a
+      on a.attrelid = i.indrelid
+     and a.attnum = k.attnum
+    where i.indrelid = format('public.%I', t.table_name)::regclass
+      and i.indisprimary;
+
+    if pk_expression is null then
+      raise exception 'Verification stopped: public.% has no primary key', t.table_name;
+    end if;
+
     verify_sql := format($sql$
       with church_ids as (
         select distinct (to_jsonb(src)->>'church_id')::uuid as church_id
@@ -76,7 +94,7 @@ begin
              select 1 from imani_archive.row_snapshots a
              where a.source_table = %2$L
                and a.church_id = ids.church_id
-               and a.row_hash = md5(to_jsonb(src)::text)
+               and a.source_pk = jsonb_build_object(%3$s)
            )),
         (select count(*) from imani_archive.row_snapshots a
          where a.source_table = %2$L
@@ -87,7 +105,7 @@ begin
                and md5(to_jsonb(src)::text) = a.row_hash
            ))
       from church_ids ids
-    $sql$, t.table_name, t.table_name);
+    $sql$, t.table_name, t.table_name, pk_expression);
 
     execute verify_sql using canonical_id;
   end loop;
@@ -115,6 +133,8 @@ from imani_archive_verification_report;
 -- Important:
 -- * "archived_rows_not_currently_matching_source" is informational, not proof of
 --   loss: a row may have changed or been removed since the snapshot was taken.
+-- * Missing snapshots are checked by source primary-key JSON, independently of
+--   row content hashes. Hash mismatches are reported separately.
 -- * This report is not a substitute for comparing against a frozen baseline,
---   primary-key sets, foreign-key relationships, and a verified restorable backup.
+--   foreign-key relationships, and a verified restorable backup.
 -- * Do not delete operational rows based on this report alone.

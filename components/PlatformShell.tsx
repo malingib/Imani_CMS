@@ -21,13 +21,15 @@ const PlatformShell: React.FC<Props> = ({ onOpenClient, onSelectClient, onLogout
   const isRestrictions = location.pathname.startsWith('/platform/restrictions');
   const isSuspensions = location.pathname.startsWith('/platform/suspensions');
   const isUpdates = location.pathname.startsWith('/platform/updates');
-  const isControls = isBilling || isRestrictions || isSuspensions || isUpdates;
+  const isActivity = location.pathname.startsWith('/platform/activity');
+  const isControls = isBilling || isRestrictions || isSuspensions || isUpdates || isActivity;
   const items = [
     { label: 'Overview', path: '/platform', icon: Activity, active: !isTenants && !isControls },
     { label: 'Billing & Plans', path: '/platform/billing', icon: Building2, active: isBilling },
     { label: 'Restrictions', path: '/platform/restrictions', icon: ShieldCheck, active: isRestrictions },
     { label: 'Suspensions', path: '/platform/suspensions', icon: Network, active: isSuspensions },
     { label: 'Updates & Releases', path: '/platform/updates', icon: RefreshCw, active: isUpdates },
+    { label: 'Audit & Activity', path: '/platform/activity', icon: Activity, active: isActivity },
     { label: 'Client Workspace', path: '/tenants', icon: Globe, active: isTenants },
   ];
 

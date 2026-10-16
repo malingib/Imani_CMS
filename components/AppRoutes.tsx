@@ -54,12 +54,12 @@ const PlatformDashboard = lazy(() => import('./PlatformDashboard'));
 const TenantRegistry = lazy(() => import('./TenantRegistry'));
 
 function Protected({ children }: { children: React.ReactNode }) {
-  const { loading, dataError, refreshData } = useApp();
+  const { loading, dataError, refreshData, currentUser, viewingChurch } = useApp();
   const { configurationError } = useChurch();
   if (loading === 'auth-loading' || loading === 'data-loading') return (
     <div className="p-10 max-w-[1600px] mx-auto"><SkeletonBlock /></div>
   );
-  if (configurationError) return <div className="max-w-xl mx-auto mt-16 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900"><h2 className="font-bold">Church deployment configuration required</h2><p className="mt-2 text-sm">{configurationError}</p></div>;
+  if (configurationError && !(currentUser?.role === UserRole.SUPER_ADMIN && !viewingChurch)) return <div className="max-w-xl mx-auto mt-16 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900"><h2 className="font-bold">Church deployment configuration required</h2><p className="mt-2 text-sm">{configurationError}</p></div>;
   if (loading === 'error' && dataError) return <ErrorFallback error={new Error(dataError)} onRetry={refreshData} fullPage={false} />;
   return <>{children}</>;
 }

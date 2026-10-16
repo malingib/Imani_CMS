@@ -5,10 +5,7 @@ import {
   Users,
   CalendarDays,
   HandCoins,
-  ClipboardList,
   ShieldCheck,
-  HeartHandshake,
-  Menu,
 } from 'lucide-react';
 import { ImaniLogoIcon } from './Sidebar';
 

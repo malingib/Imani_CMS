@@ -104,7 +104,7 @@ The cutover must fail closed if any source/archive count or hash differs. Do not
 - The application-only single-church refactor is in draft PR #13: https://github.com/malingib/Imani_CMS/pull/13
 - CI (TypeScript typecheck and Vitest) passed on the latest branch commit at the time of this plan.
 - No production schema or data was changed for this plan.
-- Added a draft additive-only snapshot script at `supabase/operations/archive_noncanonical_churches.sql`. It creates a restricted archive schema and snapshots non-canonical church rows without updating or deleting source records. It has not been executed against production. Next: test it against a restored staging copy; produce the per-table verification report; then review Phase C security-policy changes before production execution.
+- Added a draft additive-only snapshot script at `supabase/operations/archive_noncanonical_churches.sql`. It creates a restricted archive schema and snapshots non-canonical church rows without updating or deleting source records. Added `supabase/operations/verify_noncanonical_church_archive.sql`, a read-only post-snapshot report for per-table/per-church source counts, archived counts, missing current-row snapshots, and archived rows that no longer match the live source. Neither SQL script has been executed or syntax-validated against a restored staging copy. Next: validate both scripts on a restored staging copy; independently compare primary-key sets and row hashes against a frozen baseline; then review Phase C security-policy changes before production execution.
 
 ## 6. Known security issue
 

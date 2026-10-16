@@ -9,7 +9,7 @@ type ChurchControl = {
   suspended_at: string | null; suspension_reason: string | null; restrictions: Record<string, boolean>;
   minimum_client_version: string | null; latest_client_version: string | null;
 };
-type Release = { id: string; version: string; title: string; notes: string; release_channel: string; status: string; published_at: string | null; created_at: string };
+type Release = { id: string; version: string; title: string; notes: string; release_channel: string; status: string; published_at: string | null; created_at: string };\ntype ActivityLog = { id: string; action: string; user_name: string; module: string; severity: string; timestamp: string; metadata: Record<string, unknown> | null };
 
 const RESTRICTIONS = [
   { key: 'members', label: 'Membership management', description: 'Create, edit, import and export member records.' },
@@ -23,7 +23,7 @@ const RESTRICTIONS = [
 const PlatformControls: React.FC = () => {
   const { activeChurchId } = useChurch();
   const [church, setChurch] = useState<ChurchControl | null>(null);
-  const [releases, setReleases] = useState<Release[]>([]);
+  const [releases, setReleases] = useState<Release[]>([]);\n  const [activity, setActivity] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +53,11 @@ const PlatformControls: React.FC = () => {
       const { data: releaseData, error: releaseError } = await supabase.from('platform_releases').select('*').order('created_at', { ascending: false });
       if (releaseError) throw releaseError;
       setReleases((releaseData || []) as Release[]);
+      if (activeChurchId) {
+        const { data: activityData, error: activityError } = await supabase.from('audit_logs').select('id,action,user_name,module,severity,timestamp,metadata').eq('church_id', activeChurchId).order('timestamp', { ascending: false }).limit(50);
+        if (activityError) throw activityError;
+        setActivity((activityData || []) as ActivityLog[]);
+      }
     } catch (e) { setError(e instanceof Error ? e.message : 'Unable to load platform controls.'); }
     finally { setLoading(false); }
   }, [activeChurchId]);
@@ -117,8 +122,8 @@ const PlatformControls: React.FC = () => {
   if (!church) return <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">No configured Demo Church record is available. Check the deployment church ID and permissions.</div>;
 
   const path = window.location.pathname;
-  const section = path.includes('/billing') ? 'billing' : path.includes('/restrictions') ? 'restrictions' : path.includes('/suspensions') ? 'suspensions' : path.includes('/updates') ? 'updates' : 'billing';
-  const heading = section === 'billing' ? 'Billing & Plans' : section === 'restrictions' ? 'Feature Restrictions' : section === 'suspensions' ? 'Suspensions & Access' : 'Platform Updates';
+  const section = path.includes('/billing') ? 'billing' : path.includes('/restrictions') ? 'restrictions' : path.includes('/suspensions') ? 'suspensions' : path.includes('/updates') ? 'updates' : path.includes('/activity') ? 'activity' : 'billing';
+  const heading = section === 'billing' ? 'Billing & Plans' : section === 'restrictions' ? 'Feature Restrictions' : section === 'suspensions' ? 'Suspensions & Access' : section === 'activity' ? 'Audit & Activity' : 'Platform Updates';
 
   return <div className="space-y-7">
     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -155,9 +160,14 @@ const PlatformControls: React.FC = () => {
       <p className="mt-5 text-xs leading-5 text-slate-500">Suspension must be enforced by the app and database access policies, not only by hiding navigation. The superadmin will retain platform access to restore service.</p>
     </div>}
 
+    {section === 'activity' && <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div className="border-b border-slate-100 p-5"><h2 className="font-black">Recent platform activity</h2><p className="mt-1 text-sm text-slate-500">Latest audited changes associated with the configured church.</p></div>
+      {activity.length === 0 ? <p className="p-6 text-sm text-slate-500">No audit events found for this client yet.</p> : activity.map(item => <div key={item.id} className="flex flex-col gap-2 border-b border-slate-100 p-5 last:border-0 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex flex-wrap items-center gap-2"><strong className="text-sm">{item.action}</strong><span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold uppercase">{item.severity}</span></div><p className="mt-1 text-xs text-slate-500">{item.user_name} · {item.module}</p>{item.metadata && <pre className="mt-2 whitespace-pre-wrap break-words text-xs text-slate-400">{JSON.stringify(item.metadata, null, 2)}</pre>}</div><time className="shrink-0 text-xs text-slate-400">{item.timestamp ? new Date(item.timestamp).toLocaleString() : ''}</time></div>)}
+    </div>}
+
     {section === 'updates' && <div className="space-y-6">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-        <div className="mb-6 flex items-center gap-3"><UploadCloud className="text-brand-primary"/><div><h2 className="font-black">Release management</h2><p className="text-sm text-slate-500">Record release notes and mark stable releases as published or required.</p></div></div>
+        <div className="mb-6 flex items-center gap-3"><UploadCloud className="text-brand-primary"/><div><h2 className="font-black">Release management</h2><p className="text-sm text-slate-500">Record release notes and mark stable releases as published or required. This does not deploy code; deployments remain managed through GitHub and Vercel.</p></div></div>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="space-y-2 text-sm font-semibold">Version<input value={version} onChange={e=>setVersion(e.target.value)} placeholder="e.g. 1.4.0" className="w-full rounded-lg border border-slate-200 p-3"/></label>
           <label className="space-y-2 text-sm font-semibold">Release title<input value={releaseTitle} onChange={e=>setReleaseTitle(e.target.value)} placeholder="Release title" className="w-full rounded-lg border border-slate-200 p-3"/></label>

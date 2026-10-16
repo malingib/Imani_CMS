@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard, Users, Wallet, CalendarDays, Settings as SettingsIcon,
   LogOut, Layers, MessageSquare, BarChart3, PieChart, BookOpen, X,
-  Sparkles, Building2, ChevronDown, ShieldCheck, CreditCard, Receipt
+  Sparkles, Building2, ChevronDown, ShieldCheck, CreditCard, Receipt, Globe, Network
 } from 'lucide-react';
 import { AppView, User, UserRole } from '../types';
 
@@ -44,6 +44,8 @@ const adminItems = [
   { id: 'SERMONS', label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.MEMBER] },
   { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
   { id: 'BILLING', label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
+  { id: 'PLATFORM_DASHBOARD', label: 'Superadmin Dashboard', icon: Globe, roles: [UserRole.SUPER_ADMIN] },
+  { id: 'TENANTS', label: 'Client Workspace', icon: Network, roles: [UserRole.SUPER_ADMIN] },
 ];
 
 const memberItems = [

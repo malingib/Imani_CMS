@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from './supabase';
 
-interface Church { id: string; name: string; slug: string; tier: string; status: string; }
+interface Church { id: string; name: string; slug: string; tier: string; status: string; restrictions?: Record<string, boolean>; billing_status?: string; monthly_fee?: number; billing_period_end?: string | null; suspension_reason?: string | null; }
 interface ChurchContextType {
   activeChurchId: string | null;
   setActiveChurchId: (id: string | null) => void;
@@ -57,11 +57,12 @@ export function ChurchProvider({ children, churchId: initialChurchId }: { childr
 
     const { data, error } = await supabase
       .from('churches')
-      .select('id, name, slug, tier, status')
+      .select('id, name, slug, tier, status, restrictions, billing_status, monthly_fee, billing_period_end, suspension_reason')
       .eq('id', deploymentChurchId)
       .maybeSingle();
 
-    if (error || !data || data.status === 'archived' || data.status === 'suspended') {
+    const isSuperAdmin = user.app_metadata?.role === 'SUPER_ADMIN';
+    if (error || !data || data.status === 'archived' || (data.status === 'suspended' && !isSuperAdmin)) {
       setChurches([]);
       setResolvedChurchId(null);
       setConfigurationError(

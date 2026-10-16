@@ -30,13 +30,13 @@ const FALLBACK_VERSES = [
 const VERSE_INTERVAL = 30000; 
 
 const ImaniBrandingLogo = () => (
-  <div className="flex flex-col items-center justify-center space-y-8">
-    <div className="w-48 h-48 md:w-64 md:h-64 drop-shadow-2xl">
+  <div className="flex flex-col items-center justify-center space-y-5">
+    <div className="w-36 h-36 xl:w-44 xl:h-44 drop-shadow-xl">
       <ImaniLogoIcon />
     </div>
     <div className="text-center">
-      <h1 className="text-white text-6xl md:text-8xl font-black tracking-[0.2em] leading-none mb-2">IMANI</h1>
-      <p className="text-white text-[10px] md:text-xs font-black uppercase tracking-[0.4em] opacity-60">Church Management System</p>
+      <h1 className="text-white text-5xl xl:text-6xl font-black tracking-[0.16em] leading-none mb-2">IMANI</h1>
+      <p className="text-white text-[10px] font-black uppercase tracking-[0.3em] opacity-70">Church Management System</p>
     </div>
   </div>
 );
@@ -153,15 +153,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4 sm:p-6 lg:p-10 font-sans">
-      <div className="w-full max-w-6xl grid lg:grid-cols-2 bg-white rounded-[2.5rem] lg:rounded-[3rem] shadow-2xl overflow-hidden min-h-[700px]">
+    <div className="h-[100dvh] min-h-0 overflow-hidden flex flex-col items-center bg-slate-50 p-3 sm:p-4 font-sans">
+      <div className="w-full max-w-6xl flex-1 min-h-0 grid lg:grid-cols-2 bg-white rounded-2xl lg:rounded-3xl shadow-xl overflow-hidden">
         
         {/* Left Side: Solid Warm Navy Panel (Desktop Only) */}
-        <div className="hidden lg:flex flex-col items-center justify-center p-12 bg-brand-primary relative overflow-hidden grid-pattern">
+        <div className="hidden lg:flex flex-col items-center justify-center p-7 xl:p-10 bg-brand-primary relative overflow-hidden grid-pattern">
           <ImaniBrandingLogo />
           
-          <div className="mt-16 w-full max-w-md relative z-10">
-            <div className={`p-8 bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 transition-all duration-1000 ${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div className="mt-7 xl:mt-9 w-full max-w-md relative z-10">
+            <div className={`p-5 xl:p-6 bg-white/5 rounded-2xl border border-white/10 transition-all duration-1000 ${fade ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <Quote className="text-brand-gold mb-3 opacity-60" size={24} />
               <p className="text-white text-lg font-bold italic leading-relaxed mb-4">"{currentVerse.text}"</p>
               <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">— {currentVerse.ref}</p>
@@ -176,14 +176,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
         </div>
 
         {/* Right Side: Auth Forms */}
-        <div className="p-8 sm:p-14 lg:p-16 flex flex-col justify-center bg-white relative">
+        <div className="min-h-0 overflow-y-auto p-5 sm:p-8 lg:p-9 xl:p-11 flex flex-col justify-center bg-white relative">
           
           {/* Mobile Logo Section */}
-          <div className="lg:hidden flex flex-col items-center mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-             <div className="w-20 h-20 mb-4 drop-shadow-lg">
+          <div className="lg:hidden flex flex-col items-center mb-5 sm:mb-6 animate-in fade-in slide-in-from-top-4 duration-500">
+             <div className="w-12 h-12 sm:w-14 sm:h-14 mb-2 drop-shadow-md">
                 <ImaniLogoIcon />
              </div>
-             <h2 className="text-2xl font-black text-brand-primary tracking-widest">IMANI CMS</h2>
+             <h2 className="text-xl sm:text-2xl font-black text-brand-primary tracking-widest">IMANI CMS</h2>
              <div className="w-12 h-1 bg-brand-gold rounded-full mt-2"></div>
           </div>
 
@@ -196,11 +196,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
             </button>
           )}
 
-          <div className="mb-8 text-center lg:text-left">
-            <h3 className="text-3xl lg:text-4xl font-black text-brand-primary tracking-tight uppercase">
+          <div className="mb-5 sm:mb-6 text-center lg:text-left">
+            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-primary tracking-tight uppercase">
               {mode === 'LOGIN' ? 'Sign In' : mode === 'SIGNUP' ? 'Create Account' : 'Reset Password'}
             </h3>
-            <p className="text-slate-500 mt-3 font-medium text-lg leading-relaxed">
+            <p className="text-slate-500 mt-2 font-medium text-sm sm:text-base leading-relaxed">
               {mode === 'LOGIN' ? 'Sign in to your account.' : 
                mode === 'SIGNUP' ? 'Create your account.' : 
                'Enter your email to receive recovery instructions.'}
@@ -222,7 +222,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
               </button>
             </div>
           ) : (
-            <form onSubmit={mode === 'LOGIN' ? handleLogin : mode === 'SIGNUP' ? handleSignUp : handleReset} className="space-y-5">
+            <form onSubmit={mode === 'LOGIN' ? handleLogin : mode === 'SIGNUP' ? handleSignUp : handleReset} className="space-y-4">
               {mode === 'SIGNUP' && (
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Full Name</label>
@@ -296,7 +296,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-5 bg-brand-primary text-white rounded-full font-black text-lg shadow-xl shadow-brand-primary/20 hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-70 group mt-4"
+                className="w-full py-3.5 sm:py-4 bg-brand-primary text-white rounded-full font-black text-base sm:text-lg shadow-lg shadow-brand-primary/20 hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-70 group mt-4"
               >
                 {isLoading ? <Loader2 className="animate-spin" /> : (
                   <>
@@ -309,7 +309,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
           )}
 
           {mode === 'LOGIN' && (
-            <div className="mt-8 text-center">
+            <div className="mt-5 text-center">
               <p className="text-sm text-slate-400 font-medium">
                 New to Imani? <button onClick={() => setMode('SIGNUP')} className="text-brand-indigo font-black hover:underline ml-1">Create an Account</button>
               </p>
@@ -317,7 +317,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
           )}
 
           {mode === 'LOGIN' && (
-            <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col items-center">
+            <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col items-center">
               <p className="text-[11px] text-slate-400 font-black tracking-tight opacity-80 uppercase">
                 Imani CMS • Church Management System
               </p>
@@ -327,7 +327,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
       </div>
 
       {/* Outside Card Footer - Optimized Centering */}
-      <div className="w-full max-w-6xl mt-12 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 px-4">
+      <div className="w-full max-w-6xl shrink-0 py-2 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-5 px-2 text-center">
         <div className="flex items-center gap-3 text-slate-400 justify-center text-center">
            <Globe size={16} className="shrink-0" />
            <p className="text-sm font-bold">
@@ -335,7 +335,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
            </p>
         </div>
         
-        <div className="flex items-center justify-center gap-6 sm:gap-10">
+        <div className="flex items-center justify-center gap-4 sm:gap-6">
            <button 
              onClick={() => onNavigateLegal('PRIVACY')} 
              className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-primary transition-colors whitespace-nowrap"

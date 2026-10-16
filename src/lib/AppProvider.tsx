@@ -78,7 +78,7 @@ export function useApp() {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
-  const { activeChurchId, setActiveChurchId, churches, fetchChurches } = useChurch();
+  const { activeChurchId, setActiveChurchId } = useChurch();
 
   const [state, setState] = useState<AppState>({
     loading: 'auth-loading',

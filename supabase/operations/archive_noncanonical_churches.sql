@@ -18,7 +18,7 @@ create table if not exists imani_archive.row_snapshots (
   row_hash text not null,
   row_data jsonb not null,
   archived_at timestamptz not null default now(),
-  constraint imani_archive_row_snapshots_source_hash_key unique (source_table, row_hash)
+  constraint imani_archive_row_snapshots_source_church_hash_key unique (source_table, church_id, row_hash)
 );
 
 create table if not exists imani_archive.church_records (
@@ -98,7 +98,7 @@ begin
        from public.%I t
        where (to_jsonb(t)->>''church_id'') is not null
          and (to_jsonb(t)->>''church_id'')::uuid <> $2
-       on conflict (source_table, row_hash) do nothing',
+       on conflict (source_table, church_id, row_hash) do nothing',
       t.table_name, pk_expression, t.table_name
     );
 

@@ -9,7 +9,8 @@ type ChurchControl = {
   suspended_at: string | null; suspension_reason: string | null; restrictions: Record<string, boolean>;
   minimum_client_version: string | null; latest_client_version: string | null;
 };
-type Release = { id: string; version: string; title: string; notes: string; release_channel: string; status: string; published_at: string | null; created_at: string };\ntype ActivityLog = { id: string; action: string; user_name: string; module: string; severity: string; timestamp: string; metadata: Record<string, unknown> | null };
+type Release = { id: string; version: string; title: string; notes: string; release_channel: string; status: string; published_at: string | null; created_at: string };
+type ActivityLog = { id: string; action: string; user_name: string; module: string; severity: string; timestamp: string; metadata: Record<string, unknown> | null };
 
 const RESTRICTIONS = [
   { key: 'members', label: 'Membership management', description: 'Create, edit, import and export member records.' },

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Activity, Building2, ChevronRight, Globe, LogOut, Network, ShieldCheck } from 'lucide-react';
+import { Activity, Building2, ChevronRight, Globe, LogOut, Network, RefreshCw, ShieldCheck } from 'lucide-react';
 import PlatformDashboard from './PlatformDashboard';
 import TenantRegistry from './TenantRegistry';
+import PlatformControls from './PlatformControls';
 import { ImaniLogoIcon } from './Sidebar';
 
 type Props = {
@@ -16,9 +17,18 @@ const PlatformShell: React.FC<Props> = ({ onOpenClient, onSelectClient, onLogout
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isTenants = location.pathname.startsWith('/tenants');
+  const isBilling = location.pathname.startsWith('/platform/billing');
+  const isRestrictions = location.pathname.startsWith('/platform/restrictions');
+  const isSuspensions = location.pathname.startsWith('/platform/suspensions');
+  const isUpdates = location.pathname.startsWith('/platform/updates');
+  const isControls = isBilling || isRestrictions || isSuspensions || isUpdates;
   const items = [
-    { label: 'Overview', path: '/platform', icon: Activity, active: !isTenants },
-    { label: 'Client Workspace', path: '/tenants', icon: Network, active: isTenants },
+    { label: 'Overview', path: '/platform', icon: Activity, active: !isTenants && !isControls },
+    { label: 'Billing & Plans', path: '/platform/billing', icon: Building2, active: isBilling },
+    { label: 'Restrictions', path: '/platform/restrictions', icon: ShieldCheck, active: isRestrictions },
+    { label: 'Suspensions', path: '/platform/suspensions', icon: Network, active: isSuspensions },
+    { label: 'Updates & Releases', path: '/platform/updates', icon: RefreshCw, active: isUpdates },
+    { label: 'Client Workspace', path: '/tenants', icon: Globe, active: isTenants },
   ];
 
   return (
@@ -52,7 +62,9 @@ const PlatformShell: React.FC<Props> = ({ onOpenClient, onSelectClient, onLogout
         <div className="mx-auto max-w-[1500px] p-5 sm:p-8 lg:p-10">
           {isTenants
             ? <TenantRegistry onImpersonate={onSelectClient} />
-            : <PlatformDashboard onOpenClient={onOpenClient} />}
+            : isControls
+              ? <PlatformControls />
+              : <PlatformDashboard onOpenClient={onOpenClient} />}
         </div>
       </main>
     </div>

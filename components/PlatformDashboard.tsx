@@ -37,9 +37,9 @@ const PlatformDashboard: React.FC<{ onOpenClient?: () => void }> = ({ onOpenClie
   const healthSub = `${stats.activeChurches}/${stats.totalChurches} churches active`;
 
   const cards = [
-    { label: 'Total Churches', value: stats.totalChurches, sub: `${stats.activeChurches} active`, icon: Building2, color: 'bg-brand-indigo' },
+    { label: 'Configured Clients', value: stats.totalChurches, sub: `${stats.activeChurches} active`, icon: Building2, color: 'bg-brand-indigo' },
     { label: 'Total Members', value: stats.totalMembers, sub: 'across all churches', icon: Users, color: 'bg-brand-primary' },
-    { label: 'Total Revenue', value: `KES ${(stats.totalRevenue / 1000).toFixed(0)}K`, sub: 'all time', icon: TrendingUp, color: 'bg-brand-emerald' },
+    { label: 'Church Income', value: `KES ${(stats.totalRevenue / 1000).toFixed(0)}K`, sub: 'recorded giving and income · all time', icon: TrendingUp, color: 'bg-brand-emerald' },
     { label: 'System Health', value: healthLabel, sub: healthSub, icon: Activity, color: healthColor },
   ];
 
@@ -75,7 +75,7 @@ const PlatformDashboard: React.FC<{ onOpenClient?: () => void }> = ({ onOpenClie
         <AlertCircle size={24} className="text-amber-600 shrink-0" />
         <div>
           <p className="font-black text-amber-800 text-sm">Platform Overview</p>
-          <p className="text-amber-700 text-xs font-bold mt-1">Use the Tenants section to manage individual churches, or drill into their data via the church switcher.</p>
+          <p className="text-amber-700 text-xs font-bold mt-1">Use Billing & Plans, Restrictions, Suspensions, and Updates in the platform navigation to administer Demo Church independently from church operations.</p>
         </div>
       </div>
     </div>

@@ -11,7 +11,9 @@ interface ChurchContextType {
   configurationError: string | null;
 }
 
-const configuredChurchId = (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() || null;
+const CANONICAL_CHURCH_ID = '00000000-0000-0000-0000-000000000001';
+const configuredChurchId =
+  (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() || CANONICAL_CHURCH_ID;
 
 export const ChurchContext = createContext<ChurchContextType>({
   activeChurchId: configuredChurchId,
@@ -23,10 +25,17 @@ export const ChurchContext = createContext<ChurchContextType>({
 });
 export const useChurch = () => useContext(ChurchContext);
 
-/** One church per installation. A configured ID pins this deployment; otherwise
- * ordinary users are resolved only when they have exactly one active membership. */
+/**
+ * Imani is deployed for one church only. The canonical church ID is the default;
+ * VITE_CHURCH_ID is retained as an explicit deployment override for a separately
+ * provisioned installation. No membership-based tenant discovery or switching
+ * occurs in the browser.
+ */
 export function ChurchProvider({ children, churchId: initialChurchId }: { children: ReactNode; churchId: string | null }) {
-  const deploymentChurchId = configuredChurchId || initialChurchId;
+  const deploymentChurchId =
+    (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() ||
+    initialChurchId ||
+    CANONICAL_CHURCH_ID;
   const [activeChurchId, setResolvedChurchId] = useState<string | null>(deploymentChurchId);
   const [churches, setChurches] = useState<Church[]>([]);
   const [configurationError, setConfigurationError] = useState<string | null>(null);
@@ -41,72 +50,48 @@ export function ChurchProvider({ children, churchId: initialChurchId }: { childr
     }
     if (!user) {
       setChurches([]);
-      setResolvedChurchId(null);
-      setConfigurationError(null);
-      return;
-    }
-
-    if (deploymentChurchId) {
-      const { data, error } = await supabase
-        .from('churches')
-        .select('id, name, slug, tier, status')
-        .eq('id', deploymentChurchId)
-        .maybeSingle();
-      if (error || !data) {
-        setChurches([]);
-        setResolvedChurchId(null);
-        setConfigurationError('The configured church was not found. Check VITE_CHURCH_ID for this deployment.');
-        return;
-      }
-      setChurches([data as Church]);
-      setResolvedChurchId(data.id);
+      setResolvedChurchId(deploymentChurchId);
       setConfigurationError(null);
       return;
     }
 
     const { data, error } = await supabase
-      .from('church_memberships')
-      .select('church_id, churches(id, name, slug, tier, status)')
-      .eq('user_id', user.id)
-      .eq('status', 'active');
+      .from('churches')
+      .select('id, name, slug, tier, status')
+      .eq('id', deploymentChurchId)
+      .maybeSingle();
 
-    if (error) {
+    if (error || !data || data.status === 'archived' || data.status === 'suspended') {
       setChurches([]);
       setResolvedChurchId(null);
-      setConfigurationError('Unable to load your church access. Please contact the church administrator.');
+      setConfigurationError(
+        'The configured church is unavailable. Verify VITE_CHURCH_ID and the deployment database.'
+      );
       return;
     }
 
-    const authorized = (data || []).map((row: any) => row.churches).filter(Boolean) as Church[];
-    if (authorized.length === 1) {
-      setChurches(authorized);
-      setResolvedChurchId(authorized[0].id);
-      setConfigurationError(null);
-      return;
-    }
-
-    setChurches([]);
-    setResolvedChurchId(null);
-    setConfigurationError(
-      authorized.length > 1
-        ? 'This installation is configured for one church. Set VITE_CHURCH_ID to the church assigned to this deployment.'
-        : user.app_metadata?.role === 'SUPER_ADMIN'
-          ? 'Set VITE_CHURCH_ID for this single-church deployment.'
-          : 'Your account does not have an active church membership.'
-    );
+    setChurches([data as Church]);
+    setResolvedChurchId(data.id);
+    setConfigurationError(null);
   }, [deploymentChurchId]);
 
   const activeChurch = churches.find(c => c.id === activeChurchId) || null;
   useEffect(() => { void fetchChurches(); }, [fetchChurches]);
 
-  // A deployed installation cannot switch church scope from the browser.
+  // A single-church deployment never permits browser-driven church switching.
   const safeSetActiveChurchId = useCallback((id: string | null) => {
-    if (id === activeChurchId) return;
-    if (deploymentChurchId && id === deploymentChurchId) setResolvedChurchId(id);
-  }, [activeChurchId, deploymentChurchId]);
+    if (id === deploymentChurchId) setResolvedChurchId(deploymentChurchId);
+  }, [deploymentChurchId]);
 
   return (
-    <ChurchContext.Provider value={{ activeChurchId, setActiveChurchId: safeSetActiveChurchId, churches, fetchChurches, activeChurch, configurationError }}>
+    <ChurchContext.Provider value={{
+      activeChurchId,
+      setActiveChurchId: safeSetActiveChurchId,
+      churches,
+      fetchChurches,
+      activeChurch,
+      configurationError,
+    }}>
       {children}
     </ChurchContext.Provider>
   );

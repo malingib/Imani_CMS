@@ -78,7 +78,7 @@ export function useApp() {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
-  const { activeChurchId, setActiveChurchId } = useChurch();
+  const { activeChurchId, setActiveChurchId, fetchChurches } = useChurch();
 
   const [state, setState] = useState<AppState>({
     loading: 'auth-loading',
@@ -151,6 +151,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (authLoading) return;
     if (isAuthenticated && supabaseUser) {
+      void fetchChurches();
       const nextUser = mapSupabaseUserToAppUser(supabaseUser);
       setState(prev => ({
         ...prev,
@@ -164,7 +165,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } else if (!isAuthenticated) {
       setState(prev => ({ ...prev, currentUser: null, loading: 'ready' }));
     }
-  }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, setActiveChurchId]);
+  }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, setActiveChurchId, fetchChurches]);
 
   useEffect(() => {
     if (!isAuthenticated || isPlatformSession) {

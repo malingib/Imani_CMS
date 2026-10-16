@@ -64,6 +64,7 @@ function Protected({ children }: { children: React.ReactNode }) {
 
 const AccountShell = () => {
   const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
+  const { activeChurchId } = useChurch();
   const location = useLocation();
   const navigateToPath = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);

@@ -17,8 +17,6 @@ const RESTRICTIONS = [
   { key: 'finance', label: 'Finance and giving', description: 'Transactions, budgets, giving and financial reports.' },
   { key: 'communications', label: 'Communications', description: 'Church-wide announcements and messaging tools.' },
   { key: 'events', label: 'Events and groups', description: 'Manage events, attendance and ministry groups.' },
-  { key: 'exports', label: 'Data exports', description: 'Download CSV and report exports.' },
-  { key: 'ai', label: 'AI features', description: 'AI-assisted features and generated content.' },
 ] as const;
 
 const PlatformControls: React.FC = () => {

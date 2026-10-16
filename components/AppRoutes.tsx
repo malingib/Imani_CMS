@@ -10,6 +10,7 @@ import { getDefaultViewForUserRole } from '../src/lib/app-user';
 import { triggerStkPush } from '../src/lib/mpesa-service';
 import { SkeletonBlock, ToastContainer, ErrorFallback } from './shared';
 import NotificationsPanel from './NotificationsPanel';
+import PlatformShell from './PlatformShell';
 
 const ADMIN_VIEWS: AppView[] = [
   'DASHBOARD', 'MEMBERS', 'FINANCE', 'GROUPS', 'EVENTS', 'COMMUNICATION',
@@ -101,6 +102,28 @@ const AccountShell = () => {
     const { supabase } = await import('../src/lib/supabase-auth');
     await supabase.auth.signOut();
   };
+
+  // Platform administration has its own shell and navigation. Church modules are
+  // rendered only after the superadmin explicitly opens the configured client workspace.
+  if (currentUser.role === UserRole.SUPER_ADMIN && !viewingChurch) {
+    return (
+      <PlatformShell
+        onOpenClient={() => {
+          if (activeChurchId) {
+            handleSelectChurch(activeChurchId);
+            navigateToPath(ROUTES.DASHBOARD.path);
+          } else {
+            addToast('No configured client church is available.', 'error');
+          }
+        }}
+        onSelectClient={(id) => {
+          handleSelectChurch(id);
+          navigateToPath(ROUTES.DASHBOARD.path);
+        }}
+        onLogout={handleLogout}
+      />
+    );
+  }
 
   return (
     <>

@@ -1,20 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import {
-  ArrowRight,
-  BadgeCheck,
-  BarChart3,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  CircleDollarSign,
-  Facebook,
-  Linkedin,
-  MessageSquareText,
-  Play,
-  ShieldCheck,
-  Sparkles,
-  Twitter,
+  ArrowUpRight,
+  Check,
   Users,
+  CalendarDays,
+  HandCoins,
+  ClipboardList,
+  ShieldCheck,
+  HeartHandshake,
+  Menu,
 } from 'lucide-react';
 import { ImaniLogoIcon } from './Sidebar';
 
@@ -22,618 +16,228 @@ interface LandingPageProps {
   onGetStarted: () => void;
 }
 
-const partnerLogos = ['GracePoint', 'New Dawn', 'Jubilee', 'City Chapel', 'The Well'];
-
-const featureCards = [
+const workflows = [
   {
-    icon: ShieldCheck,
-    title: 'Role-based access',
-    description: 'Finance officers, pastors, and admins each see what they need. No shared passwords.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Configurable workflows',
-    description: 'Rename fields, reorder steps, adjust permissions to match how your ministry runs.',
-  },
-  {
-    icon: MessageSquareText,
-    title: 'Built-in communications',
-    description: 'Send announcements, event reminders, invite links without switching tools.',
-  },
-];
-
-const showcaseRows = [
-  {
-    eyebrow: 'Members',
-    title: 'One record per person. One view per team.',
+    number: '01',
+    icon: Users,
+    title: 'Know your people',
     description:
-      'Attendance, household links, group assignments, pastoral notes. One place your staff opens every morning.',
-    points: ['Family and household structure', 'Attendance by service or event', 'Group and volunteer placement'],
-    accent: 'from-[#dff5ec] via-[#f7fcfa] to-white',
+      'Keep member details, family relationships, ministry groups and attendance together, so the people behind the records never get lost.',
   },
   {
-    eyebrow: 'Finance',
-    title: 'Contributions, budgets, and reports you can defend.',
+    number: '02',
+    icon: HandCoins,
+    title: 'Keep giving accountable',
     description:
-      'Track tithes, recurring expenses, budget lines. Export reports your board reviews in minutes.',
-    points: ['Tithes and offering records', 'Budget vs actual tracking', 'Board-ready reporting'],
-    accent: 'from-[#fff1d8] via-[#fffaf1] to-white',
+      'Record contributions and expenses, organise financial information, and give authorised leaders a clearer view of church resources.',
   },
   {
-    eyebrow: 'Communications',
-    title: 'Invitations that reach people before Sunday.',
+    number: '03',
+    icon: CalendarDays,
+    title: 'Bring the week together',
     description:
-      'Event invites, role reminders, segmented broadcasts. Track who opened, who responded.',
-    points: ['Invite and acceptance tracking', 'Role and event reminders', 'Broadcast segmentation'],
-    accent: 'from-[#ecebff] via-[#f8f7ff] to-white',
+      'Coordinate services, events, teams and follow-ups without relying on scattered notebooks and disconnected spreadsheets.',
   },
 ];
 
-const pricingCards = [
-  {
-    name: 'Starter',
-    monthly: 29,
-    yearly: 24,
-    description: 'One church. Core member and giving records.',
-    features: ['Member management', 'Giving records', 'Basic communications', 'Email support'],
-    highlight: false,
-  },
-  {
-    name: 'Growth',
-    monthly: 79,
-    yearly: 65,
-    description: 'Finance, events, groups, invitations for active ministry teams.',
-    features: ['Everything in Starter', 'Advanced reporting', 'Invitations and roles', 'Priority support'],
-    highlight: true,
-  },
-  {
-    name: 'Network',
-    monthly: 149,
-    yearly: 119,
-    description: 'Multi-campus visibility with platform administration.',
-    features: ['Multi-church visibility', 'Platform administration', 'Custom onboarding', 'Dedicated support'],
-    highlight: false,
-  },
+const principles = [
+  'Access based on each person’s church role',
+  'Clear records for responsible leadership',
+  'Practical workflows for everyday ministry',
+  'A focused system for your church',
 ];
-
-const testimonials = [
-  {
-    quote:
-      'We stopped duplicating attendance and giving work across three spreadsheets. One system, one source of truth.',
-    name: 'Naomi W.',
-    role: 'Operations Lead',
-  },
-  {
-    quote:
-      'Inviting branch staff and assigning roles used to take a full afternoon. Now it takes fifteen minutes.',
-    name: 'Peter K.',
-    role: 'Executive Pastor',
-  },
-  {
-    quote:
-      'Leadership review used to mean pulling numbers from five places. Now they get a single report on Monday morning.',
-    name: 'Janet M.',
-    role: 'Church Treasurer',
-  },
-  {
-    quote:
-      'Our volunteer coordination went from sticky notes to a system. Attendance tracking takes two taps now.',
-    name: 'David L.',
-    role: 'Volunteer Coordinator',
-  },
-  {
-    quote:
-      'The finance board used to wait weeks for reports. Now they get them the same day offerings are counted.',
-    name: 'Grace N.',
-    role: 'Finance Director',
-  },
-];
-
-const BlobPurple = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className={`absolute pointer-events-none ${className}`}>
-    <path
-      fill="#6d5dfc"
-      fillOpacity="0.08"
-      d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-45.8C87.4,-32.5,90,-16.3,88.4,-0.9C86.8,14.5,81,29,72.3,41.3C63.6,53.6,52,63.7,38.8,71.1C25.6,78.5,10.8,83.2,-3.2,88.1C-17.2,93,-34.4,98.1,-47.4,91.5C-60.4,84.9,-69.2,66.6,-76.4,49.1C-83.6,31.6,-89.2,14.9,-88.4,-1.4C-87.6,-17.7,-80.4,-33.6,-70.1,-46.3C-59.8,-59,-46.4,-68.5,-32.5,-75.8C-18.6,-83.1,-4.2,-88.2,7.9,-98.6C20,-109,30.6,-83.6,44.7,-76.4Z"
-      transform="translate(100 100)"
-    />
-  </svg>
-);
-
-const BlobOrange = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className={`absolute pointer-events-none ${className}`}>
-    <path
-      fill="#ffb44d"
-      fillOpacity="0.08"
-      d="M39.9,-65.7C53.4,-60.2,67.2,-52.7,75.3,-41.1C83.4,-29.5,85.8,-13.8,84.3,1.2C82.8,16.2,77.4,30.5,68.6,42.3C59.8,54.1,47.6,63.4,34.1,70.1C20.6,76.8,5.8,80.9,-8.8,83.2C-23.4,85.5,-37.8,86,-49.6,78.7C-61.4,71.4,-70.6,56.3,-77.1,41.2C-83.6,26.1,-87.4,11,-86.2,-3.8C-85,-18.6,-78.8,-33.1,-69.1,-44.2C-59.4,-55.3,-46.2,-63,-33.2,-68.8C-20.2,-74.6,-7.4,-78.5,3.8,-84.2C15,-89.9,26.4,-71.2,39.9,-65.7Z"
-      transform="translate(100 100)"
-    />
-  </svg>
-);
-
-const BlobDot = ({ className = '' }: { className?: string }) => (
-  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className={`absolute pointer-events-none ${className}`}>
-    {[...Array(5)].map((_, row) =>
-      [...Array(5)].map((_, col) => (
-        <circle
-          key={`${row}-${col}`}
-          cx={10 + col * 20}
-          cy={10 + row * 20}
-          r="1.5"
-          fill="#6d5dfc"
-          fillOpacity="0.15"
-        />
-      ))
-    )}
-  </svg>
-);
-
-const ScreenshotCard = ({
-  label,
-  value,
-  sublabel,
-  color,
-}: {
-  label: string;
-  value: string;
-  sublabel: string;
-  color: string;
-}) => (
-  <div className="rounded-[1.5rem] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.1)]">
-    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">{label}</p>
-    <p className={`mt-2 text-3xl font-black ${color}`}>{value}</p>
-    <p className="mt-1 text-xs font-medium text-slate-400">{sublabel}</p>
-  </div>
-);
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const testimonialRef = useRef<HTMLDivElement>(null);
-
-  const scrollTestimonials = (direction: 'left' | 'right') => {
-    if (!testimonialRef.current) return;
-    const scrollAmount = 340;
-    testimonialRef.current.scrollBy({
-      left: direction === 'left' ? -scrollAmount : scrollAmount,
-      behavior: 'smooth',
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-[#fcfcff] text-slate-900">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10">
+    <main className="min-h-screen bg-[#f7f4ec] text-[#202b24]">
+      <header className="border-b border-[#deded2] bg-[#f7f4ec]">
+        <div className="mx-auto flex min-h-[82px] max-w-7xl items-center justify-between px-5 sm:px-8">
+          <a href="#home" className="flex items-center gap-3" aria-label="Imani home">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#244638] p-2">
               <ImaniLogoIcon />
-            </div>
-            <p className="text-lg font-black tracking-tight text-brand-primary">Imani CMS</p>
-          </div>
-          <div className="hidden items-center gap-8 md:flex">
-            <a href="#features" className="text-sm font-bold text-slate-500 transition-colors hover:text-slate-900">Features</a>
-            <a href="#product" className="text-sm font-bold text-slate-500 transition-colors hover:text-slate-900">Product</a>
-            <a href="#pricing" className="text-sm font-bold text-slate-500 transition-colors hover:text-slate-900">Pricing</a>
+            </span>
+            <span>
+              <span className="block font-serif text-[23px] font-semibold leading-none tracking-[-0.04em]">Imani</span>
+              <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.22em] text-[#647168]">Church management</span>
+            </span>
+          </a>
+
+          <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">
+            <a href="#approach" className="text-sm text-[#46554b] transition-colors hover:text-[#244638]">Our approach</a>
+            <a href="#workflows" className="text-sm text-[#46554b] transition-colors hover:text-[#244638]">What you can manage</a>
+            <a href="#trust" className="text-sm text-[#46554b] transition-colors hover:text-[#244638]">Trust & accountability</a>
             <button
               onClick={onGetStarted}
-              className="rounded-full bg-[#6d5dfc] px-6 py-3 text-sm font-black text-white shadow-lg shadow-[#6d5dfc]/20 transition-all hover:bg-[#5d4df0]"
+              className="inline-flex items-center gap-2 bg-[#244638] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#193428]"
             >
-              Get Started
+              Open Imani <ArrowUpRight size={16} />
             </button>
-          </div>
+          </nav>
+          <button
+            onClick={onGetStarted}
+            className="inline-flex items-center gap-2 bg-[#244638] px-4 py-3 text-sm font-semibold text-white md:hidden"
+          >
+            Open Imani <ArrowUpRight size={15} />
+          </button>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden px-6 pb-20 pt-16 md:pt-24">
-        <BlobPurple className="h-[600px] w-[600px] -left-40 -top-20 opacity-60" />
-        <BlobOrange className="h-[400px] w-[400px] right-0 top-20 opacity-40" />
-        <BlobDot className="h-[200px] w-[200px] left-[10%] bottom-10" />
-
-        <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#efe8ff] bg-[#f8f5ff] px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-[#6d5dfc]">
-              <Sparkles size={12} /> Product landing
-            </div>
-            <h1 className="mt-6 max-w-2xl text-5xl font-black leading-[1.05] tracking-tight text-slate-950 md:text-7xl">
-              Members, giving, events, reports. One system.
-            </h1>
-            <p className="mt-6 max-w-xl text-lg font-medium leading-8 text-slate-500">
-              Imani CMS puts member records, financial data, event coordination, leadership reports in one place your team opens daily.
+      <section id="home" className="relative overflow-hidden">
+        <div className="mx-auto grid max-w-7xl items-stretch lg:min-h-[610px] lg:grid-cols-[1.02fr_0.98fr]">
+          <div className="flex flex-col justify-center px-5 py-16 sm:px-8 sm:py-20 lg:px-12 lg:py-24">
+            <p className="mb-7 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8c573a]">
+              <span className="h-px w-9 bg-[#8c573a]" />
+              Made for the work of ministry
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+            <h1 className="max-w-2xl font-serif text-[clamp(3.2rem,6vw,5.8rem)] font-medium leading-[0.98] tracking-[-0.055em] text-[#203b2d]">
+              More time for people. Less time chasing paperwork.
+            </h1>
+            <p className="mt-7 max-w-xl text-base leading-8 text-[#5b665d] sm:text-lg">
+              Imani helps your church bring member records, attendance, giving, events and everyday administration into one clear, dependable place.
+            </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={onGetStarted}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#6d5dfc] px-8 py-4 text-sm font-black text-white shadow-[0_20px_40px_rgba(109,93,252,0.28)] transition-all hover:bg-[#5d4df0]"
+                className="inline-flex min-h-14 items-center justify-center gap-3 bg-[#244638] px-7 text-sm font-semibold text-white transition-colors hover:bg-[#193428]"
               >
-                Start with your church <ArrowRight size={16} />
+                Enter your church workspace <ArrowUpRight size={17} />
               </button>
               <a
-                href="#product"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-4 text-sm font-black text-slate-700 transition-all hover:border-slate-300 hover:text-slate-950"
+                href="#workflows"
+                className="inline-flex min-h-14 items-center justify-center border border-[#c8cec3] px-7 text-sm font-semibold text-[#31483a] transition-colors hover:border-[#244638]"
               >
-                <Play size={14} /> Watch demo
+                Explore what it helps with
               </a>
             </div>
-            <p className="mt-5 text-sm font-medium text-slate-400">
-              Different ministry model? <span className="font-black text-slate-700">Talk to us about setup.</span>
+            <p className="mt-6 max-w-md text-xs leading-6 text-[#7b8278]">
+              Technology should support the people who serve—not get in the way of serving them.
             </p>
           </div>
 
-          {/* Floating product screenshots */}
-          <div className="relative z-10 mx-auto w-full max-w-[560px]">
-            <div className="absolute -left-8 top-8 z-20">
-              <ScreenshotCard label="Attendance" value="1,284" sublabel="This Sunday" color="text-emerald-600" />
-            </div>
-            <div className="absolute -right-4 top-32 z-30">
-              <ScreenshotCard label="Monthly giving" value="KES 4.8M" sublabel="June 2026" color="text-[#6d5dfc]" />
-            </div>
-            <div className="absolute left-12 bottom-0 z-10">
-              <ScreenshotCard label="Active events" value="6" sublabel="This week" color="text-[#ffb44d]" />
-            </div>
-            <div className="relative z-5 mx-auto mt-24 w-[320px] rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_30px_80px_rgba(15,23,42,0.12)]">
-              <div className="rounded-[1.75rem] bg-[#f6f8ff] p-4">
-                <div className="mb-4 flex items-center justify-between rounded-[1.25rem] bg-white px-4 py-3 shadow-sm">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Church</p>
-                    <p className="mt-1 text-sm font-black text-slate-900">Gracepoint</p>
-                  </div>
-                  <div className="rounded-xl bg-emerald-50 px-3 py-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.24em] text-emerald-600">Active</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  {['Members', 'Giving', 'Events', 'Reports'].map((item) => (
-                    <div key={item} className="flex items-center justify-between rounded-xl bg-white px-3 py-2 shadow-sm">
-                      <span className="text-xs font-bold text-slate-600">{item}</span>
-                      <ChevronRight size={14} className="text-slate-300" />
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <div className="relative min-h-[390px] overflow-hidden bg-[#d9dfd1] sm:min-h-[470px] lg:min-h-full">
+            <img
+              src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1400&q=85"
+              alt="People gathered together in a close-knit community"
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-[#203b2d]/15" />
+            <div className="absolute bottom-5 left-5 right-5 border border-white/50 bg-[#f7f4ec]/95 p-5 sm:bottom-8 sm:left-8 sm:right-8 sm:p-7">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8c573a]">The reason behind the system</p>
+              <p className="mt-3 max-w-lg font-serif text-2xl leading-snug tracking-[-0.025em] text-[#203b2d] sm:text-3xl">
+                Good administration creates room for better care, clearer stewardship and stronger community.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Trust strip */}
-      <section className="border-y border-slate-100 bg-white px-6 py-10">
-        <div className="mx-auto max-w-7xl">
-          <p className="text-center text-sm font-bold text-slate-400">
-            Over 150,000 church members served across 300+ teams.
-          </p>
-          <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-5">
-            {partnerLogos.map((logo) => (
-              <div
-                key={logo}
-                className="flex h-16 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-sm font-black uppercase tracking-[0.18em] text-slate-400"
-              >
-                {logo}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features" className="relative px-6 py-24">
-        <BlobDot className="h-[180px] w-[180px] right-[5%] top-[10%]" />
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#6d5dfc]">Core product</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
-              What you get on day one.
+      <section id="approach" className="border-y border-[#deded2] bg-[#ebe8de]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-8 md:grid-cols-[0.75fr_1.25fr] md:items-center md:gap-16 md:py-20">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8c573a]">A more thoughtful way to work</p>
+            <h2 className="mt-4 max-w-md font-serif text-4xl leading-tight tracking-[-0.04em] text-[#203b2d] sm:text-5xl">
+              Built around the life of a church.
             </h2>
-            <p className="mt-5 text-lg font-medium leading-8 text-slate-500">
-              No spreadsheet handoffs. No separate tools for finance, members, events.
+          </div>
+          <div>
+            <p className="max-w-2xl text-base leading-8 text-[#5b665d] sm:text-lg">
+              Church work is personal. A member is more than a row in a spreadsheet. Giving is a responsibility, not just a number. An event is people coming together. Imani brings the records and routines behind that work into better order—while your leaders remain at the centre of ministry.
             </p>
           </div>
-
-          <div className="mt-16 grid gap-6 lg:grid-cols-3">
-            {featureCards.map((card) => {
-              const Icon = card.icon;
-              return (
-                <div key={card.title} className="rounded-[2rem] border border-slate-100 bg-white p-8 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f3f1ff] text-[#6d5dfc]">
-                    <Icon size={24} />
-                  </div>
-                  <h3 className="mt-6 text-2xl font-black tracking-tight text-slate-900">{card.title}</h3>
-                  <p className="mt-4 text-base font-medium leading-7 text-slate-500">{card.description}</p>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </section>
 
-      {/* Stats + Quote Band */}
-      <section className="relative px-6 pb-24">
-        <BlobPurple className="h-[400px] w-[400px] -left-32 top-0 opacity-40" />
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="relative z-10 rounded-[2.5rem] bg-[#fff5e9] p-8 md:p-12">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#e48c00]">150,000+ members served</p>
-            <h2 className="mt-4 max-w-lg text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
-              Your finance officer, your pastor, your admin.
-            </h2>
-            <p className="mt-5 max-w-xl text-lg font-medium leading-8 text-slate-600">
-              Imani serves the people who run church operations week to week, not annual reports.
-            </p>
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[1.75rem] bg-white p-6">
-                <p className="text-4xl font-black text-slate-950">2K+</p>
-                <p className="mt-2 text-sm font-bold text-slate-500">Tasks monthly</p>
-              </div>
-              <div className="rounded-[1.75rem] bg-white p-6">
-                <p className="text-4xl font-black text-slate-950">4.9</p>
-                <p className="mt-2 text-sm font-bold text-slate-500">Admin rating</p>
-              </div>
-              <div className="rounded-[1.75rem] bg-white p-6">
-                <p className="text-4xl font-black text-slate-950">300+</p>
-                <p className="mt-2 text-sm font-bold text-slate-500">Teams onboarded</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-[2.5rem] bg-slate-900 p-8 text-white md:p-12">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">Admin perspective</p>
-            <blockquote className="mt-5 text-2xl font-black leading-10 tracking-tight md:text-3xl">
-              "Attendance, invitations, weekly reports. Three workflows that used to live in three places. Now one."
-            </blockquote>
-            <p className="mt-8 text-base font-bold text-slate-300">Carl Henderson</p>
-            <p className="mt-1 text-sm font-medium text-slate-400">Operations Director</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Product Showcase */}
-      <section id="product" className="px-6 pb-24">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#6d5dfc]">Our Product</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
-              We've helped churches globally.
-            </h2>
-          </div>
-
-          <div className="mt-16 space-y-8">
-            {showcaseRows.map((row, index) => (
-              <div
-                key={row.title}
-                className={`grid items-center gap-8 rounded-[2.5rem] border border-slate-100 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.05)] md:p-10 lg:grid-cols-2 ${index % 2 === 1 ? 'lg:[&>*:first-child]:order-2' : ''}`}
-              >
-                <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#6d5dfc]">{row.eyebrow}</p>
-                  <h3 className="mt-4 max-w-xl text-3xl font-black tracking-tight text-slate-950 md:text-4xl">{row.title}</h3>
-                  <p className="mt-5 max-w-xl text-lg font-medium leading-8 text-slate-500">{row.description}</p>
-                  <div className="mt-8 space-y-3">
-                    {row.points.map((point) => (
-                      <div key={point} className="flex items-center gap-3 text-sm font-bold text-slate-700">
-                        <BadgeCheck size={18} className="text-[#6d5dfc]" />
-                        {point}
-                      </div>
-                    ))}
-                  </div>
-                  <a href="#" className="mt-8 inline-flex items-center gap-2 text-sm font-black text-[#6d5dfc] transition-colors hover:text-[#5d4df0]">
-                    Learn more <ArrowRight size={14} />
-                  </a>
-                </div>
-                <div className={`rounded-[2rem] bg-gradient-to-br ${row.accent} p-6`}>
-                  <div className="rounded-[1.75rem] bg-white p-5 shadow-sm">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="rounded-[1.25rem] bg-slate-50 p-4">
-                        <Users className="text-[#6d5dfc]" size={22} />
-                        <p className="mt-4 text-sm font-black text-slate-900">Active records</p>
-                        <p className="mt-1 text-2xl font-black text-slate-950">12,480</p>
-                      </div>
-                      <div className="rounded-[1.25rem] bg-slate-50 p-4">
-                        <CalendarDays className="text-[#33c48d]" size={22} />
-                        <p className="mt-4 text-sm font-black text-slate-900">Upcoming events</p>
-                        <p className="mt-1 text-2xl font-black text-slate-950">18</p>
-                      </div>
-                      <div className="rounded-[1.25rem] bg-slate-50 p-4">
-                        <CircleDollarSign className="text-[#ffb44d]" size={22} />
-                        <p className="mt-4 text-sm font-black text-slate-900">Monthly giving</p>
-                        <p className="mt-1 text-2xl font-black text-slate-950">KES 6.2M</p>
-                      </div>
-                      <div className="rounded-[1.25rem] bg-slate-50 p-4">
-                        <BarChart3 className="text-slate-900" size={22} />
-                        <p className="mt-4 text-sm font-black text-slate-900">Reports</p>
-                        <p className="mt-1 text-2xl font-black text-slate-950">24</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="px-6 pb-24">
-        <BlobOrange className="h-[300px] w-[300px] -right-20 top-[10%] opacity-30" />
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#6d5dfc]">Pricing</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
-              Solo, small team, or growing network.
-            </h2>
-            <p className="mt-5 text-lg font-medium leading-8 text-slate-500">
-              Start with the plan that matches your church. Scale later.
-            </p>
-
-            {/* Billing toggle */}
-            <div className="mt-8 inline-flex items-center rounded-full border border-slate-200 bg-white p-1">
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`rounded-full px-6 py-2.5 text-sm font-black transition-all ${
-                  billingCycle === 'monthly'
-                    ? 'bg-[#6d5dfc] text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingCycle('yearly')}
-                className={`rounded-full px-6 py-2.5 text-sm font-black transition-all ${
-                  billingCycle === 'yearly'
-                    ? 'bg-[#6d5dfc] text-white shadow-md'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                Yearly <span className="ml-1 text-[10px] font-bold text-[#33c48d]">Save 20%</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {pricingCards.map((card) => (
-              <div
-                key={card.name}
-                className={`rounded-[2.25rem] border p-8 shadow-[0_18px_50px_rgba(15,23,42,0.06)] ${
-                  card.highlight ? 'border-[#6d5dfc] bg-[#f7f5ff]' : 'border-slate-100 bg-white'
-                }`}
-              >
-                <p className="text-sm font-black uppercase tracking-[0.22em] text-slate-400">{card.name}</p>
-                <div className="mt-5 flex items-baseline gap-1">
-                  <p className="text-5xl font-black tracking-tight text-slate-950">
-                    ${billingCycle === 'monthly' ? card.monthly : card.yearly}
-                  </p>
-                  <p className="text-sm font-bold text-slate-400">/mo</p>
-                </div>
-                <p className="mt-2 text-xs font-medium text-slate-400">
-                  {billingCycle === 'yearly' ? 'Billed annually' : 'Per month'}
-                </p>
-                <p className="mt-6 min-h-[60px] text-base font-medium leading-7 text-slate-500">{card.description}</p>
-                <div className="mt-8 space-y-3">
-                  {card.features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-3 text-sm font-bold text-slate-700">
-                      <BadgeCheck size={18} className="text-[#6d5dfc]" />
-                      {feature}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={onGetStarted}
-                  className={`mt-10 w-full rounded-full px-6 py-4 text-sm font-black transition-all ${
-                    card.highlight
-                      ? 'bg-[#6d5dfc] text-white shadow-[0_18px_40px_rgba(109,93,252,0.28)] hover:bg-[#5d4df0]'
-                      : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
-                  }`}
-                >
-                  Start 30 days free
-                </button>
-                <p className="mt-4 text-center text-xs font-medium text-slate-400">No card required</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Carousel */}
-      <section className="px-6 pb-24">
-        <div className="mx-auto max-w-7xl">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-[#6d5dfc]">Testimonials</p>
-            <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 md:text-5xl">
-              13,000+ clients love Imani.
-            </h2>
-            <p className="mt-5 text-lg font-medium leading-8 text-slate-500">
-              From finance to member care, teams use Imani to cut busywork.
-            </p>
-          </div>
-
-          <div className="relative mt-12">
-            <button
-              onClick={() => scrollTestimonials('left')}
-              className="absolute -left-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white shadow-md transition-all hover:bg-slate-50 md:-left-6"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              onClick={() => scrollTestimonials('right')}
-              className="absolute -right-4 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white shadow-md transition-all hover:bg-slate-50 md:-right-6"
-            >
-              <ChevronRight size={18} />
-            </button>
-
-            <div
-              ref={testimonialRef}
-              className="flex gap-6 overflow-x-auto scroll-smooth pb-4 snap-x snap-mandatory scrollbar-hide"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-              {testimonials.map((item) => (
-                <div
-                  key={item.name}
-                  className="min-w-[320px] max-w-[320px] snap-start rounded-[2rem] border border-slate-100 bg-white p-8 shadow-[0_18px_50px_rgba(15,23,42,0.05)]"
-                >
-                  <p className="text-lg font-medium leading-8 text-slate-600">"{item.quote}"</p>
-                  <div className="mt-8 flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-[#f3f1ff]" />
-                    <div>
-                      <p className="text-base font-black text-slate-950">{item.name}</p>
-                      <p className="text-sm font-medium text-slate-400">{item.role}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Banner */}
-      <section className="px-6 pb-24">
-        <div className="mx-auto max-w-7xl rounded-[2.75rem] bg-[#6d5dfc] px-8 py-14 text-center text-white shadow-[0_30px_80px_rgba(109,93,252,0.28)] md:px-16 md:py-20">
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-white/70">Ready to switch?</p>
-          <h2 className="mx-auto mt-4 max-w-3xl text-4xl font-black tracking-tight md:text-5xl">
-            Put members, giving, events, reports in one place.
+      <section id="workflows" className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
+        <div className="max-w-2xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8c573a]">Everyday church work</p>
+          <h2 className="mt-4 font-serif text-4xl leading-tight tracking-[-0.04em] text-[#203b2d] sm:text-5xl">
+            The important details, in their proper place.
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg font-medium leading-8 text-white/80">
-            Start your 30-day trial. Bring member records, finance workflows, event coordination, invitation history into Imani.
+          <p className="mt-5 max-w-xl text-base leading-8 text-[#5b665d]">
+            Start with the work your team already does. Keep information organised, responsibilities clear and follow-through easier.
           </p>
+        </div>
+
+        <div className="mt-12 grid border-y border-[#d9d8cc] md:grid-cols-3 md:divide-x md:divide-[#d9d8cc]">
+          {workflows.map((item) => {
+            const Icon = item.icon;
+            return (
+              <article key={item.number} className="border-b border-[#d9d8cc] py-8 md:border-b-0 md:px-7 md:py-10 first:md:pl-0 last:md:pr-0">
+                <div className="flex items-center justify-between">
+                  <span className="font-serif text-sm text-[#8c573a]">{item.number}</span>
+                  <Icon size={22} strokeWidth={1.5} className="text-[#42614d]" />
+                </div>
+                <h3 className="mt-8 font-serif text-2xl tracking-[-0.025em] text-[#203b2d]">{item.title}</h3>
+                <p className="mt-4 text-sm leading-7 text-[#5b665d]">{item.description}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section id="trust" className="bg-[#203b2d] text-[#f7f4ec]">
+        <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1fr_0.8fr] lg:items-center lg:gap-20">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#d4b18b]">Trust is part of the work</p>
+            <h2 className="mt-4 max-w-xl font-serif text-4xl leading-tight tracking-[-0.04em] sm:text-5xl">
+              Clear records. Responsible access. Better stewardship.
+            </h2>
+            <p className="mt-6 max-w-xl text-base leading-8 text-[#d4ddd4]">
+              Church information deserves care. Imani is designed to organise everyday administration with role-based access and records that help authorised leaders work with greater clarity and accountability.
+            </p>
+            <button
+              onClick={onGetStarted}
+              className="mt-8 inline-flex min-h-14 items-center gap-3 bg-[#f0dfc6] px-6 text-sm font-semibold text-[#203b2d] transition-colors hover:bg-white"
+            >
+              Continue to Imani <ArrowUpRight size={17} />
+            </button>
+          </div>
+          <div className="border-t border-white/20 lg:border-l lg:border-t-0 lg:pl-10">
+            {principles.map((principle) => (
+              <div key={principle} className="flex gap-4 border-b border-white/20 py-5">
+                <Check size={18} className="mt-0.5 shrink-0 text-[#d4b18b]" />
+                <p className="text-sm leading-6 text-[#f1f0e7]">{principle}</p>
+              </div>
+            ))}
+            <div className="mt-8 flex items-start gap-4 text-[#d4ddd4]">
+              <ShieldCheck size={22} className="mt-1 shrink-0 text-[#d4b18b]" />
+              <p className="text-sm leading-7">Access and information handling should reflect each person's responsibilities—not give everyone the same level of access.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
+        <div className="flex flex-col justify-between gap-8 border-b border-[#d9d8cc] pb-12 md:flex-row md:items-end">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8c573a]">A quieter kind of technology</p>
+            <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-tight tracking-[-0.04em] text-[#203b2d] sm:text-5xl">
+              Let the system organise the details. Let people do the ministry.
+            </h2>
+          </div>
           <button
             onClick={onGetStarted}
-            className="mt-10 inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-black text-[#5d4df0] transition-all hover:bg-slate-100"
+            className="inline-flex min-h-14 shrink-0 items-center justify-center gap-3 self-start bg-[#244638] px-7 text-sm font-semibold text-white transition-colors hover:bg-[#193428] md:self-auto"
           >
-            Purchase now <ArrowRight size={16} />
+            Open Imani <ArrowUpRight size={17} />
           </button>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-100 bg-white px-6 py-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10">
-                <ImaniLogoIcon />
-              </div>
-              <div>
-                <p className="text-lg font-black tracking-tight text-brand-primary">Imani CMS</p>
-                <p className="text-sm font-medium text-slate-400">We build for churches, not investors.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition-colors hover:border-slate-300 hover:text-slate-600">
-                <Facebook size={16} />
-              </a>
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition-colors hover:border-slate-300 hover:text-slate-600">
-                <Twitter size={16} />
-              </a>
-              <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition-colors hover:border-slate-300 hover:text-slate-600">
-                <Linkedin size={16} />
-              </a>
-            </div>
+      <footer className="border-t border-[#deded2] bg-[#ebe8de]">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#244638] p-2">
+              <ImaniLogoIcon />
+            </span>
+            <span className="font-serif text-xl font-semibold tracking-[-0.04em] text-[#203b2d]">Imani</span>
           </div>
-          <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-6 md:flex-row md:items-center md:justify-between">
-            <p className="text-sm font-medium text-slate-400">support@imani.co.ke</p>
-            <p className="text-sm font-medium text-slate-400">Questions? Reach out anytime.</p>
-          </div>
+          <p className="text-sm text-[#69746a]">Church management, with people at the centre.</p>
+          <a href="mailto:support@imani.co.ke" className="text-sm font-medium text-[#31483a] underline decoration-[#aeb8ac] underline-offset-4 hover:text-[#8c573a]">Contact support</a>
         </div>
       </footer>
-    </div>
+    </main>
   );
 };
 

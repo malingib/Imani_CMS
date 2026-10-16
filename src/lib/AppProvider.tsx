@@ -100,14 +100,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   const churchId = activeChurchId ?? state.currentUser?.churchId ?? null;
-  const isPlatformSession =
-    isAuthenticated &&
-    !activeChurchId &&
-    (
-      state.currentUser?.role === UserRole.SUPER_ADMIN ||
-      supabaseUser?.app_metadata?.role === UserRole.SUPER_ADMIN ||
-      supabaseUser?.user_metadata?.role === UserRole.SUPER_ADMIN
-    );
+  // One church per deployment; there is no platform-wide tenant browsing.
+  const isPlatformSession = false;
 
   const addToast = useCallback((message: string, type: Toast['type'] = 'success') => {
     const id = crypto.randomUUID();

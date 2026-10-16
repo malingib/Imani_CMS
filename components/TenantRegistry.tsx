@@ -8,6 +8,7 @@ import {
   Smartphone, RefreshCw
 } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
+import { useChurch } from '../src/lib/church-context';
 import { createTenantsService, type ChurchRecord } from '../src/lib/tenants-service';
 
 const tenantsService = createTenantsService(supabase);
@@ -29,6 +30,7 @@ interface TenantRegistryProps {
 }
 
 const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
+  const { activeChurchId } = useChurch();
   const [churches, setChurches] = useState<ChurchRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,13 +51,14 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
     setLoading(true);
     try {
       const data = await tenantsService.listChurchesWithMemberCounts();
-      setChurches(data);
+      // This deployment is intentionally bound to the configured Demo Church.
+      setChurches(data.filter(church => church.id === activeChurchId));
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchChurches(); }, []);
+  useEffect(() => { fetchChurches(); }, [activeChurchId]);
 
   const filteredChurches = useMemo(() => {
     return churches.filter(c => {
@@ -155,12 +158,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
           >
             <Download size={18} /> Export Master CSV
           </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-brand-primary/20"
-          >
-            <Plus size={20} /> Provision Parish
-          </button>
+          <div className="px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-bold">Single-church deployment · Demo Church only</div>
         </div>
       </div>
 
@@ -283,7 +281,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
                            <button
                             onClick={() => onImpersonate(c.id)}
                             className="p-3 bg-white border border-slate-100 text-slate-400 rounded-xl hover:bg-brand-primary hover:text-white transition-all shadow-sm"
-                            title="Proxy Login as Admin"
+                            title="Open client workspace as superadmin" aria-label="Open client workspace as superadmin"
                            >
                               <ExternalLink size={16}/>
                            </button>

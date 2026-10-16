@@ -152,7 +152,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (authLoading) return;
     if (isAuthenticated && supabaseUser) {
       const nextUser = mapSupabaseUserToAppUser(supabaseUser);
-      const isSuperAdmin = nextUser.role === 'SUPER_ADMIN';
       setState(prev => ({
         ...prev,
         currentUser: nextUser,

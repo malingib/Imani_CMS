@@ -46,8 +46,8 @@ const principles = [
 
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   return (
-    <main className="min-h-screen bg-[#f7f4ec] text-[#202b24]">
-      <header className="border-b border-[#deded2] bg-[#f7f4ec]">
+    <main className="min-h-screen bg-[#FFFFFF] text-[#202b24]">
+      <header className="border-b border-[#E5E9E5] bg-[#FFFFFF]">
         <div className="mx-auto flex min-h-[82px] max-w-7xl items-center justify-between px-5 sm:px-8">
           <a href="#home" className="flex items-center gap-3" aria-label="Imani home">
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#244638] p-2">
@@ -101,7 +101,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               </button>
               <a
                 href="#workflows"
-                className="inline-flex min-h-14 items-center justify-center border border-[#c8cec3] px-7 text-sm font-semibold text-[#31483a] transition-colors hover:border-[#244638]"
+                className="inline-flex min-h-14 items-center justify-center border border-[#D5DDD6] px-7 text-sm font-semibold text-[#31483a] transition-colors hover:border-[#244638]"
               >
                 Explore what it helps with
               </a>
@@ -111,7 +111,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </p>
           </div>
 
-          <div className="relative min-h-[390px] overflow-hidden bg-[#d9dfd1] sm:min-h-[470px] lg:min-h-full">
+          <div className="relative min-h-[390px] overflow-hidden bg-[#E7ECE8] sm:min-h-[470px] lg:min-h-full">
             <img
               src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1400&q=85"
               alt="People gathered together in a close-knit community"
@@ -119,7 +119,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               loading="eager"
             />
             <div className="absolute inset-0 bg-[#203b2d]/15" />
-            <div className="absolute bottom-5 left-5 right-5 border border-white/50 bg-[#f7f4ec]/95 p-5 sm:bottom-8 sm:left-8 sm:right-8 sm:p-7">
+            <div className="absolute bottom-5 left-5 right-5 border border-white/50 bg-[#FFFFFF]/95 p-5 sm:bottom-8 sm:left-8 sm:right-8 sm:p-7">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8c573a]">The reason behind the system</p>
               <p className="mt-3 max-w-lg font-serif text-2xl leading-snug tracking-[-0.025em] text-[#203b2d] sm:text-3xl">
                 Good administration creates room for better care, clearer stewardship and stronger community.
@@ -129,7 +129,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      <section id="approach" className="border-y border-[#deded2] bg-[#ebe8de]">
+      <section id="approach" className="border-y border-[#E5E9E5] bg-[#F7F8F6]">
         <div className="mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-8 md:grid-cols-[0.75fr_1.25fr] md:items-center md:gap-16 md:py-20">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8c573a]">A more thoughtful way to work</p>
@@ -156,11 +156,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           </p>
         </div>
 
-        <div className="mt-12 grid border-y border-[#d9d8cc] md:grid-cols-3 md:divide-x md:divide-[#d9d8cc]">
+        <div className="mt-12 grid border-y border-[#E5E9E5] md:grid-cols-3 md:divide-x md:divide-[#E5E9E5]">
           {workflows.map((item) => {
             const Icon = item.icon;
             return (
-              <article key={item.number} className="border-b border-[#d9d8cc] py-8 md:border-b-0 md:px-7 md:py-10 first:md:pl-0 last:md:pr-0">
+              <article key={item.number} className="border-b border-[#E5E9E5] py-8 md:border-b-0 md:px-7 md:py-10 first:md:pl-0 last:md:pr-0">
                 <div className="flex items-center justify-between">
                   <span className="font-serif text-sm text-[#8c573a]">{item.number}</span>
                   <Icon size={22} strokeWidth={1.5} className="text-[#42614d]" />
@@ -173,7 +173,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      <section id="trust" className="bg-[#203b2d] text-[#f7f4ec]">
+      <section id="trust" className="bg-[#203b2d] text-[#FFFFFF]">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1fr_0.8fr] lg:items-center lg:gap-20">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#d4b18b]">Trust is part of the work</p>
@@ -185,7 +185,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </p>
             <button
               onClick={onGetStarted}
-              className="mt-8 inline-flex min-h-14 items-center gap-3 bg-[#f0dfc6] px-6 text-sm font-semibold text-[#203b2d] transition-colors hover:bg-white"
+              className="mt-8 inline-flex min-h-14 items-center gap-3 bg-[#FFFFFF] px-6 text-sm font-semibold text-[#203b2d] transition-colors hover:bg-white"
             >
               Continue to Imani <ArrowUpRight size={17} />
             </button>
@@ -206,7 +206,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
-        <div className="flex flex-col justify-between gap-8 border-b border-[#d9d8cc] pb-12 md:flex-row md:items-end">
+        <div className="flex flex-col justify-between gap-8 border-b border-[#E5E9E5] pb-12 md:flex-row md:items-end">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8c573a]">A quieter kind of technology</p>
             <h2 className="mt-4 max-w-2xl font-serif text-4xl leading-tight tracking-[-0.04em] text-[#203b2d] sm:text-5xl">
@@ -222,7 +222,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      <footer className="border-t border-[#deded2] bg-[#ebe8de]">
+      <footer className="border-t border-[#E5E9E5] bg-[#F7F8F6]">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#244638] p-2">

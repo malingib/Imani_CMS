@@ -5,18 +5,30 @@ import { Building2, Users, DollarSign, Activity, TrendingUp, AlertCircle } from 
 
 const platformDashboardService = createPlatformDashboardService(supabase);
 
-const PlatformDashboard: React.FC = () => {
+const PlatformDashboard: React.FC<{ onOpenClient?: () => void }> = ({ onOpenClient }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [stats, setStats] = useState<PlatformDashboardStats>({
     totalChurches: 0, activeChurches: 0, totalMembers: 0, totalRevenue: 0,
     totalChurchesChange: 0, totalMembersChange: 0, totalRevenueChange: 0,
   });
 
   useEffect(() => {
+    let mounted = true;
     const fetch = async () => {
-      const nextStats = await platformDashboardService.getStats();
-      setStats(nextStats);
+      setLoading(true);
+      setError('');
+      try {
+        const nextStats = await platformDashboardService.getStats();
+        if (mounted) setStats(nextStats);
+      } catch (err) {
+        if (mounted) setError(err instanceof Error ? err.message : 'Unable to load platform statistics');
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
-    fetch();
+    void fetch();
+    return () => { mounted = false; };
   }, []);
 
   const healthPct = stats.totalChurches > 0 ? (stats.activeChurches / stats.totalChurches) * 100 : 100;
@@ -33,12 +45,14 @@ const PlatformDashboard: React.FC = () => {
 
   return (
     <div className="space-y-10">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-brand-primary tracking-tight">Platform Dashboard</h1>
-          <p className="text-slate-500 font-medium mt-1">Overview of all churches</p>
+          <h1 className="text-3xl font-black text-brand-primary tracking-tight">Superadmin Dashboard</h1>
+          <p className="text-slate-500 font-medium mt-1">Platform controls and the configured Demo Church workspace</p>
         </div>
+        {onOpenClient && <button onClick={onOpenClient} className="px-5 py-3 rounded-xl bg-brand-primary text-white text-sm font-bold hover:bg-brand-primary/90">Open client workspace</button>}
       </div>
+      {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"><strong>Dashboard data unavailable:</strong> {error}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {cards.map(card => (
@@ -48,7 +62,7 @@ const PlatformDashboard: React.FC = () => {
                 <card.icon size={24} className="text-white" />
               </div>
               <div>
-                <p className="text-3xl font-black text-slate-800">{card.value}</p>
+                <p className="text-3xl font-black text-slate-800">{loading ? '…' : card.value}</p>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{card.label}</p>
               </div>
             </div>

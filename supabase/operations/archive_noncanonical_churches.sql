@@ -18,8 +18,13 @@ create table if not exists imani_archive.row_snapshots (
   row_hash text not null,
   row_data jsonb not null,
   archived_at timestamptz not null default now(),
-  constraint imani_archive_row_snapshots_source_church_hash_key unique (source_table, church_id, row_hash)
 );
+
+-- Upgrade-safe idempotency key: identical rows in different churches must not collide.
+alter table imani_archive.row_snapshots
+  drop constraint if exists imani_archive_row_snapshots_source_hash_key;
+create unique index if not exists imani_archive_row_snapshots_source_church_hash_uidx
+  on imani_archive.row_snapshots (source_table, church_id, row_hash);
 
 create table if not exists imani_archive.church_records (
   church_id uuid primary key,

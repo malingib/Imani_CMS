@@ -59,12 +59,27 @@ const PlatformControls: React.FC = () => {
 
   useEffect(() => { void load(); }, [load]);
 
+  const recordAudit = async (action: string, metadata: Record<string, unknown>) => {
+    if (!church) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from('audit_logs').insert({
+        church_id: church.id, user_id: user?.id ?? null,
+        user_name: user?.email ?? 'Superadmin', action,
+        module: 'PLATFORM_SETTINGS', severity: 'WARN', metadata,
+      });
+    } catch (auditError) {
+      console.warn('Platform action audit could not be written', auditError);
+    }
+  };
+
   const saveChurch = async (patch: Record<string, unknown>, message: string) => {
     if (!church) return;
     setSaving(true); setError(''); setNotice('');
     try {
       const { error: updateError } = await supabase.from('churches').update(patch).eq('id', church.id);
       if (updateError) throw updateError;
+      await recordAudit(message, patch);
       setNotice(message); await load();
     } catch (e) { setError(e instanceof Error ? e.message : 'The change could not be saved.'); }
     finally { setSaving(false); }
@@ -91,6 +106,7 @@ const PlatformControls: React.FC = () => {
         published_at: releaseStatus === 'draft' ? null : new Date().toISOString(), created_by: user?.id || null,
       });
       if (insertError) throw insertError;
+      if (church) await recordAudit('Platform release record saved', { version: version.trim(), title: releaseTitle.trim(), release_channel: releaseChannel, status: releaseStatus });
       setVersion(''); setReleaseTitle(''); setReleaseNotes(''); setNotice('Release record saved.');
       await load();
     } catch (e) { setError(e instanceof Error ? e.message : 'Release could not be saved.'); }
@@ -130,7 +146,7 @@ const PlatformControls: React.FC = () => {
     {section === 'restrictions' && <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
       <div className="mb-6 flex items-center gap-3"><SlidersHorizontal className="text-brand-primary"/><div><h2 className="font-black">Feature access restrictions</h2><p className="text-sm text-slate-500">Turn off specific modules for the client. Restrictions are saved against the church record.</p></div></div>
       <div className="divide-y divide-slate-100">{RESTRICTIONS.map(item=><div key={item.key} className="flex items-center justify-between gap-5 py-4"><div><p className="font-bold text-sm">{item.label}</p><p className="mt-1 text-xs text-slate-500">{item.description}</p></div><button role="switch" aria-checked={church.restrictions?.[item.key] !== false} disabled={saving} onClick={()=>toggleRestriction(item.key, church.restrictions?.[item.key] === false)} className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${church.restrictions?.[item.key] !== false ? 'bg-emerald-600' : 'bg-slate-300'}`}><span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${church.restrictions?.[item.key] !== false ? 'left-6' : 'left-1'}`}/></button></div>)}</div>
-      <p className="mt-5 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-800">A disabled module should be enforced in both the interface and database policies. This screen stores the controls; server-side enforcement must be verified for each protected data operation before relying on restrictions as a security boundary.</p>
+      <p className="mt-5 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-800">These switches currently gate the related modules in the church interface. Treat them as operational controls, not a complete security boundary, until the matching database policies and export/API paths are separately tested.</p>
     </div>}
 
     {section === 'suspensions' && <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">

@@ -17,7 +17,7 @@ const ADMIN_VIEWS: AppView[] = [
 ];
 const MEMBER_VIEWS: AppView[] = ['MY_PORTAL', 'MY_GIVING', 'SERMONS'];
 const ROLE_VIEWS: Record<UserRole, AppView[]> = {
-  SUPER_ADMIN: ADMIN_VIEWS,
+  SUPER_ADMIN: [...ADMIN_VIEWS, 'PLATFORM_DASHBOARD', 'TENANTS'],
   ADMIN: ADMIN_VIEWS,
   PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS', 'SERMONS'],
   TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS'],
@@ -50,6 +50,8 @@ const Billing = lazy(() => import('./Billing'));
 const SermonHistory = lazy(() => import('./SermonHistory'));
 const AcceptInvite = lazy(() => import('./AcceptInvite'));
 const LandingPage = lazy(() => import('./LandingPage'));
+const PlatformDashboard = lazy(() => import('./PlatformDashboard'));
+const TenantRegistry = lazy(() => import('./TenantRegistry'));
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { loading, dataError, refreshData } = useApp();
@@ -63,8 +65,8 @@ function Protected({ children }: { children: React.ReactNode }) {
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
-  const { activeChurchId } = useChurch();
+  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
+  const { activeChurchId, activeChurch } = useChurch();
   const location = useLocation();
   const navigateToPath = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -116,11 +118,14 @@ const AccountShell = () => {
             <div className="flex items-center gap-3"><div className="text-right hidden sm:block"><p className="text-xs font-bold text-slate-800 leading-none">{currentUser.name}</p><p className="text-[9px] text-slate-400 uppercase font-black tracking-tighter mt-1">{currentUser.role}</p></div><img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-xl object-cover ring-2 ring-brand-primary/10" /></div>
           </div>
         </header>
+        {currentUser.role === UserRole.SUPER_ADMIN && viewingChurch && <div className="mx-4 mt-4 lg:mx-10 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><p className="text-sm font-bold text-amber-900">Client workspace: {activeChurch?.name || 'Demo Church'}</p><p className="text-xs text-amber-800 mt-1">Viewing church data as superadmin. Your account has not been changed to a client account.</p></div><button onClick={() => { handleSelectChurch(null); navigate('PLATFORM_DASHBOARD'); }} className="shrink-0 px-4 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 text-xs font-bold hover:bg-amber-100">Return to Superadmin</button></div>}
         <div className="p-10 max-w-[1600px] mx-auto pb-20">
           <Suspense fallback={<div className="space-y-8 animate-pulse p-10"><div className="h-10 bg-slate-200 rounded-2xl w-1/3" /><div className="grid grid-cols-1 md:grid-cols-3 gap-6"><div className="h-40 bg-slate-100 rounded-[2.5rem]" /><div className="h-40 bg-slate-100 rounded-[2.5rem]" /><div className="h-40 bg-slate-100 rounded-[2.5rem]" /></div><div className="h-96 bg-slate-100 rounded-[2.5rem]" /></div>}>
             {!viewAllowed ? <div className="flex flex-col items-center justify-center py-20"><div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center"><h2 className="text-2xl font-black text-brand-primary mb-2">Access Restricted</h2><p className="text-slate-500 font-medium">Your role does not have permission to view this page.</p><button onClick={() => navigate(getDefaultViewForUserRole(currentUser.role))} className="mt-6 px-6 py-3 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary/90 transition-all">Go to your dashboard</button></div></div> : (
               <Routes>
 
+                  <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <PlatformDashboard /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
+                  <Route path={ROUTES.TENANTS.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <TenantRegistry onImpersonate={(id) => { handleSelectChurch(id); navigate('DASHBOARD'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
                   <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
                   <Route path={ROUTES.FINANCE.path} element={<FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />

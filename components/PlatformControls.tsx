@@ -24,7 +24,8 @@ const RESTRICTIONS = [
 const PlatformControls: React.FC = () => {
   const { activeChurchId } = useChurch();
   const [church, setChurch] = useState<ChurchControl | null>(null);
-  const [releases, setReleases] = useState<Release[]>([]);\n  const [activity, setActivity] = useState<ActivityLog[]>([]);
+  const [releases, setReleases] = useState<Release[]>([]);
+  const [activity, setActivity] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');

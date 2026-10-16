@@ -156,18 +156,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState(prev => ({
         ...prev,
         currentUser: nextUser,
-        viewingPlatform: isSuperAdmin && !activeChurchId,
-        viewingChurch: isSuperAdmin ? !!activeChurchId : !!nextUser.churchId,
+        viewingPlatform: false,
+        viewingChurch: !!(activeChurchId ?? nextUser.churchId),
       }));
-      if (nextUser.role === 'SUPER_ADMIN') {
-        fetchChurches();
-      } else if (!activeChurchId && nextUser.churchId) {
+      if (!activeChurchId && nextUser.churchId) {
         setActiveChurchId(nextUser.churchId);
       }
     } else if (!isAuthenticated) {
       setState(prev => ({ ...prev, currentUser: null, loading: 'ready' }));
     }
-  }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, fetchChurches, setActiveChurchId]);
+  }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, setActiveChurchId]);
 
   useEffect(() => {
     if (!isAuthenticated || isPlatformSession) {
@@ -344,9 +342,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await persistence.deleteNotification(id, requireChurchId());
       setState(prev => ({ ...prev, notifications: prev.notifications.filter(n => n.id !== id) }));
     },
-    handleSelectChurch: (id) => {
-      setActiveChurchId(id);
-      // navigate to dashboard on church switch
+    handleSelectChurch: (_id) => {
+      // Church switching is disabled in single-church deployments.
       window.history.replaceState(null, '', ROUTES.DASHBOARD.path);
     },
     handleUpdateProfile: async (m) => {

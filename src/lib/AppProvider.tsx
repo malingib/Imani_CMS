@@ -57,7 +57,7 @@ interface AppActions {
   handleMarkNotificationRead: (id: string) => Promise<void>;
   handleMarkAllNotificationsRead: () => Promise<void>;
   handleDeleteNotification: (id: string) => Promise<void>;
-  handleSelectChurch: (id: string) => void;
+  handleSelectChurch: (id: string | null) => void;
   handleUpdateProfile: (m: Member) => Promise<void>;
   handleAddGroup: (g: Group) => Promise<void>;
   handleUpdateGroup: (g: Group) => Promise<void>;
@@ -100,8 +100,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   const churchId = activeChurchId ?? state.currentUser?.churchId ?? null;
-  // One church per deployment; there is no platform-wide tenant browsing.
-  const isPlatformSession = false;
+  // Superadmins remain in platform mode until they explicitly open the configured church workspace.
+  const isPlatformSession = state.currentUser?.role === UserRole.SUPER_ADMIN && !state.viewingChurch;
 
   const addToast = useCallback((message: string, type: Toast['type'] = 'success') => {
     const id = crypto.randomUUID();
@@ -156,8 +156,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState(prev => ({
         ...prev,
         currentUser: nextUser,
-        viewingPlatform: false,
-        viewingChurch: !!(activeChurchId ?? nextUser.churchId),
+        viewingPlatform: nextUser.role === UserRole.SUPER_ADMIN,
+        viewingChurch: nextUser.role === UserRole.SUPER_ADMIN ? false : !!(activeChurchId ?? nextUser.churchId),
       }));
       if (!activeChurchId && nextUser.churchId) {
         setActiveChurchId(nextUser.churchId);
@@ -342,9 +342,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await persistence.deleteNotification(id, requireChurchId());
       setState(prev => ({ ...prev, notifications: prev.notifications.filter(n => n.id !== id) }));
     },
-    handleSelectChurch: (_id) => {
-      // Church switching is disabled in single-church deployments.
-      window.history.replaceState(null, '', ROUTES.DASHBOARD.path);
+    handleSelectChurch: (id) => {
+      const actor = state.currentUser;
+      if (actor?.role !== UserRole.SUPER_ADMIN) {
+        addToast('Only a superadmin can open the client workspace.', 'error');
+        return;
+      }
+      if (id && id !== activeChurchId) {
+        addToast('This deployment is restricted to the configured Demo Church.', 'error');
+        return;
+      }
+      if (id) {
+        setActiveChurchId(id);
+        setState(prev => ({ ...prev, viewingPlatform: false, viewingChurch: true, loading: 'data-loading', dataError: null }));
+        addToast('Client workspace opened. Your superadmin identity and permissions remain visible.');
+        void writeAudit(actor, `Opened client workspace ${id}`, 'PLATFORM_DASHBOARD', 'WARN', id);
+      } else {
+        setState(prev => ({ ...prev, viewingPlatform: true, viewingChurch: false, loading: 'ready', dataError: null }));
+        addToast('Returned to superadmin dashboard');
+      }
     },
     handleUpdateProfile: async (m) => {
       const saved = await persistence.updateMember(m, requireChurchId());
@@ -357,7 +373,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     requireChurchId,
     refreshData: async () => {
-      if (state.viewingPlatform || !isAuthenticated) return;
+      if (isPlatformSession || !isAuthenticated) return;
       setState(prev => ({ ...prev, loading: 'data-loading', dataError: null }));
       const data = await appDataService.loadChurchAppData(churchId || '');
       setState(prev => ({ ...prev, ...data, loading: 'ready' }));

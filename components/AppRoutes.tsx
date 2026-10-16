@@ -1,6 +1,6 @@
 import React, { lazy, useState, Suspense, useRef, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, ShieldAlert } from 'lucide-react';
 import Sidebar, { ImaniLogoIcon } from './Sidebar';
 import { useApp } from '../src/lib/AppProvider';
 import { useChurch } from '../src/lib/church-context';
@@ -89,6 +89,12 @@ const AccountShell = () => {
   const navigate = (v: AppView) => navigateToPath(ROUTES[v].path);
   const currentView = pathToView(location.pathname) || 'DASHBOARD';
   const viewAllowed = canAccess(currentView, currentUser.role, false);
+  const restrictionKeyByView: Partial<Record<AppView, string>> = {
+    MEMBERS: 'members', FINANCE: 'finance', COMMUNICATION: 'communications',
+    EVENTS: 'events', GROUPS: 'events',
+  };
+  const requiredFeature = restrictionKeyByView[currentView];
+  const featureAllowed = !requiredFeature || activeChurch?.restrictions?.[requiredFeature] !== false;
 
   useEffect(() => {
     if (!notifOpen) return;
@@ -105,6 +111,19 @@ const AccountShell = () => {
 
   // Platform administration has its own shell and navigation. Church modules are
   // rendered only after the superadmin explicitly opens the configured client workspace.
+  if (currentUser.role === UserRole.SUPER_ADMIN && viewingChurch && activeChurch?.status === 'suspended') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+        <div className="w-full max-w-xl rounded-2xl border border-rose-200 bg-white p-8 shadow-sm">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-rose-50 text-rose-700"><ShieldAlert size={24} /></div>
+          <h1 className="text-2xl font-black text-slate-900">Client access is suspended</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">{activeChurch.name} is suspended. Church operations are blocked while suspended. Use platform billing and suspension controls to review the account and restore access.</p>
+          <button onClick={() => { handleSelectChurch(null); navigateToPath('/platform/suspensions'); }} className="mt-6 rounded-lg bg-brand-primary px-5 py-3 text-sm font-bold text-white">Return to platform controls</button>
+        </div>
+      </div>
+    );
+  }
+
   if (currentUser.role === UserRole.SUPER_ADMIN && !viewingChurch) {
     return (
       <PlatformShell
@@ -144,7 +163,7 @@ const AccountShell = () => {
         {currentUser.role === UserRole.SUPER_ADMIN && viewingChurch && <div className="mx-4 mt-4 lg:mx-10 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3"><div><p className="text-sm font-bold text-amber-900">Client workspace: {activeChurch?.name || 'Demo Church'}</p><p className="text-xs text-amber-800 mt-1">Viewing church data as superadmin. Your account has not been changed to a client account.</p></div><button onClick={() => { handleSelectChurch(null); navigate('PLATFORM_DASHBOARD'); }} className="shrink-0 px-4 py-2 rounded-lg bg-white border border-amber-300 text-amber-900 text-xs font-bold hover:bg-amber-100">Return to Superadmin</button></div>}
         <div className="p-10 max-w-[1600px] mx-auto pb-20">
           <Suspense fallback={<div className="space-y-8 animate-pulse p-10"><div className="h-10 bg-slate-200 rounded-2xl w-1/3" /><div className="grid grid-cols-1 md:grid-cols-3 gap-6"><div className="h-40 bg-slate-100 rounded-[2.5rem]" /><div className="h-40 bg-slate-100 rounded-[2.5rem]" /><div className="h-40 bg-slate-100 rounded-[2.5rem]" /></div><div className="h-96 bg-slate-100 rounded-[2.5rem]" /></div>}>
-            {!viewAllowed ? <div className="flex flex-col items-center justify-center py-20"><div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center"><h2 className="text-2xl font-black text-brand-primary mb-2">Access Restricted</h2><p className="text-slate-500 font-medium">Your role does not have permission to view this page.</p><button onClick={() => navigate(getDefaultViewForUserRole(currentUser.role))} className="mt-6 px-6 py-3 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary/90 transition-all">Go to your dashboard</button></div></div> : (
+            {(!viewAllowed || !featureAllowed) ? <div className="flex flex-col items-center justify-center py-20"><div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center"><h2 className="text-2xl font-black text-brand-primary mb-2">Access Restricted</h2><p className="text-slate-500 font-medium">{!featureAllowed ? 'This module has been disabled by the platform administrator for this client.' : 'Your role does not have permission to view this page.'}</p><button onClick={() => navigate(getDefaultViewForUserRole(currentUser.role))} className="mt-6 px-6 py-3 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary/90 transition-all">Go to your dashboard</button></div></div> : (
               <Routes>
 
                   <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <PlatformDashboard onOpenClient={() => { if (activeChurchId) { handleSelectChurch(activeChurchId); navigate('DASHBOARD'); } else addToast('No configured client church is available.', 'error'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />

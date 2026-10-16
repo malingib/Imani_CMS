@@ -8,43 +8,91 @@ interface ChurchContextType {
   churches: Church[];
   fetchChurches: () => void;
   activeChurch: Church | null;
+  configurationError: string | null;
 }
 
-export const ChurchContext = createContext<ChurchContextType>({ activeChurchId: null, setActiveChurchId: () => {}, churches: [], fetchChurches: () => {}, activeChurch: null });
+const CANONICAL_CHURCH_ID = '00000000-0000-0000-0000-000000000001';
+const configuredChurchId =
+  (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() || CANONICAL_CHURCH_ID;
+
+export const ChurchContext = createContext<ChurchContextType>({
+  activeChurchId: configuredChurchId,
+  setActiveChurchId: () => {},
+  churches: [],
+  fetchChurches: () => {},
+  activeChurch: null,
+  configurationError: null,
+});
 export const useChurch = () => useContext(ChurchContext);
 
+/**
+ * Imani is deployed for one church only. The canonical church ID is the default;
+ * VITE_CHURCH_ID is retained as an explicit deployment override for a separately
+ * provisioned installation. No membership-based tenant discovery or switching
+ * occurs in the browser.
+ */
 export function ChurchProvider({ children, churchId: initialChurchId }: { children: ReactNode; churchId: string | null }) {
-  const [activeChurchId, setActiveChurchId] = useState<string | null>(initialChurchId);
+  const deploymentChurchId =
+    (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() ||
+    initialChurchId ||
+    CANONICAL_CHURCH_ID;
+  const [activeChurchId, setResolvedChurchId] = useState<string | null>(deploymentChurchId);
   const [churches, setChurches] = useState<Church[]>([]);
+  const [configurationError, setConfigurationError] = useState<string | null>(null);
 
   const fetchChurches = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setChurches([]); setActiveChurchId(null); return; }
-
-    if (user.app_metadata?.role === 'SUPER_ADMIN') {
-      const { data } = await supabase.from('churches').select('*').order('name');
-      if (data) setChurches(data as Church[]);
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      setChurches([]);
+      setResolvedChurchId(null);
+      setConfigurationError('Unable to verify the signed-in user. Please sign in again.');
+      return;
+    }
+    if (!user) {
+      setChurches([]);
+      setResolvedChurchId(deploymentChurchId);
+      setConfigurationError(null);
       return;
     }
 
-    const { data } = await supabase.from('church_memberships').select('church_id, churches(id, name, slug, tier, status)').eq('user_id', user.id).eq('status', 'active');
-    const authorized = (data || []).map((row: any) => row.churches).filter(Boolean) as Church[];
-    setChurches(authorized);
+    const { data, error } = await supabase
+      .from('churches')
+      .select('id, name, slug, tier, status')
+      .eq('id', deploymentChurchId)
+      .maybeSingle();
 
-    if (activeChurchId && !authorized.some(church => church.id === activeChurchId)) setActiveChurchId(authorized[0]?.id ?? null);
-    else if (!activeChurchId && authorized.length === 1) setActiveChurchId(authorized[0].id);
-  }, [activeChurchId]);
+    if (error || !data || data.status === 'archived' || data.status === 'suspended') {
+      setChurches([]);
+      setResolvedChurchId(null);
+      setConfigurationError(
+        'The configured church is unavailable. Verify VITE_CHURCH_ID and the deployment database.'
+      );
+      return;
+    }
+
+    setChurches([data as Church]);
+    setResolvedChurchId(data.id);
+    setConfigurationError(null);
+  }, [deploymentChurchId]);
 
   const activeChurch = churches.find(c => c.id === activeChurchId) || null;
+  useEffect(() => { void fetchChurches(); }, [fetchChurches]);
 
-  useEffect(() => { void fetchChurches(); }, [fetchChurches, initialChurchId]);
-
+  // A single-church deployment never permits browser-driven church switching.
   const safeSetActiveChurchId = useCallback((id: string | null) => {
-    if (id === null) { setActiveChurchId(null); return; }
-    void supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.app_metadata?.role === 'SUPER_ADMIN' || churches.some(church => church.id === id)) setActiveChurchId(id);
-    });
-  }, [churches]);
+    if (id === deploymentChurchId) setResolvedChurchId(deploymentChurchId);
+  }, [deploymentChurchId]);
 
-  return <ChurchContext.Provider value={{ activeChurchId, setActiveChurchId: safeSetActiveChurchId, churches, fetchChurches, activeChurch }}>{children}</ChurchContext.Provider>;
+  return (
+    <ChurchContext.Provider value={{
+      activeChurchId,
+      setActiveChurchId: safeSetActiveChurchId,
+      churches,
+      fetchChurches,
+      activeChurch,
+      configurationError,
+    }}>
+      {children}
+    </ChurchContext.Provider>
+  );
 }

@@ -78,7 +78,7 @@ export function useApp() {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
-  const { activeChurchId, setActiveChurchId, churches, fetchChurches } = useChurch();
+  const { activeChurchId, setActiveChurchId, fetchChurches } = useChurch();
 
   const [state, setState] = useState<AppState>({
     loading: 'auth-loading',
@@ -100,14 +100,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
 
   const churchId = activeChurchId ?? state.currentUser?.churchId ?? null;
-  const isPlatformSession =
-    isAuthenticated &&
-    !activeChurchId &&
-    (
-      state.currentUser?.role === UserRole.SUPER_ADMIN ||
-      supabaseUser?.app_metadata?.role === UserRole.SUPER_ADMIN ||
-      supabaseUser?.user_metadata?.role === UserRole.SUPER_ADMIN
-    );
+  // One church per deployment; there is no platform-wide tenant browsing.
+  const isPlatformSession = false;
 
   const addToast = useCallback((message: string, type: Toast['type'] = 'success') => {
     const id = crypto.randomUUID();
@@ -157,23 +151,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (authLoading) return;
     if (isAuthenticated && supabaseUser) {
+      void fetchChurches();
       const nextUser = mapSupabaseUserToAppUser(supabaseUser);
-      const isSuperAdmin = nextUser.role === 'SUPER_ADMIN';
       setState(prev => ({
         ...prev,
         currentUser: nextUser,
-        viewingPlatform: isSuperAdmin && !activeChurchId,
-        viewingChurch: isSuperAdmin ? !!activeChurchId : !!nextUser.churchId,
+        viewingPlatform: false,
+        viewingChurch: !!(activeChurchId ?? nextUser.churchId),
       }));
-      if (nextUser.role === 'SUPER_ADMIN') {
-        fetchChurches();
-      } else if (!activeChurchId && nextUser.churchId) {
+      if (!activeChurchId && nextUser.churchId) {
         setActiveChurchId(nextUser.churchId);
       }
     } else if (!isAuthenticated) {
       setState(prev => ({ ...prev, currentUser: null, loading: 'ready' }));
     }
-  }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, fetchChurches, setActiveChurchId]);
+  }, [authLoading, isAuthenticated, supabaseUser, activeChurchId, setActiveChurchId, fetchChurches]);
 
   useEffect(() => {
     if (!isAuthenticated || isPlatformSession) {
@@ -350,9 +342,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       await persistence.deleteNotification(id, requireChurchId());
       setState(prev => ({ ...prev, notifications: prev.notifications.filter(n => n.id !== id) }));
     },
-    handleSelectChurch: (id) => {
-      setActiveChurchId(id);
-      // navigate to dashboard on church switch
+    handleSelectChurch: (_id) => {
+      // Church switching is disabled in single-church deployments.
       window.history.replaceState(null, '', ROUTES.DASHBOARD.path);
     },
     handleUpdateProfile: async (m) => {

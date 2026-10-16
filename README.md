@@ -1,7 +1,6 @@
 # Imani CMS
 
-Church management platform with Supabase backend, AI-powered insights, and multi
-‑tenant platform operations.
+Church management platform with Supabase backend and AI-powered insights. Imani is deployed as **one church per installation**; the app has no tenant registry or church switcher.
 
 ## Setup
 
@@ -37,36 +36,22 @@ See `.env.example` for required variables.
 
 | Role | Scope | Capabilities |
 |------|-------|-------------|
-| SUPER_ADMIN | Platform-wide | Create churches, manage platform settings, view all tenants |
+| SUPER_ADMIN | Configured installation | Technical/support access to the configured church; no platform-wide tenant browsing |
 | ADMIN | Church-wide | Manage members, events, finances, groups, settings |
-| PASTOR | Church-wide (limited) | Manage members, sermons, groups; view finance s |
-| STAFF | Church-wide (operational) | Manage events, groups, communications |
+| PASTOR | Church-wide (limited) | Manage members, sermons, groups; view finance |
+| TREASURER | Finance | Finance workflows and reports |
+| SECRETARY | Operations | Manage members, events, communications |
 | MEMBER | Self-service | View profile, activities, own giving |
 
-RLS enforces this at the database level using `app_role()` and `app_church_id()` helper functions.
+Database RLS and server-side role checks remain enabled. The database retains church ownership IDs and membership-backed policies for compatibility and defense in depth; the application does not provide tenant switching.
 
-## Tenant Onboarding Flow
+## Single-Church Deployment
 
-1. Church admin visits `/signup`, fills in church details + admin account
-2. System creates a `churches` row with `status: 'trialing'` and `trial_end_date` = now + 30 days
-3. Admin user is created with role `ADMIN`
-4. Subsequent users are invited by existing admins
-5. Or create manually via the Supabase Dashboard SQL Editor
-
-## Migration Workflow
-
-```bash
-# Create a new migration
-supabase migration new my_migration_name
-
-# Apply to local DB (requires Docker)
-supabase db push
-
-# Apply to remote (linked project)
-supabase db push --linked
-
-# If Docker isn't available, paste the SQL into Supabase Dashboard SQL Editor
-```
+- Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+- Set `VITE_CHURCH_ID` to the church record assigned to this installation when using a `SUPER_ADMIN` account or when an account has more than one active church membership.
+- If a normal user has exactly one active church membership, Imani resolves that church automatically.
+- Each church runs its own deployment and Supabase project. Do not use the application to create or switch between churches.
+- This refactor does not delete historical church records or drop database columns. Schema consolidation must preserve existing records and be handled as a separate, reviewed migration.
 
 ## Provider Setup
 

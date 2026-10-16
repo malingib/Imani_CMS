@@ -54,7 +54,7 @@ describe("app shell helpers", () => {
 
   it("chooses the correct default view for each role", () => {
     expect(getDefaultViewForUserRole(UserRole.MEMBER)).toBe("MY_PORTAL");
-    expect(getDefaultViewForUserRole(UserRole.SUPER_ADMIN)).toBe("PLATFORM_DASHBOARD");
+    expect(getDefaultViewForUserRole(UserRole.SUPER_ADMIN)).toBe("DASHBOARD");
     expect(getDefaultViewForUserRole(UserRole.ADMIN)).toBe("DASHBOARD");
   });
 

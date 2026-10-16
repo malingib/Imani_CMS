@@ -8,7 +8,7 @@ import { ROUTES, pathToView } from '../src/lib/router';
 import { AppView, UserRole } from '../types';
 import { getDefaultViewForUserRole } from '../src/lib/app-user';
 import { triggerStkPush } from '../src/lib/mpesa-service';
-import { SkeletonBlock, NotFound, ToastContainer, ErrorFallback } from './shared';
+import { SkeletonBlock, ToastContainer, ErrorFallback } from './shared';
 import NotificationsPanel from './NotificationsPanel';
 
 const ADMIN_VIEWS: AppView[] = [
@@ -16,12 +16,8 @@ const ADMIN_VIEWS: AppView[] = [
   'REPORTS', 'ANALYTICS', 'SERMONS', 'AUDIT_LOGS', 'BILLING', 'SETTINGS',
 ];
 const MEMBER_VIEWS: AppView[] = ['MY_PORTAL', 'MY_GIVING', 'SERMONS'];
-const PLATFORM_VIEWS: AppView[] = [
-  'PLATFORM_DASHBOARD', 'TENANTS', 'INVITATIONS', 'BILLING', 'PLATFORM_SETTINGS',
-];
-
 const ROLE_VIEWS: Record<UserRole, AppView[]> = {
-  SUPER_ADMIN: [...ADMIN_VIEWS, ...PLATFORM_VIEWS],
+  SUPER_ADMIN: ADMIN_VIEWS,
   ADMIN: ADMIN_VIEWS,
   PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS', 'SERMONS'],
   TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS'],
@@ -29,10 +25,8 @@ const ROLE_VIEWS: Record<UserRole, AppView[]> = {
   MEMBER: MEMBER_VIEWS,
 };
 
-function canAccess(view: AppView, role: UserRole, viewingPlatform: boolean): boolean {
-  if (viewingPlatform && PLATFORM_VIEWS.includes(view)) return role === UserRole.SUPER_ADMIN;
-  const allowed = ROLE_VIEWS[role] || [];
-  return allowed.includes(view);
+function canAccess(view: AppView, role: UserRole, _viewingPlatform: boolean): boolean {
+  return (ROLE_VIEWS[role] || []).includes(view);
 }
 
 const Login = lazy(() => import('./Login'));
@@ -53,27 +47,24 @@ const MemberPortal = lazy(() => import('./MemberPortal'));
 const MyGiving = lazy(() => import('./MyGiving'));
 const AuditLogs = lazy(() => import('./AuditLogs'));
 const Billing = lazy(() => import('./Billing'));
-const PlatformDashboard = lazy(() => import('./PlatformDashboard'));
-const TenantRegistry = lazy(() => import('./TenantRegistry'));
-const PlatformSettings = lazy(() => import('./PlatformSettings'));
-const BillingOverview = lazy(() => import('./BillingOverview'));
-const InvitationsManager = lazy(() => import('./InvitationsManager'));
 const SermonHistory = lazy(() => import('./SermonHistory'));
 const AcceptInvite = lazy(() => import('./AcceptInvite'));
 const LandingPage = lazy(() => import('./LandingPage'));
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { loading, dataError, refreshData } = useApp();
+  const { configurationError } = useChurch();
   if (loading === 'auth-loading' || loading === 'data-loading') return (
     <div className="p-10 max-w-[1600px] mx-auto"><SkeletonBlock /></div>
   );
+  if (configurationError) return <div className="max-w-xl mx-auto mt-16 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900"><h2 className="font-bold">Church deployment configuration required</h2><p className="mt-2 text-sm">{configurationError}</p></div>;
   if (loading === 'error' && dataError) return <ErrorFallback error={new Error(dataError)} onRetry={refreshData} fullPage={false} />;
   return <>{children}</>;
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, viewingPlatform, viewingChurch, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleSelectChurch, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
-  const { churches, activeChurchId } = useChurch();
+  const { currentUser, toasts, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
+  const { activeChurchId } = useChurch();
   const location = useLocation();
   const navigateToPath = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -94,7 +85,7 @@ const AccountShell = () => {
   if (!currentUser) return null;
   const navigate = (v: AppView) => navigateToPath(ROUTES[v].path);
   const currentView = pathToView(location.pathname) || 'DASHBOARD';
-  const viewAllowed = canAccess(currentView, currentUser.role, viewingPlatform);
+  const viewAllowed = canAccess(currentView, currentUser.role, false);
 
   useEffect(() => {
     if (!notifOpen) return;
@@ -112,7 +103,7 @@ const AccountShell = () => {
   return (
     <>
       <div className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`} onClick={() => setSidebarOpen(false)} />
-      <Sidebar currentView={pathToView(location.pathname) || 'DASHBOARD'} setView={(v) => { navigate(v); setSidebarOpen(false); }} currentUser={currentUser} branches={[]} onBranchChange={() => {}} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} churches={churches} activeChurchId={activeChurchId} onChurchSwitch={(id) => { handleSelectChurch(id); setSidebarOpen(false); }} />
+      <Sidebar currentView={pathToView(location.pathname) || 'DASHBOARD'} setView={(v) => { navigate(v); setSidebarOpen(false); }} currentUser={currentUser} branches={[]} onBranchChange={() => {}} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="flex-1 min-h-screen lg:ml-64 transition-all">
         <header className="h-20 bg-white border-b border-slate-100 px-10 flex items-center justify-between sticky top-0 z-40 shadow-sm">
           <div className="flex items-center gap-4"><button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg"><Menu size={22} /></button><div className="lg:hidden w-10 h-10"><ImaniLogoIcon /></div></div>
@@ -129,15 +120,7 @@ const AccountShell = () => {
           <Suspense fallback={<div className="space-y-8 animate-pulse p-10"><div className="h-10 bg-slate-200 rounded-2xl w-1/3" /><div className="grid grid-cols-1 md:grid-cols-3 gap-6"><div className="h-40 bg-slate-100 rounded-[2.5rem]" /><div className="h-40 bg-slate-100 rounded-[2.5rem]" /><div className="h-40 bg-slate-100 rounded-[2.5rem]" /></div><div className="h-96 bg-slate-100 rounded-[2.5rem]" /></div>}>
             {!viewAllowed ? <div className="flex flex-col items-center justify-center py-20"><div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center"><h2 className="text-2xl font-black text-brand-primary mb-2">Access Restricted</h2><p className="text-slate-500 font-medium">Your role does not have permission to view this page.</p><button onClick={() => navigate(getDefaultViewForUserRole(currentUser.role))} className="mt-6 px-6 py-3 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary/90 transition-all">Go to your dashboard</button></div></div> : (
               <Routes>
-                {viewingPlatform ? <>
-                  <Route path={ROUTES.DASHBOARD.path} element={<Navigate to={ROUTES.PLATFORM_DASHBOARD.path} replace />} />
-                  <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={<PlatformDashboard />} />
-                  <Route path={ROUTES.TENANTS.path} element={<TenantRegistry onImpersonate={handleSelectChurch} />} />
-                  <Route path={ROUTES.INVITATIONS.path} element={<InvitationsManager />} />
-                  <Route path={ROUTES.BILLING.path} element={<BillingOverview />} />
-                  <Route path={ROUTES.PLATFORM_SETTINGS.path} element={<PlatformSettings />} />
-                  <Route path="*" element={<Navigate to={ROUTES.PLATFORM_DASHBOARD.path} replace />} />
-                </> : <>
+
                   <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
                   <Route path={ROUTES.FINANCE.path} element={<FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
@@ -153,7 +136,7 @@ const AccountShell = () => {
                   <Route path={ROUTES.MY_PORTAL.path} element={<MemberPortal member={currentMember || null} transactions={transactions} events={events} activities={[]} churchId={churchId || ''} onNavigate={navigate} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />} />
                   <Route path={ROUTES.MY_GIVING.path} element={<MyGiving member={currentMember || null} transactions={transactions} onGive={handleGive} />} />
                   <Route path="*" element={<Navigate to={ROUTES.DASHBOARD.path} replace />} />
-                </>}
+
               </Routes>
             )}
           </Suspense>
@@ -164,9 +147,9 @@ const AccountShell = () => {
 };
 
 export default function AppRoutes() {
-  const { currentUser, toasts, viewingPlatform, viewingChurch, handleLogin } = useApp();
+  const { currentUser, toasts, handleLogin } = useApp();
   const isLoggedIn = !!currentUser;
-  const landingPath = viewingPlatform ? ROUTES.PLATFORM_DASHBOARD.path : ROUTES[getDefaultViewForUserRole(currentUser?.role || UserRole.MEMBER)].path;
+  const landingPath = ROUTES[getDefaultViewForUserRole(currentUser?.role || UserRole.MEMBER)].path;
   const accountShellElement = <Protected><AccountShell /></Protected>;
   const nav = useNavigate();
   const navigateLegal = (view: AppView) => { const path = ROUTES[view]?.path || '/privacy'; nav(path); };

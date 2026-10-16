@@ -17,7 +17,7 @@ create table if not exists imani_archive.row_snapshots (
   source_pk jsonb not null,
   row_hash text not null,
   row_data jsonb not null,
-  archived_at timestamptz not null default now(),
+  archived_at timestamptz not null default now()
 );
 
 -- Upgrade-safe idempotency key: identical rows in different churches must not collide.

@@ -43,6 +43,6 @@ export function mapSupabaseUserToAppUser(supabaseUser: SupabaseUserLike): User {
 
 export function getDefaultViewForUserRole(role: UserRole): AppView {
   if (role === UserRole.MEMBER) return 'MY_PORTAL';
-  if (role === UserRole.SUPER_ADMIN) return 'DASHBOARD';
+  if (role === UserRole.SUPER_ADMIN) return 'PLATFORM_DASHBOARD';
   return 'DASHBOARD';
 }

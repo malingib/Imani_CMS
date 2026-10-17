@@ -153,12 +153,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (isAuthenticated && supabaseUser) {
       void fetchChurches();
       const nextUser = mapSupabaseUserToAppUser(supabaseUser);
-      setState(prev => ({
-        ...prev,
-        currentUser: nextUser,
-        viewingPlatform: nextUser.role === UserRole.SUPER_ADMIN,
-        viewingChurch: nextUser.role === UserRole.SUPER_ADMIN ? false : !!(activeChurchId ?? nextUser.churchId),
-      }));
+      setState(prev => {
+        // Active-church changes also retrigger this effect. Preserve an explicit
+        // superadmin workspace selection for the same authenticated user.
+        const isNewSession = prev.currentUser?.id !== nextUser.id;
+        return {
+          ...prev,
+          currentUser: nextUser,
+          viewingPlatform: nextUser.role === UserRole.SUPER_ADMIN
+            ? (isNewSession ? true : prev.viewingPlatform)
+            : false,
+          viewingChurch: nextUser.role === UserRole.SUPER_ADMIN
+            ? (isNewSession ? false : prev.viewingChurch)
+            : !!(activeChurchId ?? nextUser.churchId),
+        };
+      });
       if (!activeChurchId && nextUser.churchId) {
         setActiveChurchId(nextUser.churchId);
       }

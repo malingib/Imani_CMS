@@ -192,7 +192,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
               <th className="px-8 py-5">Transaction Ref</th>
               <th className="px-8 py-5">Member Payee</th>
               <th className="px-8 py-5">Record status</th>
-              <th className="px-8 py-5 text-right">Settled Amount</th>
+              <th className="px-8 py-5 text-right">Amount</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">

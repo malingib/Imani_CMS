@@ -52,32 +52,41 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, onAddMember, onSendSMS, onNavigate }) => {
   const celebrations = useMemo(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentDay = now.getDate();
-    const week = members.filter(m => {
-      if (!m.birthday) return false;
-      const bd = new Date(m.birthday);
-      return bd.getMonth() === currentMonth && Math.abs(bd.getDate() - currentDay) <= 7;
-    });
-    const anniversaries = members.filter(m => {
-      const jd = new Date(m.joinDate);
-      return jd.getMonth() === currentMonth && Math.abs(jd.getDate() - currentDay) <= 7;
-    });
-    const items: { id: string; name: string; type: string; date: string; avatar?: string }[] = [];
-    week.forEach(m => items.push({
-      id: `bday-${m.id}`, name: `${m.firstName} ${m.lastName}`,
-      type: 'Birthday', date: m.birthday || '',
-    }));
-    anniversaries.forEach(m => {
-      if (!week.find(w => w.id === m.id)) {
-        items.push({
-          id: `ann-${m.id}`, name: `${m.firstName} ${m.lastName}`,
-          type: 'Membership', date: m.joinDate,
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysUntil = (month: number, day: number) => {
+      const nextDate = new Date(today.getFullYear(), month, day);
+      if (nextDate < today) nextDate.setFullYear(nextDate.getFullYear() + 1);
+      return Math.round((nextDate.getTime() - today.getTime()) / 86400000);
+    };
+    const items: { id: string; name: string; type: string; date: string; daysAway: number }[] = [];
+    members.forEach(member => {
+      if (member.birthday) {
+        const birthday = new Date(member.birthday);
+        if (!Number.isNaN(birthday.getTime())) {
+          const daysAway = daysUntil(birthday.getMonth(), birthday.getDate());
+          if (daysAway <= 7) items.push({
+            id: `bday-${member.id}`,
+            name: `${member.firstName} ${member.lastName}`,
+            type: 'Birthday',
+            date: member.birthday,
+            daysAway,
+          });
+        }
+      }
+      const joined = new Date(member.joinDate);
+      if (!Number.isNaN(joined.getTime())) {
+        const daysAway = daysUntil(joined.getMonth(), joined.getDate());
+        if (daysAway <= 7) items.push({
+          id: `ann-${member.id}`,
+          name: `${member.firstName} ${member.lastName}`,
+          type: 'Membership anniversary',
+          date: member.joinDate,
+          daysAway,
         });
       }
     });
-    return items.slice(0, 10);
+    return items.sort((a, b) => a.daysAway - b.daysAway).slice(0, 10);
   }, [members]);
 
   const performanceData = useMemo(() => {
@@ -250,8 +259,20 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                      <h4 className="text-xl font-black uppercase tracking-tight">Celebrations</h4>
                  </div>
                  <p className="text-slate-300 text-sm leading-6">
-                   {celebrations.length} members have birthdays or membership anniversaries coming up soon.
+                   {celebrations.length === 0
+                     ? 'No birthdays or membership anniversaries in the next 7 days.'
+                     : `${celebrations.length} upcoming birthdays and membership anniversaries.`}
                  </p>
+                 {celebrations.length > 0 && (
+                   <ul className="space-y-2">
+                     {celebrations.slice(0, 3).map(item => (
+                       <li key={item.id} className="flex items-center justify-between gap-3 border-t border-white/10 pt-2 text-sm">
+                         <span className="truncate font-medium text-white">{item.name}</span>
+                         <span className="shrink-0 text-xs text-slate-300">{item.daysAway === 0 ? 'Today' : `In ${item.daysAway}d`}</span>
+                       </li>
+                     ))}
+                   </ul>
+                 )}
                  <button
                    onClick={() => onNavigate('COMMUNICATION')}
                    className="w-full rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100 transition-colors"

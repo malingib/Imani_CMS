@@ -502,6 +502,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[3rem] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
             <form onSubmit={handleSubmit} className="flex flex-col h-full">
+              {eventError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
               <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-brand-primary text-white rounded-2xl shadow-lg">
@@ -646,7 +647,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
 
               <div className="p-8 border-t border-slate-100 bg-white flex gap-4">
                 <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest transition-all">Cancel</button>
-                <button type="submit" className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3">
+                <button type="submit" disabled={isSavingEvent} className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-60">
                   <CheckCircle2 size={20}/> Confirm Schedule
                 </button>
               </div>
@@ -659,6 +660,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {showAttendanceModal && activeEventForRollCall && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[500] flex items-center justify-center p-4">
           <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] border border-white/20">
+            {eventError && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
             <div className="flex justify-between items-center">
                <div className="flex items-center gap-5">
                  <div className="p-4 bg-brand-gold text-brand-primary rounded-[1.5rem] shadow-xl shadow-brand-gold/20"><ClipboardList size={32}/></div>
@@ -740,6 +742,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[3rem] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
             <form onSubmit={handleEditSubmit} className="flex flex-col h-full">
+              {eventError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
               <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-brand-indigo text-white rounded-2xl shadow-lg"><Edit2 size={24}/></div>

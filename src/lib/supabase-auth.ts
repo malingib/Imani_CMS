@@ -9,11 +9,7 @@ export function useAuth() {
     return data;
   }, []);
 
-  const signup = useCallback(async (email: string, password: string, name: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { name } } });
-    if (error) throw new Error(error.message);
-    return data;
-  }, []);
+
 
   const requestPasswordReset = useCallback(async (email: string) => {
     const { data, error } = await supabase.functions.invoke('password-reset', {
@@ -29,7 +25,7 @@ export function useAuth() {
     await supabase.auth.signOut();
   }, []);
 
-  return { login, signup, requestPasswordReset, logout };
+  return { login, requestPasswordReset, logout };
 }
 
 export function useSession() {

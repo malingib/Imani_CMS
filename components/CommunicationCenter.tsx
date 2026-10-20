@@ -20,7 +20,7 @@ interface CommunicationCenterProps {
   smsCredits?: number;
 }
 
-const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs, onSendBroadcast, currentUser, addToast, smsCredits = 4280 }) => {
+const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs, onSendBroadcast, currentUser, addToast, smsCredits }) => {
   const [activeTab, setActiveTab] = useState<'LOGS' | 'COMPOSE' | 'AUTOMATION' | 'TEMPLATES'>('LOGS');
   const [searchTerm, setSearchTerm] = useState('');
   const [messageType, setMessageType] = useState<'SMS' | 'Email' | 'WhatsApp'>('SMS');
@@ -168,8 +168,8 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     </div>
                  </div>
               </div>
-              <button className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black shadow-lg hover:bg-brand-primary-700 transition-all flex items-center justify-center gap-2">
-                 <Save size={18}/> Update Automation
+              <button type="button" disabled title="Server-side scheduling is not configured" className="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black flex items-center justify-center gap-2 cursor-not-allowed">
+                 <Save size={18}/> Automation not configured
               </button>
            </div>
 
@@ -195,22 +195,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
 
               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
                  <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight"><Clock size={20} className="text-brand-indigo"/> Scheduled Messages</h4>
-                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-white hover:shadow-md transition-all">
-                       <div className="flex items-center gap-3">
-                          <Zap size={16} className="text-brand-indigo"/>
-                          <span className="text-xs font-bold text-slate-700">Daily Verse</span>
-                       </div>
-                       <span className="text-[9px] font-black uppercase text-brand-indigo">Today, 06:00 AM</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-white hover:shadow-md transition-all">
-                       <div className="flex items-center gap-3">
-                          <MessageSquare size={16} className="text-brand-indigo"/>
-                          <span className="text-xs font-bold text-slate-700">Youth Bulletin</span>
-                       </div>
-                       <span className="text-[9px] font-black uppercase text-slate-400">Wed, 09:00 PM</span>
-                    </div>
-                 </div>
+                 <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">No scheduled messages are connected to a server-side scheduler. Automation shown in this panel does not dispatch messages.</p>
               </div>
            </div>
         </div>
@@ -352,7 +337,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
              <div className="bg-white p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
                 <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">SMS Credits</h4>
                 <div className="flex items-center justify-between">
-                    <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">{smsCredits.toLocaleString()}</p>
+                    <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">{typeof smsCredits === 'number' ? smsCredits.toLocaleString() : 'Not configured'}</p>
                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Zap size={20}/></div>
                 </div>
                 <button className="w-full py-4 bg-slate-50 text-brand-indigo rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">Top Up Balance</button>

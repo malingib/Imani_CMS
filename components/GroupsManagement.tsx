@@ -16,9 +16,10 @@ interface GroupsManagementProps {
   onCreateGroup?: (group: Group) => void;
   onUpdateGroup?: (group: Group) => Promise<void>;
   onDeleteGroup?: (id: string) => Promise<void>;
+  onOpenCommunications: () => void;
 }
 
-const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: propGroups, onCreateGroup, onUpdateGroup, onDeleteGroup }) => {
+const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: propGroups, onCreateGroup, onUpdateGroup, onDeleteGroup, onOpenCommunications }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewingMembersGroup, setViewingMembersGroup] = useState<Group | null>(null);
@@ -324,7 +325,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
               <textarea className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[2rem] font-bold text-slate-700 outline-none resize-none focus:ring-2 focus:ring-brand-primary" rows={5} placeholder="Hello members, this is a reminder..."/>
               <div className="flex gap-4">
                  <button onClick={() => setMessagingGroup(null)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Discard</button>
-                  <button onClick={() => { setMessagingGroup(null); setSuccessMessage(`SMS Broadcast sent to ${messagingGroup.name}`); setTimeout(() => setSuccessMessage(null), 3000); }} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3">
+                  <button onClick={() => { setMessagingGroup(null); onOpenCommunications(); }} className="flex-1 py-4 bg-brand-primary text-white rounded-xl font-semibold hover:bg-slate-800 transition-colors flex items-center justify-center gap-3">
                     <Send size={18}/> Send
                  </button>
               </div>

@@ -129,29 +129,29 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-    
-    setTimeout(() => {
+    try {
       if (typeof showFormModal !== 'string' && showFormModal) {
-        // Update
-        onUpdateTransaction({ ...showFormModal, ...formData } as Transaction);
+        await onUpdateTransaction({ ...showFormModal, ...formData } as Transaction);
       } else {
-        // Create
         const newTrx: Transaction = {
           ...formData as Transaction,
           id: crypto.randomUUID(),
-          source: 'MANUAL', // Manual entries from this form
-          reference: formData.paymentMethod === 'Cash' && !formData.reference 
-            ? `CSH-${crypto.randomUUID().slice(0, 6).toUpperCase()}` 
-            : formData.reference || `REF-${crypto.randomUUID().slice(0, 6).toUpperCase()}`
+          source: 'MANUAL',
+          reference: formData.paymentMethod === 'Cash' && !formData.reference
+            ? 'CSH-' + crypto.randomUUID().slice(0, 6).toUpperCase()
+            : formData.reference || 'REF-' + crypto.randomUUID().slice(0, 6).toUpperCase()
         };
-        onAddTransaction(newTrx);
+        await onAddTransaction(newTrx);
       }
-      setIsProcessing(false);
       setShowFormModal(null);
-    }, 1000);
+    } catch (error) {
+      console.error('Unable to save transaction:', error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -182,24 +182,11 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-        {(() => {
-          const thisMonth = new Date().getMonth();
-          const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
-          const incomeThis = transactions.filter(t => t.category === 'Income' && new Date(t.date).getMonth() === thisMonth).reduce((s, t) => s + t.amount, 0);
-          const incomeLast = transactions.filter(t => t.category === 'Income' && new Date(t.date).getMonth() === lastMonth).reduce((s, t) => s + t.amount, 0);
-          const expThis = transactions.filter(t => t.category === 'Expense' && new Date(t.date).getMonth() === thisMonth).reduce((s, t) => s + t.amount, 0);
-          const expLast = transactions.filter(t => t.category === 'Expense' && new Date(t.date).getMonth() === lastMonth).reduce((s, t) => s + t.amount, 0);
-          const revenueTrend = incomeLast > 0 ? `${Math.round((incomeThis - incomeLast) / incomeLast * 100)}%` : '—';
-          const expenseTrend = expLast > 0 ? `${Math.round((expThis - expLast) / expLast * 100)}%` : '—';
-          const netThis = incomeThis - expThis;
-          const netLast = incomeLast - expLast;
-          const netTrend = netLast !== 0 ? `${Math.round(Math.abs(netThis - netLast) / Math.abs(netLast) * 100)}%` : '—';
-          return [
-            { label: 'Total Revenue', val: totalIncome, color: 'emerald', icon: TrendingUp, trend: revenueTrend.startsWith('-') ? revenueTrend : `+${revenueTrend.replace('+','')}` },
-            { label: 'Operating Costs', val: totalExpenses, color: 'gold', icon: TrendingDown, trend: expenseTrend.startsWith('-') ? expenseTrend : `+${expenseTrend.replace('+','')}` },
-            { label: 'Net Cash Position', val: totalIncome - totalExpenses, color: 'primary', icon: Landmark, trend: netTrend.startsWith('-') ? `-${netTrend.replace('-','')}` : `+${netTrend.replace('+','')}` }
-          ];
-        })().map((c, i) => (
+        {[
+          { label: 'Total Revenue', val: totalIncome, color: 'emerald', icon: TrendingUp, detail: 'All recorded income' },
+          { label: 'Operating Costs', val: totalExpenses, color: 'gold', icon: TrendingDown, detail: 'All recorded expenses' },
+          { label: 'Net Cash Position', val: totalIncome - totalExpenses, color: 'primary', icon: Landmark, detail: 'Revenue less expenses' }
+        ].map((c, i) => (
           <div key={i} className="p-8 sm:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm bg-white relative overflow-hidden group hover:shadow-xl transition-all">
              <div className="relative z-10">
                 <div className="flex justify-between items-start mb-6">
@@ -207,8 +194,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                     <c.icon size={24}/>
                   </div>
                   <div className="text-right">
-                    <p className={`text-[10px] font-black uppercase tracking-widest ${c.trend.startsWith('+') ? 'text-brand-emerald' : 'text-brand-gold'}`}>{c.trend}</p>
-                    <p className="text-[8px] text-slate-300 font-bold uppercase">vs last month</p>
+                    <p className="text-xs font-medium text-slate-500">{c.detail}</p>
                   </div>
                 </div>
                 <p className="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">{c.label}</p>

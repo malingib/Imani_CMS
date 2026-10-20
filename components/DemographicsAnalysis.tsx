@@ -2,12 +2,11 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Users, MapPin, TrendingUp, PieChart as PieIcon, 
-  Activity, Wallet, Map as MapIcon,
-  ExternalLink, X, Info, ArrowUpRight,
-  TrendingDown, Target, UserPlus, Heart,
+  Activity, Map as MapIcon,
+  ExternalLink, ArrowUpRight,
+  Target, UserPlus, Heart,
   Calendar, Layers, Sparkles, Home, Loader2,
   Search, GraduationCap, Building2, Stethoscope, Cross,
-  // Added ShieldAlert and CheckCircle2 to fix missing name errors
   ShieldAlert, CheckCircle2
 } from 'lucide-react';
 import { 
@@ -107,7 +106,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 rounded-2xl shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200">
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 animate-in zoom-in-95 duration-200">
           <p className="text-[10px] font-black uppercase text-slate-400 mb-1">{label}</p>
           <div className="space-y-1">
             {payload.map((entry: any, index: number) => (
@@ -130,12 +129,12 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
             <div className="p-2 bg-brand-indigo-50 text-brand-indigo rounded-xl">
                <TrendingUp size={24} />
             </div>
-            <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Analytics</h2>
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">Analytics</h2>
           </div>
-          <p className="text-slate-500 text-lg font-medium">View member demographics, growth, and giving trends.</p>
+          <p className="mt-2 text-sm text-slate-500">Explore member demographics, recorded growth, and event attendance.</p>
         </div>
         
-        <div className="flex bg-white p-1.5 rounded-[1.8rem] border border-slate-200 shadow-sm overflow-x-auto no-scrollbar glass-card self-start">
+        <div className="flex bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm overflow-x-auto no-scrollbar glass-card self-start">
           {[
             { id: 'DEMOGRAPHICS', label: 'Congregation', icon: Users },
             { id: 'RESOURCES', label: 'Resources', icon: MapIcon },
@@ -147,7 +146,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
               onClick={() => setActiveTab(tab.id as AnalyticsTab)}
               className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
                 activeTab === tab.id 
-                  ? 'bg-brand-primary text-white shadow-xl shadow-brand-primary/20' 
+                  ? 'bg-brand-primary text-white shadow-sm shadow-brand-primary/20' 
                   : 'text-slate-400 hover:text-brand-primary'
               }`}
             >
@@ -158,9 +157,9 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
       </div>
 
       {activeTab === 'RESOURCES' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in zoom-in duration-300">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:p-6 animate-in zoom-in duration-300">
            <div className="lg:col-span-4 space-y-6">
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
+              <div className="bg-white p-8 rounded-xl border border-slate-100 shadow-sm space-y-8">
                  <div className="flex items-center gap-3">
                     <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-2xl"><Target size={24}/></div>
                     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Location Finder</h3>
@@ -182,7 +181,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
                          <button 
                            key={type.id} 
                            onClick={() => setResourceType(type.id)}
-                           className={`flex flex-col items-center justify-center p-4 rounded-[1.5rem] border-2 transition-all ${resourceType === type.id ? 'bg-brand-primary text-white border-brand-primary' : 'bg-slate-50 border-transparent text-slate-400 hover:border-slate-100'}`}
+                           className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${resourceType === type.id ? 'bg-brand-primary text-white border-brand-primary' : 'bg-slate-50 border-transparent text-slate-400 hover:border-slate-100'}`}
                          >
                             <type.icon size={20} className="mb-2"/>
                             <span className="text-[9px] font-black uppercase">{type.id}</span>
@@ -215,7 +214,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
 
            <div className="lg:col-span-8">
               {resourceResults ? (
-                <div className="bg-white p-8 lg:p-12 rounded-[3.5rem] border border-slate-100 shadow-sm space-y-10 min-h-[600px]">
+                <div className="bg-white p-5 sm:p-6 rounded-[3.5rem] border border-slate-100 shadow-sm space-y-10 min-h-[600px]">
                    <div className="flex justify-between items-center border-b border-slate-50 pb-8">
                       <div>
                          <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Results</h4>
@@ -278,7 +277,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
               { label: 'Outreach Reach', value: `${members.length > 0 ? Math.round(members.length / 10) : 0}k`, icon: Target, trend: `+${Math.round(members.length / 100)}%`, color: 'gold' }
             ];
           })().map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-lg transition-all group">
+            <div key={i} className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-lg transition-all group">
               <div className="flex justify-between items-start mb-4">
                 <div className={`p-3 rounded-2xl bg-brand-${stat.color}-50 text-brand-${stat.color}-500`}>
                   <stat.icon size={20} />
@@ -340,7 +339,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
             )}
 
             {activeTab === 'GROWTH' && (
-              <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
+              <div className="bg-white p-8 lg:p-12 rounded-xl border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                       <h4 className="text-2xl font-black text-slate-800">Membership Growth</h4>

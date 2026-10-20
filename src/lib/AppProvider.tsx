@@ -8,7 +8,7 @@ import { createPersistenceService } from './persistence';
 import { countUnread } from './notification-service';
 import { AppView } from '../../types';
 import { ROUTES } from './router';
-import { User, UserRole, Member, Transaction, ChurchEvent, Budget, RecurringExpense, CommunicationLog, Group, Sermon, AppNotification, AuditLog, Toast } from '../../types';
+import { User, UserRole, Member, Transaction, ChurchEvent, Budget, RecurringExpense, CommunicationLog, Group, AppNotification, AuditLog, Toast } from '../../types';
 import { createToastRecord } from './view-routing';
 
 const appDataService = createChurchAppDataService(supabase);
@@ -26,7 +26,6 @@ interface AppState {
   recurringExpenses: RecurringExpense[];
   communications: CommunicationLog[];
   groups: Group[];
-  sermons: Sermon[];
   auditLogs: AuditLog[];
   notifications: AppNotification[];
   toasts: Toast[];
@@ -90,7 +89,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     recurringExpenses: [],
     communications: [],
     groups: [],
-    sermons: [],
     auditLogs: [],
     notifications: [],
     toasts: [],
@@ -386,7 +384,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           recurringExpenses: [],
           communications: [],
           groups: [],
-          sermons: [],
           auditLogs: [],
           notifications: [],
         }));

@@ -25,7 +25,8 @@ const MyGiving: React.FC<MyGivingProps> = ({ member, transactions, onGive }) => 
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions, member, searchTerm, typeFilter, yearFilter]);
 
-  // Pledges must come from recorded pledge data; past giving is not a pledge.\n  const pledges: StewardshipPledge[] = [];
+  // Pledges must come from recorded pledge data; past giving is not a pledge.
+  const pledges: StewardshipPledge[] = [];
 
   if (!member) return <div className="flex flex-col items-center justify-center py-20"><div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center"><h2 className="text-2xl font-black text-brand-primary mb-2">No Member Record</h2><p className="text-slate-500 font-medium">Your account is not linked to a church member profile. Contact your church admin to link your account.</p></div></div>;
 

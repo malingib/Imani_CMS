@@ -20,7 +20,7 @@ export async function triggerStkPush(
   type: string,
   memberName: string
 ): Promise<MpesaStkResult> {
-  if (!Number.isFinite(amount) || amount <= 0) return { success: false, message: 'Enter a valid amount greater than KES 0.' };
+  if (!Number.isSafeInteger(amount) || amount <= 0) return { success: false, message: 'Enter a valid amount greater than KES 0.' };
   const normalizedPhone = normalizeKenyanPhone(phone);
   if (!normalizedPhone) return { success: false, message: 'Use a valid Kenyan M-Pesa number, such as 0712345678 or 254712345678.' };
   if (!type.trim() || !memberName.trim()) return { success: false, message: 'Giving details are incomplete. Contact your church administrator.' };

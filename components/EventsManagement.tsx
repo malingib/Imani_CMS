@@ -307,78 +307,19 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
         </div>
       )}
 
-      {/* Event Reminder Modal */}
+      {/* Reminder scheduling is not connected to a persisted scheduler/provider. Be explicit instead of implying dispatch. */}
       {showReminderModal && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-xl z-[500] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in duration-300 border border-white/20">
-             <div className="flex justify-between items-start">
-               <div className="flex items-center gap-4">
-                 <div className="p-4 bg-brand-indigo/10 text-brand-indigo rounded-[1.5rem] shadow-sm flex-shrink-0">
-                    <BellRing size={28}/>
-                 </div>
-                 <div>
-                    <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">Event Reminders</h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">Set Reminder</p>
-                 </div>
-               </div>
-               <button onClick={() => setShowReminderModal(null)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all"><X size={20}/></button>
-             </div>
-
-             <div className="space-y-6">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                   <p className="text-xs font-bold text-slate-600">Reminder for:</p>
-                   <p className="text-sm font-black text-brand-primary uppercase mt-1">{showReminderModal.title}</p>
-                </div>
-
-                <div className="space-y-3">
-                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Channel</label>
-                   <div className="flex p-1 bg-slate-50 rounded-2xl border border-slate-100">
-                      <button 
-                        onClick={() => setReminderType('SMS')}
-                        className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase transition-all ${reminderType === 'SMS' ? 'bg-white text-brand-primary shadow-md' : 'text-slate-400'}`}
-                      >
-                         <Phone size={14}/> SMS Alert
-                      </button>
-                      <button 
-                        onClick={() => setReminderType('EMAIL')}
-                        className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase transition-all ${reminderType === 'EMAIL' ? 'bg-white text-brand-primary shadow-md' : 'text-slate-400'}`}
-                      >
-                         <Mail size={14}/> Email
-                      </button>
-                   </div>
-                </div>
-
-                <div className="space-y-3">
-                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Lead Time</label>
-                   <select 
-                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm"
-                     value={reminderLeadTime}
-                     onChange={(e) => setReminderLeadTime(e.target.value)}
-                   >
-                      <option value="30m">30 Minutes Before</option>
-                      <option value="1h">1 Hour Before</option>
-                      <option value="2h">2 Hours Before</option>
-                      <option value="1d">1 Day Before</option>
-                   </select>
-                </div>
-
-                <div className="p-5 bg-brand-emerald/5 rounded-2xl border border-dashed border-brand-emerald/20 flex items-start gap-4">
-                   <CheckCircle2 className="text-brand-emerald shrink-0 mt-1" size={18}/>
-                   <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
-                      You will receive an automated dispatch via <span className="font-black text-brand-primary">{reminderType}</span> to the contact details on your profile.
-                   </p>
-                </div>
-             </div>
-
-             <div className="flex flex-col gap-3">
-                <button 
-                    onClick={() => { setShowReminderModal(null); }}
-                   className="w-full py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3"
-                >
-                   <Save size={18}/> Save Reminder
-                </button>
-                <button onClick={() => setShowReminderModal(null)} className="w-full py-4 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:underline">Dismiss</button>
-             </div>
+        <div className="fixed inset-0 bg-slate-900/60 z-[500] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reminder-unavailable-title">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl p-6 space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 id="reminder-unavailable-title" className="text-xl font-bold text-slate-900">Event reminders unavailable</h3>
+                <p className="mt-1 text-sm text-slate-600">{showReminderModal.title}</p>
+              </div>
+              <button type="button" aria-label="Close reminder dialog" onClick={() => setShowReminderModal(null)} className="p-2 rounded-lg hover:bg-slate-100"><X size={20}/></button>
+            </div>
+            <p className="text-sm leading-6 text-slate-600">Reminder scheduling is not configured yet. No SMS or email will be sent from this screen. You can use the Communications module to send a message manually.</p>
+            <button type="button" onClick={() => setShowReminderModal(null)} className="w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-bold text-white">Close</button>
           </div>
         </div>
       )}

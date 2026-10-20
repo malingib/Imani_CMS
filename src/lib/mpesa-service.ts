@@ -1,5 +1,13 @@
 const LARAVEL_URL = import.meta.env.VITE_LARAVEL_URL || '';
 
+function normalizeKenyanPhone(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (digits.startsWith('254') && digits.length === 12) return digits;
+  if (digits.startsWith('0') && digits.length === 10) return '254' + digits.slice(1);
+  if (/^[17]\d{8}$/.test(digits)) return '254' + digits;
+  return '';
+}
+
 export interface MpesaStkResult {
   success: boolean;
   checkoutRequestId?: string;
@@ -13,7 +21,8 @@ export async function triggerStkPush(
   memberName: string
 ): Promise<MpesaStkResult> {
   if (!Number.isFinite(amount) || amount <= 0) return { success: false, message: 'Enter a valid amount greater than KES 0.' };
-  if (!/^254[17]\d{8}$/.test(phone.replace(/[\s+()-]/g, ''))) return { success: false, message: 'Use a valid Kenyan M-Pesa number beginning with 254.' };
+  const normalizedPhone = normalizeKenyanPhone(phone);
+  if (!normalizedPhone) return { success: false, message: 'Use a valid Kenyan M-Pesa number, such as 0712345678 or 254712345678.' };
   if (!type.trim() || !memberName.trim()) return { success: false, message: 'Giving details are incomplete. Contact your church administrator.' };
   if (!LARAVEL_URL) {
     return {
@@ -27,7 +36,7 @@ export async function triggerStkPush(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ amount, phone, type, memberName }),
+      body: JSON.stringify({ amount, phone: normalizedPhone, type, memberName }),
     });
 
     if (!res.ok) {

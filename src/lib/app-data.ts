@@ -108,7 +108,7 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       const countAuditLogs = getCount(client, "audit_logs", churchId);
       const countGroups = getCount(client, "groups", churchId);
 
-      const [loadedMembers, loadedTransactions, loadedEvents, attendanceResult, loadedBudgets, loadedRecurringExpenses, loadedCommunications, loadedNotifications, loadedAuditLogs, loadedGroups, totalMembers, totalTransactions, totalEvents, totalBudgets, totalRecurringExpenses, totalCommunications, totalNotifications, totalAuditLogs, totalGroups, totalSermons] = await Promise.all([
+      const [loadedMembers, loadedTransactions, loadedEvents, attendanceResult, loadedBudgets, loadedRecurringExpenses, loadedCommunications, loadedNotifications, loadedAuditLogs, loadedGroups, totalMembers, totalTransactions, totalEvents, totalBudgets, totalRecurringExpenses, totalCommunications, totalNotifications, totalAuditLogs, totalGroups] = await Promise.all([
         members,
         transactions,
         events,

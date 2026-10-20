@@ -607,7 +607,7 @@ const Membership: React.FC<MembershipProps> = ({
                           <p className="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 sm:mb-10">Total Contributions</p>
                           <div>
                              <h4 className="text-2xl sm:text-5xl font-black text-slate-800 tracking-tighter">KES {memberGivings.reduce((s, t) => s + t.amount, 0).toLocaleString()}</h4>
-                             <p className="text-[7px] sm:text-[10px] font-black text-brand-emerald uppercase tracking-widest mt-1.5 sm:mt-2 flex items-center gap-1.5 sm:gap-2"><CheckCircle2 size={10} className="sm:w-3 sm:h-3"/> System Verified</p>
+                             <p className="text-xs text-slate-500 mt-2">Based on saved transaction records</p>
                           </div>
                        </div>
                     </div>

@@ -14,9 +14,9 @@ import { CsvMemberSchema, MemberFormSchema, validateFormData } from '../src/lib/
 
 interface MembershipProps {
   members: Member[];
-  onAddMember: (member: Member) => void;
-  onAddMembersBulk: (members: Member[]) => void;
-  onUpdateMember: (member: Member) => void;
+  onAddMember: (member: Member) => Promise<void> | void;
+  onAddMembersBulk: (members: Member[]) => Promise<void> | void;
+  onUpdateMember: (member: Member) => Promise<void> | void;
   onDeleteMember: (id: string) => void;
   transactions: Transaction[];
   events: ChurchEvent[];
@@ -110,7 +110,7 @@ const Membership: React.FC<MembershipProps> = ({
       setImportMessage('The file could not be read. Choose a valid CSV file and try again.');
     };
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
         const lines = text.split('\n');
@@ -193,10 +193,10 @@ const Membership: React.FC<MembershipProps> = ({
           console.warn(errorMsg);
         }
 
-        onAddMembersBulk(importedMembers);
+        await onAddMembersBulk(importedMembers);
         setImportMessage(errors.length > 0
-          ? `Submitted ${importedMembers.length} valid member records. ${errors.length} rows were skipped: ${errors.slice(0, 5).join('; ')}`
-          : `Submitted ${importedMembers.length} member records. Confirm the updated member list before closing this dialog.`);
+          ? `Imported ${importedMembers.length} members. ${errors.length} rows were skipped: ${errors.slice(0, 5).join('; ')}`
+          : `Imported ${importedMembers.length} members successfully.`);
       } catch (error) {
         console.error('CSV import error:', error);
         setImportMessage('The CSV could not be processed. Check the column headers and file format, then try again.');
@@ -236,11 +236,9 @@ const Membership: React.FC<MembershipProps> = ({
     window.URL.revokeObjectURL(url);
   };
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form data
-    const validationData = {
+    const { data, errors } = validateFormData(MemberFormSchema, {
       firstName: formData.firstName,
       lastName: formData.lastName,
       phone: formData.phone,
@@ -254,36 +252,36 @@ const Membership: React.FC<MembershipProps> = ({
       gender: formData.gender,
       maritalStatus: formData.maritalStatus,
       membershipType: formData.membershipType,
-    };
-    
-    const { data, errors } = validateFormData(MemberFormSchema, validationData);
+    });
     if (!data) {
       setFormError('Please correct the form: ' + Object.values(errors)[0]);
       return;
     }
-    
+
     setFormError('');
     setIsSaving(true);
-    setTimeout(() => {
-      const newM: Member = {
+    try {
+      const newMember: Member = {
         ...data,
         email: data.email || '',
         id: crypto.randomUUID(),
-        photo: photo || undefined
+        photo: photo || undefined,
       };
-      onAddMember(newM);
-      setIsSaving(false);
+      await onAddMember(newMember);
       setShowAddModal(false);
       setFormData({ groups: [] });
       setPhoto(null);
-    }, 1000);
+    } catch (error) {
+      console.error('Unable to add member:', error);
+      setFormError('Member was not saved. Your entries have been kept. Check your connection and permissions, then try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!showEditModal) return;
-    
-    // Validate form data
     const validationData = {
       firstName: formData.firstName || showEditModal.firstName,
       lastName: formData.lastName || showEditModal.lastName,
@@ -299,25 +297,29 @@ const Membership: React.FC<MembershipProps> = ({
       maritalStatus: formData.maritalStatus || showEditModal.maritalStatus,
       membershipType: formData.membershipType || showEditModal.membershipType,
     };
-    
     const { data, errors } = validateFormData(MemberFormSchema, validationData);
     if (!data) {
-      alert('Validation error: ' + Object.values(errors)[0]);
+      setFormError('Please correct the form: ' + Object.values(errors)[0]);
       return;
     }
-    
+
+    setFormError('');
     setIsSaving(true);
-    setTimeout(() => {
-      onUpdateMember({ 
+    try {
+      await onUpdateMember({
         ...showEditModal,
         ...data,
         photo: photo || showEditModal.photo,
       } as Member);
-      setIsSaving(false);
       setShowEditModal(null);
       setFormData({ groups: [] });
       setPhoto(null);
-    }, 1000);
+    } catch (error) {
+      console.error('Unable to update member:', error);
+      setFormError('Member changes were not saved. Your entries have been kept. Check your connection and permissions, then try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleGroupSelection = (groupName: string) => {

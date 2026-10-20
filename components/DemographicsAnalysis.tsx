@@ -106,7 +106,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 animate-in zoom-in-95 duration-200">
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-100 animate-in zoom-in-95 duration-200">
           <p className="text-[10px] font-black uppercase text-slate-400 mb-1">{label}</p>
           <div className="space-y-1">
             {payload.map((entry: any, index: number) => (
@@ -144,7 +144,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id as AnalyticsTab)}
-              className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+              className={`px-6 py-3 rounded-lg text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
                 activeTab === tab.id 
                   ? 'bg-brand-primary text-white shadow-sm shadow-brand-primary/20' 
                   : 'text-slate-400 hover:text-brand-primary'
@@ -157,16 +157,16 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
       </div>
 
       {activeTab === 'RESOURCES' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:p-6 animate-in zoom-in duration-300">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 animate-in zoom-in duration-300">
            <div className="lg:col-span-4 space-y-6">
-              <div className="bg-white p-8 rounded-xl border border-slate-100 shadow-sm space-y-8">
+              <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-8">
                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-2xl"><Target size={24}/></div>
+                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-lg"><Target size={24}/></div>
                     <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Location Finder</h3>
                  </div>
                  
                  <p className="text-sm text-slate-400 font-medium leading-relaxed">
-                   Use AI Grounding to find strategic community assets near your member clusters.
+                   Find nearby community facilities using the most common location in member records.
                  </p>
 
                  <div className="space-y-4">
@@ -191,7 +191,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
                     <button 
                       onClick={handleFindResources}
                       disabled={isFindingResources}
-                      className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black shadow-lg hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                      className="w-full py-4 bg-brand-primary text-white rounded-lg font-black shadow-sm hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                     >
                        {isFindingResources ? <Loader2 className="animate-spin" size={18}/> : <Search size={18}/>}
                        {isFindingResources ? 'Processing...' : 'Search'}
@@ -199,7 +199,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
                  </div>
               </div>
 
-              <div className="bg-brand-primary p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+              <div className="bg-brand-primary p-5 sm:p-6 rounded-xl text-white shadow-sm relative overflow-hidden">
                  <div className="relative z-10 space-y-4">
                     <div className="flex items-center gap-2 text-brand-gold">
                       <Cross size={16}/>
@@ -214,7 +214,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
 
            <div className="lg:col-span-8">
               {resourceResults ? (
-                <div className="bg-white p-5 sm:p-6 rounded-[3.5rem] border border-slate-100 shadow-sm space-y-10 min-h-[600px]">
+                <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-10 min-h-[600px]">
                    <div className="flex justify-between items-center border-b border-slate-50 pb-8">
                       <div>
                          <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Results</h4>
@@ -227,22 +227,22 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {resourceResults.groundingChunks.map((chunk, i) => (
-                        <div key={i} className="group bg-slate-50 border border-slate-100 p-8 rounded-[2.5rem] hover:bg-white hover:shadow-xl transition-all space-y-6">
+                        <div key={i} className="group bg-slate-50 border border-slate-100 p-5 sm:p-6 rounded-xl hover:bg-white hover:shadow-sm transition-all space-y-6">
                            <div className="flex justify-between items-start">
-                              <div className="p-4 bg-white text-brand-primary rounded-2xl shadow-sm group-hover:bg-brand-primary group-hover:text-white transition-all">
+                              <div className="p-4 bg-white text-brand-primary rounded-lg shadow-sm group-hover:bg-brand-primary group-hover:text-white transition-all">
                                  <Building2 size={24}/>
                               </div>
                               <span className="text-[9px] font-black uppercase text-slate-300">Result #{i+1}</span>
                            </div>
                            <div>
                               <h5 className="text-xl font-black text-slate-800 line-clamp-1">{chunk.maps?.title || "Local Hub"}</h5>
-                              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Verified Community Resource</p>
+                              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Suggested community resource</p>
                            </div>
                            <a 
                              href={chunk.maps?.uri} 
                              target="_blank" 
                              rel="noopener noreferrer"
-                             className="w-full py-4 bg-brand-indigo text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-brand-primary transition-all flex items-center justify-center gap-2"
+                             className="w-full py-4 bg-brand-indigo text-white rounded-lg font-black text-[10px] uppercase tracking-widest shadow-sm shadow-indigo-100 hover:bg-brand-primary transition-all flex items-center justify-center gap-2"
                            >
                               <ExternalLink size={14}/> View Detailed Map
                            </a>
@@ -251,46 +251,48 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
                    </div>
                 </div>
               ) : (
-                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[3.5rem] h-full min-h-[600px] flex flex-col items-center justify-center text-center p-12">
+                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl h-full min-h-[600px] flex flex-col items-center justify-center text-center p-12">
                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-inner mb-6">
                       <Sparkles size={48} className="text-slate-200"/>
                    </div>
                    <h4 className="text-xl font-black text-slate-400 uppercase">No Results Yet</h4>
-                   <p className="max-w-xs text-sm font-medium text-slate-300 mt-2 leading-relaxed">Select a category and select a category and search.</p>
+                   <p className="max-w-xs text-sm font-medium text-slate-300 mt-2 leading-relaxed">Choose a resource category and search to see suggestions.</p>
                 </div>
               )}
            </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {(() => {
-            const active = members.filter(m => m.status === 'ACTIVE').length;
-            const retention = members.length > 0 ? Math.round(active / members.length * 100) : 0;
-            const thisMonth = new Date().getMonth();
-            const newThisMonth = members.filter(m => new Date(m.joinDate).getMonth() === thisMonth).length;
-            const groupsSet = new Set<string>();
-            members.forEach(m => m.groups.forEach(g => groupsSet.add(g)));
+            const active = members.filter(member => member.status === 'ACTIVE').length;
+            const now = new Date();
+            const newThisMonth = members.filter(member => {
+              const joined = new Date(member.joinDate);
+              return !Number.isNaN(joined.getTime()) &&
+                joined.getMonth() === now.getMonth() &&
+                joined.getFullYear() === now.getFullYear();
+            }).length;
+            const groups = new Set<string>();
+            members.forEach(member => member.groups.forEach(group => groups.add(group)));
+            const withLocation = members.filter(member => !!member.location?.trim()).length;
             return [
-              { label: 'Retention Rate', value: `${retention}%`, icon: Heart, trend: `+${Math.round(retention / 10)}%`, color: 'indigo' },
-              { label: 'New Converts', value: `${newThisMonth}`, icon: UserPlus, trend: `+${Math.max(newThisMonth, 1) * 5}%`, color: 'emerald' },
-              { label: 'Active Groups', value: `${groupsSet.size}`, icon: Layers, trend: 'Stable', color: 'primary' },
-              { label: 'Outreach Reach', value: `${members.length > 0 ? Math.round(members.length / 10) : 0}k`, icon: Target, trend: `+${Math.round(members.length / 100)}%`, color: 'gold' }
+              { label: 'Active members', value: active.toLocaleString(), detail: `of ${members.length} registered`, icon: Heart },
+              { label: 'Joined this month', value: newThisMonth.toLocaleString(), detail: 'Based on join dates', icon: UserPlus },
+              { label: 'Groups represented', value: groups.size.toLocaleString(), detail: 'Distinct member groups', icon: Layers },
+              { label: 'Members with location', value: withLocation.toLocaleString(), detail: 'Location recorded', icon: MapPin }
             ];
-          })().map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm hover:shadow-lg transition-all group">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-2xl bg-brand-${stat.color}-50 text-brand-${stat.color}-500`}>
-                  <stat.icon size={20} />
+          })().map(stat => (
+            <div key={stat.label} className="rounded-xl border border-slate-200 bg-white p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-500">{stat.label}</p>
+                  <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
+                  <p className="mt-1 text-xs text-slate-500">{stat.detail}</p>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${stat.trend.startsWith('+') ? 'text-emerald-500' : 'text-slate-400'}`}>
-                    {stat.trend}
-                  </span>
-                  <span className="text-[8px] text-slate-300 font-bold uppercase">vs last month</span>
+                <div className="rounded-lg bg-slate-50 p-2.5 text-slate-600">
+                  <stat.icon size={19} aria-hidden="true" />
                 </div>
               </div>
-              <h4 className="text-3xl font-black text-slate-800">{stat.value}</h4>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -298,11 +300,11 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
 
       {/* Main Content Area (Hidden if in Resources tab for cleaner UI) */}
       {activeTab !== 'RESOURCES' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
           <div className="lg:col-span-8 space-y-8">
             {activeTab === 'DEMOGRAPHICS' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+                 <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm">
                     <h4 className="text-xl font-black text-slate-800 mb-8 flex items-center gap-3"><PieIcon size={20} className="text-brand-indigo-600"/> Age Distribution</h4>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
@@ -319,7 +321,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
                     </div>
                  </div>
 
-                 <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                 <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm">
                     <h4 className="text-xl font-black text-slate-800 mb-8 flex items-center gap-3"><Sparkles size={20} className="text-brand-gold-600"/> Gender Balance</h4>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
@@ -339,7 +341,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
             )}
 
             {activeTab === 'GROWTH' && (
-              <div className="bg-white p-8 lg:p-12 rounded-xl border border-slate-100 shadow-sm space-y-10">
+              <div className="bg-white p-5 sm:p-6 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                       <h4 className="text-2xl font-black text-slate-800">Membership Growth</h4>
@@ -369,7 +371,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
 
 
             {activeTab === 'ENGAGEMENT' && (
-              <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
+              <div className="bg-white p-5 sm:p-6 sm:p-6 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                       <h4 className="text-2xl font-black text-slate-800">Attendance by Service</h4>
@@ -392,7 +394,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
           </div>
 
           <div className="lg:col-span-4 space-y-8">
-             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
+             <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-8">
                 <h4 className="text-xl font-black text-slate-800 flex items-center gap-3">
                    <MapPin size={20} className="text-brand-indigo"/> Regional Presence
                 </h4>
@@ -400,7 +402,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
                    {locationData.length === 0 ? (
                      <p className="text-sm text-slate-500">No member location data has been recorded yet.</p>
                    ) : locationData.slice(0, 5).map((loc, i) => (
-                     <div key={loc.name} className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-all cursor-default">
+                     <div key={loc.name} className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-lg transition-all cursor-default">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-400 text-xs">
                            #{i+1}
                         </div>
@@ -421,7 +423,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
                 </div>
              </div>
 
-             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+             <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-6">
                 <h4 className="text-xl font-black text-slate-800 flex items-center gap-3">
                    <Activity size={20} className="text-brand-emerald"/> Key Metrics
                 </h4>

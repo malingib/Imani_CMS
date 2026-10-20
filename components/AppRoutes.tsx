@@ -65,7 +65,7 @@ function Protected({ children }: { children: React.ReactNode }) {
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, sermons, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
+  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
   const { activeChurchId, activeChurch } = useChurch();
   const location = useLocation();
   const navigateToPath = useNavigate();
@@ -174,7 +174,7 @@ const AccountShell = () => {
                   <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
                   <Route path={ROUTES.COMMUNICATION.path} element={<CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} addToast={addToast} />} />
                   <Route path={ROUTES.REPORTS.path} element={<ReportsCenter transactions={transactions} members={members} events={events} />} />
-                  <Route path={ROUTES.ANALYTICS.path} element={<DemographicsAnalysis members={members} />} />
+                  <Route path={ROUTES.ANALYTICS.path} element={<DemographicsAnalysis members={members} events={events} />} />
                   <Route path={ROUTES.SETTINGS.path} element={currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.SUPER_ADMIN ? <ChurchAdministration currentUserRole={currentUser.role} churchId={churchId || ''} /> : <Settings currentUserRole={currentUser.role} churchId={churchId || ''} />} />
                   <Route path={ROUTES.AUDIT_LOGS.path} element={<AuditLogs logs={auditLogs} />} />
                   <Route path={ROUTES.BILLING.path} element={<Billing />} />

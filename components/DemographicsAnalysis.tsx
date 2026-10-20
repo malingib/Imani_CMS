@@ -12,19 +12,19 @@ import {
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area,
-  ComposedChart, Line
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area
 } from 'recharts';
-import { Member } from '../types';
+import { Member, ChurchEvent } from '../types';
 import { scoutOutreachLocations } from '../services/geminiService';
 
-type AnalyticsTab = 'DEMOGRAPHICS' | 'GROWTH' | 'GIVING' | 'ENGAGEMENT' | 'RESOURCES';
+type AnalyticsTab = 'DEMOGRAPHICS' | 'GROWTH' | 'ENGAGEMENT' | 'RESOURCES';
 
 interface DemographicsAnalysisProps {
   members: Member[];
+  events: ChurchEvent[];
 }
 
-const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) => {
+const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, events }) => {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('DEMOGRAPHICS');
   // Resource Finder State
   const [resourceType, setResourceType] = useState('Schools');
@@ -35,7 +35,10 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
 
   const locationData = useMemo(() => {
     const counts: Record<string, number> = {};
-    members.forEach(m => counts[m.location] = (counts[m.location] || 0) + 1);
+    members.forEach(m => {
+      const location = m.location?.trim();
+      if (location) counts[location] = (counts[location] || 0) + 1;
+    });
     return Object.entries(counts).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [members]);
 
@@ -58,45 +61,38 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
   }, [members]);
 
   const growthData = useMemo(() => {
+    const year = new Date().getFullYear();
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    let cumulative = 0;
-    return months.slice(0, 7).map((month, idx) => {
-      cumulative += members.filter(m => new Date(m.joinDate).getMonth() === idx).length;
-      return {
-        month,
-        members: cumulative || members.length,
-        outreach: Math.round((cumulative || members.length) * (0.14 + idx * 0.03)),
-      };
+    return months.map((month, index) => {
+      const monthEnd = new Date(year, index + 1, 0, 23, 59, 59, 999);
+      const total = members.filter(member => {
+        const joined = new Date(member.joinDate);
+        return !Number.isNaN(joined.getTime()) && joined <= monthEnd;
+      }).length;
+      return { month, members: total };
     });
   }, [members]);
 
-  const givingTrendData = useMemo(() => {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months.slice(0, 6).map((month, idx) => {
-      const memberCount = members.filter(m => new Date(m.joinDate).getMonth() === idx).length;
-      return {
-        month,
-        income: Math.round(memberCount * 12000) || 450000,
-        expenses: Math.round(memberCount * 8000) || 320000,
-      };
-    });
-  }, [members]);
-
-  const engagementData = useMemo(() => {
-    const activeCount = members.filter(m => m.status === 'ACTIVE').length;
-    return [
-      { name: 'Sunday Service', attendance: Math.round(activeCount * 0.75), capacity: Math.round(activeCount * 0.8) },
-      { name: 'Youth Night', attendance: Math.round(activeCount * 0.2), capacity: Math.round(activeCount * 0.35) },
-      { name: 'Mid-week Prayer', attendance: Math.round(activeCount * 0.12), capacity: Math.round(activeCount * 0.25) },
-      { name: 'Bible Study', attendance: Math.round(activeCount * 0.1), capacity: Math.round(activeCount * 0.2) },
-    ];
-  }, [members]);
+  const engagementData = useMemo(() => events
+    .filter(event => !!event.date)
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 6)
+    .reverse()
+    .map(event => ({
+      name: event.title,
+      attendance: Array.isArray(event.attendance) ? event.attendance.length : 0,
+    })), [events]);
 
   const handleFindResources = async () => {
     setIsFindingResources(true);
     setResourceResults(null);
     try {
-      const topLoc = locationData[0]?.name || "Nairobi Central";
+      const topLoc = locationData[0]?.name;
+      if (!topLoc) {
+        alert('Add location details to member records before searching for nearby community resources.');
+        return;
+      }
       const res = await scoutOutreachLocations(`${resourceType} near ${topLoc} for community service and benevolence ministry`);
       setResourceResults(res);
     } catch (e) {
@@ -348,12 +344,9 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                       <h4 className="text-2xl font-black text-slate-800">Membership Growth</h4>
-                      <p className="text-slate-500 font-medium">Monthly acquisition vs outreach engagement.</p>
+                      <p className="text-slate-500 font-medium">Cumulative registered members by month, based on join dates.</p>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-indigo"></div><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Members</span></div>
-                      <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-gold"></div><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Outreach Leads</span></div>
-                    </div>
+                    <span className="text-xs text-slate-500">Members</span>
                  </div>
                  <div className="h-80 w-full">
                     <ResponsiveContainer width="100%" height="100%">
@@ -363,55 +356,25 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                             <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.1}/>
                             <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
                           </linearGradient>
-                          <linearGradient id="colorOutreach" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#FFB800" stopOpacity={0.1}/>
-                            <stop offset="95%" stopColor="#FFB800" stopOpacity={0}/>
-                          </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 900}} />
                         <YAxis hide />
                         <Tooltip content={<CustomTooltip />} />
                         <Area type="monotone" dataKey="members" stroke="#4F46E5" strokeWidth={4} fillOpacity={1} fill="url(#colorMembers)" />
-                        <Area type="monotone" dataKey="outreach" stroke="#FFB800" strokeWidth={4} fillOpacity={1} fill="url(#colorOutreach)" />
                       </AreaChart>
                     </ResponsiveContainer>
                  </div>
               </div>
             )}
 
-            {activeTab === 'GIVING' && (
-              <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
-                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                      <h4 className="text-2xl font-black text-slate-800">Income vs Expenses</h4>
-                      <p className="text-slate-500 font-medium">Operational income vs ministry expenses.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="px-4 py-1.5 bg-brand-indigo-50 text-brand-indigo text-[10px] font-black uppercase rounded-lg">Surplus Focus</span>
-                    </div>
-                 </div>
-                 <div className="h-80 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={givingTrendData}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 900}} />
-                        <YAxis hide />
-                        <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="income" fill="#4F46E5" radius={[10, 10, 0, 0]} barSize={40} />
-                        <Line type="step" dataKey="expenses" stroke="#10B981" strokeWidth={3} dot={{r: 4, strokeWidth: 0}} />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                 </div>
-              </div>
-            )}
 
             {activeTab === 'ENGAGEMENT' && (
               <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                       <h4 className="text-2xl font-black text-slate-800">Attendance by Service</h4>
-                      <p className="text-slate-500 font-medium">Actual attendance vs facility capacity.</p>
+                      <p className="text-slate-500 font-medium">Recorded attendance for the most recent events. Unrecorded attendance is shown as zero.</p>
                     </div>
                  </div>
                  <div className="h-80 w-full">
@@ -422,7 +385,6 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                         <YAxis hide />
                         <Tooltip content={<CustomTooltip />} cursor={{fill: 'transparent'}} />
                         <Bar dataKey="attendance" fill="#4F46E5" radius={[10, 10, 0, 0]} barSize={40} />
-                        <Bar dataKey="capacity" fill="#E2E8F0" radius={[10, 10, 0, 0]} barSize={40} />
                       </BarChart>
                     </ResponsiveContainer>
                  </div>
@@ -431,30 +393,14 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
           </div>
 
           <div className="lg:col-span-4 space-y-8">
-             <div className="bg-brand-primary p-10 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
-                <div className="relative z-10 space-y-6">
-                   <div className="flex items-center gap-3">
-                      <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Target size={24}/></div>
-                      <h4 className="text-xl font-black uppercase tracking-tight">Recommendations</h4>
-                   </div>
-                   <p className="text-slate-300 font-medium leading-relaxed">
-                     Current growth trends show a <span className="text-brand-gold font-black">12% uptick</span> in the 19-35 demographic. It is recommended to increase resource allocation for the <span className="text-white font-black underline decoration-brand-gold">youth programs</span> by 15% next quarter.
-                   </p>
-                   <div className="pt-6 border-t border-white/10">
-                      <button className="w-full py-4 bg-white text-brand-primary rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-gold hover:text-brand-primary transition-all flex items-center justify-center gap-2">
-                         Review Full Plan <ArrowUpRight size={16}/>
-                      </button>
-                   </div>
-                </div>
-                <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-10 group-hover:scale-110 transition-transform duration-700"></div>
-             </div>
-
              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-8">
                 <h4 className="text-xl font-black text-slate-800 flex items-center gap-3">
                    <MapPin size={20} className="text-brand-indigo"/> Regional Presence
                 </h4>
                 <div className="space-y-4">
-                   {locationData.slice(0, 5).map((loc, i) => (
+                   {locationData.length === 0 ? (
+                     <p className="text-sm text-slate-500">No member location data has been recorded yet.</p>
+                   ) : locationData.slice(0, 5).map((loc, i) => (
                      <div key={loc.name} className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl transition-all cursor-default">
                         <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-slate-400 text-xs">
                            #{i+1}
@@ -474,9 +420,6 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                      </div>
                    ))}
                 </div>
-                <button className="w-full py-3 bg-slate-50 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">
-                   View All 12 Regions
-                </button>
              </div>
 
              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
@@ -485,9 +428,9 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                 </h4>
                 <div className="space-y-6">
                    {[
-                     { label: 'Baptismal Candidates', value: 12, icon: Calendar },
-                     { label: 'Small Group Hosts', value: 48, icon: Home },
-                     { label: 'Active Volunteers', value: 310, icon: Users }
+                     { label: 'Members in groups', value: members.filter(member => member.groups?.length > 0).length, icon: Users },
+                     { label: 'Upcoming events', value: events.filter(event => new Date(event.date) >= new Date(new Date().setHours(0, 0, 0, 0))).length, icon: Calendar },
+                     { label: 'Members with contact details', value: members.filter(member => !!member.phone || !!member.email).length, icon: Home }
                    ].map((p, i) => (
                      <div key={i} className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

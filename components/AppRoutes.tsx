@@ -14,13 +14,13 @@ import PlatformShell from './PlatformShell';
 
 const ADMIN_VIEWS: AppView[] = [
   'DASHBOARD', 'MEMBERS', 'FINANCE', 'GROUPS', 'EVENTS', 'COMMUNICATION',
-  'REPORTS', 'ANALYTICS', 'SERMONS', 'AUDIT_LOGS', 'BILLING', 'SETTINGS',
+  'REPORTS', 'ANALYTICS', 'AUDIT_LOGS', 'BILLING', 'SETTINGS',
 ];
-const MEMBER_VIEWS: AppView[] = ['MY_PORTAL', 'MY_GIVING', 'SERMONS'];
+const MEMBER_VIEWS: AppView[] = ['MY_PORTAL', 'MY_GIVING'];
 const ROLE_VIEWS: Record<UserRole, AppView[]> = {
   SUPER_ADMIN: [...ADMIN_VIEWS, 'PLATFORM_DASHBOARD', 'TENANTS'],
   ADMIN: ADMIN_VIEWS,
-  PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS', 'SERMONS'],
+  PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS'],
   TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS'],
   SECRETARY: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION'],
   MEMBER: MEMBER_VIEWS,
@@ -48,7 +48,6 @@ const MemberPortal = lazy(() => import('./MemberPortal'));
 const MyGiving = lazy(() => import('./MyGiving'));
 const AuditLogs = lazy(() => import('./AuditLogs'));
 const Billing = lazy(() => import('./Billing'));
-const SermonHistory = lazy(() => import('./SermonHistory'));
 const AcceptInvite = lazy(() => import('./AcceptInvite'));
 const LandingPage = lazy(() => import('./LandingPage'));
 const PlatformDashboard = lazy(() => import('./PlatformDashboard'));
@@ -175,7 +174,6 @@ const AccountShell = () => {
                   <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
                   <Route path={ROUTES.COMMUNICATION.path} element={<CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} addToast={addToast} />} />
                   <Route path={ROUTES.REPORTS.path} element={<ReportsCenter transactions={transactions} members={members} events={events} />} />
-                  <Route path={ROUTES.SERMONS.path} element={<SermonHistory events={events} sermons={sermons} />} />
                   <Route path={ROUTES.ANALYTICS.path} element={<DemographicsAnalysis members={members} />} />
                   <Route path={ROUTES.SETTINGS.path} element={currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.SUPER_ADMIN ? <ChurchAdministration currentUserRole={currentUser.role} churchId={churchId || ''} /> : <Settings currentUserRole={currentUser.role} churchId={churchId || ''} />} />
                   <Route path={ROUTES.AUDIT_LOGS.path} element={<AuditLogs logs={auditLogs} />} />

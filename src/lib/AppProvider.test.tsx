@@ -173,7 +173,7 @@ describe("AppProvider", () => {
     expect(mockCreateAuditLog).toHaveBeenCalledWith(expect.objectContaining({ action: "Login success" }));
   });
 
-  it("keeps super admins in single-church mode when no church is configured", async () => {
+  it("keeps super admins in platform mode until a church workspace is opened", async () => {
     mockUseSession.mockReturnValue({ user: fakeSuperAdmin, isAuthenticated: true, isLoading: false });
     mockUseChurch.mockReturnValue({ activeChurchId: null, setActiveChurchId: vi.fn(), churches: [], fetchChurches: vi.fn() });
     mockLoadChurchData.mockResolvedValue({
@@ -206,7 +206,7 @@ describe("AppProvider", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("loading").textContent).toBe("ready");
-      expect(screen.getByTestId("platform").textContent).toBe("false");
+      expect(screen.getByTestId("platform").textContent).toBe("true");
     });
 
     act(() => screen.getByText("Login").click());

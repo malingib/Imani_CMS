@@ -159,7 +159,6 @@ export type AppView =
   | 'EVENTS' 
   | 'COMMUNICATION' 
   | 'REPORTS' 
-  | 'SERMONS' 
   | 'ANALYTICS' 
   | 'SETTINGS' 
   | 'AUDIT_LOGS'
@@ -251,18 +250,6 @@ export interface RecurringExpense {
   amount: number;
   frequency: 'Weekly' | 'Monthly' | 'Quarterly' | 'Yearly';
   nextDate: string;
-}
-
-export interface Sermon {
-  id: string;
-  title: string;
-  speaker: string;
-  date: string;
-  time: string;
-  scripture: string;
-  event: string;
-  eventId: string;
-  transcript: string;
 }
 
 export interface Group {

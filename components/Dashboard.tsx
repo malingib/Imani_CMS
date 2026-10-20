@@ -1,44 +1,15 @@
 
 import React, { useMemo } from 'react';
-import { 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  AreaChart, 
-  Area,
-  BarChart,
-  Bar,
-  Cell
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area
 } from 'recharts';
-import { 
-  Users, 
-  MessageSquare, 
-  Plus, 
-  Wallet, 
-  Smartphone,
-  CheckCircle2,
-  Gift,
-  ArrowRight,
-  Zap,
-  X,
-  Cake,
-  Heart,
-  Star,
-  Send,
-  Loader2,
-  TrendingUp,
-  ArrowUpRight,
-  Filter,
-  Activity,
-  HandCoins,
-  CalendarPlus,
-  UserPlus,
-  Clock,
-  ExternalLink,
-  ShieldCheck
-} from 'lucide-react';
+import { Users, MessageSquare, Wallet, Smartphone, Gift, HandCoins, CalendarPlus, UserPlus, ExternalLink } from 'lucide-react';
 import { Member, Transaction, ChurchEvent, AppView } from '../types';
 
 interface DashboardProps {

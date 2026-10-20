@@ -102,7 +102,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
   const childRegistrations = useMemo(() => members.filter(member =>
     (typeof member.age === 'number' && member.age <= 12) || member.groups.some(group => group.toLowerCase().includes('children'))
-  ).slice(0, 20).map(child => ({
+  ).slice().sort((a, b) => new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime()).slice(0, 20).map(child => ({
     n: child.firstName + ' ' + child.lastName,
     p: 'Not recorded',
     a: typeof child.age === 'number' ? (child.age <= 5 ? '3-5' : child.age <= 8 ? '6-8' : '9-12') + ' years' : '—',
@@ -263,15 +263,21 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
         </div>
         <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={attendanceChartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-              <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
-              <YAxis hide />
-              <Tooltip />
-              <Line type="monotone" dataKey="s" stroke="#4F46E5" strokeWidth={5} dot={{ r: 4, strokeWidth: 0 }} activeDot={{ r: 8 }} />
-            </LineChart>
-          </ResponsiveContainer>
+          {attendanceChartData.some(event => event.s > 0) ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={attendanceChartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="d" axisLine={false} tickLine={false} tick={{fill: "#64748b", fontSize: 11}} />
+                <YAxis hide />
+                <Tooltip />
+                <Line type="monotone" dataKey="s" name="Recorded attendance" stroke="#334155" strokeWidth={2} dot={{ r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-200 bg-white p-6 text-center">
+              <p className="text-sm text-slate-500">No attendance has been recorded for recent events yet.</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -367,7 +373,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((s, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-lg transition-all">
+          <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden">
             <div className="flex justify-between items-start relative z-10">
                <div>
                   <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">{s.label}</p>
@@ -384,7 +390,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-3 space-y-6 print:hidden">
-           <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-2">
+           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
               <p className="text-[10px] font-black uppercase text-slate-400 mb-6 px-4 tracking-[0.2em]">Report Scope</p>
               {[
                 { id: 'FINANCIAL', label: 'Financial', icon: Landmark, desc: 'Audit & Cashflow' },
@@ -428,7 +434,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
            </div>
         </div>
 
-        <div className="lg:col-span-9 bg-white p-10 lg:p-16 rounded-[3.5rem] border border-slate-100 shadow-sm space-y-12 min-h-[800px]">
+        <div className="lg:col-span-9 bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-8 min-h-[600px]">
            {aiInsight && (
               <div className="bg-slate-50 border-2 border-indigo-100 p-10 rounded-[3rem] space-y-10 animate-in slide-in-from-top-4 relative">
                  <button 

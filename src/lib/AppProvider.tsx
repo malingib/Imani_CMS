@@ -362,9 +362,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
       if (id) {
+        // Load the selected church explicitly instead of relying only on the
+        // mode-change effect. This prevents the workspace shell from rendering
+        // with the platform session's empty data arrays while the effect races
+        // the auth/church-context refresh.
         setActiveChurchId(id);
-        setState(prev => ({ ...prev, viewingPlatform: false, viewingChurch: true, loading: 'data-loading', dataError: null }));
-        addToast('Client workspace opened. Your superadmin identity and permissions remain visible.');
+        setState(prev => ({
+          ...prev,
+          viewingPlatform: false,
+          viewingChurch: true,
+          loading: 'data-loading',
+          dataError: null,
+          members: [],
+          transactions: [],
+          events: [],
+          budgets: [],
+          recurringExpenses: [],
+          communications: [],
+          groups: [],
+          sermons: [],
+          auditLogs: [],
+          notifications: [],
+        }));
+        addToast('Loading Demo Church workspace…');
+        void appDataService.loadChurchAppData(id)
+          .then(data => {
+            setState(prev => prev.currentUser?.role === UserRole.SUPER_ADMIN && prev.viewingChurch
+              ? { ...prev, ...data, loading: 'ready', dataError: null }
+              : prev);
+          })
+          .catch(error => {
+            const message = error instanceof Error ? error.message : 'Unable to load the client workspace.';
+            console.error('Failed to load superadmin client workspace:', error);
+            setState(prev => prev.currentUser?.role === UserRole.SUPER_ADMIN && prev.viewingChurch
+              ? { ...prev, loading: 'error', dataError: message }
+              : prev);
+            addToast(`Client workspace failed to load: ${message}`, 'error');
+          });
         void writeAudit(actor, `Opened client workspace ${id}`, 'PLATFORM_DASHBOARD', 'WARN', id);
       } else {
         setState(prev => ({ ...prev, viewingPlatform: true, viewingChurch: false, loading: 'ready', dataError: null }));

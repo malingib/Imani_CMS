@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   LayoutDashboard, Users, Wallet, CalendarDays, Settings as SettingsIcon,
-  LogOut, Layers, MessageSquare, BarChart3, PieChart, BookOpen, X,
+  LogOut, Layers, MessageSquare, BarChart3, PieChart, X,
   Sparkles, Building2, ChevronDown, ShieldCheck, CreditCard, Receipt, Globe, Network
 } from 'lucide-react';
 import { AppView, User, UserRole } from '../types';
@@ -41,7 +41,6 @@ const adminItems = [
   { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
   { id: 'REPORTS', label: 'Reports', icon: BarChart3, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.TREASURER] },
   { id: 'ANALYTICS', label: 'Analytics', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
-  { id: 'SERMONS', label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.MEMBER] },
   { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
   { id: 'BILLING', label: 'Subscription', icon: CreditCard, roles: [UserRole.ADMIN] },
   { id: 'PLATFORM_DASHBOARD', label: 'Superadmin Dashboard', icon: Globe, roles: [UserRole.SUPER_ADMIN] },
@@ -50,7 +49,6 @@ const adminItems = [
 
 const memberItems = [
   { id: 'MY_PORTAL', label: 'My Sanctuary', icon: Sparkles, roles: [UserRole.MEMBER] },
-  { id: 'SERMONS', label: 'Sermon Archive', icon: BookOpen, roles: [UserRole.MEMBER] },
   { id: 'MY_GIVING', label: 'Stewardship', icon: Wallet, roles: [UserRole.MEMBER] },
 ];
 

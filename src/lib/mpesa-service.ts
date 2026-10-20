@@ -13,7 +13,7 @@ export async function triggerStkPush(
   memberName: string
 ): Promise<MpesaStkResult> {
   if (!Number.isFinite(amount) || amount <= 0) return { success: false, message: 'Enter a valid amount greater than KES 0.' };
-  if (!/^254[17]\\d{8}$/.test(phone.replace(/[\\s+()-]/g, ''))) return { success: false, message: 'Use a valid Kenyan M-Pesa number beginning with 254.' };
+  if (!/^254[17]\d{8}$/.test(phone.replace(/[\s+()-]/g, ''))) return { success: false, message: 'Use a valid Kenyan M-Pesa number beginning with 254.' };
   if (!type.trim() || !memberName.trim()) return { success: false, message: 'Giving details are incomplete. Contact your church administrator.' };
   if (!LARAVEL_URL) {
     return {

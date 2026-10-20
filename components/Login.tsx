@@ -3,21 +3,21 @@ import React, { useState, useEffect } from 'react';
 import { 
   Lock, Mail, ArrowRight, Loader2, 
   Eye, EyeOff, Quote, AlertCircle, 
-  ArrowLeft, CheckCircle2, User, Globe
+  ArrowLeft, CheckCircle2, Globe
 } from 'lucide-react';
 import { User as UserType, AppView } from '../types';
 import { generateDailyVerse } from '../services/geminiService';
 import { ImaniLogoIcon } from './Sidebar';
 import { useAuth } from '../src/lib/supabase-auth';
 import { mapSupabaseUserToAppUser } from '../src/lib/app-user';
-import { LoginFormSchema, SignupFormSchema, PasswordResetSchema, validateFormData } from '../src/lib/validation';
+import { LoginFormSchema, PasswordResetSchema, validateFormData } from '../src/lib/validation';
 
 interface LoginProps {
   onLogin: (user: UserType) => void;
   onNavigateLegal: (view: AppView) => void;
 }
 
-type AuthMode = 'LOGIN' | 'SIGNUP' | 'RESET';
+type AuthMode = 'LOGIN' | 'RESET';
 
 const FALLBACK_VERSES = [
   { text: "For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.", ref: "Jeremiah 29:11" },
@@ -45,7 +45,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
   const [mode, setMode] = useState<AuthMode>('LOGIN');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -110,25 +109,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
     }
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    
-    // Validate form data
-    const { data, errors } = validateFormData(SignupFormSchema, { name, email, password, confirmPassword: password });
-    if (!data) {
-      setError(Object.values(errors)[0] || 'Invalid input');
-      setIsLoading(false);
-      return;
-    }
-    
-    setTimeout(() => {
-      setSuccess('Your registration request has been sent to the church admin for approval.');
-      setIsLoading(false);
-    }, 2000);
-  };
-
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -187,7 +167,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
              <div className="w-12 h-1 bg-brand-gold rounded-full mt-2"></div>
           </div>
 
-          {mode !== 'LOGIN' && (
+          {mode === 'RESET' && (
             <button 
               onClick={() => { setMode('LOGIN'); setSuccess(''); setError(''); }}
               className="absolute top-8 left-8 lg:top-12 lg:left-12 flex items-center gap-2 text-slate-400 hover:text-brand-indigo font-bold transition-all text-sm"
@@ -198,17 +178,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
 
           <div className="mb-5 sm:mb-6 text-center lg:text-left">
             <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-primary tracking-tight uppercase">
-              {mode === 'LOGIN' ? 'Sign In' : mode === 'SIGNUP' ? 'Create Account' : 'Reset Password'}
+              {mode === 'LOGIN' ? 'Sign In' : 'Reset Password'}
             </h3>
             <p className="text-slate-500 mt-2 font-medium text-sm sm:text-base leading-relaxed">
-              {mode === 'LOGIN' ? 'Sign in to your account.' : 
-               mode === 'SIGNUP' ? 'Create your account.' : 
-               'Enter your email to receive recovery instructions.'}
+              {mode === 'LOGIN' ? 'Sign in with the account created by your church administrator.' : 'Enter your registered email to receive recovery instructions.'}
             </p>
           </div>
 
           {success ? (
-            <div className="p-8 bg-brand-emerald/10 rounded-[2rem] border border-brand-emerald/20 text-center space-y-4 animate-in zoom-in duration-300">
+            <div role="status" className="p-8 bg-brand-emerald/10 rounded-[2rem] border border-brand-emerald/20 text-center space-y-4 animate-in zoom-in duration-300">
               <div className="w-16 h-16 bg-brand-emerald/20 text-brand-emerald rounded-full flex items-center justify-center mx-auto">
                 <CheckCircle2 size={32} />
               </div>
@@ -222,24 +200,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
               </button>
             </div>
           ) : (
-            <form onSubmit={mode === 'LOGIN' ? handleLogin : mode === 'SIGNUP' ? handleSignUp : handleReset} className="space-y-4">
-              {mode === 'SIGNUP' && (
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Full Name</label>
-                  <div className="relative">
-                    <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. John Kamau"
-                      className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-brand-primary focus:ring-2 focus:ring-brand-indigo outline-none transition-all"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-
+            <form onSubmit={mode === 'LOGIN' ? handleLogin : handleReset} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Registered Email</label>
                 <div className="relative">
@@ -268,7 +229,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-brand-indigo transition-colors">
+                    <button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-brand-indigo transition-colors">
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
@@ -288,7 +249,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
               )}
 
               {error && (
-                <div className="p-4 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold border border-rose-100 flex items-center gap-2 animate-in shake-in duration-300">
+                <div role="alert" className="p-4 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold border border-rose-100 flex items-center gap-2 animate-in shake-in duration-300">
                   <AlertCircle size={14} /> {error}
                 </div>
               )}
@@ -300,7 +261,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
               >
                 {isLoading ? <Loader2 className="animate-spin" /> : (
                   <>
-                    {mode === 'LOGIN' ? 'Sign In to Portal' : mode === 'SIGNUP' ? 'Create Account' : 'Send Recovery Email'}
+                    {mode === 'LOGIN' ? 'Sign In to Portal' : 'Send Recovery Email'}
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -308,13 +269,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
             </form>
           )}
 
-          {mode === 'LOGIN' && (
-            <div className="mt-5 text-center">
-              <p className="text-sm text-slate-400 font-medium">
-                New to Imani? <button onClick={() => setMode('SIGNUP')} className="text-brand-indigo font-black hover:underline ml-1">Create an Account</button>
-              </p>
-            </div>
-          )}
 
           {mode === 'LOGIN' && (
             <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col items-center">

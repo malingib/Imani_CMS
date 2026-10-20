@@ -1,8 +1,8 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Users, MapPin, TrendingUp, PieChart as PieIcon, 
-  Activity, Wallet, Map as MapIcon, Maximize2,
+  Activity, Wallet, Map as MapIcon,
   ExternalLink, X, Info, ArrowUpRight,
   TrendingDown, Target, UserPlus, Heart,
   Calendar, Layers, Sparkles, Home, Loader2,
@@ -24,25 +24,8 @@ interface DemographicsAnalysisProps {
   members: Member[];
 }
 
-const LOCATION_COORDS: Record<string, [number, number]> = {
-  'Nairobi West': [-1.3048, 36.8206],
-  'Kileleshwa': [-1.2828, 36.7865],
-  'Thika Road': [-1.2212, 36.8837],
-  'Nairobi Central': [-1.286389, 36.817223],
-  'Westlands': [-1.2633, 36.8028],
-  'Langata': [-1.3333, 36.7667],
-  'Donholm': [-1.3000, 36.8833],
-  'Kasaran': [-1.2167, 36.9000],
-  'Kiambu': [-1.1667, 36.8333],
-  'Default': [-1.286389, 36.817223]
-};
-
 const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) => {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('DEMOGRAPHICS');
-  const [showMapModal, setShowMapModal] = useState(false);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-
   // Resource Finder State
   const [resourceType, setResourceType] = useState('Schools');
   const [isFindingResources, setIsFindingResources] = useState(false);
@@ -123,35 +106,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
     }
   };
 
-  useEffect(() => {
-    if (showMapModal && mapContainerRef.current) {
-      const L = (window as any).L;
-      if (!L) return;
-      if (mapInstanceRef.current) mapInstanceRef.current.remove();
-      const map = L.map(mapContainerRef.current).setView([-1.286389, 36.817223], 12);
-      L.tileLayer('https://{s}.tile.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
-      }).addTo(map);
-      
-      locationData.forEach((loc) => {
-        const coords = LOCATION_COORDS[loc.name] || LOCATION_COORDS['Default'];
-        const marker = L.circle(coords, {
-          color: '#1E293B',
-          fillColor: '#4F46E5',
-          fillOpacity: 0.5,
-          radius: Math.sqrt(loc.value) * 500
-        }).addTo(map);
-        marker.bindPopup(`
-          <div style="font-family: sans-serif; padding: 10px;">
-            <h3 style="margin: 0; font-weight: 800; color: #1E293B;">${loc.name}</h3>
-            <p style="margin: 5px 0 0; font-weight: 600; color: #4F46E5;">${loc.value} Members</p>
-          </div>
-        `);
-      });
-      mapInstanceRef.current = map;
-    }
-    return () => { if (mapInstanceRef.current) mapInstanceRef.current.remove(); };
-  }, [showMapModal, locationData]);
+
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -384,29 +339,9 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
                     </div>
                  </div>
 
-                 <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm md:col-span-2">
-                    <div className="flex justify-between items-center mb-8">
-                      <h4 className="text-xl font-black text-slate-800 flex items-center gap-3"><MapIcon size={20} className="text-brand-primary-600"/> Geographic Heatmap</h4>
-                      <button onClick={() => setShowMapModal(true)} className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">
-                        <Maximize2 size={14}/> View Full Map
-                      </button>
-                    </div>
-                    <div className="h-72 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden">
-                       <div className="absolute inset-0 opacity-10">
-                          <div className="grid grid-cols-12 h-full gap-4 p-4">
-                             {Array.from({length: 48}).map((_, i) => <div key={i} className="bg-brand-primary/20 rounded-lg"></div>)}
-                          </div>
-                       </div>
-                       <div className="relative z-10 text-center space-y-3">
-                          <MapIcon size={48} className="mx-auto text-slate-300" />
-                          <p className="text-slate-400 text-sm font-bold">Interactive map available in full-screen view.</p>
-                       </div>
-                    </div>
-                 </div>
+
               </div>
             )}
-
-            {activeTab === 'GROWTH' && (
               <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
@@ -566,54 +501,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
         </div>
       )}
 
-      {/* Full Map Modal */}
-      {showMapModal && (
-        <div className="fixed inset-0 bg-brand-primary/60 backdrop-blur-xl z-[500] flex items-center justify-center p-4 lg:p-12 animate-in fade-in duration-500">
-          <div className="bg-white rounded-[3.5rem] w-full h-full shadow-2xl flex flex-col relative overflow-hidden border border-white/20">
-             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white z-10 relative">
-                <div className="flex items-center gap-4">
-                   <div className="p-3 bg-brand-indigo-50 text-brand-indigo rounded-2xl shadow-sm">
-                      <MapIcon size={32}/>
-                   </div>
-                   <div>
-                      <h3 className="text-3xl font-black text-brand-primary tracking-tight uppercase">Member Locations</h3>
-                      <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Map of member locations</p>
-                   </div>
-                </div>
-                <button 
-                  onClick={() => setShowMapModal(false)} 
-                  className="p-4 bg-slate-50 text-slate-400 hover:text-brand-primary hover:bg-slate-100 rounded-3xl transition-all shadow-sm"
-                >
-                  <X size={28}/>
-                </button>
-             </div>
-             
-             <div className="flex-1 relative">
-                <div ref={mapContainerRef} className="absolute inset-0 z-0 h-full" />
-                
-                <div className="absolute bottom-10 left-10 z-20 bg-white/90 backdrop-blur-md p-8 rounded-[2.5rem] shadow-2xl border border-white/40 max-w-xs space-y-6">
-                   <h5 className="text-xs font-black uppercase text-brand-primary tracking-widest">Legend & Toggles</h5>
-                   <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                         <div className="w-4 h-4 rounded-full bg-brand-indigo opacity-50 border-2 border-brand-indigo shadow-sm"></div>
-                         <span className="text-[10px] font-black text-slate-600 uppercase">Member Cluster</span>
-                      </div>
-                      <div className="p-4 bg-brand-primary/5 rounded-2xl space-y-2">
-                         <div className="flex justify-between text-[8px] font-black uppercase text-slate-400">
-                            <span>Density Range</span>
-                            <span>Scale 1:12</span>
-                         </div>
-                         <div className="h-1.5 w-full bg-gradient-to-r from-slate-200 to-brand-indigo rounded-full"></div>
-                      </div>
-                   </div>
-                   <button className="w-full py-3 bg-brand-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-                      <ExternalLink size={12}/> Focus: CBD Central
-                   </button>
-                </div>
-             </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 };

@@ -357,7 +357,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         addToast('Only a superadmin can open the client workspace.', 'error');
         return;
       }
-      if (id && id !== activeChurchId) {
+      // This deployment is single-church. Validate against the configured tenant,
+      // not activeChurchId: auth/context refresh can temporarily leave activeChurchId
+      // null even though the configured Demo Church is valid.
+      const configuredChurchId =
+        (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() ||
+        '00000000-0000-0000-0000-000000000001';
+      if (id && id !== configuredChurchId) {
         addToast('This deployment is restricted to the configured Demo Church.', 'error');
         return;
       }

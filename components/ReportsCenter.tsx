@@ -183,7 +183,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
         <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
-          <h4 className="font-black text-slate-800 uppercase tracking-tight">M-Pesa Reconciliation</h4>
+          <h4 className="font-semibold text-slate-900">Recent transaction records</h4>
           <span className="text-xs text-slate-500">Recorded transactions</span>
         </div>
         <table className="w-full text-left">
@@ -257,13 +257,10 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
       <div className="bg-slate-50/50 p-8 rounded-[3rem] border border-slate-100">
         <div className="flex justify-between items-center mb-8 px-2">
           <div>
-            <h4 className="text-sm font-black uppercase text-slate-400 tracking-[0.2em]">Attendance Over Time</h4>
-            <p className="text-xs font-bold text-slate-500 mt-1">Consistency tracking across Sunday and Mid-week services.</p>
+            <h4 className="text-base font-semibold text-slate-900">Attendance by event</h4>
+            <p className="text-sm text-slate-500 mt-1">Counts reflect attendance lists saved on each event.</p>
           </div>
-          <div className="flex gap-4">
-             <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-brand-indigo"/> <span className="text-[10px] font-black text-slate-400 uppercase">Sunday</span></div>
-             <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-brand-gold"/> <span className="text-[10px] font-black text-slate-400 uppercase">Mid-week</span></div>
-          </div>
+
         </div>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -273,7 +270,6 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
               <YAxis hide />
               <Tooltip />
               <Line type="monotone" dataKey="s" stroke="#4F46E5" strokeWidth={5} dot={{ r: 4, strokeWidth: 0 }} activeDot={{ r: 8 }} />
-              <Line type="monotone" dataKey="m" stroke="#FFB800" strokeWidth={5} dot={{ r: 4, strokeWidth: 0 }} activeDot={{ r: 8 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -308,7 +304,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
   const renderSundaySchoolReport = () => (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {sundaySchoolStats.map((m, i) => (
           <div key={i} className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 text-center">
             <div className={`mx-auto w-10 h-10 mb-3 bg-brand-${m.color}/10 text-brand-${m.color} rounded-xl flex items-center justify-center`}>
@@ -324,7 +320,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
         <div className="p-8 border-b border-slate-100 bg-slate-50/30">
-          <h4 className="font-black text-slate-800 uppercase tracking-tight">Recent Child Registrations</h4>
+          <h4 className="font-semibold text-slate-900">Registered children</h4>
         </div>
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 tracking-widest border-b border-slate-100">
@@ -360,11 +356,11 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
           <p className="text-slate-500 mt-2 text-lg font-medium">View reports on giving, attendance, and membership.</p>
         </div>
         <div className="flex gap-3 flex-wrap">
-          <button className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
-            <Printer size={16} /> Print View
+          <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+            <Printer size={16} /> Print view
           </button>
-          <button className="flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-xl shadow-brand-primary/20">
-            <Download size={16} /> Export PDF
+          <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors">
+            <Download size={16} /> Print / save PDF
           </button>
         </div>
       </header>
@@ -378,7 +374,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
                   <h4 className="text-3xl font-black text-slate-800 tracking-tight">{s.value}</h4>
                </div>
                <div className={`p-3 bg-brand-${s.color}-50 text-brand-${s.color} rounded-xl`}>
-                  <Zap size={18} />
+                  <s.icon size={18} />
                </div>
             </div>
             <div className={`absolute bottom-0 left-0 h-1 bg-brand-${s.color} transition-all duration-700 w-full group-hover:h-2 opacity-50`}></div>
@@ -392,8 +388,8 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
               <p className="text-[10px] font-black uppercase text-slate-400 mb-6 px-4 tracking-[0.2em]">Report Scope</p>
               {[
                 { id: 'FINANCIAL', label: 'Financial', icon: Landmark, desc: 'Audit & Cashflow' },
-                { id: 'MEMBERSHIP', label: 'Membership', icon: Users, desc: 'Growth & Churn' },
-                { id: 'ATTENDANCE', label: 'Attendance', icon: BarChart3, desc: 'Service Vitality' },
+                { id: 'MEMBERSHIP', label: 'Membership', icon: Users, desc: 'Status & growth' },
+                { id: 'ATTENDANCE', label: 'Attendance', icon: BarChart3, desc: 'Recorded attendance' },
                 { id: 'SUNDAY_SCHOOL', label: 'Sunday School', icon: Baby, desc: 'Children' },
               ].map(report => (
                 <button 
@@ -475,10 +471,10 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
                  </div>
                  <div className="flex items-center gap-4">
                     <div className="text-right">
-                       <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Integrity Level</p>
-                       <p className="text-sm font-medium text-slate-600">Based on recorded data</p>
+                       <p className="text-[10px] font-semibold uppercase text-slate-500 tracking-wider">Report source</p>
+                       <p className="text-sm font-medium text-slate-700">Saved church records</p>
                     </div>
-                    <div className="p-3 bg-brand-emerald/10 text-brand-emerald rounded-2xl"><ShieldCheck size={24}/></div>
+                    <div className="p-3 bg-slate-100 text-slate-600 rounded-lg"><FileText size={20}/></div>
                  </div>
               </div>
 

@@ -342,6 +342,8 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members }) 
 
               </div>
             )}
+
+            {activeTab === 'GROWTH' && (
               <div className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>

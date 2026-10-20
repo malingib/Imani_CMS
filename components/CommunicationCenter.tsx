@@ -20,7 +20,7 @@ interface CommunicationCenterProps {
   smsCredits?: number;
 }
 
-const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs, onSendBroadcast, currentUser, addToast, smsCredits = 4280 }) => {
+const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs, onSendBroadcast, currentUser, addToast, smsCredits }) => {
   const [activeTab, setActiveTab] = useState<'LOGS' | 'COMPOSE' | 'AUTOMATION' | 'TEMPLATES'>('LOGS');
   const [searchTerm, setSearchTerm] = useState('');
   const [messageType, setMessageType] = useState<'SMS' | 'Email' | 'WhatsApp'>('SMS');
@@ -48,32 +48,13 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
   const [isGeneratingSermon, setIsGeneratingSermon] = useState(false);
 
   const handleSend = () => {
-    if (!content) return;
-
-    const isScheduled = !!(scheduledDate && scheduledTime);
-    const targetCount = members.length;
-    
-    const newLog: CommunicationLog = {
-      id: crypto.randomUUID(),
-      type: messageType,
-      recipientCount: targetCount,
-      targetGroupName: broadcastTarget,
-      subject: subject || `${messageType} Broadcast`,
-      content,
-      date: new Date().toISOString().split('T')[0],
-      scheduledFor: isScheduled ? `${scheduledDate} ${scheduledTime}` : undefined,
-      status: isScheduled ? 'Scheduled' : 'Sent',
-      sender: currentUser.name,
-      deliveryBreakdown: isScheduled ? undefined : {
-        delivered: targetCount,
-        opened: Math.floor(targetCount * (messageType === 'Email' ? 0.35 : 0.85)),
-        failed: 0
-      }
-    };
-
-    onSendBroadcast(newLog);
-    setActiveTab('LOGS');
-    resetForm();
+    if (!content.trim()) {
+      addToast?.('Enter a message before sending.', 'error');
+      return;
+    }
+    // This UI has no configured delivery adapter. Never fabricate a sent log,
+    // delivery counts, opens, or a scheduled job. Keep the user's draft intact.
+    addToast?.('Message not sent: no SMS, email, or WhatsApp delivery provider is configured for this workflow. Your draft has been kept.', 'error');
   };
 
   const useTemplate = (t: CommunicationTemplate) => {
@@ -145,7 +126,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-2xl"><Sparkles size={24}/></div>
                     <h3 className="text-xl sm:text-2xl font-black text-slate-800">Auto-Verse</h3>
                  </div>
-                  <div className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full p-1 cursor-pointer transition-all ${autoVerseEnabled ? 'bg-brand-primary' : 'bg-slate-200'}`} onClick={() => { const next = !autoVerseEnabled; setAutoVerseEnabled(next); localStorage.setItem('autoVerseEnabled', String(next)); }}>
+                  <div className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full p-1 opacity-60 cursor-not-allowed ${autoVerseEnabled ? 'bg-brand-primary' : 'bg-slate-200'}`} aria-disabled="true" title="Server-side automation is not configured">
                     <div className={`w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full shadow-sm transition-all ${autoVerseEnabled ? 'translate-x-6 sm:translate-x-7' : 'translate-x-0'}`} />
                  </div>
               </div>
@@ -154,14 +135,14 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Frequency</label>
-                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseFrequency} onChange={e => setVerseFrequency(e.target.value as any)}>
+                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseFrequency} disabled onChange={e => setVerseFrequency(e.target.value as any)}>
                           <option>Daily</option>
                           <option>Weekly</option>
                        </select>
                     </div>
                     <div className="space-y-2">
                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Generation Mode</label>
-                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseMode} onChange={e => setVerseMode(e.target.value as any)}>
+                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseMode} disabled onChange={e => setVerseMode(e.target.value as any)}>
                           <option>Auto (Gemini AI)</option>
                           <option>Manual Entry</option>
                        </select>
@@ -171,7 +152,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                  {verseMode === 'Manual' && (
                     <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Static Verse Queue</label>
-                       <textarea className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold resize-none outline-none focus:ring-2 focus:ring-brand-primary" rows={3} placeholder="Paste verse and reference..." value={manualVerse} onChange={e => setManualVerse(e.target.value)} />
+                       <textarea className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold resize-none outline-none focus:ring-2 focus:ring-brand-primary" rows={3} placeholder="Paste verse and reference..." value={manualVerse} disabled onChange={e => setManualVerse(e.target.value)} />
                     </div>
                  )}
 
@@ -180,15 +161,15 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     <div className="flex flex-wrap gap-2">
                        {['SMS', 'WhatsApp', 'Email'].map(channel => (
                           <div key={channel} className="flex-1 min-w-[80px] p-3 bg-white rounded-xl border border-slate-100 flex items-center justify-center gap-2 shadow-sm">
-                             <input type="checkbox" defaultChecked className="accent-brand-primary h-4 w-4" />
+                             <input type="checkbox" defaultChecked disabled className="accent-brand-primary h-4 w-4" />
                              <span className="text-[10px] font-black text-slate-600 uppercase">{channel}</span>
                           </div>
                        ))}
                     </div>
                  </div>
               </div>
-              <button className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black shadow-lg hover:bg-brand-primary-700 transition-all flex items-center justify-center gap-2">
-                 <Save size={18}/> Update Automation
+              <button type="button" disabled title="Server-side scheduling is not configured" className="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black flex items-center justify-center gap-2 cursor-not-allowed">
+                 <Save size={18}/> Automation not configured
               </button>
            </div>
 
@@ -214,22 +195,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
 
               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
                  <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight"><Clock size={20} className="text-brand-indigo"/> Scheduled Messages</h4>
-                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-white hover:shadow-md transition-all">
-                       <div className="flex items-center gap-3">
-                          <Zap size={16} className="text-brand-indigo"/>
-                          <span className="text-xs font-bold text-slate-700">Daily Verse</span>
-                       </div>
-                       <span className="text-[9px] font-black uppercase text-brand-indigo">Today, 06:00 AM</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-white hover:shadow-md transition-all">
-                       <div className="flex items-center gap-3">
-                          <MessageSquare size={16} className="text-brand-indigo"/>
-                          <span className="text-xs font-bold text-slate-700">Youth Bulletin</span>
-                       </div>
-                       <span className="text-[9px] font-black uppercase text-slate-400">Wed, 09:00 PM</span>
-                    </div>
-                 </div>
+                 <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">No scheduled messages are connected to a server-side scheduler. Automation shown in this panel does not dispatch messages.</p>
               </div>
            </div>
         </div>
@@ -371,10 +337,10 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
              <div className="bg-white p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
                 <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">SMS Credits</h4>
                 <div className="flex items-center justify-between">
-                    <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">{smsCredits.toLocaleString()}</p>
+                    <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">{typeof smsCredits === 'number' ? smsCredits.toLocaleString() : 'Not configured'}</p>
                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Zap size={20}/></div>
                 </div>
-                <button className="w-full py-4 bg-slate-50 text-brand-indigo rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">Top Up Balance</button>
+                <button type="button" disabled title="SMS provider billing is not connected" className="w-full py-4 bg-slate-100 text-slate-500 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Top-up not configured</button>
              </div>
           </div>
         </div>

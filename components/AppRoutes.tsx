@@ -76,12 +76,18 @@ const AccountShell = () => {
   const currentMember = members.find(m => m.id === currentUser?.memberId);
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const handleGive = async () => {
-    addToast('Initiating STK Push...');
-    createAudit('Initiated Giving STK', 'MY_GIVING');
-    const memberPhone = currentMember?.phone || '';
-    const result = await triggerStkPush(0, memberPhone, 'Tithe', currentMember?.firstName || '');
-    if (result.success) addToast(result.message); else addToast(result.message || 'Payment could not be processed.');
+  const handleGive = async (amount: number, type: string): Promise<{ success: boolean; message: string }> => {
+    if (!currentMember?.phone) {
+      return { success: false, message: 'Your member profile has no phone number. Contact your church administrator.' };
+    }
+    const result = await triggerStkPush(amount, currentMember.phone, type, `${currentMember.firstName} ${currentMember.lastName}`.trim());
+    if (result.success) {
+      createAudit('M-Pesa giving prompt accepted', 'MY_GIVING');
+      addToast(result.message, 'info');
+    } else {
+      addToast(result.message, 'error');
+    }
+    return result;
   };
 
   if (!currentUser) return null;

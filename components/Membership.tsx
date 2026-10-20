@@ -14,9 +14,9 @@ import { CsvMemberSchema, MemberFormSchema, validateFormData } from '../src/lib/
 
 interface MembershipProps {
   members: Member[];
-  onAddMember: (member: Member) => void;
-  onAddMembersBulk: (members: Member[]) => void;
-  onUpdateMember: (member: Member) => void;
+  onAddMember: (member: Member) => Promise<void> | void;
+  onAddMembersBulk: (members: Member[]) => Promise<void> | void;
+  onUpdateMember: (member: Member) => Promise<void> | void;
   onDeleteMember: (id: string) => void;
   transactions: Transaction[];
   events: ChurchEvent[];
@@ -49,6 +49,8 @@ const Membership: React.FC<MembershipProps> = ({
   const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [activeDetailTab, setActiveDetailTab] = useState<'OVERVIEW' | 'GIVING' | 'ATTENDANCE'>('OVERVIEW');
   const [isSaving, setIsSaving] = useState(false);
+  const [importMessage, setImportMessage] = useState('');
+  const [formError, setFormError] = useState('');
   
   const [messagingGroup, setMessagingGroup] = useState<MessagingTarget | null>(null);
 
@@ -99,22 +101,22 @@ const Membership: React.FC<MembershipProps> = ({
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size exceeds 5MB limit. Please use a smaller file.');
+      setImportMessage('File size exceeds 5MB. Choose a smaller CSV file.');
       return;
     }
 
     const reader = new FileReader();
     reader.onerror = () => {
-      alert('Failed to read file. Please ensure it is a valid CSV file.');
+      setImportMessage('The file could not be read. Choose a valid CSV file and try again.');
     };
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
         const lines = text.split('\n');
         
         if (lines.length < 2) {
-          alert('CSV file is empty. Please add at least one member row.');
+          setImportMessage('The CSV has no member rows. Add at least one row and try again.');
           return;
         }
 
@@ -182,7 +184,7 @@ const Membership: React.FC<MembershipProps> = ({
         });
 
         if (importedMembers.length === 0) {
-          alert(`Import failed. ${errors.length > 0 ? 'Errors: ' + errors.slice(0, 5).join('; ') : 'No valid records found.'}`);
+          setImportMessage(`No members were imported. ${errors.length > 0 ? errors.slice(0, 5).join('; ') : 'No valid records were found.'}`);
           return;
         }
 
@@ -191,15 +193,13 @@ const Membership: React.FC<MembershipProps> = ({
           console.warn(errorMsg);
         }
 
-        onAddMembersBulk(importedMembers);
-        setShowBulkModal(false);
-        
-        if (errors.length > 0) {
-          alert(`Successfully imported ${importedMembers.length} members. ${errors.length} rows had errors and were skipped.`);
-        }
+        await onAddMembersBulk(importedMembers);
+        setImportMessage(errors.length > 0
+          ? `Imported ${importedMembers.length} members. ${errors.length} rows were skipped: ${errors.slice(0, 5).join('; ')}`
+          : `Imported ${importedMembers.length} members successfully.`);
       } catch (error) {
         console.error('CSV import error:', error);
-        alert('An error occurred while processing the CSV file. Please check the file format and try again.');
+        setImportMessage('The CSV could not be processed. Check the column headers and file format, then try again.');
       }
     };
 
@@ -236,11 +236,9 @@ const Membership: React.FC<MembershipProps> = ({
     window.URL.revokeObjectURL(url);
   };
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form data
-    const validationData = {
+    const { data, errors } = validateFormData(MemberFormSchema, {
       firstName: formData.firstName,
       lastName: formData.lastName,
       phone: formData.phone,
@@ -254,35 +252,36 @@ const Membership: React.FC<MembershipProps> = ({
       gender: formData.gender,
       maritalStatus: formData.maritalStatus,
       membershipType: formData.membershipType,
-    };
-    
-    const { data, errors } = validateFormData(MemberFormSchema, validationData);
+    });
     if (!data) {
-      alert('Validation error: ' + Object.values(errors)[0]);
+      setFormError('Please correct the form: ' + Object.values(errors)[0]);
       return;
     }
-    
+
+    setFormError('');
     setIsSaving(true);
-    setTimeout(() => {
-      const newM: Member = {
+    try {
+      const newMember: Member = {
         ...data,
         email: data.email || '',
         id: crypto.randomUUID(),
-        photo: photo || undefined
+        photo: photo || undefined,
       };
-      onAddMember(newM);
-      setIsSaving(false);
+      await onAddMember(newMember);
       setShowAddModal(false);
       setFormData({ groups: [] });
       setPhoto(null);
-    }, 1000);
+    } catch (error) {
+      console.error('Unable to add member:', error);
+      setFormError('Member was not saved. Your entries have been kept. Check your connection and permissions, then try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!showEditModal) return;
-    
-    // Validate form data
     const validationData = {
       firstName: formData.firstName || showEditModal.firstName,
       lastName: formData.lastName || showEditModal.lastName,
@@ -298,25 +297,29 @@ const Membership: React.FC<MembershipProps> = ({
       maritalStatus: formData.maritalStatus || showEditModal.maritalStatus,
       membershipType: formData.membershipType || showEditModal.membershipType,
     };
-    
     const { data, errors } = validateFormData(MemberFormSchema, validationData);
     if (!data) {
-      alert('Validation error: ' + Object.values(errors)[0]);
+      setFormError('Please correct the form: ' + Object.values(errors)[0]);
       return;
     }
-    
+
+    setFormError('');
     setIsSaving(true);
-    setTimeout(() => {
-      onUpdateMember({ 
+    try {
+      await onUpdateMember({
         ...showEditModal,
         ...data,
         photo: photo || showEditModal.photo,
       } as Member);
-      setIsSaving(false);
       setShowEditModal(null);
       setFormData({ groups: [] });
       setPhoto(null);
-    }, 1000);
+    } catch (error) {
+      console.error('Unable to update member:', error);
+      setFormError('Member changes were not saved. Your entries have been kept. Check your connection and permissions, then try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleGroupSelection = (groupName: string) => {
@@ -346,7 +349,7 @@ const Membership: React.FC<MembershipProps> = ({
           {currentUserRole !== UserRole.MEMBER && (
             <>
               <button 
-                onClick={() => setShowBulkModal(true)}
+                onClick={() => { setImportMessage(''); setShowBulkModal(true); }}
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-brand-indigo border border-indigo-100 rounded-[1rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-sm"
               >
                 <FileSpreadsheet size={16} /> Bulk Import
@@ -636,6 +639,7 @@ const Membership: React.FC<MembershipProps> = ({
             </div>
 
             <div className="space-y-6">
+              {importMessage && <p role="status" aria-live="polite" className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">{importMessage}</p>}
               <div className="p-8 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50 flex flex-col items-center justify-center text-center space-y-4 group hover:border-brand-primary transition-all">
                 <Upload size={48} className="text-slate-300 group-hover:text-brand-primary transition-colors"/>
                 <div>
@@ -678,6 +682,7 @@ const Membership: React.FC<MembershipProps> = ({
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[600] flex items-center justify-center p-0 sm:p-4 lg:p-12 overflow-y-auto">
           <div className="bg-white rounded-none sm:rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col my-auto animate-in zoom-in-95 duration-300 border border-white/20">
             <form onSubmit={showAddModal ? handleAddSubmit : handleEditSubmit} className="flex flex-col h-full lg:max-h-[90vh]">
+              {formError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{formError}</p>}
               <div className="p-8 sm:p-12 bg-slate-50 border-b border-slate-100 flex justify-between items-center relative overflow-hidden flex-shrink-0">
                 <div className="flex items-center gap-6 relative z-10">
                   <div className="p-4 bg-brand-primary text-white rounded-[1.5rem] shadow-xl">

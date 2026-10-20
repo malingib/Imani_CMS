@@ -2,7 +2,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Heart, 
-  BookOpen, 
   Calendar, 
   Wallet, 
   ArrowRight, 
@@ -281,9 +280,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                           <button className="p-2 text-slate-300 hover:text-brand-primary transition-all"><ChevronRight size={16}/></button>
                        </div>
                     ))}
-                    <button onClick={() => onNavigate('GROUPS' as any)} className="w-full py-4 border-2 border-dashed border-slate-100 rounded-2xl text-[10px] font-black uppercase text-slate-300 hover:border-brand-primary hover:text-brand-primary transition-all flex items-center justify-center gap-2">
-                       <Plus size={14}/> Join a Group
-                    </button>
+                    <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">To join or change a group, contact your church administrator.</p>
                  </div>
               </div>
 
@@ -293,16 +290,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                     <h4 className="text-lg font-black text-slate-800 uppercase tracking-tight">Resources</h4>
                  </div>
                  <div className="space-y-4">
-                    <div className="p-6 bg-indigo-50 border border-indigo-100 rounded-[2rem] space-y-4 group cursor-pointer hover:bg-indigo-100 transition-all">
-                       <p className="text-[9px] font-black uppercase text-brand-indigo tracking-widest flex items-center gap-2">
-                          <Zap size={12} fill="currentColor"/> New Resource Available
-                       </p>
-                       <h5 className="font-black text-slate-800 leading-tight">Walking in Faith: A Study Guide for NextGen Ministry</h5>
-                       <button className="text-xs font-black text-brand-primary uppercase flex items-center gap-1 group-hover:gap-2 transition-all">Download PDF <Download size={14}/></button>
-                    </div>
-                    <button onClick={() => onNavigate('SERMONS')} className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
-                       Sermon Archive <BookOpen size={14}/>
-                    </button>
+                    <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">The church resource library is not configured yet. Contact your church administrator for study materials.</p>
                  </div>
               </div>
            </div>

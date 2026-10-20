@@ -17,11 +17,11 @@ interface EventsManagementProps {
   events: ChurchEvent[];
   members: Member[];
   currentUser: UserType | null;
-  onRSVP: (eventId: string, isRSVPing: boolean) => void;
-  onAddEvent: (event: ChurchEvent) => void;
-  onUpdateEvent: (event: ChurchEvent) => void;
-  onDeleteEvent: (id: string) => void;
-  onUpdateAttendance: (eventId: string, memberIds: string[]) => void;
+  onRSVP: (eventId: string, isRSVPing: boolean) => Promise<void> | void;
+  onAddEvent: (event: ChurchEvent) => Promise<void> | void;
+  onUpdateEvent: (event: ChurchEvent) => Promise<void> | void;
+  onDeleteEvent: (id: string) => Promise<void> | void;
+  onUpdateAttendance: (eventId: string, memberIds: string[]) => Promise<void> | void;
 }
 
 const EVENT_TYPE_CONFIG: Record<ChurchEventType, { icon: any, color: string, label: string }> = {
@@ -41,6 +41,9 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
   const [viewingEvent, setViewingEvent] = useState<ChurchEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
   const [showScoutModal, setShowScoutModal] = useState(false);
+  const [eventError, setEventError] = useState('');
+  const [isSavingEvent, setIsSavingEvent] = useState(false);
+  const [isSavingAttendance, setIsSavingAttendance] = useState(false);
   
   const [newEvent, setNewEvent] = useState<Partial<ChurchEvent>>({
     type: 'WORSHIP',
@@ -57,9 +60,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
   const activeEventForRollCall = useMemo(() => events.find(e => e.id === showAttendanceModal), [events, showAttendanceModal]);
   const [currentAttendance, setCurrentAttendance] = useState<string[]>([]);
 
-  // Reminder State
-  const [reminderType, setReminderType] = useState<'SMS' | 'EMAIL'>('SMS');
-  const [reminderLeadTime, setReminderLeadTime] = useState('1h');
 
   useEffect(() => {
     if (activeEventForRollCall) {
@@ -100,15 +100,25 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
     );
   };
 
-  const saveRollCall = () => {
-    if (showAttendanceModal) {
-      onUpdateAttendance(showAttendanceModal, currentAttendance);
+  const saveRollCall = async () => {
+    if (!showAttendanceModal) return;
+    setEventError('');
+    setIsSavingAttendance(true);
+    try {
+      await onUpdateAttendance(showAttendanceModal, currentAttendance);
       setShowAttendanceModal(null);
+    } catch (error) {
+      console.error('Unable to save event attendance:', error);
+      setEventError('Attendance was not saved. Your selections have been kept; check your connection and try again.');
+    } finally {
+      setIsSavingAttendance(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setEventError('');
+    setIsSavingEvent(true);
     const event: ChurchEvent = {
       id: `ev${Date.now()}`,
       title: newEvent.title || 'Untitled Event',
@@ -123,9 +133,51 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       recurrence: newEvent.recurrence as RecurrenceType,
       attendance: [],
     };
-    onAddEvent(event);
-    setShowAddModal(false);
-    setNewEvent({ type: 'WORSHIP', recurrence: 'NONE', attendance: [] });
+    try {
+      await onAddEvent(event);
+      setShowAddModal(false);
+      setNewEvent({ type: 'WORSHIP', recurrence: 'NONE', attendance: [] });
+    } catch (error) {
+      console.error('Unable to create event:', error);
+      setEventError('Event was not saved. Your entries have been kept; check your connection and permissions, then try again.');
+    } finally {
+      setIsSavingEvent(false);
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEventError('');
+    setIsSavingEvent(true);
+    try {
+      await onUpdateEvent(newEvent as ChurchEvent);
+      setEditingEvent(null);
+    } catch (error) {
+      console.error('Unable to update event:', error);
+      setEventError('Event changes were not saved. Your entries have been kept; check your connection and permissions, then try again.');
+    } finally {
+      setIsSavingEvent(false);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    setEventError('');
+    try {
+      await onDeleteEvent(eventId);
+    } catch (error) {
+      console.error('Unable to delete event:', error);
+      setEventError('Event was not deleted. Check your connection and permissions, then try again.');
+    }
+  };
+
+  const handleRSVPAction = async (eventId: string, isRSVPing: boolean) => {
+    setEventError('');
+    try {
+      await onRSVP(eventId, isRSVPing);
+    } catch (error) {
+      console.error('Unable to update RSVP:', error);
+      setEventError('Your RSVP was not saved. Check your connection and try again.');
+    }
   };
 
   const isUserRSVPd = (event: ChurchEvent) => {
@@ -134,6 +186,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+      {eventError && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{eventError}</p>}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Events Management</h2>
@@ -247,7 +300,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                       <button onClick={() => setShowAttendanceModal(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-gold text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white transition-all shadow-xl">
                         <UserCheck size={16}/> Mark Attendance
                       </button>
-                      <button onClick={() => onDeleteEvent(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-rose-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-xl">
+                      <button onClick={() => void handleDeleteEvent(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-rose-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-xl">
                         <Trash2 size={16}/> Delete Event
                       </button>
                     </>
@@ -307,78 +360,19 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
         </div>
       )}
 
-      {/* Event Reminder Modal */}
+      {/* Reminder scheduling is not connected to a persisted scheduler/provider. Be explicit instead of implying dispatch. */}
       {showReminderModal && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-xl z-[500] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in duration-300 border border-white/20">
-             <div className="flex justify-between items-start">
-               <div className="flex items-center gap-4">
-                 <div className="p-4 bg-brand-indigo/10 text-brand-indigo rounded-[1.5rem] shadow-sm flex-shrink-0">
-                    <BellRing size={28}/>
-                 </div>
-                 <div>
-                    <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight leading-none">Event Reminders</h3>
-                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">Set Reminder</p>
-                 </div>
-               </div>
-               <button onClick={() => setShowReminderModal(null)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all"><X size={20}/></button>
-             </div>
-
-             <div className="space-y-6">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                   <p className="text-xs font-bold text-slate-600">Reminder for:</p>
-                   <p className="text-sm font-black text-brand-primary uppercase mt-1">{showReminderModal.title}</p>
-                </div>
-
-                <div className="space-y-3">
-                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Channel</label>
-                   <div className="flex p-1 bg-slate-50 rounded-2xl border border-slate-100">
-                      <button 
-                        onClick={() => setReminderType('SMS')}
-                        className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase transition-all ${reminderType === 'SMS' ? 'bg-white text-brand-primary shadow-md' : 'text-slate-400'}`}
-                      >
-                         <Phone size={14}/> SMS Alert
-                      </button>
-                      <button 
-                        onClick={() => setReminderType('EMAIL')}
-                        className={`flex-1 py-3 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase transition-all ${reminderType === 'EMAIL' ? 'bg-white text-brand-primary shadow-md' : 'text-slate-400'}`}
-                      >
-                         <Mail size={14}/> Email
-                      </button>
-                   </div>
-                </div>
-
-                <div className="space-y-3">
-                   <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Lead Time</label>
-                   <select 
-                     className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm"
-                     value={reminderLeadTime}
-                     onChange={(e) => setReminderLeadTime(e.target.value)}
-                   >
-                      <option value="30m">30 Minutes Before</option>
-                      <option value="1h">1 Hour Before</option>
-                      <option value="2h">2 Hours Before</option>
-                      <option value="1d">1 Day Before</option>
-                   </select>
-                </div>
-
-                <div className="p-5 bg-brand-emerald/5 rounded-2xl border border-dashed border-brand-emerald/20 flex items-start gap-4">
-                   <CheckCircle2 className="text-brand-emerald shrink-0 mt-1" size={18}/>
-                   <p className="text-[10px] text-slate-600 font-medium leading-relaxed">
-                      You will receive an automated dispatch via <span className="font-black text-brand-primary">{reminderType}</span> to the contact details on your profile.
-                   </p>
-                </div>
-             </div>
-
-             <div className="flex flex-col gap-3">
-                <button 
-                    onClick={() => { setShowReminderModal(null); }}
-                   className="w-full py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3"
-                >
-                   <Save size={18}/> Save Reminder
-                </button>
-                <button onClick={() => setShowReminderModal(null)} className="w-full py-4 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:underline">Dismiss</button>
-             </div>
+        <div className="fixed inset-0 bg-slate-900/60 z-[500] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reminder-unavailable-title">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl p-6 space-y-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 id="reminder-unavailable-title" className="text-xl font-bold text-slate-900">Event reminders unavailable</h3>
+                <p className="mt-1 text-sm text-slate-600">{showReminderModal.title}</p>
+              </div>
+              <button type="button" aria-label="Close reminder dialog" onClick={() => setShowReminderModal(null)} className="p-2 rounded-lg hover:bg-slate-100"><X size={20}/></button>
+            </div>
+            <p className="text-sm leading-6 text-slate-600">Reminder scheduling is not configured yet. No SMS or email will be sent from this screen. You can use the Communications module to send a message manually.</p>
+            <button type="button" onClick={() => setShowReminderModal(null)} className="w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-bold text-white">Close</button>
           </div>
         </div>
       )}
@@ -508,6 +502,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[3rem] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
             <form onSubmit={handleSubmit} className="flex flex-col h-full">
+              {eventError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
               <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-brand-primary text-white rounded-2xl shadow-lg">
@@ -652,7 +647,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
 
               <div className="p-8 border-t border-slate-100 bg-white flex gap-4">
                 <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest transition-all">Cancel</button>
-                <button type="submit" className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3">
+                <button type="submit" disabled={isSavingEvent} className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-60">
                   <CheckCircle2 size={20}/> Confirm Schedule
                 </button>
               </div>
@@ -665,6 +660,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {showAttendanceModal && activeEventForRollCall && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[500] flex items-center justify-center p-4">
           <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] border border-white/20">
+            {eventError && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
             <div className="flex justify-between items-center">
                <div className="flex items-center gap-5">
                  <div className="p-4 bg-brand-gold text-brand-primary rounded-[1.5rem] shadow-xl shadow-brand-gold/20"><ClipboardList size={32}/></div>
@@ -732,8 +728,8 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                </div>
                <div className="flex gap-4 w-full sm:w-auto">
                  <button onClick={() => setShowAttendanceModal(null)} className="flex-1 sm:flex-none px-10 py-5 bg-slate-50 text-slate-500 rounded-[1.5rem] font-black hover:bg-slate-100 uppercase text-[11px] tracking-widest transition-all">Discard</button>
-                 <button onClick={saveRollCall} className="flex-[2] sm:flex-none px-12 py-5 bg-brand-primary text-white rounded-[1.5rem] font-black shadow-2xl hover:bg-brand-indigo uppercase text-[11px] tracking-widest transition-all flex items-center justify-center gap-3">
-                   <Save size={20}/> Save Attendance
+                 <button onClick={() => void saveRollCall()} disabled={isSavingAttendance} className="flex-[2] sm:flex-none px-12 py-5 bg-brand-primary text-white rounded-[1.5rem] font-black shadow-2xl hover:bg-brand-indigo uppercase text-[11px] tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-60">
+                   <Save size={20}/> {isSavingAttendance ? 'Saving…' : 'Save Attendance'}
                  </button>
                </div>
             </div>
@@ -745,7 +741,8 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {editingEvent && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-[3rem] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
-            <form onSubmit={(e) => { e.preventDefault(); onUpdateEvent(newEvent as ChurchEvent); setEditingEvent(null); }} className="flex flex-col h-full">
+            <form onSubmit={handleEditSubmit} className="flex flex-col h-full">
+              {eventError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
               <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-brand-indigo text-white rounded-2xl shadow-lg"><Edit2 size={24}/></div>
@@ -810,7 +807,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
               </div>
               <div className="p-8 border-t border-slate-100 bg-white flex gap-4">
                 <button type="button" onClick={() => setEditingEvent(null)} className="flex-1 py-5 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest">Cancel</button>
-                <button type="submit" className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3">
+                <button type="submit" disabled={isSavingEvent} className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3 disabled:opacity-60">
                   <CheckCircle2 size={20}/> Save Changes
                 </button>
               </div>

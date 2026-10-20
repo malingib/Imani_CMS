@@ -1,5 +1,13 @@
 const LARAVEL_URL = import.meta.env.VITE_LARAVEL_URL || '';
 
+function normalizeKenyanPhone(value: string): string {
+  const digits = value.replace(/\D/g, '');
+  if (digits.startsWith('254') && digits.length === 12) return digits;
+  if (digits.startsWith('0') && digits.length === 10) return '254' + digits.slice(1);
+  if (/^[17]\d{8}$/.test(digits)) return '254' + digits;
+  return '';
+}
+
 export interface MpesaStkResult {
   success: boolean;
   checkoutRequestId?: string;
@@ -12,6 +20,10 @@ export async function triggerStkPush(
   type: string,
   memberName: string
 ): Promise<MpesaStkResult> {
+  if (!Number.isSafeInteger(amount) || amount <= 0) return { success: false, message: 'Enter a valid amount greater than KES 0.' };
+  const normalizedPhone = normalizeKenyanPhone(phone);
+  if (!normalizedPhone) return { success: false, message: 'Use a valid Kenyan M-Pesa number, such as 0712345678 or 254712345678.' };
+  if (!type.trim() || !memberName.trim()) return { success: false, message: 'Giving details are incomplete. Contact your church administrator.' };
   if (!LARAVEL_URL) {
     return {
       success: false,
@@ -24,19 +36,22 @@ export async function triggerStkPush(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ amount, phone, type, memberName }),
+      body: JSON.stringify({ amount, phone: normalizedPhone, type, memberName }),
     });
 
     if (!res.ok) {
-      const err = await res.text();
-      return { success: false, message: `Payment failed: ${err}` };
+      return { success: false, message: 'The payment service rejected the request. No gift has been recorded.' };
     }
 
-    const data = await res.json();
+    const data = await res.json().catch(() => null) as { success?: boolean; checkoutRequestId?: string; CheckoutRequestID?: string; message?: string } | null;
+    const checkoutRequestId = data?.checkoutRequestId || data?.CheckoutRequestID;
+    if (data?.success !== true || !checkoutRequestId) {
+      return { success: false, message: 'The payment service did not confirm that an M-Pesa prompt was accepted. No gift has been recorded.' };
+    }
     return {
       success: true,
-      checkoutRequestId: data.checkoutRequestId,
-      message: 'STK Push sent to your phone. Enter your PIN to complete.',
+      checkoutRequestId,
+      message: 'M-Pesa prompt accepted. Complete it on your phone; your gift will appear after payment confirmation.',
     };
   } catch {
     return {

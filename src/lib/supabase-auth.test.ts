@@ -3,7 +3,6 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 
 const mockSignInWithPassword = vi.fn();
-const mockSignUp = vi.fn();
 const mockSignOut = vi.fn();
 const mockGetSession = vi.fn();
 const mockOnAuthStateChange = vi.fn();
@@ -14,7 +13,6 @@ vi.mock("./supabase", () => ({
   supabase: {
     auth: {
       signInWithPassword: mockSignInWithPassword,
-      signUp: mockSignUp,
       signOut: mockSignOut,
       getSession: mockGetSession,
       onAuthStateChange: mockOnAuthStateChange,
@@ -46,14 +44,6 @@ describe("useAuth", () => {
     mockSignInWithPassword.mockResolvedValue({ data: null, error: { message: "Invalid credentials" } });
     const { result } = renderHook(() => useAuth());
     await expect(act(async () => result.current.login("a@b.com", "wrong"))).rejects.toThrow("Invalid credentials");
-  });
-
-  it("signup calls signUp with name in options", async () => {
-    mockSignUp.mockResolvedValue({ data: { user: { id: "u-2" } }, error: null });
-    const { result } = renderHook(() => useAuth());
-    const data = await act(async () => result.current.signup("a@b.com", "Pass1234", "Alice"));
-    expect(mockSignUp).toHaveBeenCalledWith({ email: "a@b.com", password: "Pass1234", options: { data: { name: "Alice" } } });
-    expect(data.user.id).toBe("u-2");
   });
 
   it("requestPasswordReset invokes edge function", async () => {

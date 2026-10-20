@@ -46,6 +46,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
   const [showFormModal, setShowFormModal] = useState<Transaction | 'NEW_INCOME' | 'NEW_EXPENSE' | null>(null);
   const [viewingTransaction, setViewingTransaction] = useState<Transaction | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [openActionId, setOpenActionId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
@@ -132,6 +133,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
+    setSaveError('');
     try {
       if (typeof showFormModal !== 'string' && showFormModal) {
         await onUpdateTransaction({ ...showFormModal, ...formData } as Transaction);
@@ -149,6 +151,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
       setShowFormModal(null);
     } catch (error) {
       console.error('Unable to save transaction:', error);
+      setSaveError('Transaction was not saved. Your entries have been kept. Check your connection and permissions, then try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -528,6 +531,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-0 sm:p-4">
           <div className="bg-white h-full sm:h-auto sm:rounded-[3.5rem] w-full sm:max-w-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200 flex flex-col">
              <form onSubmit={handleFormSubmit} className="flex flex-col h-full max-h-[95vh]">
+               {saveError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{saveError}</p>}
                 <div className="p-8 sm:p-12 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center flex-shrink-0">
                   <div className="flex items-center gap-6">
                     <div className={`p-4 rounded-[1.5rem] shadow-xl ${formData.category === 'Income' ? 'bg-brand-emerald text-white' : 'bg-brand-gold text-white'}`}>

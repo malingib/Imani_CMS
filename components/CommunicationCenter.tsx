@@ -48,32 +48,13 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
   const [isGeneratingSermon, setIsGeneratingSermon] = useState(false);
 
   const handleSend = () => {
-    if (!content) return;
-
-    const isScheduled = !!(scheduledDate && scheduledTime);
-    const targetCount = members.length;
-    
-    const newLog: CommunicationLog = {
-      id: crypto.randomUUID(),
-      type: messageType,
-      recipientCount: targetCount,
-      targetGroupName: broadcastTarget,
-      subject: subject || `${messageType} Broadcast`,
-      content,
-      date: new Date().toISOString().split('T')[0],
-      scheduledFor: isScheduled ? `${scheduledDate} ${scheduledTime}` : undefined,
-      status: isScheduled ? 'Scheduled' : 'Sent',
-      sender: currentUser.name,
-      deliveryBreakdown: isScheduled ? undefined : {
-        delivered: targetCount,
-        opened: Math.floor(targetCount * (messageType === 'Email' ? 0.35 : 0.85)),
-        failed: 0
-      }
-    };
-
-    onSendBroadcast(newLog);
-    setActiveTab('LOGS');
-    resetForm();
+    if (!content.trim()) {
+      addToast?.('Enter a message before sending.', 'error');
+      return;
+    }
+    // This UI has no configured delivery adapter. Never fabricate a sent log,
+    // delivery counts, opens, or a scheduled job. Keep the user's draft intact.
+    addToast?.('Message not sent: no SMS, email, or WhatsApp delivery provider is configured for this workflow. Your draft has been kept.', 'error');
   };
 
   const useTemplate = (t: CommunicationTemplate) => {

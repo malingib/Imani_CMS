@@ -20,10 +20,10 @@ type AnalyticsTab = 'DEMOGRAPHICS' | 'GROWTH' | 'ENGAGEMENT' | 'RESOURCES';
 
 interface DemographicsAnalysisProps {
   members: Member[];
-  events: ChurchEvent[];
+  events?: ChurchEvent[];
 }
 
-const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, events }) => {
+const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, events = [] }) => {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('DEMOGRAPHICS');
   // Resource Finder State
   const [resourceType, setResourceType] = useState('Schools');

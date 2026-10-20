@@ -126,7 +126,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-2xl"><Sparkles size={24}/></div>
                     <h3 className="text-xl sm:text-2xl font-black text-slate-800">Auto-Verse</h3>
                  </div>
-                  <div className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full p-1 cursor-pointer transition-all ${autoVerseEnabled ? 'bg-brand-primary' : 'bg-slate-200'}`} onClick={() => { const next = !autoVerseEnabled; setAutoVerseEnabled(next); localStorage.setItem('autoVerseEnabled', String(next)); }}>
+                  <div className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full p-1 opacity-60 cursor-not-allowed ${autoVerseEnabled ? 'bg-brand-primary' : 'bg-slate-200'}`} aria-disabled="true" title="Server-side automation is not configured">
                     <div className={`w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full shadow-sm transition-all ${autoVerseEnabled ? 'translate-x-6 sm:translate-x-7' : 'translate-x-0'}`} />
                  </div>
               </div>
@@ -135,14 +135,14 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Frequency</label>
-                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseFrequency} onChange={e => setVerseFrequency(e.target.value as any)}>
+                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseFrequency} disabled onChange={e => setVerseFrequency(e.target.value as any)}>
                           <option>Daily</option>
                           <option>Weekly</option>
                        </select>
                     </div>
                     <div className="space-y-2">
                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Generation Mode</label>
-                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseMode} onChange={e => setVerseMode(e.target.value as any)}>
+                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseMode} disabled onChange={e => setVerseMode(e.target.value as any)}>
                           <option>Auto (Gemini AI)</option>
                           <option>Manual Entry</option>
                        </select>
@@ -152,7 +152,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                  {verseMode === 'Manual' && (
                     <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
                        <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Static Verse Queue</label>
-                       <textarea className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold resize-none outline-none focus:ring-2 focus:ring-brand-primary" rows={3} placeholder="Paste verse and reference..." value={manualVerse} onChange={e => setManualVerse(e.target.value)} />
+                       <textarea className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold resize-none outline-none focus:ring-2 focus:ring-brand-primary" rows={3} placeholder="Paste verse and reference..." value={manualVerse} disabled onChange={e => setManualVerse(e.target.value)} />
                     </div>
                  )}
 
@@ -161,7 +161,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     <div className="flex flex-wrap gap-2">
                        {['SMS', 'WhatsApp', 'Email'].map(channel => (
                           <div key={channel} className="flex-1 min-w-[80px] p-3 bg-white rounded-xl border border-slate-100 flex items-center justify-center gap-2 shadow-sm">
-                             <input type="checkbox" defaultChecked className="accent-brand-primary h-4 w-4" />
+                             <input type="checkbox" defaultChecked disabled className="accent-brand-primary h-4 w-4" />
                              <span className="text-[10px] font-black text-slate-600 uppercase">{channel}</span>
                           </div>
                        ))}
@@ -340,7 +340,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">{typeof smsCredits === 'number' ? smsCredits.toLocaleString() : 'Not configured'}</p>
                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Zap size={20}/></div>
                 </div>
-                <button className="w-full py-4 bg-slate-50 text-brand-indigo rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">Top Up Balance</button>
+                <button type="button" disabled title="SMS provider billing is not connected" className="w-full py-4 bg-slate-100 text-slate-500 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Top-up not configured</button>
              </div>
           </div>
         </div>

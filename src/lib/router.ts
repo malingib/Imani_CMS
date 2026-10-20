@@ -20,7 +20,6 @@ export const ROUTES: Record<AppView, Route> = {
   EVENTS: { view: 'EVENTS', path: '/events', label: 'Events' },
   COMMUNICATION: { view: 'COMMUNICATION', path: '/communication', label: 'Communication' },
   REPORTS: { view: 'REPORTS', path: '/reports', label: 'Reports' },
-  SERMONS: { view: 'SERMONS', path: '/sermons', label: 'Sermons' },
   ANALYTICS: { view: 'ANALYTICS', path: '/analytics', label: 'Analytics' },
   SETTINGS: { view: 'SETTINGS', path: '/settings', label: 'Settings' },
   AUDIT_LOGS: { view: 'AUDIT_LOGS', path: '/audit-logs', label: 'Audit Logs' },
@@ -40,8 +39,6 @@ export const ROUTES: Record<AppView, Route> = {
  * Convert path to view (e.g., '/dashboard' -> 'DASHBOARD')
  */
 export function pathToView(path: string): AppView | null {
-  // The sermon archive has been retired; legacy links should fall back to the dashboard.
-  if (path === ROUTES.SERMONS.path) return null;
   const route = Object.values(ROUTES).find(r => r.path === path);
   return route?.view ?? null;
 }

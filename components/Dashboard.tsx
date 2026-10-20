@@ -104,7 +104,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-10">
       <header className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Dashboard</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Dashboard</h2>
         </div>
         
         <div className="grid grid-cols-2 md:flex gap-3">
@@ -153,7 +153,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white p-6 rounded-[2rem] shadow-md relative overflow-hidden">
+          <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 relative z-10">
                  <div>
                    <p className="text-base font-semibold text-slate-900">Tithes recorded over the last 7 days</p>
@@ -164,22 +164,28 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                  </div>
               </div>
              
-             <div className="h-[400px] w-full relative z-10">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={performanceData}>
-                    <defs>
-                      <linearGradient id="colorTithes" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#1E293B" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#1E293B" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 900}} dy={15} />
-                    <YAxis hide />
-                    <Tooltip contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', padding: '20px'}} />
-                    <Area type="monotone" dataKey="tithes" stroke="#1E293B" strokeWidth={5} fillOpacity={1} fill="url(#colorTithes)" />
-                  </AreaChart>
-                </ResponsiveContainer>
+             <div className="h-[320px] w-full">
+                {performanceData.some(day => day.tithes > 0) ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={performanceData}>
+                      <defs>
+                        <linearGradient id="colorTithes" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#1E293B" stopOpacity={0.1}/>
+                          <stop offset="95%" stopColor="#1E293B" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
+                      <YAxis hide />
+                      <Tooltip formatter={(value) => [`KES ${Number(value).toLocaleString()}`, 'Tithes']} />
+                      <Area type="monotone" dataKey="tithes" stroke="#1E293B" strokeWidth={2} fillOpacity={1} fill="url(#colorTithes)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
+                    <p className="max-w-sm text-sm text-slate-500">No tithe transactions have been recorded in the last 7 days.</p>
+                  </div>
+                )}
              </div>
           </div>
 
@@ -193,7 +199,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                <button 
                  key={i} 
                  onClick={btn.action}
-                 className="bg-white p-5 rounded-[2rem] shadow-md hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col items-center justify-center gap-4 group"
+                 className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors flex flex-col items-center justify-center gap-4"
                >
                  <div className={`p-4 bg-brand-${btn.color}-50 text-brand-${btn.color}-500 rounded-[1.5rem] group-hover:scale-110 transition-transform`}>
                     <btn.icon size={28} />
@@ -205,12 +211,12 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-           <div className="bg-white p-6 rounded-[2rem] shadow-md space-y-6">
+           <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
               <div className="flex items-center justify-between">
                  <h4 className="text-xl font-black text-slate-800 uppercase flex items-center gap-3">
                    <Smartphone size={20} className="text-brand-indigo" /> Recent Transactions
                  </h4>
-                 <div className="px-3 py-1 bg-brand-emerald/10 text-brand-emerald rounded-lg text-[10px] font-black uppercase tracking-widest">REAL-TIME</div>
+                 <span className="text-xs text-slate-500">Latest records</span>
               </div>
               
               <div className="space-y-6">
@@ -250,7 +256,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                    onClick={() => onNavigate('COMMUNICATION')}
                    className="w-full rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100 transition-colors"
                  >
-                   Message members
+                   Open communications
                  </button>
               </div>
               <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-brand-indigo rounded-full blur-[80px] opacity-10 group-hover:scale-125 transition-transform duration-1000" />

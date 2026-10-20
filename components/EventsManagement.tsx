@@ -60,9 +60,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
   const activeEventForRollCall = useMemo(() => events.find(e => e.id === showAttendanceModal), [events, showAttendanceModal]);
   const [currentAttendance, setCurrentAttendance] = useState<string[]>([]);
 
-  // Reminder State
-  const [reminderType, setReminderType] = useState<'SMS' | 'EMAIL'>('SMS');
-  const [reminderLeadTime, setReminderLeadTime] = useState('1h');
 
   useEffect(() => {
     if (activeEventForRollCall) {
@@ -729,8 +726,8 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                </div>
                <div className="flex gap-4 w-full sm:w-auto">
                  <button onClick={() => setShowAttendanceModal(null)} className="flex-1 sm:flex-none px-10 py-5 bg-slate-50 text-slate-500 rounded-[1.5rem] font-black hover:bg-slate-100 uppercase text-[11px] tracking-widest transition-all">Discard</button>
-                 <button onClick={() => void saveRollCall()} className="flex-[2] sm:flex-none px-12 py-5 bg-brand-primary text-white rounded-[1.5rem] font-black shadow-2xl hover:bg-brand-indigo uppercase text-[11px] tracking-widest transition-all flex items-center justify-center gap-3">
-                   <Save size={20}/> Save Attendance
+                 <button onClick={() => void saveRollCall()} disabled={isSavingAttendance} className="flex-[2] sm:flex-none px-12 py-5 bg-brand-primary text-white rounded-[1.5rem] font-black shadow-2xl hover:bg-brand-indigo uppercase text-[11px] tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-60">
+                   <Save size={20}/> {isSavingAttendance ? 'Saving…' : 'Save Attendance'}
                  </button>
                </div>
             </div>

@@ -2,7 +2,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Heart, 
-  BookOpen, 
   Calendar, 
   Wallet, 
   ArrowRight, 
@@ -300,9 +299,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
                        <h5 className="font-black text-slate-800 leading-tight">Walking in Faith: A Study Guide for NextGen Ministry</h5>
                        <button className="text-xs font-black text-brand-primary uppercase flex items-center gap-1 group-hover:gap-2 transition-all">Download PDF <Download size={14}/></button>
                     </div>
-                    <button onClick={() => onNavigate('SERMONS')} className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
-                       Sermon Archive <BookOpen size={14}/>
-                    </button>
+
                  </div>
               </div>
            </div>

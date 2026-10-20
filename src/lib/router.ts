@@ -40,6 +40,8 @@ export const ROUTES: Record<AppView, Route> = {
  * Convert path to view (e.g., '/dashboard' -> 'DASHBOARD')
  */
 export function pathToView(path: string): AppView | null {
+  // The sermon archive has been retired; legacy links should fall back to the dashboard.
+  if (path === ROUTES.SERMONS.path) return null;
   const route = Object.values(ROUTES).find(r => r.path === path);
   return route?.view ?? null;
 }

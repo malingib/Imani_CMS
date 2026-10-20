@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { 
   XAxis, 
   YAxis, 
@@ -51,24 +51,6 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, onAddMember, onSendSMS, onNavigate }) => {
-  const [showAnniversaryModal, setShowAnniversaryModal] = useState(false);
-  const [isSendingBlessings, setIsSendingBlessings] = useState(false);
-  const [blessingSent, setBlessingSent] = useState(false);
-
-  const sparkData = useMemo(() => {
-    const days = 7;
-    const today = new Date();
-    return Array.from({length: days}, (_, i) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() - (days - 1 - i));
-      const dayStr = d.toISOString().split('T')[0];
-      const dayTotal = transactions
-        .filter(t => t.date === dayStr)
-        .reduce((s, t) => s + t.amount, 0);
-      return { v: dayTotal || Math.round(Math.random() * 1000) + 500 };
-    });
-  }, [transactions]);
-
   const celebrations = useMemo(() => {
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -99,21 +81,24 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
   }, [members]);
 
   const performanceData = useMemo(() => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.map(name => {
-      const dayTxns = transactions.filter(t => {
-        const d = new Date(t.date);
-        return days[d.getDay() === 0 ? 6 : d.getDay() - 1] === name;
-      });
-      const tithes = dayTxns.filter(t => t.type === 'Tithe').reduce((s, t) => s + t.amount, 0);
-      const dayEvents = events.filter(e => {
-        const d = new Date(e.date);
-        return days[d.getDay() === 0 ? 6 : d.getDay() - 1] === name;
-      });
-      const attendance = dayEvents.reduce((s, e) => s + (e.attendance?.length || 0), 0);
-      return { name, tithes, attendance: attendance || Math.round(dayTxns.length * 15) };
+    const dateKey = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (6 - index));
+      const key = dateKey(date);
+      const dayTransactions = transactions.filter(t => t.date.slice(0, 10) === key);
+      const tithes = dayTransactions
+        .filter(t => t.type === 'Tithe' && t.category === 'Income')
+        .reduce((sum, transaction) => sum + transaction.amount, 0);
+      return { name: date.toLocaleDateString('en-KE', { weekday: 'short' }), tithes };
     });
-  }, [transactions, events]);
+  }, [transactions]);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-10">
@@ -132,62 +117,50 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
         </div>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {(() => {
-          const totalTithes = transactions.filter(t=>t.type==='Tithe').reduce((s,t)=>s+t.amount,0);
-          const mobilePct = transactions.length > 0
-            ? Math.round(transactions.filter(t=>t.paymentMethod==='M-Pesa').length / transactions.length * 100)
-            : 0;
-          const thisMonth = new Date().getMonth();
-          const totalEvents = events.length;
-          const attendedCount = members.filter(m => m.status === 'ACTIVE').length;
+          const recordedIncome = transactions
+            .filter(transaction => transaction.category === 'Income')
+            .reduce((sum, transaction) => sum + transaction.amount, 0);
+          const mpesaCount = transactions.filter(transaction => transaction.paymentMethod === 'M-Pesa').length;
+          const mpesaShare = transactions.length ? Math.round((mpesaCount / transactions.length) * 100) : 0;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const upcomingEvents = events.filter(event => {
+            const eventDate = new Date(event.date);
+            return !Number.isNaN(eventDate.getTime()) && eventDate >= today;
+          }).length;
           return [
-            { label: 'Members', val: members.length.toLocaleString(), icon: Users, color: 'indigo', trend: members.length > 0 ? `+${Math.round(members.filter(m => {
-              const jd = new Date(m.joinDate);
-              return jd.getMonth() === thisMonth;
-            }).length / members.length * 100)}%` : '0%' },
-            { label: 'Total Tithes', val: `KES ${(totalTithes / 1000).toFixed(1)}k`, icon: Wallet, color: 'emerald', trend: totalTithes > 0 ? `+${Math.round(totalTithes > 10000 ? totalTithes / 10000 : totalTithes / 1000)}%` : '0%' },
-            { label: 'Mobile Payments', val: `${mobilePct}%`, icon: Smartphone, color: 'gold', trend: mobilePct > 0 ? `+${Math.round(mobilePct / 10)}%` : '0%' },
-            { label: 'Attendance', val: totalEvents > 0 ? `${Math.round(totalEvents > 0 ? attendedCount / totalEvents : 0)}` : `${attendedCount}`, icon: Activity, color: 'primary', trend: attendedCount > 0 ? `+${Math.round(attendedCount / members.length * 100)}%` : '0%' }
+            { label: 'Members', value: members.length.toLocaleString(), detail: 'Registered records', icon: Users },
+            { label: 'Recorded income', value: `KES ${recordedIncome.toLocaleString()}`, detail: 'All recorded income', icon: Wallet },
+            { label: 'M-Pesa share', value: `${mpesaShare}%`, detail: `${mpesaCount} of ${transactions.length} transactions`, icon: Smartphone },
+            { label: 'Upcoming events', value: upcomingEvents.toLocaleString(), detail: 'Scheduled from today', icon: CalendarPlus },
           ];
-        })().map((stat, i) => (
-          <div key={i} className="bg-white p-5 rounded-[2rem] shadow-md hover:shadow-xl transition-all group relative overflow-hidden">
-            <div className="flex items-start justify-between mb-8">
-              <div>
-                <p className="text-slate-400 text-[10px] uppercase tracking-[0.2em] font-black mb-1">{stat.label}</p>
-                <h4 className="text-3xl font-black text-slate-800 tracking-tighter">{stat.val}</h4>
+        })().map((stat) => (
+          <div key={stat.label} className="rounded-xl border border-slate-200 bg-white p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-500">{stat.label}</p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
+                <p className="mt-1 text-xs text-slate-500">{stat.detail}</p>
               </div>
-              <div className={`p-4 bg-brand-${stat.color}-50 text-brand-${stat.color}-500 rounded-2xl group-hover:scale-110 transition-transform`}>
-                <stat.icon size={20} />
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-brand-emerald font-black text-xs">{stat.trend}</span>
-                <ArrowUpRight size={14} className="text-brand-emerald" />
-              </div>
-              <div className="h-8 w-24">
-                <ResponsiveContainer width="100%" height="100%">
-                   <AreaChart data={sparkData}>
-                      <Area type="monotone" dataKey="v" stroke={i % 2 === 0 ? '#4F46E5' : '#10B981'} fill="transparent" strokeWidth={3} />
-                   </AreaChart>
-                </ResponsiveContainer>
+              <div className="rounded-lg bg-slate-50 p-2.5 text-slate-600">
+                <stat.icon size={19} aria-hidden="true" />
               </div>
             </div>
           </div>
         ))}
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
           <div className="bg-white p-6 rounded-[2rem] shadow-md relative overflow-hidden">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 relative z-10">
                  <div>
-                   <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Tithing | Attendance</p>
+                   <p className="text-base font-semibold text-slate-900">Tithes recorded over the last 7 days</p>
                  </div>
                  <div className="flex items-center gap-6">
                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-primary" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Tithing</span></div>
-                   <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-gold" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Attendance</span></div>
+                   
                  </div>
               </div>
              
@@ -205,7 +178,6 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                     <YAxis hide />
                     <Tooltip contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', padding: '20px'}} />
                     <Area type="monotone" dataKey="tithes" stroke="#1E293B" strokeWidth={5} fillOpacity={1} fill="url(#colorTithes)" />
-                    <Area type="monotone" dataKey="attendance" stroke="#FFB800" strokeWidth={5} fill="transparent" />
                   </AreaChart>
                 </ResponsiveContainer>
              </div>
@@ -216,7 +188,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
                { label: 'Tithe', icon: HandCoins, color: 'emerald', action: () => onNavigate('FINANCE') },
                { label: 'Convert', icon: UserPlus, color: 'indigo', action: onAddMember },
                { label: 'Service', icon: CalendarPlus, color: 'primary', action: () => onNavigate('EVENTS') },
-               { label: 'Outreach', icon: MessageSquare, color: 'gold', action: () => onNavigate('COMMUNICATION') }
+               { label: 'Outreach', icon: MessageSquare, color: 'gold', action: onSendSMS }
              ].map((btn, i) => (
                <button 
                  key={i} 
@@ -271,14 +243,14 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
 <Gift size={28} className="text-brand-gold animate-bounce" />
                      <h4 className="text-xl font-black uppercase tracking-tight">Celebrations</h4>
                  </div>
-                 <p className="text-slate-300 text-base font-medium leading-relaxed">
-                   <span className="text-white font-black">{celebrations.length} members</span> with birthdays or anniversaries this week.
+                 <p className="text-slate-300 text-sm leading-6">
+                   {celebrations.length} members have birthdays or membership anniversaries coming up soon.
                  </p>
-                 <button 
-                   onClick={() => setShowAnniversaryModal(true)}
-                   className="w-full py-4 bg-white text-brand-primary rounded-[1.25rem] font-black text-xs uppercase tracking-widest shadow-xl hover:bg-brand-gold transition-all"
+                 <button
+                   onClick={() => onNavigate('COMMUNICATION')}
+                   className="w-full rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100 transition-colors"
                  >
-                   Send Blessings
+                   Message members
                  </button>
               </div>
               <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-brand-indigo rounded-full blur-[80px] opacity-10 group-hover:scale-125 transition-transform duration-1000" />
@@ -286,56 +258,6 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
         </div>
       </div>
 
-      {showAnniversaryModal && (
-        <div className="fixed inset-0 bg-brand-primary/40 backdrop-blur-md z-[500] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100 flex flex-col max-h-[90vh]">
-            <div className="p-10 bg-brand-primary text-white relative">
-              <div className="flex justify-between items-start relative z-10">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-<Gift className="text-brand-gold" size={24} />
-                     <h3 className="text-3xl font-black tracking-tight uppercase leading-tight">Celebrations</h3>
-                  </div>
-                  <p className="text-slate-300 text-sm font-medium">Send birthday and anniversary wishes via SMS and WhatsApp.</p>
-                </div>
-                <button onClick={() => setShowAnniversaryModal(false)} className="p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all"><X size={24} /></button>
-              </div>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-10 space-y-6 no-scrollbar">
-              <div className="grid grid-cols-1 gap-4">
-                {celebrations.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 p-5 bg-slate-50 border border-slate-100 rounded-[2rem] hover:bg-white hover:shadow-xl transition-all">
-                    <img src={item.avatar} className="w-14 h-14 rounded-2xl object-cover" />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-black text-slate-800 text-lg truncate">{item.name}</h4>
-                      <p className="text-[10px] font-black uppercase text-brand-indigo tracking-widest">{item.type} • {item.date}</p>
-                    </div>
-                    <div className="w-3 h-3 rounded-full bg-brand-emerald animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-10 bg-slate-50 border-t border-slate-100 flex gap-4">
-              <button onClick={() => setShowAnniversaryModal(false)} className="flex-1 py-5 font-black text-slate-500 hover:bg-slate-200 rounded-[1.5rem] transition-all uppercase tracking-widest text-xs">Dismiss</button>
-              <button 
-                onClick={() => {
-                  setIsSendingBlessings(true);
-                  setTimeout(() => {
-                    setIsSendingBlessings(false);
-                    setBlessingSent(true);
-                    setTimeout(() => setShowAnniversaryModal(false), 1500);
-                  }, 2000);
-                }}
-                className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl flex items-center justify-center gap-3"
-              >
-                {isSendingBlessings ? <Loader2 className="animate-spin" /> : <Send size={20} />} {isSendingBlessings ? 'Sending...' : 'Send Blessings'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

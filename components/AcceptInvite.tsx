@@ -24,7 +24,7 @@ const AcceptInvite: React.FC = () => {
   if (!token) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="bg-white rounded-[2.5rem] shadow-2xl p-12 max-w-md w-full text-center">
+        <div className="bg-white rounded-xl shadow-sm p-6 max-w-md w-full text-center">
           <AlertCircle size={48} className="mx-auto text-rose-400 mb-4" />
           <h1 className="text-2xl font-black text-brand-primary mb-2">Invalid Link</h1>
           <p className="text-slate-500 font-medium">This invitation link is missing a token. Check the link you received or request a new invitation.</p>
@@ -76,7 +76,7 @@ const AcceptInvite: React.FC = () => {
   if (step === 'success') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="bg-white rounded-[2.5rem] shadow-2xl p-12 max-w-md w-full text-center animate-in zoom-in duration-300">
+        <div className="bg-white rounded-xl shadow-sm p-6 max-w-md w-full text-center animate-in zoom-in duration-300">
           <div className="w-16 h-16 bg-brand-emerald/20 text-brand-emerald rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 size={32} />
           </div>
@@ -88,9 +88,9 @@ const AcceptInvite: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4 sm:p-6 lg:p-10">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4 sm:p-6 lg:p-6">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 sm:p-12">
+        <div className="bg-white rounded-xl shadow-sm p-5 sm:p-6">
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 mb-4">
               <ImaniLogoIcon />
@@ -164,7 +164,7 @@ const AcceptInvite: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 flex items-center justify-center gap-2 disabled:opacity-70"
+              className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-sm shadow-brand-primary/20 flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {isLoading ? (
                 <Loader2 size={18} className="animate-spin" />

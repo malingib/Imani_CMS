@@ -54,10 +54,10 @@ const InfrastructureNodes: React.FC = () => {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-xl">
+            <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-sm">
                <Server size={28} />
             </div>
-            <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase leading-none">Node Infrastructure</h2>
+            <h2 className="text-2xl font-semibold text-brand-primary tracking-tight uppercase leading-none">Node Infrastructure</h2>
           </div>
           <p className="text-slate-500 text-lg font-medium">Regional cluster health.</p>
         </div>
@@ -77,19 +77,19 @@ const InfrastructureNodes: React.FC = () => {
           { label: 'Mean Latency', val: '24ms', icon: Activity, color: 'gold' },
           { label: 'Security Scans', val: 'Passed', icon: ShieldCheck, color: 'primary' }
         ].map((s, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 relative overflow-hidden group">
+          <div key={i} className="bg-white p-5 rounded-xl border border-slate-100 relative overflow-hidden group">
             <div className="flex justify-between items-start mb-6 relative z-10">
               <div className={`p-4 bg-brand-${s.color}-50 text-brand-${s.color}-500 rounded-2xl`}>
                 <s.icon size={24} />
               </div>
             </div>
-            <h4 className="text-3xl font-black text-slate-800 tracking-tighter">{s.val}</h4>
+            <h4 className="text-2xl font-semibold text-slate-800 tracking-tighter">{s.val}</h4>
             <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1">{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 text-[10px] uppercase text-slate-400 font-black border-b">
@@ -128,8 +128,8 @@ const InfrastructureNodes: React.FC = () => {
 
       {selectedNode && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex justify-end">
-           <div className="bg-white w-full max-w-2xl h-full shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col border-l">
-              <div className="p-8 border-b flex justify-between items-center bg-slate-50/50">
+           <div className="bg-white w-full max-w-2xl h-full shadow-sm animate-in slide-in-from-right duration-300 flex flex-col border-l">
+              <div className="p-5 border-b flex justify-between items-center bg-slate-50/50">
                  <div className="flex items-center gap-4">
                     <Terminal size={24}/>
                     <h3 className="text-2xl font-black text-slate-800 uppercase">{selectedNode.name}</h3>
@@ -137,7 +137,7 @@ const InfrastructureNodes: React.FC = () => {
                  <button onClick={() => setSelectedNode(null)} className="p-3 bg-white border rounded-xl text-slate-400 hover:text-rose-500 transition-all shadow-sm"><X size={20}/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-10 space-y-12">
+              <div className="flex-1 overflow-y-auto p-6 space-y-12">
                  <div className="grid grid-cols-2 gap-6">
                     <div className="p-6 bg-slate-50 rounded-3xl border space-y-2">
                        <p className="text-[10px] font-black uppercase text-slate-400">Node Status</p>
@@ -189,9 +189,9 @@ const InfrastructureNodes: React.FC = () => {
                  </section>
               </div>
 
-              <div className="p-8 border-t bg-slate-50/50 flex gap-4">
+              <div className="p-5 border-t bg-slate-50/50 flex gap-4">
                  <button onClick={() => setSelectedNode(null)} className="flex-1 py-5 bg-white border rounded-2xl font-black uppercase text-[10px]">Close</button>
-                 <button className="flex-[2] py-5 bg-brand-primary text-white rounded-2xl font-black uppercase text-[10px] shadow-xl hover:bg-brand-indigo">
+                 <button className="flex-[2] py-5 bg-brand-primary text-white rounded-2xl font-black uppercase text-[10px] shadow-sm hover:bg-brand-indigo">
                     Re-Sync Databases
                  </button>
               </div>

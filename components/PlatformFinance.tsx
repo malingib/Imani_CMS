@@ -49,7 +49,7 @@ const PlatformFinance: React.FC = () => {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
            <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-xl">
+              <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-sm">
                  <Receipt size={28}/>
               </div>
               <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase leading-none">Global Revenue</h2>
@@ -60,7 +60,7 @@ const PlatformFinance: React.FC = () => {
            <button className="flex items-center gap-2 px-6 py-4 bg-white text-slate-700 border border-slate-200 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
               <Download size={18}/> Fiscal Report
            </button>
-           <button className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-brand-primary/20">
+           <button className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm shadow-brand-primary/20">
               <RefreshCcw size={18}/> Re-Sync Billing
            </button>
         </div>
@@ -68,7 +68,7 @@ const PlatformFinance: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {platformStats.map((s, i) => (
-          <div key={i} className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all group overflow-hidden relative">
+          <div key={i} className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-sm transition-all group overflow-hidden relative">
             <div className="flex justify-between items-start mb-6 relative z-10">
               <div className={`p-4 bg-brand-${s.color}-50 text-brand-${s.color}-500 rounded-2xl group-hover:scale-110 transition-transform`}>
                 <s.icon size={24} />
@@ -89,7 +89,7 @@ const PlatformFinance: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-         <div className="lg:col-span-8 bg-white p-10 lg:p-14 rounded-[3.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
+         <div className="lg:col-span-8 bg-white p-6 lg:p-14 rounded-xl border border-slate-100 shadow-sm relative overflow-hidden">
             <div className="flex justify-between items-center mb-10 relative z-10">
                <div>
                   <h3 className="text-2xl font-black text-slate-800 tracking-tight uppercase">Platform MRR Progression</h3>
@@ -122,7 +122,7 @@ const PlatformFinance: React.FC = () => {
          </div>
 
          <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+            <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-8">
                <h4 className="text-xl font-black text-slate-800 uppercase flex items-center gap-3">
                   <PieIcon size={20} className="text-brand-indigo"/> Plan Adoption
                </h4>
@@ -139,7 +139,7 @@ const PlatformFinance: React.FC = () => {
                </div>
             </div>
 
-            <div className="bg-brand-primary p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
+            <div className="bg-brand-primary p-6 rounded-xl text-white shadow-sm relative overflow-hidden group">
                <div className="relative z-10 space-y-6">
                   <div className="flex items-center gap-3">
                      <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Landmark size={24}/></div>
@@ -165,8 +165,8 @@ const PlatformFinance: React.FC = () => {
          </div>
       </div>
 
-      <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-         <div className="p-10 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+         <div className="p-6 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
             <h3 className="text-2xl font-black text-brand-primary uppercase tracking-tight">Platform Invoicing Ledger</h3>
             <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase hover:bg-slate-50 transition-all">
                <Download size={14}/> CSV Archive

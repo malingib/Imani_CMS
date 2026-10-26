@@ -96,11 +96,11 @@ const SystemOwnerDashboard: React.FC<SystemOwnerDashboardProps> = ({
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-5">
-           <div className="p-4 bg-brand-primary text-brand-gold rounded-[1.8rem] shadow-2xl border border-white/10 ring-4 ring-indigo-50">
+           <div className="p-4 bg-brand-primary text-brand-gold rounded-[1.8rem] shadow-sm border border-white/10 ring-4 ring-indigo-50">
               <Globe size={32} />
            </div>
            <div>
-              <h2 className="text-4xl font-black text-brand-primary tracking-tighter uppercase leading-none">Mobiwave HQ</h2>
+              <h2 className="text-2xl font-semibold text-brand-primary tracking-tighter uppercase leading-none">Mobiwave HQ</h2>
               <p className="text-slate-400 text-xs font-black uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
                  <Terminal size={14} className="text-brand-indigo"/> Command Console
               </p>
@@ -118,7 +118,7 @@ const SystemOwnerDashboard: React.FC<SystemOwnerDashboardProps> = ({
           </button>
           <button 
             onClick={() => setShowAddParish(true)}
-            className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-brand-primary/20"
+            className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm shadow-brand-primary/20"
           >
             <Plus size={20} /> Provision New Parish
           </button>
@@ -126,7 +126,7 @@ const SystemOwnerDashboard: React.FC<SystemOwnerDashboardProps> = ({
       </div>
 
       {/* Real-time Resource Utilization Pulse */}
-      <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+      <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-8">
         <div className="flex items-center justify-between">
            <div>
               <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Fleet Resource Pulse</h3>
@@ -140,7 +140,7 @@ const SystemOwnerDashboard: React.FC<SystemOwnerDashboardProps> = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
            {tenants.map(tenant => (
-              <div key={tenant.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-6">
+              <div key={tenant.id} className="p-6 bg-slate-50 rounded-xl border border-slate-100 space-y-6">
                  <div className="flex items-center gap-3">
                     <div className="p-2 bg-white rounded-xl shadow-sm"><Building2 size={16} className="text-brand-indigo"/></div>
                     <span className="font-black text-slate-800 text-sm truncate">{tenant.name}</span>
@@ -174,7 +174,7 @@ const SystemOwnerDashboard: React.FC<SystemOwnerDashboardProps> = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 bg-white p-10 lg:p-14 rounded-[3.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
+        <div className="lg:col-span-8 bg-white p-6 lg:p-14 rounded-xl border border-slate-100 shadow-sm relative overflow-hidden">
            <div className="flex justify-between items-center mb-10 relative z-10">
               <div>
                 <h3 className="text-2xl font-black text-slate-800 tracking-tight uppercase">SaaS Trajectory</h3>
@@ -202,7 +202,7 @@ const SystemOwnerDashboard: React.FC<SystemOwnerDashboardProps> = ({
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+           <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm space-y-8">
               <div className="flex items-center justify-between">
                  <h4 className="text-xl font-black text-slate-800 uppercase flex items-center gap-3">
                    <Activity size={20} className="text-brand-indigo" /> Global Signals

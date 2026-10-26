@@ -20,14 +20,14 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
           <Scale size={16} />
           <span className="text-[10px] font-black uppercase tracking-widest">Privacy Policy</span>
         </div>
-        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Privacy Policy</h1>
+        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Privacy Policy</h1>
         <p className="text-slate-500 text-lg font-medium leading-relaxed">
           In compliance with the <strong>Kenya Data Protection Act, 2019</strong>, Imani CMS is committed to protecting the privacy and "Sensitive Personal Data" of our church members.
         </p>
       </header>
 
       <div className="grid grid-cols-1 gap-8">
-        <section className="bg-white p-8 lg:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+        <section className="bg-white p-5 lg:p-6 rounded-xl border border-slate-100 shadow-sm space-y-6">
           <div className="flex items-center gap-4 text-brand-indigo">
             <div className="p-3 bg-brand-indigo/10 rounded-2xl"><Eye size={24}/></div>
             <h2 className="text-2xl font-black text-slate-800">What We Collect</h2>
@@ -51,7 +51,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
           </div>
         </section>
 
-        <section className="bg-white p-8 lg:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+        <section className="bg-white p-5 lg:p-6 rounded-xl border border-slate-100 shadow-sm space-y-6">
           <div className="flex items-center gap-4 text-brand-emerald">
             <div className="p-3 bg-brand-emerald/10 rounded-2xl"><Lock size={24}/></div>
             <h2 className="text-2xl font-black text-slate-800">How We Use Your Data</h2>
@@ -74,7 +74,7 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
           </div>
         </section>
 
-        <section className="bg-brand-primary p-8 lg:p-10 rounded-[2.5rem] text-white space-y-6 relative overflow-hidden">
+        <section className="bg-brand-primary p-5 lg:p-6 rounded-xl text-white space-y-6 relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-4 text-brand-indigo/80">
               <div className="p-3 bg-white/10 rounded-2xl"><FileText size={24}/></div>

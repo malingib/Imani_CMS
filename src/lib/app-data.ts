@@ -83,13 +83,22 @@ function mergeEventAttendance(events: ChurchEvent[], attendanceRows: unknown[]) 
 export function createChurchAppDataService(client: SupabaseLikeClient) {
   return {
     async loadLifetimeTitheTransactions(churchId: string): Promise<Transaction[]> {
-      let query = client.from("transactions").select("*")
-        .eq("type", "Tithe")
-        .eq("category", "Income");
-      if (churchId) query = query.eq("church_id", churchId);
-      const { data, error } = await query.order("date", { ascending: false });
-      if (error) throw new Error(error.message);
-      return (data || []).map(mapTransaction);
+      const pageSize = 1000;
+      const rows: unknown[] = [];
+      for (let start = 0; ; start += pageSize) {
+        let query = client.from("transactions").select("*")
+          .eq("type", "Tithe")
+          .eq("category", "Income");
+        if (churchId) query = query.eq("church_id", churchId);
+        const { data, error } = await query
+          .order("date", { ascending: false })
+          .range(start, start + pageSize - 1);
+        if (error) throw new Error(error.message);
+        const page = data || [];
+        rows.push(...page);
+        if (page.length < pageSize) break;
+      }
+      return rows.map(mapTransaction);
     },
 
     async loadDashboardTransactions(churchId: string, startDate: string, endDate: string): Promise<Transaction[]> {

@@ -5,7 +5,7 @@ import {
   Search, Wallet, Calendar, PieChart as PieIcon,
   Tag, Plus, X, Settings2, Smartphone, Repeat, 
   BarChart3, AlertCircle, Save, CheckCircle2,
-  Loader2, History, Search as SearchIcon,
+  Loader2, Landmark, History, Search as SearchIcon,
   Banknote, MoreHorizontal, Edit2, Trash2, Eye,
   ArrowDownRight, Receipt,
   Printer, ShieldCheck, CreditCard

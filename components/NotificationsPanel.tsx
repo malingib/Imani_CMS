@@ -38,7 +38,7 @@ const NotificationsPanel: React.FC<NotificationsPanelProps> = ({
   };
 
   return (
-    <div className="absolute right-0 top-12 w-80 lg:w-[400px] bg-white rounded-[2rem] shadow-2xl border border-slate-100 z-[100] animate-in slide-in-from-top-2 duration-200 overflow-hidden">
+    <div className="absolute right-0 top-12 w-80 lg:w-[400px] bg-white rounded-xl shadow-sm border border-slate-100 z-[100] animate-in slide-in-from-top-2 duration-200 overflow-hidden">
       <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-indigo-50/30">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-indigo-100 text-indigo-600 rounded-xl">

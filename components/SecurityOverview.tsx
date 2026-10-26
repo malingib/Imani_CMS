@@ -27,7 +27,7 @@ const SecurityOverview: React.FC<SecurityOverviewProps> = ({ onBack }) => {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
+        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-6">
            <div className="p-4 bg-brand-indigo/10 text-brand-indigo rounded-2xl w-fit"><Key size={32}/></div>
            <h3 className="text-2xl font-black text-slate-800">Advanced Encryption</h3>
            <p className="text-sm text-slate-500 font-medium leading-relaxed">
@@ -42,7 +42,7 @@ const SecurityOverview: React.FC<SecurityOverviewProps> = ({ onBack }) => {
            </div>
         </div>
 
-        <div className="bg-brand-primary p-10 rounded-[3rem] text-white shadow-xl space-y-6 relative overflow-hidden">
+        <div className="bg-brand-primary p-6 rounded-xl text-white shadow-sm space-y-6 relative overflow-hidden">
            <div className="p-4 bg-white/10 text-brand-indigo/30 rounded-2xl w-fit relative z-10"><Smartphone size={32}/></div>
            <h3 className="text-2xl font-black relative z-10">M-Pesa Security</h3>
            <p className="text-sm text-indigo-100/70 font-medium leading-relaxed relative z-10">
@@ -59,7 +59,7 @@ const SecurityOverview: React.FC<SecurityOverviewProps> = ({ onBack }) => {
         </div>
       </div>
 
-      <div className="bg-white p-10 lg:p-12 rounded-[3.5rem] border border-slate-100 shadow-sm space-y-10">
+      <div className="bg-white p-6 lg:p-6 rounded-xl border border-slate-100 shadow-sm space-y-10">
          <div className="flex items-center gap-4">
             <Server size={32} className="text-slate-400"/>
             <h3 className="text-2xl font-black text-slate-800">Operational Security</h3>

@@ -35,7 +35,7 @@ const BillingOverview: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map(s => (
-          <div key={s.label} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+          <div key={s.label} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
             <div className="flex items-center gap-3">
               <s.icon size={28} className={s.color} />
               <div>

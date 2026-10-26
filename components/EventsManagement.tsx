@@ -155,7 +155,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {eventError && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{eventError}</p>}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Events Management</h2>
+          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Events Management</h2>
           <p className="text-slate-500 mt-2 text-lg">Manage church events and track attendance.</p>
         </div>
         <div className="flex gap-3">
@@ -350,7 +350,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">
                     {EVENT_TYPE_CONFIG[viewingEvent.type].label}
                   </div>
-                  <h3 className="text-3xl sm:text-5xl font-black tracking-tight uppercase leading-tight">{viewingEvent.title}</h3>
+                  <h3 className="text-3xl sm:text-5xl font-semibold tracking-tight leading-tight">{viewingEvent.title}</h3>
                 </div>
                 <button onClick={() => setViewingEvent(null)} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/10">
                   <X size={24} />
@@ -365,7 +365,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   <section className="space-y-6">
                     <div className="flex items-center gap-3 text-slate-800">
                       <Info size={24} className="text-brand-indigo" />
-                      <h4 className="text-xl font-black uppercase tracking-tight">Description</h4>
+                      <h4 className="text-xl font-semibold tracking-tight">Description</h4>
                     </div>
                     <p className="text-lg text-slate-600 leading-relaxed font-medium">
                       {viewingEvent.description || "No description provided."}
@@ -397,7 +397,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                     </h4>
                     <div className="space-y-4">
                        <div className="flex justify-between items-end">
-                          <p className="text-3xl font-black tracking-tighter">{viewingEvent.attendance.length} People</p>
+                          <p className="text-2xl font-semibold tracking-tighter">{viewingEvent.attendance.length} People</p>
                           <p className="text-[10px] font-black text-indigo-300 uppercase">Confirmed RSVP</p>
                        </div>
                        <div className="flex -space-x-3 overflow-hidden">
@@ -471,7 +471,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   <div className="p-3 bg-brand-primary text-white rounded-2xl shadow-sm">
                     <Calendar size={24}/>
                   </div>
-                  <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Schedule New Event</h3>
+                  <h3 className="text-2xl font-semibold text-slate-800 uppercase tracking-tight">Schedule New Event</h3>
                 </div>
                 <button type="button" onClick={() => setShowAddModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"><X size={24}/></button>
               </div>
@@ -628,7 +628,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                <div className="flex items-center gap-5">
                  <div className="p-4 bg-brand-gold text-brand-primary rounded-[1.5rem] shadow-sm shadow-brand-gold/20"><ClipboardList size={32}/></div>
                  <div>
-                   <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Mark Roll Call</h3>
+                   <h3 className="text-2xl font-semibold text-slate-800 uppercase tracking-tight">Mark Roll Call</h3>
                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">{activeEventForRollCall.title} • {activeEventForRollCall.date}</p>
                  </div>
                </div>
@@ -709,7 +709,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
               <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-brand-indigo text-white rounded-2xl shadow-sm"><Edit2 size={24}/></div>
-                  <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Edit Event</h3>
+                  <h3 className="text-2xl font-semibold text-slate-800 uppercase tracking-tight">Edit Event</h3>
                 </div>
                 <button type="button" onClick={() => setEditingEvent(null)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"><X size={24}/></button>
               </div>

@@ -16,14 +16,13 @@ const ADMIN_VIEWS: AppView[] = [
   'DASHBOARD', 'MEMBERS', 'FINANCE', 'GROUPS', 'EVENTS', 'COMMUNICATION',
   'REPORTS', 'ANALYTICS', 'AUDIT_LOGS', 'BILLING', 'SETTINGS',
 ];
-const MEMBER_VIEWS: AppView[] = ['MY_PORTAL', 'MY_GIVING'];
 const ROLE_VIEWS: Record<UserRole, AppView[]> = {
   SUPER_ADMIN: [...ADMIN_VIEWS, 'PLATFORM_DASHBOARD', 'TENANTS'],
   ADMIN: ADMIN_VIEWS,
   PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS'],
   TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS'],
   SECRETARY: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION'],
-  MEMBER: MEMBER_VIEWS,
+  MEMBER: [],
 };
 
 function canAccess(view: AppView, role: UserRole, _viewingPlatform: boolean): boolean {
@@ -44,8 +43,6 @@ const ChurchAdministration = lazy(() => import('./ChurchAdministration'));
 const PrivacyPolicy = lazy(() => import('./PrivacyPolicy'));
 const CompliancePortal = lazy(() => import('./CompliancePortal'));
 const SecurityOverview = lazy(() => import('./SecurityOverview'));
-const MemberPortal = lazy(() => import('./MemberPortal'));
-const MyGiving = lazy(() => import('./MyGiving'));
 const AuditLogs = lazy(() => import('./AuditLogs'));
 const Billing = lazy(() => import('./Billing'));
 const AcceptInvite = lazy(() => import('./AcceptInvite'));
@@ -91,6 +88,22 @@ const AccountShell = () => {
   };
 
   if (!currentUser) return null;
+
+  // Member self-service is intentionally paused. Keep staff-facing congregation
+  // management available, but do not expose member profile, RSVP or giving pages.
+  if (currentUser.role === UserRole.MEMBER) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+        <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-600"><ShieldAlert size={28} /></div>
+          <h1 className="text-2xl font-black text-slate-900">Member portal temporarily unavailable</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">Self-service profiles, event RSVPs and personal giving are paused while these features are reviewed. Please contact your church administrator for assistance.</p>
+          <button onClick={handleLogout} className="mt-6 rounded-lg bg-brand-primary px-5 py-3 text-sm font-bold text-white">Sign out</button>
+        </div>
+      </div>
+    );
+  }
+
   const navigate = (v: AppView) => navigateToPath(ROUTES[v].path);
   const currentView = pathToView(location.pathname) || 'DASHBOARD';
   const viewAllowed = canAccess(currentView, currentUser.role, false);
@@ -184,8 +197,6 @@ const AccountShell = () => {
                   <Route path={ROUTES.SETTINGS.path} element={currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.SUPER_ADMIN ? <ChurchAdministration currentUserRole={currentUser.role} churchId={churchId || ''} /> : <Settings currentUserRole={currentUser.role} churchId={churchId || ''} />} />
                   <Route path={ROUTES.AUDIT_LOGS.path} element={<AuditLogs logs={auditLogs} />} />
                   <Route path={ROUTES.BILLING.path} element={<Billing />} />
-                  <Route path={ROUTES.MY_PORTAL.path} element={<MemberPortal member={currentMember || null} transactions={transactions} events={events} activities={[]} churchId={churchId || ''} onNavigate={navigate} onUpdateProfile={handleUpdateProfile} onRSVP={handleRSVP} />} />
-                  <Route path={ROUTES.MY_GIVING.path} element={<MyGiving member={currentMember || null} transactions={transactions} onGive={handleGive} />} />
                   <Route path="*" element={<Navigate to={ROUTES.DASHBOARD.path} replace />} />
 
               </Routes>

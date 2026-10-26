@@ -235,7 +235,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
 
 
             {activeTab === 'ENGAGEMENT' && (
-              <div className="bg-white p-5 sm:p-6 sm:p-6 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
+              <div className="bg-white p-5 sm:p-6 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-10">
                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                       <h4 className="text-2xl font-black text-slate-800">Attendance by Service</h4>

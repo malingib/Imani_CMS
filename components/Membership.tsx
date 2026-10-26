@@ -341,7 +341,7 @@ const Membership: React.FC<MembershipProps> = ({
             <div className="p-2 bg-brand-indigo-50 text-brand-indigo rounded-xl">
                <Users size={24} />
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Members</h2>
+            <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Members</h2>
           </div>
           <p className="text-slate-500 mt-1 text-sm sm:text-lg font-medium">Manage church member records and details.</p>
         </div>
@@ -631,7 +631,7 @@ const Membership: React.FC<MembershipProps> = ({
                   <FileSpreadsheet size={28}/>
                 </div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-none">Bulk Import</h3>
+                  <h3 className="text-2xl font-semibold text-slate-800 uppercase tracking-tight leading-none">Bulk Import</h3>
                   <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2">CSV or Excel Format (Comma Separated)</p>
                 </div>
               </div>
@@ -689,7 +689,7 @@ const Membership: React.FC<MembershipProps> = ({
                     {showAddModal ? <UserPlus size={28}/> : <Edit2 size={28}/>}
                   </div>
                   <div>
-                    <h3 className="text-2xl sm:text-4xl font-black text-slate-800 uppercase tracking-tight">{showAddModal ? 'Add New Member' : 'Update Profile'}</h3>
+                    <h3 className="text-2xl sm:text-2xl font-semibold text-slate-800 uppercase tracking-tight">{showAddModal ? 'Add New Member' : 'Update Profile'}</h3>
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">Member Registration</p>
                   </div>
                 </div>
@@ -813,7 +813,7 @@ const Membership: React.FC<MembershipProps> = ({
                   <ShieldAlert size={48}/>
                </div>
                <div className="space-y-4">
-                  <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight leading-tight">Delete Member?</h3>
+                  <h3 className="text-2xl font-semibold text-slate-800 uppercase tracking-tight leading-tight">Delete Member?</h3>
                   <p className="text-slate-500 font-medium text-base leading-relaxed px-4">You are about to delete the member record for <span className="text-slate-900 font-black">{showDeleteConfirm.firstName} {showDeleteConfirm.lastName}</span>. This action is irreversible.</p>
                </div>
                <div className="flex flex-col gap-4">

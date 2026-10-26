@@ -110,7 +110,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-[10px] sm:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-indigo'}`}
+              className={`px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl text-[10px] sm:text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === tab.id ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-400 hover:text-brand-indigo'}`}
             >
               {tab.icon && <tab.icon size={14}/>} {tab.label}
             </button>
@@ -120,7 +120,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
 
       {activeTab === 'AUTOMATION' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-           <div className="bg-white p-8 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] border border-slate-100 shadow-xl space-y-8">
+           <div className="bg-white p-5 sm:p-6 rounded-xl sm:rounded-xl border border-slate-100 shadow-sm space-y-8">
               <div className="flex items-center justify-between">
                  <div className="flex items-center gap-3">
                     <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-2xl"><Sparkles size={24}/></div>
@@ -156,7 +156,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     </div>
                  )}
 
-                 <div className="p-6 bg-slate-50 rounded-[2rem] border border-dashed border-slate-200">
+                 <div className="p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                     <p className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest text-center sm:text-left">Selected Channels</p>
                     <div className="flex flex-wrap gap-2">
                        {['SMS', 'WhatsApp', 'Email'].map(channel => (
@@ -174,7 +174,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
            </div>
 
            <div className="space-y-6 sm:space-y-8">
-              <div className="bg-brand-primary p-8 sm:p-10 rounded-[2.5rem] sm:rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
+              <div className="bg-brand-primary p-5 sm:p-6 rounded-xl sm:rounded-xl text-white shadow-sm relative overflow-hidden group">
                  <div className="relative z-10 space-y-5">
                     <div className="flex items-center gap-3">
                        <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Wand2 size={24}/></div>
@@ -184,7 +184,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     <button 
                        onClick={handleGenerateAiSermon}
                        disabled={isGeneratingSermon}
-                       className="w-full py-4 bg-white text-brand-primary rounded-xl sm:rounded-2xl font-black shadow-xl hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                       className="w-full py-4 bg-white text-brand-primary rounded-xl sm:rounded-2xl font-black shadow-sm hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                        {isGeneratingSermon ? <Loader2 className="animate-spin" size={18}/> : <Sparkles size={18}/>}
                        {isGeneratingSermon ? 'Generating...' : 'Draft with Gemini'}
@@ -193,7 +193,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                  <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-indigo rounded-full blur-[60px] opacity-20 group-hover:scale-125 transition-transform"></div>
               </div>
 
-              <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+              <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm space-y-6">
                  <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight"><Clock size={20} className="text-brand-indigo"/> Scheduled Messages</h4>
                  <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">No scheduled messages are connected to a server-side scheduler. Automation shown in this panel does not dispatch messages.</p>
               </div>
@@ -202,8 +202,8 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
       )}
 
       {activeTab === 'LOGS' && (
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-6 sm:p-10 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between bg-slate-50/50 gap-6">
+        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="p-6 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between bg-slate-50/50 gap-6">
             <h3 className="text-xl sm:text-2xl font-black text-slate-800 uppercase tracking-tight">Broadcast History</h3>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -218,7 +218,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
           </div>
           <div className="divide-y divide-slate-50 overflow-x-auto">
             {filteredLogs.length > 0 ? filteredLogs.map(log => (
-              <div key={log.id} className="p-6 sm:p-8 hover:bg-slate-50 transition-all flex items-center justify-between gap-6 min-w-[600px] lg:min-w-0">
+              <div key={log.id} className="p-6 sm:p-5 hover:bg-slate-50 transition-all flex items-center justify-between gap-6 min-w-[600px] lg:min-w-0">
                 <div className="flex items-start gap-4 sm:gap-6 flex-1">
                   <div className={`p-3 sm:p-4 rounded-xl sm:rounded-[1.5rem] shadow-sm flex-shrink-0 ${
                     log.type === 'SMS' ? 'bg-brand-indigo/10 text-brand-indigo' : 
@@ -261,7 +261,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
       {activeTab === 'TEMPLATES' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 animate-in slide-in-from-bottom-4 duration-500">
           {templates.map(t => (
-            <div key={t.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all h-full">
+            <div key={t.id} className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between group hover:shadow-sm transition-all h-full">
                <div className="mb-8">
                   <div className="flex justify-between items-start mb-6">
                      <div className={`p-3 rounded-2xl ${t.type === 'SMS' ? 'bg-brand-indigo/10 text-brand-indigo' : t.type === 'Email' ? 'bg-brand-gold/10 text-brand-gold' : 'bg-brand-emerald/10 text-brand-emerald'}`}>
@@ -280,7 +280,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                </button>
             </div>
           ))}
-          <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-4">
+          <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-5 rounded-xl flex flex-col items-center justify-center text-center space-y-4">
              <div className="w-12 h-12 rounded-full bg-white border border-slate-100 flex items-center justify-center text-slate-200 shadow-inner"><Plus size={24}/></div>
              <p className="text-xs sm:text-sm font-bold text-slate-400">Save your custom messages as templates for the whole team.</p>
           </div>
@@ -289,13 +289,13 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
 
       {activeTab === 'COMPOSE' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          <div className="lg:col-span-2 bg-white p-6 sm:p-10 lg:p-12 rounded-[2rem] lg:rounded-[3rem] border border-slate-100 shadow-xl space-y-8">
+          <div className="lg:col-span-2 bg-white p-6 sm:p-6 lg:p-6 rounded-xl lg:rounded-xl border border-slate-100 shadow-sm space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Channel</label>
                 <div className="flex gap-2">
                   {(['SMS', 'Email', 'WhatsApp'] as const).map(t => (
-                    <button key={t} onClick={() => setMessageType(t)} className={`flex-1 py-3 rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] transition-all border-2 ${messageType === t ? 'bg-brand-primary text-white border-brand-primary shadow-lg' : 'bg-slate-50 text-slate-400 border-slate-50 hover:bg-slate-100'}`}>{t}</button>
+                    <button key={t} onClick={() => setMessageType(t)} className={`flex-1 py-3 rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] transition-all border-2 ${messageType === t ? 'bg-brand-primary text-white border-brand-primary shadow-sm' : 'bg-slate-50 text-slate-400 border-slate-50 hover:bg-slate-100'}`}>{t}</button>
                   ))}
                 </div>
               </div>
@@ -313,12 +313,12 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
               {messageType === 'Email' && (
                 <input type="text" placeholder="Email Subject Header" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl font-black text-sm text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo shadow-inner" value={subject} onChange={(e) => setSubject(e.target.value)} />
               )}
-              <textarea rows={8} placeholder="Type your message here..." className="w-full p-6 sm:p-8 bg-slate-50 border border-slate-100 rounded-[1.5rem] sm:rounded-[2rem] font-bold text-sm sm:text-base text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo shadow-inner" value={content} onChange={(e) => setContent(e.target.value)} />
+              <textarea rows={8} placeholder="Type your message here..." className="w-full p-6 sm:p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] sm:rounded-xl font-bold text-sm sm:text-base text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo shadow-inner" value={content} onChange={(e) => setContent(e.target.value)} />
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                <button onClick={resetForm} className="w-full sm:w-auto px-10 py-5 bg-slate-50 text-slate-400 rounded-xl sm:rounded-2xl font-black uppercase text-[10px] hover:bg-slate-100 transition-all order-2 sm:order-1">Clear Draft</button>
-               <button onClick={handleSend} disabled={!content || isSending} className="flex-1 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black text-sm sm:text-lg shadow-2xl hover:bg-brand-primary-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50 order-1 sm:order-2">
+               <button onClick={handleSend} disabled={!content || isSending} className="flex-1 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black text-sm sm:text-lg shadow-sm hover:bg-brand-primary-700 transition-all flex items-center justify-center gap-3 disabled:opacity-50 order-1 sm:order-2">
                  {isSending ? <Loader2 className="animate-spin" size={24} /> : <Send size={24} />} 
                  {isSending ? 'Dispatching...' : `Send ${messageType}`}
                </button>
@@ -326,7 +326,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
           </div>
           
           <div className="space-y-6 sm:space-y-8">
-             <div className="bg-brand-primary p-8 rounded-[2rem] sm:rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+             <div className="bg-brand-primary p-5 rounded-xl sm:rounded-xl text-white shadow-sm relative overflow-hidden">
                 <div className="relative z-10 space-y-4">
                    <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-indigo-300">Quick Tags</h4>
                    <p className="text-xs sm:text-sm font-medium leading-relaxed">Map variables automatically: <code className="bg-white/10 px-1.5 rounded">{'{name}'}</code> or <code className="bg-white/10 px-1.5 rounded">{'{amount}'}</code> for bulk personalization.</p>
@@ -334,7 +334,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                 <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl opacity-20"></div>
              </div>
              
-             <div className="bg-white p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+             <div className="bg-white p-5 rounded-xl sm:rounded-xl border border-slate-100 shadow-sm space-y-6">
                 <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">SMS Credits</h4>
                 <div className="flex items-center justify-between">
                     <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">{typeof smsCredits === 'number' ? smsCredits.toLocaleString() : 'Not configured'}</p>

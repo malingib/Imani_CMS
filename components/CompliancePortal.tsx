@@ -27,21 +27,21 @@ const CompliancePortal: React.FC<CompliancePortalProps> = ({ onBack }) => {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm text-center space-y-3">
+        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm text-center space-y-3">
           <div className="mx-auto w-12 h-12 bg-brand-emerald/10 text-brand-emerald rounded-2xl flex items-center justify-center">
             <FileCheck size={24}/>
           </div>
           <h4 className="font-black text-slate-800 text-sm">ODPC Certified</h4>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Registered Data Controller #00-123-KE</p>
         </div>
-        <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm text-center space-y-3">
+        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm text-center space-y-3">
           <div className="mx-auto w-12 h-12 bg-brand-indigo/10 text-brand-indigo rounded-2xl flex items-center justify-center">
             <Scale size={24}/>
           </div>
           <h4 className="font-black text-slate-800 text-sm">Financing Act</h4>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">Compliant with PBO & Societies Act Rules</p>
         </div>
-        <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm text-center space-y-3">
+        <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm text-center space-y-3">
           <div className="mx-auto w-12 h-12 bg-brand-gold/10 text-brand-gold rounded-2xl flex items-center justify-center">
             <ShieldCheck size={24}/>
           </div>
@@ -50,7 +50,7 @@ const CompliancePortal: React.FC<CompliancePortalProps> = ({ onBack }) => {
         </div>
       </div>
 
-      <section className="bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
+      <section className="bg-white p-5 lg:p-6 rounded-xl border border-slate-100 shadow-sm space-y-10">
         <div>
           <h3 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
              <CheckCircle2 size={24} className="text-brand-emerald"/> Compliance Checklist
@@ -78,7 +78,7 @@ const CompliancePortal: React.FC<CompliancePortalProps> = ({ onBack }) => {
           </div>
         </div>
 
-        <div className="p-8 bg-brand-gold/10 border border-brand-gold/20 rounded-[2rem] flex items-start gap-6">
+        <div className="p-5 bg-brand-gold/10 border border-brand-gold/20 rounded-xl flex items-start gap-6">
            <AlertCircle className="text-brand-gold shrink-0" size={28}/>
            <div className="space-y-2">
               <h4 className="font-black text-brand-gold text-sm uppercase tracking-tight">Audit Notice</h4>

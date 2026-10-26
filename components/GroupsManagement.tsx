@@ -84,7 +84,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {successMessage && (
-        <div className="fixed top-24 right-8 bg-brand-primary text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-right-8 z-[100]">
+        <div className="fixed top-24 right-8 bg-brand-primary text-white px-6 py-4 rounded-2xl shadow-sm flex items-center gap-3 animate-in slide-in-from-right-8 z-[100]">
           <CheckCircle2 size={24} />
           <span className="font-bold">{successMessage}</span>
         </div>
@@ -98,7 +98,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
         <div className="flex gap-3">
           <button 
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-slate-800 transition-all shadow-lg shadow-indigo-100"
+            className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-slate-800 transition-all shadow-sm shadow-indigo-100"
           >
             <Plus size={20} /> Create Group
           </button>
@@ -125,8 +125,8 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
           const progress = Math.min((groupMemberCount / target) * 100, 100);
 
           return (
-            <div key={group.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group">
-              <div className="p-8 space-y-6 flex-1">
+            <div key={group.id} className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-sm transition-all duration-300 flex flex-col group">
+              <div className="p-5 space-y-6 flex-1">
                   <div className="flex justify-between items-start">
                   <div className={`p-3 rounded-2xl bg-slate-50`}>
                     {getCategoryIcon(group.name)}
@@ -190,7 +190,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
       {/* Create Group Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200">
+          <div className="bg-white rounded-xl w-full max-w-2xl shadow-sm p-6 space-y-8 animate-in zoom-in duration-200">
             <div className="flex justify-between items-center">
               <h3 className="text-3xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Create New Group</h3>
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-rose-500 transition-all"><X size={24}/></button>
@@ -209,7 +209,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
 
             <div className="flex gap-4 pt-4">
               <button onClick={() => setShowCreateModal(false)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Cancel</button>
-              <button onClick={handleCreateGroup} disabled={isSubmitting || !newGroupName} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
+              <button onClick={handleCreateGroup} disabled={isSubmitting || !newGroupName} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-3 disabled:opacity-50">
                 {isSubmitting ? <Loader2 className="animate-spin" size={20}/> : <Plus size={20}/>} {isSubmitting ? 'Creating...' : 'Create Group'}
               </button>
             </div>
@@ -220,7 +220,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
       {/* View Members Modal */}
       {viewingMembersGroup && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-4xl shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-xl w-full max-w-4xl shadow-sm p-6 space-y-8 animate-in zoom-in duration-200 max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <div className={`p-4 rounded-2xl bg-slate-50`}>{getCategoryIcon(viewingMembersGroup.name)}</div>
@@ -232,7 +232,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
               <button onClick={() => setViewingMembersGroup(null)} className="text-slate-400 hover:text-rose-500 transition-all"><X size={24}/></button>
             </div>
             
-            <div className="flex-1 overflow-y-auto no-scrollbar border border-slate-100 rounded-[2rem]">
+            <div className="flex-1 overflow-y-auto no-scrollbar border border-slate-100 rounded-xl">
                <table className="w-full text-left">
                   <thead className="sticky top-0 bg-slate-50 text-[10px] uppercase text-slate-400 font-black tracking-widest z-10">
                     <tr>
@@ -267,7 +267,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
       {/* Edit Group Modal */}
       {editingGroup && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200">
+          <div className="bg-white rounded-xl w-full max-w-2xl shadow-sm p-6 space-y-8 animate-in zoom-in duration-200">
             <div className="flex justify-between items-center">
               <h3 className="text-3xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Edit Group</h3>
               <button onClick={() => setEditingGroup(null)} className="text-slate-400 hover:text-rose-500 transition-all"><X size={24}/></button>
@@ -294,7 +294,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
                 setEditingGroup(null);
                 setSuccessMessage(`"${editGroupName}" updated!`);
                 setTimeout(() => setSuccessMessage(null), 3000);
-              }} disabled={isSubmitting || !editGroupName} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-xl hover:bg-slate-800 transition-all disabled:opacity-50">
+              }} disabled={isSubmitting || !editGroupName} className="flex-1 py-4 bg-brand-primary text-white rounded-2xl font-black shadow-sm hover:bg-slate-800 transition-all disabled:opacity-50">
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
@@ -305,7 +305,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
       {/* Message Group Modal */}
       {messagingGroup && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-sm p-6 space-y-8 animate-in zoom-in duration-200">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-indigo-50 text-brand-primary rounded-2xl"><Send size={20}/></div>
@@ -322,7 +322,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
                  </div>
                  <span className="text-[10px] font-black uppercase text-brand-primary">{getMemberCount(messagingGroup.name)} Recipients</span>
               </div>
-              <textarea className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[2rem] font-bold text-slate-700 outline-none resize-none focus:ring-2 focus:ring-brand-primary" rows={5} placeholder="Hello members, this is a reminder..."/>
+              <textarea className="w-full p-6 bg-slate-50 border border-slate-100 rounded-xl font-bold text-slate-700 outline-none resize-none focus:ring-2 focus:ring-brand-primary" rows={5} placeholder="Hello members, this is a reminder..."/>
               <div className="flex gap-4">
                  <button onClick={() => setMessagingGroup(null)} className="flex-1 py-4 font-black text-slate-500 hover:bg-slate-100 rounded-2xl transition-all">Discard</button>
                   <button onClick={() => { setMessagingGroup(null); onOpenCommunications?.(); }} className="flex-1 py-4 bg-brand-primary text-white rounded-xl font-semibold hover:bg-slate-800 transition-colors flex items-center justify-center gap-3">

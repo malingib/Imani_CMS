@@ -47,8 +47,8 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ logs }) => {
         </button>
       </header>
 
-      <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden min-h-[600px]">
-        <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex flex-col xl:flex-row gap-6 items-center">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden min-h-[600px]">
+        <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col xl:flex-row gap-6 items-center">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 

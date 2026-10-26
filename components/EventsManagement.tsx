@@ -197,7 +197,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
              <Sparkles size={20}/> Find Outreach Locations
           </button>
           {currentUser?.role !== UserRole.MEMBER && (
-            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 text-xs sm:text-sm">
+            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 text-xs sm:text-sm">
                <Plus size={20} /> Schedule Event
             </button>
           )}
@@ -205,8 +205,8 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       </div>
 
       <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-200 shadow-sm self-start overflow-x-auto no-scrollbar max-w-full">
-        <button onClick={() => setViewMode('GRID')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${viewMode === 'GRID' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}><LayoutGrid size={16}/> Cards</button>
-        <button onClick={() => setViewMode('CALENDAR')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${viewMode === 'CALENDAR' ? 'bg-brand-primary text-white shadow-lg' : 'text-slate-400 hover:text-brand-primary'}`}><Calendar size={16}/> Calendar</button>
+        <button onClick={() => setViewMode('GRID')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${viewMode === 'GRID' ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-400 hover:text-brand-primary'}`}><LayoutGrid size={16}/> Cards</button>
+        <button onClick={() => setViewMode('CALENDAR')} className={`px-6 py-3 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${viewMode === 'CALENDAR' ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-400 hover:text-brand-primary'}`}><Calendar size={16}/> Calendar</button>
       </div>
 
       {viewMode === 'CALENDAR' ? (
@@ -232,8 +232,8 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
           });
 
           return (
-            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-8 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
+            <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
                 <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">{monthNames[month]} {year}</h3>
                 <div className="flex gap-2">
                   <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
@@ -279,28 +279,28 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
             const going = isUserRSVPd(event);
             
             return (
-              <div key={event.id} className="relative bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-2xl hover:scale-[1.03] transition-all duration-300">
+              <div key={event.id} className="relative bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-sm hover:scale-[1.03] transition-all duration-300">
                 {/* Quick Actions Overlay */}
-                <div className="absolute inset-0 bg-brand-primary/95 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-8 space-y-3 z-20">
+                <div className="absolute inset-0 bg-brand-primary/95 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-5 space-y-3 z-20">
                   <p className="text-brand-gold font-black uppercase tracking-[0.2em] text-[10px] mb-2">Quick Actions</p>
                   
-                  <button onClick={() => setViewingEvent(event)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-white text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-xl">
+                  <button onClick={() => setViewingEvent(event)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-white text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-sm">
                     <Eye size={16}/> View Details
                   </button>
 
-                  <button onClick={() => setShowReminderModal(event)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-indigo text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-brand-primary transition-all shadow-xl">
+                  <button onClick={() => setShowReminderModal(event)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-indigo text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-brand-primary transition-all shadow-sm">
                     <BellRing size={16}/> Set Reminder
                   </button>
 
                   {currentUser?.role !== UserRole.MEMBER && (
                     <>
-                      <button onClick={() => { setEditingEvent(event); setNewEvent({ ...event }); }} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-indigo text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-brand-primary transition-all shadow-xl">
+                      <button onClick={() => { setEditingEvent(event); setNewEvent({ ...event }); }} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-indigo text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-brand-primary transition-all shadow-sm">
                         <Edit2 size={16}/> Edit Event
                       </button>
-                      <button onClick={() => setShowAttendanceModal(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-gold text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white transition-all shadow-xl">
+                      <button onClick={() => setShowAttendanceModal(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-gold text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white transition-all shadow-sm">
                         <UserCheck size={16}/> Mark Attendance
                       </button>
-                      <button onClick={() => void handleDeleteEvent(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-rose-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-xl">
+                      <button onClick={() => void handleDeleteEvent(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-rose-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-sm">
                         <Trash2 size={16}/> Delete Event
                       </button>
                     </>
@@ -309,9 +309,9 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   <button className="text-white/40 text-[9px] font-black uppercase tracking-widest hover:text-white transition-colors mt-2" onClick={(e) => e.stopPropagation()}>Dismiss</button>
                 </div>
 
-                <div className="p-8 flex-1 space-y-4">
+                <div className="p-5 flex-1 space-y-4">
                   <div className="flex justify-between items-start">
-                    <div className={`p-3 rounded-2xl text-white shadow-lg ${config.color}`}>
+                    <div className={`p-3 rounded-2xl text-white shadow-sm ${config.color}`}>
                       <Icon size={20} />
                     </div>
                     <div className="flex gap-2">
@@ -363,7 +363,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {/* Reminder scheduling is not connected to a persisted scheduler/provider. Be explicit instead of implying dispatch. */}
       {showReminderModal && (
         <div className="fixed inset-0 bg-slate-900/60 z-[500] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reminder-unavailable-title">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-xl p-6 space-y-5">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-sm p-6 space-y-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 id="reminder-unavailable-title" className="text-xl font-bold text-slate-900">Event reminders unavailable</h3>
@@ -380,8 +380,8 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {/* View Event Detail Modal */}
       {viewingEvent && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20 flex flex-col max-h-[90vh]">
-            <div className={`p-10 text-white relative overflow-hidden flex-shrink-0 ${EVENT_TYPE_CONFIG[viewingEvent.type].color}`}>
+          <div className="bg-white rounded-xl w-full max-w-4xl shadow-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20 flex flex-col max-h-[90vh]">
+            <div className={`p-6 text-white relative overflow-hidden flex-shrink-0 ${EVENT_TYPE_CONFIG[viewingEvent.type].color}`}>
               <div className="relative z-10 flex justify-between items-start">
                 <div className="space-y-4">
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest">
@@ -396,7 +396,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
               <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-white/10 rounded-full blur-[80px]" />
             </div>
 
-            <div className="flex-1 overflow-y-auto p-10 sm:p-14 space-y-12 no-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 sm:p-14 space-y-12 no-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
                 <div className="md:col-span-7 space-y-10">
                   <section className="space-y-6">
@@ -410,14 +410,14 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   </section>
 
                   <section className="grid grid-cols-2 gap-6">
-                    <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-3">
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-100 space-y-3">
                       <div className="flex items-center gap-2 text-brand-indigo">
                         <Clock size={18} />
                         <span className="text-[10px] font-black uppercase tracking-widest">Schedule</span>
                       </div>
                       <p className="text-sm font-bold text-slate-800">{viewingEvent.date} @ {viewingEvent.time}</p>
                     </div>
-                    <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-3">
+                    <div className="p-6 bg-slate-50 rounded-xl border border-slate-100 space-y-3">
                       <div className="flex items-center gap-2 text-brand-indigo">
                         <MapPin size={18} />
                         <span className="text-[10px] font-black uppercase tracking-widest">Venue</span>
@@ -428,7 +428,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                 </div>
 
                 <div className="md:col-span-5 space-y-8">
-                  <div className="p-8 bg-brand-primary text-white rounded-[2.5rem] shadow-xl space-y-6">
+                  <div className="p-5 bg-brand-primary text-white rounded-xl shadow-sm space-y-6">
                     <h4 className="text-lg font-black uppercase flex items-center gap-3">
                       <Users size={20} className="text-brand-gold" /> Attendance
                     </h4>
@@ -453,7 +453,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   </div>
 
                   {(viewingEvent.coordinator || viewingEvent.contactPerson) && (
-                    <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6">
+                    <div className="p-5 bg-slate-50 rounded-xl border border-slate-100 space-y-6">
                       <h4 className="text-sm font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
                         <Phone size={16} /> Contacts
                       </h4>
@@ -477,12 +477,12 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
               </div>
             </div>
 
-            <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex gap-4 flex-shrink-0">
+            <div className="p-5 border-t border-slate-100 bg-slate-50/50 flex gap-4 flex-shrink-0">
                <button onClick={() => setViewingEvent(null)} className="flex-1 py-5 font-black text-slate-500 hover:bg-slate-100 rounded-2xl uppercase text-[11px] tracking-widest transition-all">Close</button>
                {currentUser?.memberId && (
                  <button 
                   onClick={() => { onRSVP(viewingEvent.id, !isUserRSVPd(viewingEvent)); setViewingEvent(null); }}
-                  className={`flex-[2] py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl transition-all flex items-center justify-center gap-3 ${
+                  className={`flex-[2] py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-sm transition-all flex items-center justify-center gap-3 ${
                     isUserRSVPd(viewingEvent) 
                       ? 'bg-rose-500 text-white hover:bg-rose-600' 
                       : 'bg-brand-primary text-white hover:bg-brand-indigo'
@@ -500,12 +500,12 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {/* Add Event Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
+          <div className="bg-white rounded-xl w-full max-w-3xl shadow-sm overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
             <form onSubmit={handleSubmit} className="flex flex-col h-full">
               {eventError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
-              <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-brand-primary text-white rounded-2xl shadow-lg">
+                  <div className="p-3 bg-brand-primary text-white rounded-2xl shadow-sm">
                     <Calendar size={24}/>
                   </div>
                   <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Schedule New Event</h3>
@@ -513,7 +513,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                 <button type="button" onClick={() => setShowAddModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"><X size={24}/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8 lg:p-10 space-y-8 no-scrollbar">
+              <div className="flex-1 overflow-y-auto p-5 lg:p-6 space-y-8 no-scrollbar">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-6">
                     <div className="space-y-2">
@@ -593,7 +593,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                       </select>
                     </div>
 
-                    <div className="space-y-4 p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                    <div className="space-y-4 p-6 bg-slate-50 rounded-xl border border-slate-100">
                       <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-b border-slate-200 pb-3">Logistics & Contacts</h4>
                       
                       <div className="space-y-2">
@@ -645,9 +645,9 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                 </div>
               </div>
 
-              <div className="p-8 border-t border-slate-100 bg-white flex gap-4">
+              <div className="p-5 border-t border-slate-100 bg-white flex gap-4">
                 <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest transition-all">Cancel</button>
-                <button type="submit" disabled={isSavingEvent} className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-60">
+                <button type="submit" disabled={isSavingEvent} className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-sm hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-60">
                   <CheckCircle2 size={20}/> Confirm Schedule
                 </button>
               </div>
@@ -659,11 +659,11 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {/* Attendance / Roll Call Modal */}
       {showAttendanceModal && activeEventForRollCall && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xl z-[500] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] border border-white/20">
+          <div className="bg-white rounded-xl w-full max-w-2xl shadow-sm p-6 space-y-8 animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh] border border-white/20">
             {eventError && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
             <div className="flex justify-between items-center">
                <div className="flex items-center gap-5">
-                 <div className="p-4 bg-brand-gold text-brand-primary rounded-[1.5rem] shadow-xl shadow-brand-gold/20"><ClipboardList size={32}/></div>
+                 <div className="p-4 bg-brand-gold text-brand-primary rounded-[1.5rem] shadow-sm shadow-brand-gold/20"><ClipboardList size={32}/></div>
                  <div>
                    <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Mark Roll Call</h3>
                    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1">{activeEventForRollCall.title} • {activeEventForRollCall.date}</p>
@@ -690,7 +690,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                    <button 
                     key={m.id}
                     onClick={() => toggleAttendance(m.id)}
-                    className={`w-full group flex items-center justify-between p-5 rounded-[2rem] border-2 transition-all ${isPresent ? 'bg-brand-emerald border-brand-emerald shadow-xl shadow-emerald-100' : 'bg-white border-slate-50 hover:border-slate-200'}`}
+                    className={`w-full group flex items-center justify-between p-5 rounded-xl border-2 transition-all ${isPresent ? 'bg-brand-emerald border-brand-emerald shadow-sm shadow-emerald-100' : 'bg-white border-slate-50 hover:border-slate-200'}`}
                    >
                      <div className="flex items-center gap-5">
                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm transition-all ${isPresent ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-400'}`}>
@@ -728,7 +728,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                </div>
                <div className="flex gap-4 w-full sm:w-auto">
                  <button onClick={() => setShowAttendanceModal(null)} className="flex-1 sm:flex-none px-10 py-5 bg-slate-50 text-slate-500 rounded-[1.5rem] font-black hover:bg-slate-100 uppercase text-[11px] tracking-widest transition-all">Discard</button>
-                 <button onClick={() => void saveRollCall()} disabled={isSavingAttendance} className="flex-[2] sm:flex-none px-12 py-5 bg-brand-primary text-white rounded-[1.5rem] font-black shadow-2xl hover:bg-brand-indigo uppercase text-[11px] tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-60">
+                 <button onClick={() => void saveRollCall()} disabled={isSavingAttendance} className="flex-[2] sm:flex-none px-12 py-5 bg-brand-primary text-white rounded-[1.5rem] font-black shadow-sm hover:bg-brand-indigo uppercase text-[11px] tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-60">
                    <Save size={20}/> {isSavingAttendance ? 'Saving…' : 'Save Attendance'}
                  </button>
                </div>
@@ -740,17 +740,17 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {/* Edit Event Modal */}
       {editingEvent && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
+          <div className="bg-white rounded-xl w-full max-w-3xl shadow-sm overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in duration-200">
             <form onSubmit={handleEditSubmit} className="flex flex-col h-full">
               {eventError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{eventError}</p>}
-              <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+              <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-brand-indigo text-white rounded-2xl shadow-lg"><Edit2 size={24}/></div>
+                  <div className="p-3 bg-brand-indigo text-white rounded-2xl shadow-sm"><Edit2 size={24}/></div>
                   <h3 className="text-3xl font-black text-slate-800 uppercase tracking-tight">Edit Event</h3>
                 </div>
                 <button type="button" onClick={() => setEditingEvent(null)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"><X size={24}/></button>
               </div>
-              <div className="flex-1 overflow-y-auto p-8 lg:p-10 space-y-8 no-scrollbar">
+              <div className="flex-1 overflow-y-auto p-5 lg:p-6 space-y-8 no-scrollbar">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-6">
                     <div className="space-y-2">
@@ -805,9 +805,9 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   </div>
                 </div>
               </div>
-              <div className="p-8 border-t border-slate-100 bg-white flex gap-4">
+              <div className="p-5 border-t border-slate-100 bg-white flex gap-4">
                 <button type="button" onClick={() => setEditingEvent(null)} className="flex-1 py-5 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest">Cancel</button>
-                <button type="submit" disabled={isSavingEvent} className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3 disabled:opacity-60">
+                <button type="submit" disabled={isSavingEvent} className="flex-[2] py-5 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-sm hover:bg-brand-indigo transition-all flex items-center justify-center gap-3 disabled:opacity-60">
                   <CheckCircle2 size={20}/> Save Changes
                 </button>
               </div>
@@ -819,7 +819,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       {/* Scout Modal */}
       {showScoutModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-4xl shadow-2xl p-10 space-y-8 animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
+          <div className="bg-white rounded-xl w-full max-w-4xl shadow-sm p-6 space-y-8 animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
             <div className="flex justify-between items-center">
                <div className="flex items-center gap-4">
                  <div className="p-4 bg-indigo-50 text-brand-primary rounded-2xl"><Sparkles size={24}/></div>
@@ -844,7 +844,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                 <button 
                   onClick={handleScoutOutreach}
                   disabled={isScouting}
-                  className="px-6 py-4 bg-brand-primary text-white rounded-2xl font-black hover:bg-brand-primary/90 transition-all shadow-lg flex items-center justify-center min-w-[120px] gap-2"
+                  className="px-6 py-4 bg-brand-primary text-white rounded-2xl font-black hover:bg-brand-primary/90 transition-all shadow-sm flex items-center justify-center min-w-[120px] gap-2"
                 >
                   {isScouting ? <Loader2 className="animate-spin" size={20}/> : <Navigation size={18}/>}
                   {isScouting ? 'Scouting...' : 'Search'}
@@ -855,13 +855,13 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
             <div className="flex-1 overflow-y-auto no-scrollbar pr-2 space-y-6">
                {scoutResults ? (
                  <div className="space-y-6">
-                    <div className="bg-indigo-50/50 p-6 rounded-[2rem] border border-indigo-100">
+                    <div className="bg-indigo-50/50 p-6 rounded-xl border border-indigo-100">
                        <p className="text-slate-700 text-sm font-medium leading-relaxed italic">"{scoutResults.text}"</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                        {scoutResults.groundingChunks.map((chunk: any, i: number) => (
-                         <div key={i} className="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-all space-y-4 group">
+                         <div key={i} className="bg-white border border-slate-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-all space-y-4 group">
                             <div className="flex justify-between items-start">
                                <div className="p-3 bg-brand-primary/5 text-brand-primary rounded-xl group-hover:bg-brand-primary group-hover:text-white transition-colors">
                                   <MapPin size={20}/>
@@ -887,7 +887,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                     </div>
                  </div>
                ) : (
-                 <div className="h-64 border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center text-center p-8 space-y-4">
+                 <div className="h-64 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-center p-5 space-y-4">
                     <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
                       <MapIcon size={32} />
                     </div>

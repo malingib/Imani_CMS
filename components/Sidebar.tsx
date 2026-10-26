@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  LayoutDashboard, Users, Wallet, CalendarDays, Settings as SettingsIcon,
+  LayoutDashboard, Users, CalendarDays, Settings as SettingsIcon,
   LogOut, Layers, MessageSquare, BarChart3, PieChart, X,
   Building2, ChevronDown, ShieldCheck, CreditCard, Receipt, Globe, Network
 } from 'lucide-react';

@@ -21,6 +21,7 @@ interface AppState {
   currentUser: User | null;
   members: Member[];
   transactions: Transaction[];
+  dashboardTransactions: Transaction[];
   events: ChurchEvent[];
   budgets: Budget[];
   recurringExpenses: RecurringExpense[];
@@ -84,6 +85,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     currentUser: null,
     members: [],
     transactions: [],
+    dashboardTransactions: [],
     events: [],
     budgets: [],
     recurringExpenses: [],
@@ -185,12 +187,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     const controller = new AbortController();
     setState(prev => ({ ...prev, loading: 'data-loading', dataError: null }));
-    appDataService.loadChurchAppData(churchId)
-      .then(data => {
+    const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+    const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    Promise.all([
+      appDataService.loadChurchAppData(churchId),
+      appDataService.loadDashboardTransactions(churchId, dateKey(start), dateKey(end)),
+    ])
+      .then(([data, dashboardTransactions]) => {
         if (!controller.signal.aborted) {
           setState(prev => ({
             ...prev,
             ...data,
+            dashboardTransactions,
             loading: 'ready',
             dataError: null,
           }));
@@ -379,6 +389,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           dataError: null,
           members: [],
           transactions: [],
+          dashboardTransactions: [],
           events: [],
           budgets: [],
           recurringExpenses: [],
@@ -388,10 +399,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           notifications: [],
         }));
         addToast('Loading Demo Church workspace…');
-        void appDataService.loadChurchAppData(id)
-          .then(data => {
+        const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const today = new Date();
+        const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+        const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        void Promise.all([
+          appDataService.loadChurchAppData(id),
+          appDataService.loadDashboardTransactions(id, dateKey(start), dateKey(end)),
+        ])
+          .then(([data, dashboardTransactions]) => {
             setState(prev => prev.currentUser?.role === UserRole.SUPER_ADMIN && prev.viewingChurch
-              ? { ...prev, ...data, loading: 'ready', dataError: null }
+              ? { ...prev, ...data, dashboardTransactions, loading: 'ready', dataError: null }
               : prev);
           })
           .catch(error => {
@@ -421,8 +439,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     refreshData: async () => {
       if (isPlatformSession || !isAuthenticated) return;
       setState(prev => ({ ...prev, loading: 'data-loading', dataError: null }));
-      const data = await appDataService.loadChurchAppData(churchId || '');
-      setState(prev => ({ ...prev, ...data, loading: 'ready' }));
+      const scopedChurchId = churchId || '';
+      const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      const today = new Date();
+      const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+      const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const [data, dashboardTransactions] = await Promise.all([
+        appDataService.loadChurchAppData(scopedChurchId),
+        appDataService.loadDashboardTransactions(scopedChurchId, dateKey(start), dateKey(end)),
+      ]);
+      setState(prev => ({ ...prev, ...data, dashboardTransactions, loading: 'ready' }));
     },
   };
 

@@ -15,13 +15,14 @@ import { Member, Transaction, ChurchEvent, AppView } from '../types';
 interface DashboardProps {
   members: Member[];
   transactions: Transaction[];
+  dashboardTransactions: Transaction[];
   events: ChurchEvent[];
   onAddMember: () => void;
   onSendSMS: () => void;
   onNavigate: (view: AppView) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, onAddMember, onSendSMS, onNavigate }) => {
+const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardTransactions, events, onAddMember, onSendSMS, onNavigate }) => {
   const celebrations = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -68,17 +69,18 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, events, on
       return `${year}-${month}-${day}`;
     };
     const today = new Date();
+    const chartTransactions = Array.from(new Map([...dashboardTransactions, ...transactions].map(transaction => [transaction.id, transaction])).values());
     return Array.from({ length: 7 }, (_, index) => {
       const date = new Date(today);
       date.setDate(today.getDate() - (6 - index));
       const key = dateKey(date);
-      const dayTransactions = transactions.filter(t => t.date.slice(0, 10) === key);
+      const dayTransactions = chartTransactions.filter(t => typeof t.date === 'string' && t.date.slice(0, 10) === key);
       const tithes = dayTransactions
         .filter(t => t.type === 'Tithe' && t.category === 'Income')
         .reduce((sum, transaction) => sum + transaction.amount, 0);
       return { name: date.toLocaleDateString('en-KE', { weekday: 'short' }), tithes };
     });
-  }, [transactions]);
+  }, [transactions, dashboardTransactions]);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-10">

@@ -87,7 +87,7 @@ const PlatformSettings: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        <button onClick={save} disabled={saving} className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 disabled:opacity-70">
+        <button onClick={save} disabled={saving} className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-sm shadow-brand-primary/20 disabled:opacity-70">
           {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
           {saving ? 'Saving...' : 'Save Settings'}
         </button>

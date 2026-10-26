@@ -22,6 +22,7 @@ interface AppState {
   members: Member[];
   transactions: Transaction[];
   dashboardTransactions: Transaction[];
+  lifetimeTitheTransactions: Transaction[];
   events: ChurchEvent[];
   budgets: Budget[];
   recurringExpenses: RecurringExpense[];
@@ -86,6 +87,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     members: [],
     transactions: [],
     dashboardTransactions: [],
+    lifetimeTitheTransactions: [],
     events: [],
     budgets: [],
     recurringExpenses: [],
@@ -194,13 +196,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     Promise.all([
       appDataService.loadChurchAppData(churchId),
       appDataService.loadDashboardTransactions(churchId, dateKey(start), dateKey(end)),
+      appDataService.loadLifetimeTitheTransactions(churchId),
     ])
-      .then(([data, dashboardTransactions]) => {
+      .then(([data, dashboardTransactions, lifetimeTitheTransactions]) => {
         if (!controller.signal.aborted) {
           setState(prev => ({
             ...prev,
             ...data,
             dashboardTransactions,
+            lifetimeTitheTransactions,
             loading: 'ready',
             dataError: null,
           }));

@@ -9,7 +9,6 @@ import {
   Save, Loader2, Copy, Bookmark
 } from 'lucide-react';
 import { CommunicationLog, Member, CommunicationTemplate } from '../types';
-import { generateShortInspirationalSermon, generateDailyVerse } from '../services/geminiService';
 
 interface CommunicationCenterProps {
   members: Member[];
@@ -41,11 +40,6 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
   ];
 
   // Automation State
-  const [autoVerseEnabled, setAutoVerseEnabled] = useState(() => localStorage.getItem('autoVerseEnabled') !== 'false');
-  const [verseFrequency, setVerseFrequency] = useState<'Daily' | 'Weekly'>((localStorage.getItem('verseFrequency') as any) || 'Daily');
-  const [verseMode, setVerseMode] = useState<'Auto' | 'Manual'>((localStorage.getItem('verseMode') as any) || 'Auto');
-  const [manualVerse, setManualVerse] = useState('');
-  const [isGeneratingSermon, setIsGeneratingSermon] = useState(false);
 
   const handleSend = () => {
     if (!content.trim()) {
@@ -62,22 +56,6 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
     setMessageType(t.type);
     if (t.subject) setSubject(t.subject);
     setActiveTab('COMPOSE');
-  };
-
-  const handleGenerateAiSermon = async () => {
-    setIsGeneratingSermon(true);
-    try {
-      const res = await generateShortInspirationalSermon('Strength in Unity');
-      if (res) {
-        setContent(res);
-        setMessageType('WhatsApp');
-        setActiveTab('COMPOSE');
-      }
-    } catch (e) {
-      if (addToast) addToast('Failed to generate message.', 'error');
-    } finally {
-      setIsGeneratingSermon(false);
-    }
   };
 
   const resetForm = () => {
@@ -119,86 +97,11 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
       </div>
 
       {activeTab === 'AUTOMATION' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-           <div className="bg-white p-5 sm:p-6 rounded-xl sm:rounded-xl border border-slate-100 shadow-sm space-y-8">
-              <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                    <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-2xl"><Sparkles size={24}/></div>
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-800">Auto-Verse</h3>
-                 </div>
-                  <div className={`w-12 sm:w-14 h-6 sm:h-7 rounded-full p-1 opacity-60 cursor-not-allowed ${autoVerseEnabled ? 'bg-brand-primary' : 'bg-slate-200'}`} aria-disabled="true" title="Server-side automation is not configured">
-                    <div className={`w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full shadow-sm transition-all ${autoVerseEnabled ? 'translate-x-6 sm:translate-x-7' : 'translate-x-0'}`} />
-                 </div>
-              </div>
-              
-              <div className="space-y-6">
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Frequency</label>
-                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseFrequency} disabled onChange={e => setVerseFrequency(e.target.value as any)}>
-                          <option>Daily</option>
-                          <option>Weekly</option>
-                       </select>
-                    </div>
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Generation Mode</label>
-                       <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:ring-2 focus:ring-brand-primary outline-none text-sm" value={verseMode} disabled onChange={e => setVerseMode(e.target.value as any)}>
-                          <option>Auto (Gemini AI)</option>
-                          <option>Manual Entry</option>
-                       </select>
-                    </div>
-                 </div>
-
-                 {verseMode === 'Manual' && (
-                    <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                       <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Static Verse Queue</label>
-                       <textarea className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold resize-none outline-none focus:ring-2 focus:ring-brand-primary" rows={3} placeholder="Paste verse and reference..." value={manualVerse} disabled onChange={e => setManualVerse(e.target.value)} />
-                    </div>
-                 )}
-
-                 <div className="p-6 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest text-center sm:text-left">Selected Channels</p>
-                    <div className="flex flex-wrap gap-2">
-                       {['SMS', 'WhatsApp', 'Email'].map(channel => (
-                          <div key={channel} className="flex-1 min-w-[80px] p-3 bg-white rounded-xl border border-slate-100 flex items-center justify-center gap-2 shadow-sm">
-                             <input type="checkbox" defaultChecked disabled className="accent-brand-primary h-4 w-4" />
-                             <span className="text-[10px] font-black text-slate-600 uppercase">{channel}</span>
-                          </div>
-                       ))}
-                    </div>
-                 </div>
-              </div>
-              <button type="button" disabled title="Server-side scheduling is not configured" className="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black flex items-center justify-center gap-2 cursor-not-allowed">
-                 <Save size={18}/> Automation not configured
-              </button>
-           </div>
-
-           <div className="space-y-6 sm:space-y-8">
-              <div className="bg-brand-primary p-5 sm:p-6 rounded-xl sm:rounded-xl text-white shadow-sm relative overflow-hidden group">
-                 <div className="relative z-10 space-y-5">
-                    <div className="flex items-center gap-3">
-                       <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Wand2 size={24}/></div>
-                       <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight">AI Message Generator</h3>
-                    </div>
-                    <p className="text-indigo-100 text-sm font-medium opacity-80 leading-relaxed">Generate short messages for WhatsApp or email.</p>
-                    <button 
-                       onClick={handleGenerateAiSermon}
-                       disabled={isGeneratingSermon}
-                       className="w-full py-4 bg-white text-brand-primary rounded-xl sm:rounded-2xl font-black shadow-sm hover:bg-white/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                       {isGeneratingSermon ? <Loader2 className="animate-spin" size={18}/> : <Sparkles size={18}/>}
-                       {isGeneratingSermon ? 'Generating...' : 'Draft with Gemini'}
-                    </button>
-                 </div>
-                 <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-brand-indigo rounded-full blur-[60px] opacity-20 group-hover:scale-125 transition-transform"></div>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm space-y-6">
-                 <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight"><Clock size={20} className="text-brand-indigo"/> Scheduled Messages</h4>
-                 <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">No scheduled messages are connected to a server-side scheduler. Automation shown in this panel does not dispatch messages.</p>
-              </div>
-           </div>
-        </div>
+        <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 space-y-4">
+          <h3 className="text-base font-semibold text-slate-900">Message automation</h3>
+          <p className="text-sm leading-6 text-slate-600">Automated scheduling and message delivery are not connected. No messages will be dispatched from this screen. Draft and review messages in Compose, or contact your platform administrator to configure a supported delivery provider.</p>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Automation is unavailable until a server-side scheduler and delivery provider are configured.</div>
+        </section>
       )}
 
       {activeTab === 'LOGS' && (

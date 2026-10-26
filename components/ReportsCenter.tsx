@@ -342,7 +342,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 print:hidden">
         <div>
-          <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Reports</h2>
+          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Reports</h2>
           <p className="text-slate-500 mt-2 text-lg font-medium">View reports on giving, attendance, and membership.</p>
         </div>
         <div className="flex gap-3 flex-wrap">
@@ -361,7 +361,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
             <div className="flex justify-between items-start relative z-10">
                <div>
                   <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">{s.label}</p>
-                  <h4 className="text-3xl font-black text-slate-800 tracking-tight">{s.value}</h4>
+                  <h4 className="text-2xl font-semibold text-slate-800 tracking-tight">{s.value}</h4>
                </div>
                <div className={`p-3 bg-brand-${s.color}-50 text-brand-${s.color} rounded-xl`}>
                   <s.icon size={18} />
@@ -389,7 +389,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
                 >
                   <report.icon size={20} className="shrink-0 mt-1" />
                   <div>
-                    <span className="text-sm font-black uppercase tracking-tight block leading-none mb-1">{report.label}</span>
+                    <span className="text-sm font-semibold tracking-tight block leading-none mb-1">{report.label}</span>
                     <span className={`text-[10px] font-medium opacity-60 ${activeReport === report.id ? 'text-white' : 'text-slate-400'}`}>{report.desc}</span>
                   </div>
                 </button>
@@ -402,7 +402,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
             <div className="space-y-10">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-50 pb-10">
                  <div>
-                    <h3 className="text-4xl font-black text-brand-primary uppercase tracking-tight">{activeReport.replace('_', ' ')} Analysis</h3>
+                    <h3 className="text-2xl font-semibold text-brand-primary uppercase tracking-tight">{activeReport.replace('_', ' ')} Analysis</h3>
                     <p className="text-slate-400 font-bold uppercase tracking-widest text-xs mt-2 flex items-center gap-2">
                        <Calendar size={14}/> Period: All recorded data
                     </p>

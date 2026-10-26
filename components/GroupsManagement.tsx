@@ -92,7 +92,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
 
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Groups & Fellowships</h2>
+          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Groups & Fellowships</h2>
           <p className="text-slate-500 mt-2 text-lg">Manage groups and fellowships.</p>
         </div>
         <div className="flex gap-3">
@@ -192,7 +192,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-2xl shadow-sm p-6 space-y-8 animate-in zoom-in duration-200">
             <div className="flex justify-between items-center">
-              <h3 className="text-3xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Create New Group</h3>
+              <h3 className="text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Create New Group</h3>
               <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-rose-500 transition-all"><X size={24}/></button>
             </div>
             
@@ -225,7 +225,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
               <div className="flex items-center gap-4">
                 <div className={`p-4 rounded-2xl bg-slate-50`}>{getCategoryIcon(viewingMembersGroup.name)}</div>
                 <div>
-                  <h3 className="text-3xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">{viewingMembersGroup.name} Members</h3>
+                  <h3 className="text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">{viewingMembersGroup.name} Members</h3>
                   {viewingMembersGroup.description && <p className="text-slate-500 font-medium">{viewingMembersGroup.description}</p>}
                 </div>
               </div>
@@ -269,7 +269,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl w-full max-w-2xl shadow-sm p-6 space-y-8 animate-in zoom-in duration-200">
             <div className="flex justify-between items-center">
-              <h3 className="text-3xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Edit Group</h3>
+              <h3 className="text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Edit Group</h3>
               <button onClick={() => setEditingGroup(null)} className="text-slate-400 hover:text-rose-500 transition-all"><X size={24}/></button>
             </div>
             <div className="space-y-6">

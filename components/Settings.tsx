@@ -131,7 +131,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 max-w-[1200px] mx-auto pb-12">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase leading-tight">System Settings</h2>
+        <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase leading-tight">System Settings</h2>
         <p className="text-slate-500 text-sm sm:text-lg font-medium">Global configuration for identity, security, and integrations.</p>
       </div>
 
@@ -217,7 +217,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                    <div className="relative z-10 space-y-6">
                       <div className="flex items-center gap-3">
                          <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Zap size={24}/></div>
-                         <h4 className="text-xl font-black uppercase tracking-tight">Payment Integration</h4>
+                         <h4 className="text-xl font-semibold tracking-tight">Payment Integration</h4>
                        </div>
                        <p className="text-indigo-100 text-sm font-medium leading-relaxed">
                          Authorize <span className="text-white font-black">Direct M-Pesa</span> and <span className="text-white font-black">Paystack Africa</span>. Requires C2B/B2C credentials from Daraja portal.

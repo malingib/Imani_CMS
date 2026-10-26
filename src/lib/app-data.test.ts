@@ -23,6 +23,8 @@ function createQuery(data: unknown[], table: string, calls: string[]) {
       calls.push(`${table}.range:${start}:${end}`);
       return query;
     },
+    gte(column: string, value: string) { calls.push(`${table}.gte:${column}:${value}`); return query; },
+    lte(column: string, value: string) { calls.push(`${table}.lte:${column}:${value}`); return query; },
     then(resolve: (result: QueryResult) => unknown) {
       if (isHeadQuery) {
         return Promise.resolve(resolve({ data: null, count: data.length, error: null }));
@@ -44,9 +46,9 @@ function createFailingQuery(errorMessage: string) {
     order() {
       return this;
     },
-    range() {
-      return this;
-    },
+    range() { return this; },
+    gte() { return this; },
+    lte() { return this; },
     then(resolve: (result: QueryResult) => unknown) {
       return Promise.resolve(resolve({ data: null, count: null, error: { message: errorMessage } }));
     },
@@ -177,6 +179,25 @@ describe("createChurchAppDataService", () => {
     expect(calls).toContain("members.order:created_at:desc");
     expect(calls).toContain("budgets.range:0:99");
     expect(calls).toContain("budgets.order:created_at:desc");
+  });
+
+  it("loads all dashboard transactions within the date window, scoped to the church", async () => {
+    const calls: string[] = [];
+    const rowsByTable: Record<string, unknown[]> = { transactions: [{
+      id: "recent-tithe", member_name: "Ada Lovelace", amount: 250, type: "Tithe",
+      payment_method: "Cash", date: "2026-10-26", reference: "T-26", category: "Income",
+    }] };
+    const service = createChurchAppDataService({
+      from(table: string) { return createQuery(rowsByTable[table] ?? [], table, calls); },
+      rpc() { return { then() { return Promise.resolve({ data: null, error: null }); } }; },
+    });
+    const result = await service.loadDashboardTransactions("church-1", "2026-10-20", "2026-10-26");
+    expect(result).toHaveLength(1);
+    expect(result[0].type).toBe("Tithe");
+    expect(calls).toContain("transactions.gte:date:2026-10-20");
+    expect(calls).toContain("transactions.lte:date:2026-10-26");
+    expect(calls).toContain("transactions.eq:church_id:church-1");
+    expect(calls).not.toContain("transactions.range:0:99");
   });
 
   it("writes audit logs with the supplied church scope", async () => {

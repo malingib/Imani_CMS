@@ -143,7 +143,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-xl">
+            <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-sm">
                <Network size={28} />
             </div>
             <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Tenant Registry</h2>
@@ -162,8 +162,8 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
-        <div className="p-10 border-b border-slate-100 bg-slate-50/30 flex flex-col xl:flex-row items-center justify-between gap-6">
+      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden min-h-[600px] flex flex-col">
+        <div className="p-6 border-b border-slate-100 bg-slate-50/30 flex flex-col xl:flex-row items-center justify-between gap-6">
           <div className="relative flex-1 w-full xl:max-w-xl">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
@@ -299,10 +299,10 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
       {/* Tenant Detail Side Panel */}
       {selectedChurch && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex justify-end">
-           <div className="bg-white w-full max-w-2xl h-full shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col border-l border-white/20">
-              <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+           <div className="bg-white w-full max-w-2xl h-full shadow-sm animate-in slide-in-from-right duration-300 flex flex-col border-l border-white/20">
+              <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-brand-primary text-white rounded-xl shadow-lg"><Building2 size={24}/></div>
+                    <div className="p-3 bg-brand-primary text-white rounded-xl shadow-sm"><Building2 size={24}/></div>
                     <div>
                        <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">{selectedChurch.name}</h3>
                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Tenant Profile</p>
@@ -311,7 +311,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
                  <button onClick={() => setSelectedChurch(null)} className="p-3 bg-white border border-slate-200 text-slate-400 rounded-xl hover:text-rose-500 transition-all shadow-sm"><X size={20}/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-10 space-y-12 no-scrollbar">
+              <div className="flex-1 overflow-y-auto p-6 space-y-12 no-scrollbar">
                  {/* Identity Summary */}
                  <section className="grid grid-cols-2 gap-6">
                     {selectedChurch.email && (
@@ -355,7 +355,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
                     <h4 className="text-sm font-black uppercase text-slate-400 tracking-[0.2em] flex items-center gap-2">
                        <CreditCard size={16} className="text-brand-gold"/> Subscription
                     </h4>
-                    <div className="bg-slate-900 rounded-[2.5rem] p-8 space-y-6 relative overflow-hidden group">
+                    <div className="bg-slate-900 rounded-xl p-5 space-y-6 relative overflow-hidden group">
                        <div className="relative z-10 flex justify-between items-start text-white">
                           <div>
                              <p className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Tier</p>
@@ -383,10 +383,10 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
                  </section>
               </div>
 
-              <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex gap-4">
+              <div className="p-5 border-t border-slate-100 bg-slate-50/50 flex gap-4">
                  <button
                   onClick={() => { onImpersonate(selectedChurch.id); setSelectedChurch(null); }}
-                  className="flex-1 py-5 bg-brand-primary text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-5 bg-brand-primary text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-sm hover:bg-brand-indigo transition-all flex items-center justify-center gap-2"
                  >
                     <ExternalLink size={16}/> Proxy Login
                  </button>
@@ -398,8 +398,8 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
       {/* Suspension Confirmation Dialog */}
       {suspensionConfirm && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[700] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-12 space-y-10 animate-in zoom-in-95 duration-200 text-center border border-white/20">
-              <div className="w-24 h-24 bg-rose-50 rounded-[2.5rem] flex items-center justify-center mx-auto text-rose-500 shadow-inner">
+           <div className="bg-white rounded-xl w-full max-w-md shadow-sm p-6 space-y-10 animate-in zoom-in-95 duration-200 text-center border border-white/20">
+              <div className="w-24 h-24 bg-rose-50 rounded-xl flex items-center justify-center mx-auto text-rose-500 shadow-inner">
                  <ShieldX size={48}/>
               </div>
               <div className="space-y-4">
@@ -412,7 +412,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
                  <button
                    disabled={isSuspending}
                    onClick={handleConfirmSuspend}
-                   className="w-full py-5 bg-rose-500 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-200 hover:bg-rose-600 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                   className="w-full py-5 bg-rose-500 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-sm shadow-rose-200 hover:bg-rose-600 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                  >
                    {isSuspending ? <Loader2 className="animate-spin" size={20}/> : <ShieldX size={20}/>}
                    Confirm Suspension
@@ -426,11 +426,11 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
       {/* Add Parish Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20">
-              <div className="p-10 lg:p-14 space-y-10">
+           <div className="bg-white rounded-xl w-full max-w-2xl shadow-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-white/20">
+              <div className="p-6 lg:p-14 space-y-10">
                  <div className="flex justify-between items-start">
                     <div className="flex items-center gap-5">
-                       <div className="p-4 bg-brand-primary text-white rounded-[1.5rem] shadow-xl">
+                       <div className="p-4 bg-brand-primary text-white rounded-[1.5rem] shadow-sm">
                           <Plus size={32}/>
                        </div>
                        <div>
@@ -487,7 +487,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
                    </div>
                  )}
 
-                 <div className="p-6 bg-emerald-50 rounded-[2rem] border border-dashed border-emerald-200 flex items-start gap-4">
+                 <div className="p-6 bg-emerald-50 rounded-xl border border-dashed border-emerald-200 flex items-start gap-4">
                     <CheckCircle2 className="text-emerald-500 shrink-0 mt-1" size={20}/>
                     <p className="text-[11px] text-slate-600 font-medium leading-relaxed">A 14-day trial instance will be created. An admin invite will be dispatched to the provided email.</p>
                  </div>
@@ -496,7 +496,7 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
                     <button onClick={() => setShowAddModal(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-slate-50 rounded-2xl uppercase text-xs tracking-widest transition-all">Cancel</button>
                     <button
                        onClick={handleCreateChurch}
-                       className="flex-[2] py-5 bg-brand-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3"
+                       className="flex-[2] py-5 bg-brand-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-sm hover:bg-brand-indigo transition-all flex items-center justify-center gap-3"
                     >
                        <PackageCheck size={20}/> Push Live
                     </button>

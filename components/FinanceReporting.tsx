@@ -5,9 +5,9 @@ import {
   Search, Wallet, Calendar, PieChart as PieIcon,
   Tag, Plus, X, Settings2, Smartphone, Repeat, 
   BarChart3, AlertCircle, Save, CheckCircle2,
-  Loader2, Landmark, History, Search as SearchIcon,
+  Loader2, History, Search as SearchIcon,
   Banknote, MoreHorizontal, Edit2, Trash2, Eye,
-  ArrowUpRight, ArrowDownRight, Sparkles, Receipt,
+  ArrowDownRight, Receipt,
   Printer, ShieldCheck, CreditCard
 } from 'lucide-react';
 import { 
@@ -175,7 +175,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
               </button>
               <button 
                 onClick={() => handleOpenForm('NEW_INCOME')}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-xl shadow-brand-primary/20"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-sm shadow-brand-primary/20"
               >
                 <Plus size={18} /> Record Income
               </button>
@@ -190,7 +190,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
           { label: 'Operating Costs', val: totalExpenses, color: 'gold', icon: TrendingDown, detail: 'All recorded expenses' },
           { label: 'Net Cash Position', val: totalIncome - totalExpenses, color: 'primary', icon: Landmark, detail: 'Revenue less expenses' }
         ].map((c, i) => (
-          <div key={i} className="p-8 sm:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm bg-white relative overflow-hidden group hover:shadow-xl transition-all">
+          <div key={i} className="p-8 sm:p-10 rounded-xl border border-slate-100 shadow-sm bg-white relative overflow-hidden group hover:shadow-xl transition-all">
              <div className="relative z-10">
                 <div className="flex justify-between items-start mb-6">
                   <div className={`p-4 bg-brand-${c.color}-50 text-brand-${c.color}-500 rounded-2xl group-hover:scale-110 transition-transform`}>
@@ -210,7 +210,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white p-4 sm:p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-4 items-center">
+          <div className="bg-white p-4 sm:p-6 rounded-lg border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-4 items-center">
             <div className="relative flex-1 w-full">
               <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
@@ -295,7 +295,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                                    <MoreHorizontal size={20}/>
                                 </button>
                                 {openActionId === t.id && (
-                                  <div className="absolute right-10 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                  <div className="absolute right-10 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-sm z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
                                      <button 
                                       onClick={() => { setViewingTransaction(t); setOpenActionId(null); }}
                                       className="w-full text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors border-b border-slate-50"
@@ -345,119 +345,30 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
           </div>
         </div>
 
-        <div className="lg:col-span-4 space-y-8">
-           <div className="bg-brand-primary p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
-              <div className="relative z-10 space-y-6">
-                 <div className="flex items-center gap-3">
-                    <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Sparkles size={24}/></div>
-                     <h4 className="text-xl font-black uppercase tracking-tight">AI Insights</h4>
-                 </div>
-                  <p className="text-indigo-100 text-sm font-medium leading-relaxed">
-                    {(() => {
-                      const totalRev = totalIncome || 1;
-                      const expPct = Math.round(totalExpenses / totalRev * 100);
-                      const net = totalIncome - totalExpenses;
-                      const status = net > 0 ? 'positive' : 'negative';
-                      return `Current net position is ${status}. Expenses are ${expPct}% of total revenue${net > 0 ? '. Consider allocating surplus funds to outreach and facility improvements.' : '. Review recurring expenses to reduce the gap.'}`;
-                    })()}
-                  </p>
-                 <div className="pt-6 border-t border-white/10">
-                    <button className="w-full py-4 bg-white text-brand-primary rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand-gold transition-all flex items-center justify-center gap-2">
-                       Detailed Analysis <ArrowUpRight size={16}/>
-                    </button>
-                 </div>
-              </div>
-              <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-400 rounded-full blur-[80px] opacity-10" />
-           </div>
-
-           <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
-               <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
-                   <BarChart3 size={20} className="text-brand-indigo"/> Income Sources
-               </h4>
-               <div className="space-y-6">
-                  {incomeByType.length > 0 ? incomeByType.map(s => (
-                    <div key={s.label} className="space-y-2">
-                       <div className="flex justify-between items-end">
-                         <span className="text-xs font-bold text-slate-600">{s.label}</span>
-                         <span className="text-[10px] font-black text-slate-400">{(s.pct * 100).toFixed(0)}% (KES {s.amount.toLocaleString()})</span>
-                       </div>
-                       <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                         <div className="h-full bg-brand-primary rounded-full" style={{ width: `${s.pct * 100}%` }} />
-                       </div>
-                    </div>
-                  )) : (
-                    <p className="text-sm text-slate-400 font-medium text-center py-4">No income data yet</p>
-                  )}
+        <div className="lg:col-span-4 space-y-5">
+           <section className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+             <h4 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><BarChart3 size={17} className="text-slate-500"/> Income sources</h4>
+             {incomeByType.length ? incomeByType.map(source => (
+               <div key={source.label} className="space-y-2">
+                 <div className="flex justify-between gap-3 text-sm"><span className="text-slate-600">{source.label}</span><span className="font-medium tabular-nums text-slate-900">{(source.pct * 100).toFixed(0)}% · KES {source.amount.toLocaleString()}</span></div>
+                 <div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-slate-700" style={{ width: `${source.pct * 100}%` }} /></div>
                </div>
-            </div>
-
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
-               <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
-                   <Wallet size={20} className="text-brand-indigo"/> Budgets
-               </h4>
-               {budgets.length > 0 ? (
-                 <div className="space-y-4">
-                   {budgets.map(b => (
-                     <div key={b.id} className="space-y-2">
-                       <div className="flex justify-between items-end">
-                         <span className="text-xs font-bold text-slate-600">{b.category}</span>
-                         <span className="text-[10px] font-black text-slate-400">KES {b.spent.toLocaleString()} / KES {b.amount.toLocaleString()}</span>
-                       </div>
-                       <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                         <div className={`h-full rounded-full ${b.spent > b.amount ? 'bg-brand-gold' : 'bg-brand-emerald'}`}
-                           style={{ width: `${Math.min((b.spent / (b.amount || 1)) * 100, 100)}%` }} />
-                       </div>
-                       <p className="text-[8px] text-slate-400 font-bold uppercase">{b.month}</p>
-                     </div>
-                   ))}
-                 </div>
-               ) : (
-                 <p className="text-sm text-slate-400 font-medium text-center py-4">No budgets set</p>
-               )}
-               <button onClick={() => setShowBudgetModal(true)}
-                 className="w-full py-4 bg-slate-50 text-brand-primary rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">
-                 Set Budget
-               </button>
-            </div>
-
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
-               <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
-                   <Repeat size={20} className="text-brand-indigo"/> Recurring Expenses
-               </h4>
-               {recurringExpenses.length > 0 ? (
-                 <div className="space-y-4">
-                   {recurringExpenses.map(r => (
-                     <div key={r.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl">
-                       <div>
-                         <p className="font-black text-slate-700 text-sm">{r.category}</p>
-                         <p className="text-[9px] text-slate-400 font-bold uppercase">{r.frequency} • Next: {r.nextDate}</p>
-                       </div>
-                       <span className="font-black text-slate-800">KES {r.amount.toLocaleString()}</span>
-                     </div>
-                   ))}
-                 </div>
-               ) : (
-                 <p className="text-sm text-slate-400 font-medium text-center py-4">No recurring expenses</p>
-               )}
-               <button onClick={() => setShowRecurringModal(true)}
-                 className="w-full py-4 bg-slate-50 text-brand-primary rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all">
-                 Add Recurring
-               </button>
-            </div>
-
-           <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-4">
-              <Landmark size={48} className="text-slate-200" />
-               <h4 className="text-lg font-black text-slate-500 uppercase">Tax Compliance</h4>
-              <p className="text-xs text-slate-400 font-medium leading-relaxed">Ensure all donation receipts are compliant with Section 13 (2) of the Income Tax Act.</p>
-              <button className="text-[10px] font-black text-brand-indigo uppercase tracking-widest hover:underline">Download Forms</button>
-           </div>
+             )) : <p className="text-sm text-slate-500">No income records yet.</p>}
+           </section>
+           <section className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+             <div className="flex items-center justify-between gap-3"><h4 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><Wallet size={17} className="text-slate-500"/> Budgets</h4><button onClick={() => setShowBudgetModal(true)} className="text-sm font-medium text-slate-700 underline underline-offset-4 hover:text-slate-950">Set budget</button></div>
+             {budgets.length ? budgets.map(budget => <div key={budget.id} className="space-y-2"><div className="flex justify-between gap-3 text-sm"><span className="text-slate-600">{budget.category}</span><span className="tabular-nums text-slate-700">KES {budget.spent.toLocaleString()} / {budget.amount.toLocaleString()}</span></div><div className="h-1.5 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${budget.spent > budget.amount ? 'bg-rose-600' : 'bg-slate-700'}`} style={{ width: `${Math.min((budget.spent / (budget.amount || 1)) * 100, 100)}%` }} /></div><p className="text-xs text-slate-500">{budget.month}</p></div>) : <p className="text-sm text-slate-500">No budgets set.</p>}
+           </section>
+           <section className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
+             <div className="flex items-center justify-between gap-3"><h4 className="flex items-center gap-2 text-sm font-semibold text-slate-900"><Repeat size={17} className="text-slate-500"/> Recurring expenses</h4><button onClick={() => setShowRecurringModal(true)} className="text-sm font-medium text-slate-700 underline underline-offset-4 hover:text-slate-950">Add</button></div>
+             {recurringExpenses.length ? recurringExpenses.map(item => <div key={item.id} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0"><div><p className="text-sm font-medium text-slate-800">{item.category}</p><p className="mt-1 text-xs text-slate-500">{item.frequency} · Next: {item.nextDate}</p></div><span className="whitespace-nowrap text-sm font-medium tabular-nums text-slate-900">KES {item.amount.toLocaleString()}</span></div>) : <p className="text-sm text-slate-500">No recurring expenses.</p>}
+           </section>
         </div>
-      </div>
 
       {/* Transaction Detail Modal */}
       {viewingTransaction && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[600] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in duration-200 border border-white/20">
+           <div className="bg-white rounded-xl w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in duration-200 border border-white/20">
               <div className="p-8 sm:p-12 space-y-10 relative">
                  <button onClick={() => setViewingTransaction(null)} className="absolute top-8 right-8 p-3 hover:bg-slate-50 rounded-2xl transition-all text-slate-400"><X size={24}/></button>
                  
@@ -664,7 +575,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
       {/* Budget Modal */}
       {showBudgetModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-xl w-full max-w-md shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-200">
             <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Set Budget</h3>
             <div className="space-y-4">
               <div className="space-y-2">

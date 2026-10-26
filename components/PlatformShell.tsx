@@ -61,7 +61,7 @@ const PlatformShell: React.FC<Props> = ({ onOpenClient, onSelectClient, onLogout
           <div className="flex items-center gap-3"><button className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold lg:hidden" onClick={() => setMobileMenuOpen(v => !v)}>Menu</button><div><p className="text-sm font-black">Platform administration</p><p className="text-xs text-slate-500">Independent from the church dashboard</p></div></div>
           <div className="hidden items-center gap-2 rounded-full border border-slate-200 px-3 py-2 sm:flex"><span className="h-2 w-2 rounded-full bg-emerald-500" /><span className="text-xs font-semibold text-slate-600">Superadmin</span></div>
         </header>
-        <div className="mx-auto max-w-[1500px] p-5 sm:p-8 lg:p-10">
+        <div className="mx-auto max-w-[1500px] p-5 sm:p-5 lg:p-6">
           {isTenants
             ? <TenantRegistry onImpersonate={onSelectClient} />
             : isControls

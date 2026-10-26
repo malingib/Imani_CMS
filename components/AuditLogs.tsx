@@ -39,7 +39,7 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ logs }) => {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Audit Log</h2>
+          <h2 className="text-2xl font-semibold text-brand-primary tracking-tight uppercase">Audit Log</h2>
           <p className="text-slate-500 mt-2 text-lg font-medium">Record of all system actions.</p>
         </div>
         <button className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">

@@ -77,9 +77,6 @@ const AccountShell = () => {
     await supabase.auth.signOut();
   };
 
-
-  if (!currentUser) return null;
-
   // Member self-service is intentionally paused. Keep staff-facing congregation
   // management available, but do not expose member profile, RSVP or giving pages.
   if (currentUser.role === UserRole.MEMBER) {
@@ -94,6 +91,9 @@ const AccountShell = () => {
       </div>
     );
   }
+
+
+  if (!currentUser) return null;
 
   const navigate = (v: AppView) => navigateToPath(ROUTES[v].path);
   const currentView = pathToView(location.pathname) || 'DASHBOARD';

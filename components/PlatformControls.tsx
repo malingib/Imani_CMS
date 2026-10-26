@@ -118,7 +118,7 @@ const PlatformControls: React.FC = () => {
     finally { setSaving(false); }
   };
 
-  if (loading) return <div className="flex items-center gap-3 p-10 text-slate-500"><LoaderCircle className="animate-spin" />Loading platform controls…</div>;
+  if (loading) return <div className="flex items-center gap-3 p-6 text-slate-500"><LoaderCircle className="animate-spin" />Loading platform controls…</div>;
   if (!church) return <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">No configured Demo Church record is available. Check the deployment church ID and permissions.</div>;
 
   const path = window.location.pathname;
@@ -127,7 +127,7 @@ const PlatformControls: React.FC = () => {
 
   return <div className="space-y-7">
     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div><p className="text-xs font-bold uppercase tracking-[.18em] text-slate-400">Platform controls / {church.name}</p><h1 className="mt-2 text-3xl font-black tracking-tight text-brand-primary">{heading}</h1><p className="mt-2 text-sm text-slate-500">Manage the configured client without mixing these controls into church operations.</p></div>
+      <div><p className="text-xs font-bold uppercase tracking-[.18em] text-slate-400">Platform controls / {church.name}</p><h1 className="mt-2 text-2xl font-semibold tracking-tight text-brand-primary">{heading}</h1><p className="mt-2 text-sm text-slate-500">Manage the configured client without mixing these controls into church operations.</p></div>
       <button onClick={() => void load()} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold"><RefreshCw size={16}/> Refresh</button>
     </div>
     {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>}
@@ -137,7 +137,7 @@ const PlatformControls: React.FC = () => {
       <strong className="text-sm">{church.name}</strong><span className="text-xs text-slate-500">Plan: {church.tier}</span><span className="text-xs text-slate-500">Status: {church.status}</span><span className="text-xs text-slate-500">Billing: {church.billing_status}</span>
     </div>
 
-    {section === 'billing' && <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+    {section === 'billing' && <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-5">
       <div className="mb-6 flex items-center gap-3"><CreditCard className="text-brand-primary"/><div><h2 className="font-black">Subscription and billing</h2><p className="text-sm text-slate-500">Set the commercial plan and billing cycle for Demo Church.</p></div></div>
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="space-y-2 text-sm font-semibold">Plan<select value={tier} onChange={e=>setTier(e.target.value)} className="w-full rounded-lg border border-slate-200 p-3"><option value="basic">Basic</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></label>
@@ -148,13 +148,13 @@ const PlatformControls: React.FC = () => {
       <button disabled={saving} onClick={saveBilling} className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand-primary px-5 py-3 text-sm font-bold text-white disabled:opacity-50"><Save size={16}/> Save billing settings</button>
     </div>}
 
-    {section === 'restrictions' && <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+    {section === 'restrictions' && <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-5">
       <div className="mb-6 flex items-center gap-3"><SlidersHorizontal className="text-brand-primary"/><div><h2 className="font-black">Feature access restrictions</h2><p className="text-sm text-slate-500">Turn off specific modules for the client. Restrictions are saved against the church record.</p></div></div>
       <div className="divide-y divide-slate-100">{RESTRICTIONS.map(item=><div key={item.key} className="flex items-center justify-between gap-5 py-4"><div><p className="font-bold text-sm">{item.label}</p><p className="mt-1 text-xs text-slate-500">{item.description}</p></div><button role="switch" aria-checked={church.restrictions?.[item.key] !== false} disabled={saving} onClick={()=>toggleRestriction(item.key, church.restrictions?.[item.key] === false)} className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${church.restrictions?.[item.key] !== false ? 'bg-emerald-600' : 'bg-slate-300'}`}><span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${church.restrictions?.[item.key] !== false ? 'left-6' : 'left-1'}`}/></button></div>)}</div>
       <p className="mt-5 rounded-lg bg-amber-50 p-3 text-xs leading-5 text-amber-800">These switches currently gate the related modules in the church interface. Treat them as operational controls, not a complete security boundary, until the matching database policies and export/API paths are separately tested.</p>
     </div>}
 
-    {section === 'suspensions' && <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+    {section === 'suspensions' && <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-5">
       <div className="mb-6 flex items-center gap-3"><ShieldAlert className="text-rose-600"/><div><h2 className="font-black">Suspend or restore client access</h2><p className="text-sm text-slate-500">Use for non-payment, security concerns or a requested service pause.</p></div></div>
       {church.status === 'suspended' ? <div className="space-y-4"><div className="rounded-xl border border-rose-200 bg-rose-50 p-4"><p className="font-bold text-rose-800">Access is currently suspended</p><p className="mt-1 text-sm text-rose-700">{church.suspension_reason || 'No reason recorded.'}</p>{church.suspended_at && <p className="mt-1 text-xs text-rose-600">Since {new Date(church.suspended_at).toLocaleString()}</p>}</div><button disabled={saving} onClick={reactivate} className="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-5 py-3 text-sm font-bold text-white disabled:opacity-50"><CheckCircle2 size={16}/> Restore access</button></div> : <div className="space-y-4"><label className="block space-y-2 text-sm font-semibold">Reason for suspension<textarea value={suspensionReason} onChange={e=>setSuspensionReason(e.target.value)} rows={3} placeholder="e.g. Subscription overdue after grace period" className="w-full rounded-lg border border-slate-200 p-3"/></label><button disabled={saving} onClick={suspend} className="inline-flex items-center gap-2 rounded-lg bg-rose-700 px-5 py-3 text-sm font-bold text-white disabled:opacity-50"><Ban size={16}/> Suspend client access</button></div>}
       <p className="mt-5 text-xs leading-5 text-slate-500">Suspension must be enforced by the app and database access policies, not only by hiding navigation. The superadmin will retain platform access to restore service.</p>
@@ -166,7 +166,7 @@ const PlatformControls: React.FC = () => {
     </div>}
 
     {section === 'updates' && <div className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-5">
         <div className="mb-6 flex items-center gap-3"><UploadCloud className="text-brand-primary"/><div><h2 className="font-black">Release management</h2><p className="text-sm text-slate-500">Record release notes and mark stable releases as published or required. This does not deploy code; deployments remain managed through GitHub and Vercel.</p></div></div>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="space-y-2 text-sm font-semibold">Version<input value={version} onChange={e=>setVersion(e.target.value)} placeholder="e.g. 1.4.0" className="w-full rounded-lg border border-slate-200 p-3"/></label>

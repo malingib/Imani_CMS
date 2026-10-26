@@ -29,7 +29,6 @@ import {
   Download
 } from 'lucide-react';
 import { Member, Transaction, ChurchEvent, AppView, MemberActivity } from '../types';
-import { generateDailyVerse } from '../services/geminiService';
 import { createPersistenceService } from '../src/lib/persistence';
 import { supabase } from '../src/lib/supabase-auth';
 const persistence = createPersistenceService(supabase);
@@ -58,7 +57,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
   }
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<Member>({ ...member });
-  const [dailyVerse, setDailyVerse] = useState({ text: 'Loading inspirational word...', ref: '' });
+  const dailyVerse = { text: 'The Lord is my shepherd; I shall not want.', ref: 'Psalm 23:1' };
   const [eventFilter, setEventFilter] = useState<'ALL' | 'REGISTERED'>('ALL');
   const [activities, setActivities] = useState<MemberActivity[]>(_initialActivities);
 
@@ -76,20 +75,7 @@ const MemberPortal: React.FC<MemberPortalProps> = ({ member, transactions, event
   const myTransactions = useMemo(() => transactions.filter(t => t.memberId === member.id), [transactions, member.id]);
   const totalGiving = myTransactions.reduce((sum, t) => sum + t.amount, 0);
 
-  useEffect(() => {
-    const fetchVerse = async () => {
-      try {
-        const raw = await generateDailyVerse();
-        if (raw) {
-          const [text, ref] = raw.split('|');
-          setDailyVerse({ text: text?.trim() || '', ref: ref?.trim() || '' });
-        }
-      } catch (e) {
-        setDailyVerse({ text: "The Lord is my shepherd; I shall not want.", ref: "Psalm 23:1" });
-      }
-    };
-    fetchVerse();
-  }, []);
+
 
   const isGoing = (eventId: string) => events.find(e => e.id === eventId)?.attendance.includes(member.id);
 

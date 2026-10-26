@@ -362,7 +362,7 @@ const Membership: React.FC<MembershipProps> = ({
               </button>
               <button 
                 onClick={() => { setShowAddModal(true); setFormData({ groups: [], status: MemberStatus.ACTIVE, membershipType: MembershipType.FULL, maritalStatus: MaritalStatus.SINGLE }); setPhoto(null); }}
-                className="flex items-center justify-center gap-2 px-8 py-3 bg-brand-primary text-white rounded-[1rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-xl shadow-brand-primary/20"
+                className="flex items-center justify-center gap-2 px-8 py-3 bg-brand-primary text-white rounded-[1rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-sm shadow-brand-primary/20"
               >
                 <Plus size={18} /> Add Member
               </button>
@@ -371,8 +371,8 @@ const Membership: React.FC<MembershipProps> = ({
         </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden min-h-[400px]">
-        <div className="p-6 sm:p-10 border-b border-slate-100 bg-slate-50/30 flex flex-col xl:flex-row gap-6 items-center">
+      <div className="bg-white rounded-xl sm:rounded-xl shadow-sm border border-slate-100 overflow-hidden min-h-[400px]">
+        <div className="p-6 sm:p-6 border-b border-slate-100 bg-slate-50/30 flex flex-col xl:flex-row gap-6 items-center">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
@@ -468,7 +468,7 @@ const Membership: React.FC<MembershipProps> = ({
                             <MoreHorizontal size={15} />
                           </button>
                           {openActionMenuId === member.id && (
-                            <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-100 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                            <div className="absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-100 rounded-xl shadow-sm z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                               <button 
                                 onClick={() => { setShowEditModal(member); setFormData(member); setPhoto(member.photo || null); setOpenActionMenuId(null); }}
                                 className="w-full text-left px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-brand-indigo/5 flex items-center gap-2.5 transition-colors border-b border-slate-50"
@@ -509,14 +509,14 @@ const Membership: React.FC<MembershipProps> = ({
 
       {/* Detail Modal */}
       {selectedMember && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-0 sm:p-4 lg:p-12">
-          <div className="bg-white rounded-none sm:rounded-[3rem] w-full max-w-6xl h-full lg:h-auto lg:max-h-[90vh] shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-white/20">
-            <div className="p-5 sm:p-10 lg:p-14 bg-brand-primary text-white relative overflow-hidden flex-shrink-0">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-0 sm:p-4 lg:p-6">
+          <div className="bg-white rounded-none sm:rounded-xl w-full max-w-6xl h-full lg:h-auto lg:max-h-[90vh] shadow-sm overflow-hidden flex flex-col animate-in zoom-in-95 duration-300 border border-white/20">
+            <div className="p-5 sm:p-6 lg:p-14 bg-brand-primary text-white relative overflow-hidden flex-shrink-0">
                <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-10">
                   <div className="flex items-center gap-4 sm:gap-8 lg:gap-10 w-full lg:w-auto">
-                    <div className="w-16 h-16 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-2xl sm:rounded-[2.5rem] bg-white p-0.5 sm:p-1 shadow-2xl relative flex-shrink-0 ring-2 sm:ring-4 ring-white/10">
+                    <div className="w-16 h-16 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-2xl sm:rounded-xl bg-white p-0.5 sm:p-1 shadow-sm relative flex-shrink-0 ring-2 sm:ring-4 ring-white/10">
                        {selectedMember.photo ? <img src={selectedMember.photo} className="w-full h-full object-cover rounded-[1.4rem] sm:rounded-[2.2rem]" /> : <div className="w-full h-full bg-slate-100 rounded-[1.4rem] sm:rounded-[2.2rem] flex items-center justify-center text-slate-300"><User size={28}/></div>}
-                       <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 p-1.5 sm:p-3 bg-brand-emerald rounded-lg sm:rounded-2xl border-2 sm:border-4 border-brand-primary shadow-xl">
+                       <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 p-1.5 sm:p-3 bg-brand-emerald rounded-lg sm:rounded-2xl border-2 sm:border-4 border-brand-primary shadow-sm">
                           <CheckCircle2 size={12} className="text-white sm:w-5 sm:h-5" />
                        </div>
                     </div>
@@ -549,11 +549,11 @@ const Membership: React.FC<MembershipProps> = ({
                </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 sm:p-10 lg:p-14 no-scrollbar bg-slate-50/50">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-14 no-scrollbar bg-slate-50/50">
                {activeDetailTab === 'OVERVIEW' && (
                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-10 animate-in fade-in duration-500">
                     <div className="lg:col-span-4 space-y-4 sm:space-y-8">
-                       <section className="bg-white p-5 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-5 sm:space-y-8">
+                       <section className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-xl border border-slate-100 shadow-sm space-y-5 sm:space-y-8">
                           <h4 className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] text-slate-400 border-b border-slate-50 pb-3 sm:pb-5 flex items-center gap-2 sm:gap-3"><Phone size={12}/> Contact Data</h4>
                           <div className="space-y-4 sm:space-y-6">
                              {[
@@ -574,7 +574,7 @@ const Membership: React.FC<MembershipProps> = ({
                     </div>
 
                     <div className="lg:col-span-8 space-y-8">
-                       <section className="bg-white p-5 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-5 sm:space-y-8">
+                       <section className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-xl border border-slate-100 shadow-sm space-y-5 sm:space-y-8">
                           <h4 className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] text-slate-400 border-b border-slate-50 pb-3 sm:pb-5 flex items-center gap-2 sm:gap-3"><Activity size={12}/> Profile Info</h4>
                           <div className="grid grid-cols-2 gap-3 sm:gap-6">
                              {[
@@ -591,7 +591,7 @@ const Membership: React.FC<MembershipProps> = ({
                           </div>
                        </section>
 
-                       <section className="bg-white p-5 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm space-y-5">
+                       <section className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-xl border border-slate-100 shadow-sm space-y-5">
                           <h4 className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] text-slate-400 border-b border-slate-50 pb-3 flex items-center gap-2"><Layers size={12}/> Active Ministries</h4>
                           <div className="flex flex-wrap gap-2">
                              {selectedMember.groups?.map(g => (
@@ -606,7 +606,7 @@ const Membership: React.FC<MembershipProps> = ({
                {activeDetailTab === 'GIVING' && (
                  <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-4 sm:space-y-10">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
-                       <div className="bg-white p-5 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between">
+                       <div className="bg-white p-5 sm:p-6 rounded-2xl sm:rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
                           <p className="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4 sm:mb-10">Total Contributions</p>
                           <div>
                              <h4 className="text-2xl sm:text-5xl font-black text-slate-800 tracking-tighter">KES {memberGivings.reduce((s, t) => s + t.amount, 0).toLocaleString()}</h4>
@@ -624,7 +624,7 @@ const Membership: React.FC<MembershipProps> = ({
       {/* Bulk Import Modal */}
       {showBulkModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[600] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl p-10 space-y-8 animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl w-full max-w-2xl shadow-sm p-6 space-y-8 animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <div className="p-4 bg-brand-indigo/10 text-brand-indigo rounded-[1.5rem] shadow-sm flex-shrink-0">
@@ -640,7 +640,7 @@ const Membership: React.FC<MembershipProps> = ({
 
             <div className="space-y-6">
               {importMessage && <p role="status" aria-live="polite" className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">{importMessage}</p>}
-              <div className="p-8 border-2 border-dashed border-slate-200 rounded-[2rem] bg-slate-50 flex flex-col items-center justify-center text-center space-y-4 group hover:border-brand-primary transition-all">
+              <div className="p-5 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 flex flex-col items-center justify-center text-center space-y-4 group hover:border-brand-primary transition-all">
                 <Upload size={48} className="text-slate-300 group-hover:text-brand-primary transition-colors"/>
                 <div>
                   <p className="text-sm font-black text-slate-600 uppercase">Drop CSV file here</p>
@@ -679,13 +679,13 @@ const Membership: React.FC<MembershipProps> = ({
 
       {/* Add/Edit Member Modal */}
       {(showAddModal || showEditModal) && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[600] flex items-center justify-center p-0 sm:p-4 lg:p-12 overflow-y-auto">
-          <div className="bg-white rounded-none sm:rounded-[3rem] w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col my-auto animate-in zoom-in-95 duration-300 border border-white/20">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[600] flex items-center justify-center p-0 sm:p-4 lg:p-6 overflow-y-auto">
+          <div className="bg-white rounded-none sm:rounded-xl w-full max-w-4xl shadow-sm overflow-hidden flex flex-col my-auto animate-in zoom-in-95 duration-300 border border-white/20">
             <form onSubmit={showAddModal ? handleAddSubmit : handleEditSubmit} className="flex flex-col h-full lg:max-h-[90vh]">
               {formError && <p role="alert" className="mx-6 mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{formError}</p>}
-              <div className="p-8 sm:p-12 bg-slate-50 border-b border-slate-100 flex justify-between items-center relative overflow-hidden flex-shrink-0">
+              <div className="p-5 sm:p-6 bg-slate-50 border-b border-slate-100 flex justify-between items-center relative overflow-hidden flex-shrink-0">
                 <div className="flex items-center gap-6 relative z-10">
-                  <div className="p-4 bg-brand-primary text-white rounded-[1.5rem] shadow-xl">
+                  <div className="p-4 bg-brand-primary text-white rounded-[1.5rem] shadow-sm">
                     {showAddModal ? <UserPlus size={28}/> : <Edit2 size={28}/>}
                   </div>
                   <div>
@@ -696,19 +696,19 @@ const Membership: React.FC<MembershipProps> = ({
                 <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(null); setFormData({ groups: [] }); setPhoto(null); }} className="relative z-10 p-4 hover:bg-white rounded-2xl transition-all text-slate-400"><X size={28}/></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8 sm:p-12 lg:p-16 space-y-12 no-scrollbar">
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 lg:p-16 space-y-12 no-scrollbar">
                 <div className="flex flex-col lg:flex-row gap-12">
                    <div className="lg:w-1/3 space-y-8">
                       <div className="space-y-4">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Photo</label>
-                        <div className="aspect-square w-full rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center relative overflow-hidden group shadow-inner">
+                        <div className="aspect-square w-full rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center relative overflow-hidden group shadow-inner">
                            {photo ? (
                               <div className="relative w-full h-full">
                                 <img src={photo} className="w-full h-full object-cover" alt="Member" />
                                 <button type="button" onClick={() => setPhoto(null)} className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-xl backdrop-blur-md hover:bg-rose-500 transition-colors"><Trash2 size={16}/></button>
                               </div>
                            ) : (
-                              <div className="text-center p-8 space-y-4">
+                              <div className="text-center p-5 space-y-4">
                                 <div className="p-5 bg-white rounded-2xl shadow-sm text-slate-200 inline-block"><ImageIcon size={48}/></div>
                                 <div className="space-y-2">
                                    <input 
@@ -732,7 +732,7 @@ const Membership: React.FC<MembershipProps> = ({
                         </div>
                       </div>
                       
-                      <div className="space-y-4 p-6 bg-slate-100/50 rounded-[2rem] border border-slate-200">
+                      <div className="space-y-4 p-6 bg-slate-100/50 rounded-xl border border-slate-200">
                         <label className="text-[11px] font-black uppercase text-slate-400 tracking-widest ml-2">Groups</label>
                         <div className="space-y-2 max-h-48 overflow-y-auto pr-2 no-scrollbar">
                            {allPossibleGroups.map(group => {
@@ -790,12 +790,12 @@ const Membership: React.FC<MembershipProps> = ({
                 </div>
               </div>
 
-              <div className="p-10 sm:p-14 border-t border-slate-100 bg-white flex flex-col sm:flex-row gap-6 flex-shrink-0">
+              <div className="p-6 sm:p-14 border-t border-slate-100 bg-white flex flex-col sm:flex-row gap-6 flex-shrink-0">
                 <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(null); setFormData({ groups: [] }); }} className="flex-1 py-6 font-black text-slate-400 hover:bg-slate-50 rounded-[1.5rem] uppercase text-xs tracking-widest transition-all">Cancel</button>
                 <button 
                   type="submit" 
                   disabled={isSaving}
-                  className="flex-[2] py-6 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-2xl shadow-brand-primary/30 hover:bg-brand-indigo transition-all flex items-center justify-center gap-3 disabled:opacity-70"
+                  className="flex-[2] py-6 bg-brand-primary text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-sm shadow-brand-primary/30 hover:bg-brand-indigo transition-all flex items-center justify-center gap-3 disabled:opacity-70"
                 >
                   {isSaving ? <Loader2 className="animate-spin" size={24}/> : <CheckCircle2 size={24}/>} {showAddModal ? 'Save' : 'Update Record'}
                 </button>
@@ -808,8 +808,8 @@ const Membership: React.FC<MembershipProps> = ({
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
          <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[700] flex items-center justify-center p-4">
-            <div className="bg-white rounded-[3rem] w-full max-md shadow-2xl p-12 space-y-10 animate-in zoom-in-95 duration-200 text-center border border-white/20">
-               <div className="w-24 h-24 bg-rose-50 rounded-[2.5rem] flex items-center justify-center mx-auto text-rose-500 shadow-inner">
+            <div className="bg-white rounded-xl w-full max-md shadow-sm p-6 space-y-10 animate-in zoom-in-95 duration-200 text-center border border-white/20">
+               <div className="w-24 h-24 bg-rose-50 rounded-xl flex items-center justify-center mx-auto text-rose-500 shadow-inner">
                   <ShieldAlert size={48}/>
                </div>
                <div className="space-y-4">
@@ -819,7 +819,7 @@ const Membership: React.FC<MembershipProps> = ({
                <div className="flex flex-col gap-4">
                   <button 
                     onClick={() => { onDeleteMember(showDeleteConfirm.id); setShowDeleteConfirm(null); }}
-                    className="w-full py-5 bg-rose-500 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-200 hover:bg-rose-600 transition-all"
+                    className="w-full py-5 bg-rose-500 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-sm shadow-rose-200 hover:bg-rose-600 transition-all"
                   >
                     Delete
                   </button>

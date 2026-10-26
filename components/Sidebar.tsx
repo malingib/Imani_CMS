@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard, Users, Wallet, CalendarDays, Settings as SettingsIcon,
   LogOut, Layers, MessageSquare, BarChart3, PieChart, X,
-  Sparkles, Building2, ChevronDown, ShieldCheck, CreditCard, Receipt, Globe, Network
+  Building2, ChevronDown, ShieldCheck, CreditCard, Receipt, Globe, Network
 } from 'lucide-react';
 import { AppView, User, UserRole } from '../types';
 
@@ -47,17 +47,11 @@ const adminItems = [
   { id: 'TENANTS', label: 'Client Workspace', icon: Network, roles: [UserRole.SUPER_ADMIN] },
 ];
 
-const memberItems = [
-  { id: 'MY_PORTAL', label: 'My Sanctuary', icon: Sparkles, roles: [UserRole.MEMBER] },
-  { id: 'MY_GIVING', label: 'Stewardship', icon: Wallet, roles: [UserRole.MEMBER] },
-];
-
 const Sidebar: React.FC<SidebarProps> = ({
   currentView, setView, currentUser, branches, onBranchChange, onLogout, isOpen, onClose,
 }) => {
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
-  const menuItems = currentUser.role === UserRole.MEMBER ? memberItems : adminItems;
-  const filteredItems = menuItems.filter(item => item.roles.includes(currentUser.role));
+  const filteredItems = adminItems.filter(item => item.roles.includes(currentUser.role));
 
   return (
     <aside className={`

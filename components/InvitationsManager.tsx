@@ -67,17 +67,17 @@ const InvitationsManager: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-brand-primary tracking-tight">Invitations</h1>
+          <h1 className="text-2xl font-semibold text-brand-primary tracking-tight">Invitations</h1>
           <p className="text-slate-500 font-medium mt-1">{invitations.length} sent</p>
         </div>
-        <button onClick={() => setShowSend(true)} className="flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20">
+        <button onClick={() => setShowSend(true)} className="flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-sm shadow-brand-primary/20">
           <Send size={18} /> Send Invite
         </button>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         {invitations.length === 0 ? (
-          <div className="p-12 text-center">
+          <div className="p-6 text-center">
             <Mail size={40} className="mx-auto text-slate-300 mb-4" />
             <p className="font-bold text-slate-400">No invitations sent yet</p>
             <p className="text-xs text-slate-400 mt-1">Invite church admins to join the platform</p>
@@ -116,7 +116,7 @@ const InvitationsManager: React.FC = () => {
 
       {showSend && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => setShowSend(false)}>
-          <div className="bg-white rounded-3xl p-10 w-full max-w-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-sm" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-2xl font-black text-brand-primary mb-6">Send Invitation</h2>
             <div className="space-y-4">
               <div>
@@ -138,7 +138,7 @@ const InvitationsManager: React.FC = () => {
                   <option value="SECRETARY">Secretary</option>
                 </select>
               </div>
-              <button onClick={sendInvite} disabled={sending} className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20 mt-2 flex items-center justify-center gap-2 disabled:opacity-70">
+              <button onClick={sendInvite} disabled={sending} className="w-full py-4 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-sm shadow-brand-primary/20 mt-2 flex items-center justify-center gap-2 disabled:opacity-70">
                 {sending ? <RefreshCw size={18} className="animate-spin" /> : <Send size={18} />}
                 {sending ? 'Sending...' : 'Send Invitation'}
               </button>

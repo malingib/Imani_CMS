@@ -149,12 +149,12 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
 
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
         {activeTab === 'PROFILE' && (
-          <div className="bg-white rounded-[2rem] sm:rounded-[3rem] border border-slate-100 shadow-sm p-6 sm:p-12 space-y-10 animate-in slide-in-from-bottom-2 duration-400">
+          <div className="bg-white rounded-xl sm:rounded-xl border border-slate-100 shadow-sm p-6 sm:p-6 space-y-10 animate-in slide-in-from-bottom-2 duration-400">
             <div className="flex flex-col lg:flex-row gap-8 sm:gap-12">
-               <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-48 lg:h-48 bg-slate-50 rounded-[2rem] sm:rounded-[2.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center relative group flex-shrink-0 mx-auto lg:mx-0 shadow-inner">
+               <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-48 lg:h-48 bg-slate-50 rounded-xl sm:rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center relative group flex-shrink-0 mx-auto lg:mx-0 shadow-inner">
                   <span className="text-4xl sm:text-6xl font-black text-slate-200">I</span>
                   {isAdmin && (
-                    <div className="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 rounded-[2rem] sm:rounded-[2.5rem] transition-all flex items-center justify-center cursor-pointer">
+                    <div className="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 rounded-xl sm:rounded-xl transition-all flex items-center justify-center cursor-pointer">
                       <Camera className="text-brand-primary" size={32}/>
                     </div>
                   )}
@@ -202,7 +202,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
 
             {isAdmin && (
               <div className="flex justify-center lg:justify-start pt-4">
-                <button onClick={handleSaveProfile} disabled={isSaving} className="w-full sm:w-auto px-10 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black flex items-center justify-center gap-2 shadow-xl hover:bg-brand-primary-700 transition-all disabled:opacity-50 text-xs uppercase tracking-widest">
+                <button onClick={handleSaveProfile} disabled={isSaving} className="w-full sm:w-auto px-10 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black flex items-center justify-center gap-2 shadow-sm hover:bg-brand-primary-700 transition-all disabled:opacity-50 text-xs uppercase tracking-widest">
                   {isSaving ? <Loader2 className="animate-spin" size={18}/> : <Save size={18}/>} {isSaving ? 'Updating...' : 'Save Global Profile'}
                 </button>
               </div>
@@ -213,7 +213,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
         {activeTab === 'INTEGRATIONS' && isFinance && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in slide-in-from-bottom-2 duration-500">
              <div className="lg:col-span-4 space-y-6">
-                <div className="bg-brand-primary p-10 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden group">
+                <div className="bg-brand-primary p-6 rounded-xl text-white shadow-sm relative overflow-hidden group">
                    <div className="relative z-10 space-y-6">
                       <div className="flex items-center gap-3">
                          <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Zap size={24}/></div>
@@ -227,7 +227,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                    <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
                 </div>
 
-                <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+                <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm space-y-6">
                    <h4 className="text-sm font-black uppercase text-slate-400 flex items-center gap-3">
                       <ShieldCheck size={18} className="text-brand-indigo"/> Security
                    </h4>
@@ -243,7 +243,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                    </div>
                 </div>
 
-                <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-8 rounded-[2.5rem] space-y-4">
+                <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-5 rounded-xl space-y-4">
                    <ShieldQuestion size={32} className="text-slate-300 mx-auto"/>
                    <h5 className="text-center font-black text-slate-600 uppercase text-xs tracking-tight">Need Daraja Help?</h5>
                    <p className="text-center text-[10px] text-slate-400 font-medium">Follow our integration guide to obtain your Consumer Key and Secret from the Safaricom Developer Portal.</p>
@@ -255,7 +255,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
 
              <div className="lg:col-span-8 space-y-8">
                 {/* M-Pesa Card */}
-                <div className="bg-white p-8 sm:p-12 rounded-[3rem] border border-slate-100 shadow-sm space-y-10">
+                <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-10">
                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <div className="flex items-center gap-4">
                          <div className="w-16 h-16 bg-brand-emerald/10 text-brand-emerald rounded-2xl flex items-center justify-center shadow-inner">
@@ -355,7 +355,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                           </button>
                           <button 
                             onClick={() => setIntegrations({...integrations, mpesaEnabled: !integrations.mpesaEnabled})}
-                            className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl ${integrations.mpesaEnabled ? 'bg-slate-900 text-white hover:bg-rose-600' : 'bg-brand-emerald text-white hover:shadow-emerald-100'}`}
+                            className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm ${integrations.mpesaEnabled ? 'bg-slate-900 text-white hover:bg-rose-600' : 'bg-brand-emerald text-white hover:shadow-emerald-100'}`}
                           >
                             {integrations.mpesaEnabled ? 'Revoke Gateway Access' : 'Initialize Direct Bridge'}
                           </button>
@@ -364,7 +364,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                 </div>
 
                 {/* Alternative Gateway: Paystack */}
-                <div className="bg-slate-50 p-8 sm:p-12 rounded-[3rem] border border-slate-200 shadow-sm space-y-8 group transition-all hover:bg-white hover:border-slate-100">
+                <div className="bg-slate-50 p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-8 group transition-all hover:bg-white hover:border-slate-100">
                    <div className="flex justify-between items-center">
                       <div className="flex items-center gap-4">
                          <div className="w-14 h-14 bg-white text-brand-indigo rounded-2xl flex items-center justify-center shadow-sm">
@@ -404,7 +404,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                    )}
                 </div>
 
-                <div className="p-8 bg-brand-gold/5 border border-brand-gold/20 rounded-[2.5rem] flex items-start gap-6">
+                <div className="p-5 bg-brand-gold/5 border border-brand-gold/20 rounded-xl flex items-start gap-6">
                    <AlertCircle className="text-brand-gold shrink-0 mt-1" size={24}/>
                    <div className="space-y-2">
                       <h4 className="font-black text-brand-gold text-sm uppercase tracking-tight">Important</h4>
@@ -425,16 +425,16 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                 <p className="text-[11px] text-slate-600 font-medium leading-relaxed">Map church governance to system permissions. These roles define module visibility.</p>
               </div>
               {roles.map(r => (
-                <button key={r.id} onClick={() => setSelectedRoleId(r.id)} className={`w-full p-6 text-left rounded-[1.5rem] sm:rounded-[2rem] border transition-all ${selectedRoleId === r.id ? 'bg-brand-primary text-white shadow-xl shadow-indigo-100 border-brand-primary' : 'bg-white border-slate-100 text-slate-600 hover:bg-slate-50'}`}>
+                <button key={r.id} onClick={() => setSelectedRoleId(r.id)} className={`w-full p-6 text-left rounded-[1.5rem] sm:rounded-xl border transition-all ${selectedRoleId === r.id ? 'bg-brand-primary text-white shadow-sm shadow-indigo-100 border-brand-primary' : 'bg-white border-slate-100 text-slate-600 hover:bg-slate-50'}`}>
                   <p className="font-black text-lg">{r.name}</p>
                   <p className="text-[10px] uppercase font-black tracking-widest mt-1 opacity-60">{r.memberCount} active users</p>
                 </button>
               ))}
-              <button className="w-full p-6 border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-300 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:border-brand-primary hover:text-brand-primary transition-all">
+              <button className="w-full p-6 border-2 border-dashed border-slate-200 rounded-xl text-slate-300 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:border-brand-primary hover:text-brand-primary transition-all">
                  <Plus size={16}/> Create Custom Role
               </button>
             </div>
-            <div className="lg:col-span-8 bg-white p-6 sm:p-12 rounded-[2rem] sm:rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+            <div className="lg:col-span-8 bg-white p-6 sm:p-6 rounded-xl sm:rounded-xl border border-slate-100 shadow-sm space-y-8">
                <div className="flex items-center justify-between">
                   <h3 className="text-xl sm:text-2xl font-black text-slate-800 uppercase tracking-tight">Permission Grid</h3>
                   <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold text-[9px] font-black uppercase tracking-widest rounded-lg">Admin</span>
@@ -463,7 +463,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
         )}
 
         {activeTab === 'PREFERENCES' && (isAdmin || currentUserRole === UserRole.PASTOR) && (
-          <div className="bg-white rounded-[2rem] sm:rounded-[3rem] border border-slate-100 shadow-sm p-6 sm:p-12 space-y-12 animate-in slide-in-from-left-4 duration-500">
+          <div className="bg-white rounded-xl sm:rounded-xl border border-slate-100 shadow-sm p-6 sm:p-6 space-y-12 animate-in slide-in-from-left-4 duration-500">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12">
                <div className="space-y-6">
                   <div className="flex items-center gap-3">
@@ -512,7 +512,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                </div>
             </div>
             <div className="flex justify-center lg:justify-start pt-6 border-t border-slate-50">
-              <button onClick={handleSaveNotificationPrefs} disabled={isSaving} className="w-full sm:w-auto px-10 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black flex items-center justify-center gap-2 shadow-xl hover:bg-brand-primary-700 transition-all disabled:opacity-50 text-xs uppercase tracking-widest">
+              <button onClick={handleSaveNotificationPrefs} disabled={isSaving} className="w-full sm:w-auto px-10 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black flex items-center justify-center gap-2 shadow-sm hover:bg-brand-primary-700 transition-all disabled:opacity-50 text-xs uppercase tracking-widest">
                 {isSaving ? <Loader2 className="animate-spin" size={18}/> : <CheckCircle2 size={18}/>} Commit Changes
               </button>
             </div>

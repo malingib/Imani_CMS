@@ -75,7 +75,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 overflow-x-hidden pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase">Communication</h2>
+          <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Communication</h2>
           <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">Send SMS, email, and WhatsApp messages to members.</p>
         </div>
         <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm self-start lg:self-center overflow-x-auto no-scrollbar max-w-full">
@@ -136,7 +136,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                       <span className="text-[8px] sm:text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-black uppercase tracking-widest">{log.type}</span>
                     </div>
                     <p className="text-xs text-slate-500 line-clamp-1 mb-2 font-medium">"{log.content}"</p>
-                    <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-tighter text-slate-400">
+                    <div className="flex items-center gap-3 text-[9px] font-semibold tracking-tighter text-slate-400">
                       <span className="flex items-center gap-1"><Users size={12}/> {log.recipientCount}</span>
                       <span>{log.date}</span>
                     </div>
@@ -240,7 +240,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
              <div className="bg-white p-5 rounded-xl sm:rounded-xl border border-slate-100 shadow-sm space-y-6">
                 <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">SMS Credits</h4>
                 <div className="flex items-center justify-between">
-                    <p className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">{typeof smsCredits === 'number' ? smsCredits.toLocaleString() : 'Not configured'}</p>
+                    <p className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tighter">{typeof smsCredits === 'number' ? smsCredits.toLocaleString() : 'Not configured'}</p>
                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Zap size={20}/></div>
                 </div>
                 <button type="button" disabled title="SMS provider billing is not connected" className="w-full py-4 bg-slate-100 text-slate-500 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Top-up not configured</button>

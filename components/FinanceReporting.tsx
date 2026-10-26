@@ -364,6 +364,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
              {recurringExpenses.length ? recurringExpenses.map(item => <div key={item.id} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0"><div><p className="text-sm font-medium text-slate-800">{item.category}</p><p className="mt-1 text-xs text-slate-500">{item.frequency} · Next: {item.nextDate}</p></div><span className="whitespace-nowrap text-sm font-medium tabular-nums text-slate-900">KES {item.amount.toLocaleString()}</span></div>) : <p className="text-sm text-slate-500">No recurring expenses.</p>}
            </section>
         </div>
+      </div>
 
       {/* Transaction Detail Modal */}
       {viewingTransaction && (

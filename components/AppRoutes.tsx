@@ -181,7 +181,7 @@ const AccountShell = () => {
                   <Route path={ROUTES.ANALYTICS.path} element={<DemographicsAnalysis members={members} events={events} />} />
                   <Route path={ROUTES.SETTINGS.path} element={currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.SUPER_ADMIN ? <ChurchAdministration currentUserRole={currentUser.role} churchId={churchId || ''} /> : <Settings currentUserRole={currentUser.role} churchId={churchId || ''} />} />
                   <Route path={ROUTES.AUDIT_LOGS.path} element={<AuditLogs logs={auditLogs} />} />
-                  <Route path={ROUTES.BILLING.path} element={<Billing />} />
+                  <Route path={ROUTES.BILLING.path} element={<Billing churchId={churchId || ''} />} />
                   <Route path="*" element={<Navigate to={ROUTES.DASHBOARD.path} replace />} />
 
               </Routes>

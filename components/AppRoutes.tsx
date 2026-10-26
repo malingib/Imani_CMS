@@ -7,7 +7,6 @@ import { useChurch } from '../src/lib/church-context';
 import { ROUTES, pathToView } from '../src/lib/router';
 import { AppView, UserRole } from '../types';
 import { getDefaultViewForUserRole } from '../src/lib/app-user';
-import { triggerStkPush } from '../src/lib/mpesa-service';
 import { SkeletonBlock, ToastContainer, ErrorFallback } from './shared';
 import NotificationsPanel from './NotificationsPanel';
 import PlatformShell from './PlatformShell';
@@ -62,7 +61,7 @@ function Protected({ children }: { children: React.ReactNode }) {
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, handleUpdateProfile, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
+  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, events, budgets, recurringExpenses, communications, groups, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
   const { activeChurchId, activeChurch } = useChurch();
   const location = useLocation();
   const navigateToPath = useNavigate();
@@ -70,22 +69,7 @@ const AccountShell = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const churchId = activeChurchId ?? currentUser?.churchId ?? null;
-  const currentMember = members.find(m => m.id === currentUser?.memberId);
   const unreadCount = notifications.filter(n => !n.read).length;
-
-  const handleGive = async (amount: number, type: string): Promise<{ success: boolean; message: string }> => {
-    if (!currentMember?.phone) {
-      return { success: false, message: 'Your member profile has no phone number. Contact your church administrator.' };
-    }
-    const result = await triggerStkPush(amount, currentMember.phone, type, `${currentMember.firstName} ${currentMember.lastName}`.trim());
-    if (result.success) {
-      createAudit('M-Pesa giving prompt accepted', 'MY_GIVING');
-      addToast(result.message, 'info');
-    } else {
-      addToast(result.message, 'error');
-    }
-    return result;
-  };
 
   if (!currentUser) return null;
 

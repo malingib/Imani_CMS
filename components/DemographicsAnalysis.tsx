@@ -163,9 +163,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
             </div>
           ))}
         </div>
-      )}
-
-      {/* Main Content Area (Hidden if in Resources tab for cleaner UI) */}
+      {/* Main analytics content */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
           <div className="lg:col-span-8 space-y-8">
             {activeTab === 'DEMOGRAPHICS' && (
@@ -311,7 +309,6 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
              </div>
           </div>
         </div>
-      </div>
 
     </div>
   );

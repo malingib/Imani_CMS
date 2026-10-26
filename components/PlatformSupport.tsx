@@ -68,10 +68,10 @@ const PlatformSupport: React.FC = () => {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
            <div className="flex items-center gap-3 mb-2">
-              <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-xl">
+              <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-sm">
                  <LifeBuoy size={28}/>
               </div>
-              <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase leading-none">SaaS Help Desk</h2>
+              <h2 className="text-2xl font-semibold text-brand-primary tracking-tight uppercase leading-none">SaaS Help Desk</h2>
            </div>
            <p className="text-slate-500 text-lg font-medium">Platform-wide support orchestration for all church administrators.</p>
         </div>
@@ -85,7 +85,7 @@ const PlatformSupport: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
-           <div className="bg-white p-4 sm:p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+           <div className="bg-white p-4 sm:p-6 rounded-xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-4 items-center">
               <div className="relative flex-1 w-full">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
@@ -104,13 +104,13 @@ const PlatformSupport: React.FC = () => {
               </select>
            </div>
 
-           <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[600px]">
+           <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[600px]">
               <div className="divide-y divide-slate-50">
                  {filteredTickets.map(ticket => (
                     <div 
                       key={ticket.id} 
                       onClick={() => setViewingTicket(ticket)}
-                      className="p-8 hover:bg-slate-50/80 transition-all cursor-pointer flex flex-col sm:flex-row items-center gap-6 group"
+                      className="p-5 hover:bg-slate-50/80 transition-all cursor-pointer flex flex-col sm:flex-row items-center gap-6 group"
                     >
                        <div className="flex-shrink-0">
                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xs shadow-sm ${getPriorityColor(ticket.priority)}`}>
@@ -151,19 +151,19 @@ const PlatformSupport: React.FC = () => {
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-           <div className="bg-brand-primary p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
+           <div className="bg-brand-primary p-6 rounded-xl text-white shadow-sm relative overflow-hidden group">
               <div className="relative z-10 space-y-6">
                  <div className="flex items-center gap-3">
                     <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Zap size={24}/></div>
-                    <h4 className="text-xl font-black uppercase tracking-tight">SLA Performance</h4>
+                    <h4 className="text-xl font-semibold tracking-tight">SLA Performance</h4>
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                     <div className="p-5 bg-white/5 border border-white/10 rounded-2xl text-center">
-                       <p className="text-3xl font-black">12m</p>
+                       <p className="text-2xl font-semibold">12m</p>
                        <p className="text-[9px] font-black uppercase text-indigo-300">Avg. Response</p>
                     </div>
                     <div className="p-5 bg-white/5 border border-white/10 rounded-2xl text-center">
-                       <p className="text-3xl font-black">98.4%</p>
+                       <p className="text-2xl font-semibold">98.4%</p>
                        <p className="text-[9px] font-black uppercase text-indigo-300">Resolution Rate</p>
                     </div>
                  </div>
@@ -175,7 +175,7 @@ const PlatformSupport: React.FC = () => {
               <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-10" />
            </div>
 
-           <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm space-y-8">
+           <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm space-y-8">
               <h4 className="text-lg font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
                  <FileText size={20} className="text-brand-indigo"/> Support Intel
               </h4>
@@ -202,14 +202,14 @@ const PlatformSupport: React.FC = () => {
       {/* Ticket Reply Modal */}
       {viewingTicket && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[500] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-4xl shadow-2xl overflow-hidden animate-in zoom-in duration-200 border border-white/20 flex flex-col max-h-[90vh]">
-              <div className={`p-10 text-white relative overflow-hidden flex-shrink-0 ${getPriorityColor(viewingTicket.priority)}`}>
+           <div className="bg-white rounded-xl w-full max-w-4xl shadow-sm overflow-hidden animate-in zoom-in duration-200 border border-white/20 flex flex-col max-h-[90vh]">
+              <div className={`p-6 text-white relative overflow-hidden flex-shrink-0 ${getPriorityColor(viewingTicket.priority)}`}>
                  <div className="relative z-10 flex justify-between items-start">
                     <div>
                        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
                           {viewingTicket.priority} Priority • #{viewingTicket.id}
                        </div>
-                       <h3 className="text-3xl font-black uppercase tracking-tight leading-tight">{viewingTicket.subject}</h3>
+                       <h3 className="text-2xl font-semibold uppercase tracking-tight leading-tight">{viewingTicket.subject}</h3>
                        <div className="flex items-center gap-4 mt-2 opacity-80 font-bold text-xs">
                           <span className="flex items-center gap-2"><Building2 size={14}/> {viewingTicket.tenantName}</span>
                           <span className="flex items-center gap-2"><Clock size={14}/> Created {new Date(viewingTicket.createdAt).toLocaleDateString()}</span>
@@ -219,12 +219,12 @@ const PlatformSupport: React.FC = () => {
                  </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-10 lg:p-14 space-y-12 no-scrollbar bg-white">
+              <div className="flex-1 overflow-y-auto p-6 lg:p-14 space-y-12 no-scrollbar bg-white">
                  <section className="space-y-6">
                     <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
                        <MessageSquare size={14}/> Issue Description
                     </h4>
-                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100">
+                    <div className="bg-slate-50 p-5 rounded-xl border border-slate-100">
                        <p className="text-lg text-slate-700 font-medium leading-relaxed leading-relaxed italic font-serif">
                           "{viewingTicket.description}"
                        </p>
@@ -236,7 +236,7 @@ const PlatformSupport: React.FC = () => {
                        <Send size={14}/> SaaS Command Response
                     </h4>
                     <textarea 
-                      className="w-full p-8 bg-slate-50 border border-slate-200 rounded-[2.5rem] font-bold text-slate-700 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all resize-none shadow-inner"
+                      className="w-full p-5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-4 focus:ring-brand-primary/10 transition-all resize-none shadow-inner"
                       rows={6}
                       placeholder="Compose technical or account-level guidance..."
                       value={reply}
@@ -245,7 +245,7 @@ const PlatformSupport: React.FC = () => {
                  </section>
               </div>
 
-              <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4 flex-shrink-0">
+              <div className="p-5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4 flex-shrink-0">
                  <div className="flex-1 flex gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
                     <button className="px-5 py-3 bg-white border border-slate-200 text-slate-500 rounded-xl text-[10px] font-black uppercase whitespace-nowrap hover:bg-slate-50">Escalate to Dev</button>
                     <button className="px-5 py-3 bg-white border border-slate-200 text-slate-500 rounded-xl text-[10px] font-black uppercase whitespace-nowrap hover:bg-slate-50">Mark Resolved</button>
@@ -253,7 +253,7 @@ const PlatformSupport: React.FC = () => {
                  <button 
                    onClick={handleSendReply}
                    disabled={isReplying || !reply}
-                   className="flex-[2] py-5 bg-brand-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-brand-indigo transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                   className="flex-[2] py-5 bg-brand-primary text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-sm hover:bg-brand-indigo transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                  >
                     {isReplying ? <Loader2 className="animate-spin" size={20}/> : <ArrowRight size={20}/>}
                     Dispatch Response

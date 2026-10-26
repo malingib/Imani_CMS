@@ -124,7 +124,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
   const renderFinancialReport = () => (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+        <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100">
           <h4 className="text-sm font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
             <TrendingUp size={16} className="text-brand-emerald"/> Income Stream Allocation
           </h4>
@@ -146,7 +146,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100">
+        <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100">
           <h4 className="text-sm font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
             <Activity size={16} className="text-brand-indigo"/> Monthly Income vs Expenses
           </h4>
@@ -165,8 +165,8 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
-        <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm">
+        <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
           <h4 className="font-semibold text-slate-900">Recent transaction records</h4>
           <span className="text-xs text-slate-500">Recorded transactions</span>
         </div>
@@ -203,7 +203,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {membershipStats.map((m, i) => (
-          <div key={i} className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 text-center">
+          <div key={i} className="bg-slate-50/50 p-6 rounded-xl border border-slate-100 text-center">
             <div className={`mx-auto w-10 h-10 mb-3 bg-brand-${m.color}/10 text-brand-${m.color} rounded-xl flex items-center justify-center`}>
               <m.icon size={20} />
             </div>
@@ -213,7 +213,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
         ))}
       </div>
 
-      <div className="bg-slate-50/50 p-8 rounded-[3rem] border border-slate-100">
+      <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100">
         <h4 className="text-sm font-black uppercase text-slate-400 mb-6 px-2 tracking-[0.2em]">Membership Growth</h4>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -238,7 +238,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
   const renderAttendanceReport = () => (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="bg-slate-50/50 p-8 rounded-[3rem] border border-slate-100">
+      <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100">
         <div className="flex justify-between items-center mb-8 px-2">
           <div>
             <h4 className="text-base font-semibold text-slate-900">Attendance by event</h4>
@@ -296,7 +296,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {sundaySchoolStats.map((m, i) => (
-          <div key={i} className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 text-center">
+          <div key={i} className="bg-slate-50/50 p-6 rounded-xl border border-slate-100 text-center">
             <div className={`mx-auto w-10 h-10 mb-3 bg-brand-${m.color}/10 text-brand-${m.color} rounded-xl flex items-center justify-center`}>
               <m.icon size={20} />
             </div>
@@ -308,8 +308,8 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
 
       <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">Attendance and lesson completion are not reported because those data are not currently tracked. This screen shows registered children only.</p>
 
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
-        <div className="p-8 border-b border-slate-100 bg-slate-50/30">
+      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm">
+        <div className="p-5 border-b border-slate-100 bg-slate-50/30">
           <h4 className="font-semibold text-slate-900">Registered children</h4>
         </div>
         <table className="w-full text-left">
@@ -385,7 +385,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
                 <button 
                   key={report.id} 
                   onClick={() => setActiveReport(report.id as ReportType)} 
-                  className={`w-full flex items-start gap-4 px-6 py-5 rounded-[1.8rem] transition-all text-left ${activeReport === report.id ? 'bg-brand-primary text-white shadow-2xl shadow-brand-primary/30' : 'text-slate-500 hover:bg-slate-50'}`}
+                  className={`w-full flex items-start gap-4 px-6 py-5 rounded-[1.8rem] transition-all text-left ${activeReport === report.id ? 'bg-brand-primary text-white shadow-sm shadow-brand-primary/30' : 'text-slate-500 hover:bg-slate-50'}`}
                 >
                   <report.icon size={20} className="shrink-0 mt-1" />
                   <div>

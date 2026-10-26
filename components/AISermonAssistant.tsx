@@ -30,7 +30,7 @@ const AISermonAssistant: React.FC = () => {
           <Sparkles size={28} />
         </div>
         <div>
-          <h2 className="text-3xl font-black text-slate-800 uppercase">AI Sermon Assistant</h2>
+          <h2 className="text-2xl font-semibold text-slate-800 uppercase">AI Sermon Assistant</h2>
           <p className="text-slate-500">Draft inspiring sermon outlines with Kenyan contextual examples.</p>
         </div>
       </div>
@@ -61,13 +61,13 @@ const AISermonAssistant: React.FC = () => {
             <button 
               onClick={handleGenerate}
               disabled={loading}
-              className={`w-full flex items-center justify-center gap-2 py-4 bg-brand-primary text-white rounded-xl font-black shadow-lg shadow-indigo-100 transition-all ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-800 active:scale-95'}`}
+              className={`w-full flex items-center justify-center gap-2 py-4 bg-brand-primary text-white rounded-xl font-black shadow-sm shadow-indigo-100 transition-all ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-800 active:scale-95'}`}
             >
               {loading ? 'Processing...' : <><Send size={18} /> Generate Outline</>}
             </button>
           </div>
 
-          <div className="bg-brand-primary text-white p-6 rounded-2xl shadow-lg shadow-brand-primary/20 space-y-4">
+          <div className="bg-brand-primary text-white p-6 rounded-2xl shadow-sm shadow-brand-primary/20 space-y-4">
             <h3 className="font-black flex items-center gap-2 uppercase tracking-widest text-xs">
               <History size={18} /> Recent Drafts
             </h3>
@@ -80,7 +80,7 @@ const AISermonAssistant: React.FC = () => {
 
         <div className="lg:col-span-2">
           {result ? (
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 min-h-[500px] flex flex-col">
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 min-h-[500px] flex flex-col">
               <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-4">
                   <BookOpen className="text-brand-primary" size={24} />

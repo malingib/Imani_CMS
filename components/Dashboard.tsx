@@ -16,13 +16,14 @@ interface DashboardProps {
   members: Member[];
   transactions: Transaction[];
   dashboardTransactions: Transaction[];
+  lifetimeTitheTransactions: Transaction[];
   events: ChurchEvent[];
   onAddMember: () => void;
   onSendSMS: () => void;
   onNavigate: (view: AppView) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardTransactions, events, onAddMember, onSendSMS, onNavigate }) => {
+const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardTransactions, lifetimeTitheTransactions, events, onAddMember, onSendSMS, onNavigate }) => {
   const celebrations = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -62,25 +63,24 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
   }, [members]);
 
   const performanceData = useMemo(() => {
-    const dateKey = (date: Date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-    const today = new Date();
-    const chartTransactions = Array.from(new Map([...dashboardTransactions, ...transactions].map(transaction => [transaction.id, transaction])).values());
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() - (6 - index));
-      const key = dateKey(date);
-      const dayTransactions = chartTransactions.filter(t => typeof t.date === 'string' && t.date.slice(0, 10) === key);
-      const tithes = dayTransactions
-        .filter(t => t.type === 'Tithe' && t.category === 'Income')
-        .reduce((sum, transaction) => sum + transaction.amount, 0);
-      return { name: date.toLocaleDateString('en-KE', { weekday: 'short' }), tithes };
+    const monthly = new Map<string, number>();
+    lifetimeTitheTransactions.forEach(transaction => {
+      if (transaction.type !== 'Tithe' || transaction.category !== 'Income') return;
+      const date = new Date(transaction.date);
+      if (Number.isNaN(date.getTime())) return;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthly.set(key, (monthly.get(key) || 0) + transaction.amount);
     });
-  }, [transactions, dashboardTransactions]);
+    return Array.from(monthly.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([key, tithes]) => {
+      const [year, month] = key.split('-').map(Number);
+      return { name: new Date(year, month - 1, 1).toLocaleDateString('en-KE', { month: 'short', year: 'numeric' }), tithes };
+    });
+  }, [lifetimeTitheTransactions]);
+
+  const recentTithes = useMemo(() => [...lifetimeTitheTransactions]
+    .filter(t => t.type === 'Tithe' && t.category === 'Income')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5), [lifetimeTitheTransactions]);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-10">
@@ -138,7 +138,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
           <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 relative z-10">
                  <div>
-                   <p className="text-base font-semibold text-slate-900">Tithes recorded over the last 7 days</p>
+                   <p className="text-base font-semibold text-slate-900">Lifetime tithe income by month</p>
                  </div>
                  <div className="flex items-center gap-6">
                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-primary" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Tithing</span></div>
@@ -165,7 +165,7 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
-                    <p className="max-w-sm text-sm text-slate-500">No tithe transactions have been recorded in the last 7 days.</p>
+                    <p className="max-w-sm text-sm text-slate-500">No tithe records have been recorded for this church yet.</p>
                   </div>
                 )}
              </div>
@@ -196,13 +196,13 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
            <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
               <div className="flex items-center justify-between">
                  <h4 className="text-xl font-black text-slate-800 uppercase flex items-center gap-3">
-                   <Smartphone size={20} className="text-brand-indigo" /> Recent Transactions
+                   <HandCoins size={20} className="text-brand-indigo" /> Recent Tithes
                  </h4>
-                 <span className="text-xs text-slate-500">Latest records</span>
+                 <span className="text-xs text-slate-500">Latest 5 records</span>
               </div>
               
               <div className="space-y-6">
-                 {transactions.slice(0, 4).map((trx, i) => (
+                 {recentTithes.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">No tithe transactions recorded yet.</p> : recentTithes.map((trx, i) => (
                    <div key={trx.id} className="flex items-start gap-4 animate-in slide-in-from-right duration-500" style={{ animationDelay: `${i * 150}ms` }}>
                       <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-brand-indigo font-black text-xs flex-shrink-0">
                          {trx.memberName[0]}

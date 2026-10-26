@@ -11,7 +11,6 @@ import {
   BellRing, Mail
 } from 'lucide-react';
 import { ChurchEvent, Member, RecurrenceType, ChurchEventType, User as UserType, UserRole } from '../types';
-import { scoutOutreachLocations } from '../services/geminiService';
 
 interface EventsManagementProps {
   events: ChurchEvent[];
@@ -40,7 +39,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
   const [showReminderModal, setShowReminderModal] = useState<ChurchEvent | null>(null);
   const [viewingEvent, setViewingEvent] = useState<ChurchEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
-  const [showScoutModal, setShowScoutModal] = useState(false);
   const [eventError, setEventError] = useState('');
   const [isSavingEvent, setIsSavingEvent] = useState(false);
   const [isSavingAttendance, setIsSavingAttendance] = useState(false);
@@ -50,11 +48,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
     recurrence: 'NONE',
     attendance: [],
   });
-
-  // Scouting State
-  const [scoutQuery, setScoutQuery] = useState('High-traffic areas for street ministry');
-  const [isScouting, setIsScouting] = useState(false);
-  const [scoutResults, setScoutResults] = useState<{ text: string, groundingChunks: any[] } | null>(null);
 
   const [attendanceSearch, setAttendanceSearch] = useState('');
   const activeEventForRollCall = useMemo(() => events.find(e => e.id === showAttendanceModal), [events, showAttendanceModal]);
@@ -66,33 +59,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       setCurrentAttendance(activeEventForRollCall.attendance);
     }
   }, [activeEventForRollCall]);
-
-  const handleScoutOutreach = async () => {
-    setIsScouting(true);
-    setScoutResults(null);
-    
-    let lat: number | undefined;
-    let lng: number | undefined;
-
-    try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
-      });
-      lat = position.coords.latitude;
-      lng = position.coords.longitude;
-    } catch (e) {
-      console.warn("Geolocation access denied, falling back to default city context.");
-    }
-
-    try {
-      const res = await scoutOutreachLocations(scoutQuery, lat, lng);
-      setScoutResults(res);
-    } catch (e) {
-      console.error('AI Scouter error');
-    } finally {
-      setIsScouting(false);
-    }
-  };
 
   const toggleAttendance = (memberId: string) => {
     setCurrentAttendance(prev => 
@@ -193,9 +159,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
           <p className="text-slate-500 mt-2 text-lg">Manage church events and track attendance.</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => setShowScoutModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-white text-brand-primary border border-indigo-100 rounded-xl font-black hover:bg-indigo-50 transition-all shadow-sm text-xs sm:text-sm">
-             <Sparkles size={20}/> Find Outreach Locations
-          </button>
           {currentUser?.role !== UserRole.MEMBER && (
             <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 text-xs sm:text-sm">
                <Plus size={20} /> Schedule Event
@@ -817,93 +780,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       )}
 
       {/* Scout Modal */}
-      {showScoutModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-4xl shadow-sm p-6 space-y-8 animate-in zoom-in duration-200 flex flex-col max-h-[90vh]">
-            <div className="flex justify-between items-center">
-               <div className="flex items-center gap-4">
-                 <div className="p-4 bg-indigo-50 text-brand-primary rounded-2xl"><Sparkles size={24}/></div>
-                 <div>
-                   <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Location Finder</h3>
-                   <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">Powered by Google Maps</p>
-                 </div>
-               </div>
-               <button onClick={() => setShowScoutModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"><X size={24}/></button>
-            </div>
-            
-            <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-2">What are you looking for?</label>
-              <div className="flex gap-3">
-                <input 
-                  className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-primary"
-                  value={scoutQuery}
-                  onChange={e => setScoutQuery(e.target.value)}
-                  placeholder="e.g. Public parks in Nairobi for a family worship day"
-                  onKeyDown={(e) => e.key === 'Enter' && handleScoutOutreach()}
-                />
-                <button 
-                  onClick={handleScoutOutreach}
-                  disabled={isScouting}
-                  className="px-6 py-4 bg-brand-primary text-white rounded-2xl font-black hover:bg-brand-primary/90 transition-all shadow-sm flex items-center justify-center min-w-[120px] gap-2"
-                >
-                  {isScouting ? <Loader2 className="animate-spin" size={20}/> : <Navigation size={18}/>}
-                  {isScouting ? 'Scouting...' : 'Search'}
-                </button>
-              </div>
-            </div>
 
-            <div className="flex-1 overflow-y-auto no-scrollbar pr-2 space-y-6">
-               {scoutResults ? (
-                 <div className="space-y-6">
-                    <div className="bg-indigo-50/50 p-6 rounded-xl border border-indigo-100">
-                       <p className="text-slate-700 text-sm font-medium leading-relaxed italic">"{scoutResults.text}"</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       {scoutResults.groundingChunks.map((chunk: any, i: number) => (
-                         <div key={i} className="bg-white border border-slate-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-all space-y-4 group">
-                            <div className="flex justify-between items-start">
-                               <div className="p-3 bg-brand-primary/5 text-brand-primary rounded-xl group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                                  <MapPin size={20}/>
-                               </div>
-                               <span className="text-[9px] font-black uppercase text-slate-300 tracking-widest">Result {i+1}</span>
-                            </div>
-                            <div>
-                               <h4 className="font-black text-slate-800 text-lg line-clamp-1">{chunk.maps?.title || "Suggested Venue"}</h4>
-                               <p className="text-xs text-slate-400 font-medium line-clamp-2 mt-1">Found via real-time Google Maps data for current region.</p>
-                            </div>
-                            <div className="pt-4 border-t border-slate-50">
-                               <a 
-                                 href={chunk.maps?.uri} 
-                                 target="_blank" 
-                                 rel="noopener noreferrer"
-                                 className="w-full flex items-center justify-center gap-2 py-3 bg-slate-50 text-brand-primary rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all"
-                               >
-                                  <ExternalLink size={14}/> Navigate Venue
-                               </a>
-                            </div>
-                         </div>
-                       ))}
-                    </div>
-                 </div>
-               ) : (
-                 <div className="h-64 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-center p-5 space-y-4">
-                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
-                      <MapIcon size={32} />
-                    </div>
-                    <div className="max-w-xs">
-                      <p className="text-sm font-bold text-slate-400 leading-relaxed">
-                        Allow location access to find high-impact outreach opportunities near you.
-                      </p>
-                    </div>
-                 </div>
-               )}
-            </div>
-
-            <button onClick={() => setShowScoutModal(false)} className="w-full py-4 bg-slate-50 text-slate-400 rounded-[1.25rem] font-black uppercase text-[10px] tracking-widest hover:bg-slate-100 transition-all">Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

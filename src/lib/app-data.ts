@@ -82,6 +82,16 @@ function mergeEventAttendance(events: ChurchEvent[], attendanceRows: unknown[]) 
 
 export function createChurchAppDataService(client: SupabaseLikeClient) {
   return {
+    async loadLifetimeTitheTransactions(churchId: string): Promise<Transaction[]> {
+      let query = client.from("transactions").select("*")
+        .eq("type", "Tithe")
+        .eq("category", "Income");
+      if (churchId) query = query.eq("church_id", churchId);
+      const { data, error } = await query.order("date", { ascending: false });
+      if (error) throw new Error(error.message);
+      return (data || []).map(mapTransaction);
+    },
+
     async loadDashboardTransactions(churchId: string, startDate: string, endDate: string): Promise<Transaction[]> {
       let query = client.from("transactions").select("*").gte("date", startDate).lte("date", endDate);
       if (churchId) query = query.eq("church_id", churchId);

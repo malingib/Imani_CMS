@@ -69,8 +69,8 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
       const matchesType = filterType === 'All'
         || (filterType === 'Expense' ? t.category === 'Expense' : t.type === filterType);
       const matchesSearch = 
-        t.memberName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        t.reference.toLowerCase().includes(searchTerm.toLowerCase());
+        (t.memberName || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (t.reference || '').toLowerCase().includes(searchTerm.toLowerCase());
       return matchesType && matchesSearch;
     });
   }, [transactions, filterType, searchTerm]);
@@ -99,11 +99,15 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
   };
 
   const handleExportCSV = () => {
-    const headers = "ID,Date,Reference,Payer/Recipient,Category,Type,Method,Source,Amount\n";
-    const rows = filtered.map(t => 
-      `${t.id},${t.date},${t.reference},${t.memberName},${t.category},${t.type},${t.paymentMethod},${t.source},${t.amount}`
-    ).join("\n");
-    const blob = new Blob([headers + rows], { type: 'text/csv' });
+    const escapeCsv = (value: unknown) => {
+      const text = String(value ?? '');
+      return /[",\r\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+    };
+    const headers = ["ID","Date","Reference","Payer/Recipient","Category","Type","Method","Source","Amount"].join(",") + "\r\n";
+    const rows = filtered.map(t =>
+      [t.id, t.date, t.reference, t.memberName, t.category, t.type, t.paymentMethod, t.source, t.amount].map(escapeCsv).join(",")
+    ).join("\r\n");
+    const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

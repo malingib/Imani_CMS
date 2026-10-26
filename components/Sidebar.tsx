@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside className={`
-      w-64 h-full bg-white text-slate-600 fixed left-0 top-0 flex flex-col border-r border-slate-100 shadow-2xl lg:shadow-sm z-[70] transition-transform duration-300 ease-in-out
+      w-64 h-full bg-white text-slate-600 fixed left-0 top-0 flex flex-col border-r border-slate-100 shadow-sm lg:shadow-sm z-[70] transition-transform duration-300 ease-in-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
     `}>
       <div className="p-6">
@@ -87,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <ChevronDown size={14} className={`text-slate-300 transition-transform ${isBranchMenuOpen ? 'rotate-180' : ''}`} />
             </button>
             {isBranchMenuOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-2xl z-50 overflow-hidden">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-sm z-50 overflow-hidden">
                 {branches.map(branch => (
                   <button key={branch} onClick={() => { onBranchChange(branch); setIsBranchMenuOpen(false); }}
                     className={`w-full text-left px-4 py-3 text-xs font-bold border-b last:border-0 border-slate-50 ${currentUser.branch === branch ? 'bg-slate-100 text-brand-primary' : 'text-slate-600 hover:bg-slate-50'}`}>

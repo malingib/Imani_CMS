@@ -56,9 +56,9 @@ const PlatformDashboard: React.FC<{ onOpenClient?: () => void }> = ({ onOpenClie
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {cards.map(card => (
-          <div key={card.label} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100">
+          <div key={card.label} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
             <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 ${card.color} rounded-2xl flex items-center justify-center shadow-lg`}>
+              <div className={`w-14 h-14 ${card.color} rounded-2xl flex items-center justify-center shadow-sm`}>
                 <card.icon size={24} className="text-white" />
               </div>
               <div>

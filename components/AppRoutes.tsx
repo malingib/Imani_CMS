@@ -71,6 +71,13 @@ const AccountShell = () => {
   const churchId = activeChurchId ?? currentUser?.churchId ?? null;
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  const handleLogout = async () => {
+    createAudit('Logout', 'DASHBOARD');
+    const { supabase } = await import('../src/lib/supabase-auth');
+    await supabase.auth.signOut();
+  };
+
+
   if (!currentUser) return null;
 
   // Member self-service is intentionally paused. Keep staff-facing congregation
@@ -104,12 +111,6 @@ const AccountShell = () => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [notifOpen]);
-
-  const handleLogout = async () => {
-    createAudit('Logout', 'DASHBOARD');
-    const { supabase } = await import('../src/lib/supabase-auth');
-    await supabase.auth.signOut();
-  };
 
   // Platform administration has its own shell and navigation. Church modules are
   // rendered only after the superadmin explicitly opens the configured client workspace.

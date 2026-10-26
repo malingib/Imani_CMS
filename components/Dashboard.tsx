@@ -6,8 +6,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  AreaChart,
-  Area
+  BarChart,
+  Bar
 } from 'recharts';
 import { Users, MessageSquare, Wallet, Smartphone, Gift, HandCoins, CalendarPlus, UserPlus, ExternalLink } from 'lucide-react';
 import { Member, Transaction, ChurchEvent, AppView } from '../types';
@@ -83,23 +83,23 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
     .slice(0, 5), [lifetimeTitheTransactions]);
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-700 pb-10">
+    <div className="space-y-8 sm:space-y-10 pb-10 text-slate-900">
       <header className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Dashboard</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Dashboard</h2>
         </div>
         
         <div className="grid grid-cols-2 md:flex gap-3">
-          <button onClick={() => onNavigate('COMMUNICATION')} className="flex items-center justify-center gap-2 px-6 py-4 bg-white text-slate-700 border border-slate-200 rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
+          <button onClick={() => onNavigate('COMMUNICATION')} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-transparent text-slate-700 border border-slate-200 rounded-md font-medium text-sm hover:bg-slate-50 transition-colors">
             <MessageSquare size={18} className="text-brand-indigo" /> Messages
           </button>
-          <button onClick={() => onNavigate('FINANCE')} className="flex items-center justify-center gap-2 px-6 py-4 bg-brand-primary text-white rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-xl shadow-brand-primary/20">
+          <button onClick={() => onNavigate('FINANCE')} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-brand-primary text-white rounded-md font-medium text-sm hover:bg-brand-primary-700 transition-colors">
             <Smartphone size={18} className="text-brand-gold"/> Record Payment
           </button>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 border-y border-slate-200 divide-x divide-slate-200">
         {(() => {
           const recordedIncome = transactions
             .filter(transaction => transaction.category === 'Income')
@@ -119,14 +119,14 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
             { label: 'Upcoming events', value: upcomingEvents.toLocaleString(), detail: 'Scheduled from today', icon: CalendarPlus },
           ];
         })().map((stat) => (
-          <div key={stat.label} className="rounded-xl border border-slate-200 bg-white p-5">
+          <div key={stat.label} className="min-w-0 px-3 py-5 sm:px-5 sm:py-6 bg-transparent">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-slate-500">{stat.label}</p>
                 <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">{stat.value}</p>
                 <p className="mt-1 text-xs text-slate-500">{stat.detail}</p>
               </div>
-              <div className="rounded-lg bg-slate-50 p-2.5 text-slate-600">
+              <div className="hidden sm:block text-slate-400 p-1">
                 <stat.icon size={19} aria-hidden="true" />
               </div>
             </div>
@@ -135,13 +135,13 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
+          <div className="bg-transparent py-2">
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 relative z-10">
                  <div>
-                   <p className="text-base font-semibold text-slate-900">Lifetime tithe income by month</p>
+                   <p className="text-base font-semibold text-slate-950">Lifetime tithe income by month</p>
                  </div>
                  <div className="flex items-center gap-6">
-                   <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-brand-primary" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Tithing</span></div>
+                   <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-sm bg-brand-primary" /><span className="text-xs font-medium text-slate-500">Tithing</span></div>
                    
                  </div>
               </div>
@@ -149,22 +149,16 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
              <div className="h-[320px] w-full">
                 {performanceData.some(day => day.tithes > 0) ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={performanceData}>
-                      <defs>
-                        <linearGradient id="colorTithes" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#1E293B" stopOpacity={0.1}/>
-                          <stop offset="95%" stopColor="#1E293B" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <BarChart data={performanceData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
                       <YAxis hide />
-                      <Tooltip formatter={(value) => [`KES ${Number(value).toLocaleString()}`, 'Tithes']} />
-                      <Area type="monotone" dataKey="tithes" stroke="#1E293B" strokeWidth={2} fillOpacity={1} fill="url(#colorTithes)" />
-                    </AreaChart>
+                      <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', boxShadow: 'none' }} formatter={(value) => [`KES ${Number(value).toLocaleString()}`, 'Tithes']} />
+                      <Bar dataKey="tithes" name="Tithes" fill="#334155" radius={[3, 3, 0, 0]} maxBarSize={42} />
+                    </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 text-center">
+                  <div className="flex h-full items-center justify-center border border-dashed border-slate-200 px-6 text-center">
                     <p className="max-w-sm text-sm text-slate-500">No tithe records have been recorded for this church yet.</p>
                   </div>
                 )}
@@ -181,21 +175,21 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
                <button 
                  key={i} 
                  onClick={btn.action}
-                 className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors flex flex-col items-center justify-center gap-4"
+                 className="p-4 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-3"
                >
-                 <div className={`p-4 bg-brand-${btn.color}-50 text-brand-${btn.color}-500 rounded-[1.5rem] group-hover:scale-110 transition-transform`}>
+                 <div className="text-slate-500">
                     <btn.icon size={28} />
                  </div>
-                 <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">{btn.label}</span>
+                 <span className="text-sm font-medium text-slate-700">{btn.label}</span>
                </button>
              ))}
           </div>
         </div>
 
         <div className="lg:col-span-4 space-y-8">
-           <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+           <div className="bg-transparent border-t border-slate-200 pt-6 space-y-6">
               <div className="flex items-center justify-between">
-                 <h4 className="text-xl font-black text-slate-800 uppercase flex items-center gap-3">
+                 <h4 className="text-base font-semibold text-slate-950 flex items-center gap-2">
                    <HandCoins size={20} className="text-brand-indigo" /> Recent Tithes
                  </h4>
                  <span className="text-xs text-slate-500">Latest 5 records</span>
@@ -204,13 +198,13 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
               <div className="space-y-6">
                  {recentTithes.length === 0 ? <p className="py-6 text-center text-sm text-slate-500">No tithe transactions recorded yet.</p> : recentTithes.map((trx, i) => (
                    <div key={trx.id} className="flex items-start gap-4 animate-in slide-in-from-right duration-500" style={{ animationDelay: `${i * 150}ms` }}>
-                      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-brand-indigo font-black text-xs flex-shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold text-xs flex-shrink-0">
                          {trx.memberName[0]}
                       </div>
                       <div className="flex-1 min-w-0">
                          <div className="flex justify-between items-start">
-                            <p className="text-sm font-bold text-slate-800 truncate pr-2">{trx.memberName}</p>
-                            <span className="text-brand-emerald font-black text-xs">KES {trx.amount.toLocaleString()}</span>
+                            <p className="text-sm font-medium text-slate-800 truncate pr-2">{trx.memberName}</p>
+                            <span className="text-slate-700 font-semibold text-xs">KES {trx.amount.toLocaleString()}</span>
                          </div>
                          <div className="flex items-center justify-between mt-1">
                             <p className="text-[10px] text-slate-400 font-black uppercase tracking-tighter truncate">{trx.type}</p>
@@ -220,18 +214,18 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
                    </div>
                  ))}
               </div>
-              <button onClick={() => onNavigate('FINANCE')} className="w-full py-4 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+              <button onClick={() => onNavigate('FINANCE')} className="w-full py-2.5 bg-transparent text-slate-600 rounded-md font-medium text-sm border border-slate-200 hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
                  View All <ExternalLink size={12}/>
               </button>
            </div>
 
-           <div className="bg-brand-primary p-6 rounded-[2rem] text-white shadow-2xl relative overflow-hidden group">
+           <div className="border-t border-slate-200 pt-6 text-slate-800 relative overflow-hidden">
               <div className="relative z-10 space-y-6">
                  <div className="flex items-center gap-3">
-<Gift size={28} className="text-brand-gold animate-bounce" />
-                     <h4 className="text-xl font-black uppercase tracking-tight">Celebrations</h4>
+<Gift size={20} className="text-slate-500" />
+                     <h4 className="text-base font-semibold tracking-tight">Celebrations</h4>
                  </div>
-                 <p className="text-slate-300 text-sm leading-6">
+                 <p className="text-slate-500 text-sm leading-6">
                    {celebrations.length === 0
                      ? 'No birthdays or membership anniversaries in the next 7 days.'
                      : `${celebrations.length} upcoming birthdays and membership anniversaries.`}
@@ -239,21 +233,20 @@ const Dashboard: React.FC<DashboardProps> = ({ members, transactions, dashboardT
                  {celebrations.length > 0 && (
                    <ul className="space-y-2">
                      {celebrations.slice(0, 3).map(item => (
-                       <li key={item.id} className="flex items-center justify-between gap-3 border-t border-white/10 pt-2 text-sm">
-                         <span className="truncate font-medium text-white">{item.name}</span>
-                         <span className="shrink-0 text-xs text-slate-300">{item.daysAway === 0 ? 'Today' : `In ${item.daysAway}d`}</span>
+                       <li key={item.id} className="flex items-center justify-between gap-3 border-t border-slate-200 pt-2 text-sm">
+                         <span className="truncate font-medium text-slate-800">{item.name}</span>
+                         <span className="shrink-0 text-xs text-slate-500">{item.daysAway === 0 ? 'Today' : `In ${item.daysAway}d`}</span>
                        </li>
                      ))}
                    </ul>
                  )}
                  <button
                    onClick={() => onNavigate('COMMUNICATION')}
-                   className="w-full rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100 transition-colors"
+                   className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                  >
                    Open communications
                  </button>
               </div>
-              <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-brand-indigo rounded-full blur-[80px] opacity-10 group-hover:scale-125 transition-transform duration-1000" />
            </div>
         </div>
       </div>

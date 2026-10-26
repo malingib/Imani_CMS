@@ -2,21 +2,19 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Users, MapPin, TrendingUp, PieChart as PieIcon, 
-  Activity, Map as MapIcon,
-  ExternalLink, ArrowUpRight,
-  Target, UserPlus, Heart,
-  Calendar, Layers, Sparkles, Home, Loader2,
-  Search, GraduationCap, Building2, Stethoscope, Cross,
-  ShieldAlert, CheckCircle2
+  Activity,
+  ArrowUpRight,
+  UserPlus, Heart,
+  Calendar, Layers, Sparkles, Home,
+  CheckCircle2
 } from 'lucide-react';
 import { 
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area
 } from 'recharts';
 import { Member, ChurchEvent } from '../types';
-import { scoutOutreachLocations } from '../services/geminiService';
 
-type AnalyticsTab = 'DEMOGRAPHICS' | 'GROWTH' | 'ENGAGEMENT' | 'RESOURCES';
+type AnalyticsTab = 'DEMOGRAPHICS' | 'GROWTH' | 'ENGAGEMENT';
 
 interface DemographicsAnalysisProps {
   members: Member[];
@@ -25,11 +23,6 @@ interface DemographicsAnalysisProps {
 
 const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, events = [] }) => {
   const [activeTab, setActiveTab] = useState<AnalyticsTab>('DEMOGRAPHICS');
-  // Resource Finder State
-  const [resourceType, setResourceType] = useState('Schools');
-  const [isFindingResources, setIsFindingResources] = useState(false);
-  const [resourceResults, setResourceResults] = useState<{text: string, groundingChunks: any[]} | null>(null);
-
   const COLORS = ['#4F46E5', '#0EA5E9', '#10B981', '#FFB800', '#8B5CF6', '#F43F5E'];
 
   const locationData = useMemo(() => {
@@ -83,25 +76,6 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
       attendance: Array.isArray(event.attendance) ? event.attendance.length : 0,
     })), [events]);
 
-  const handleFindResources = async () => {
-    setIsFindingResources(true);
-    setResourceResults(null);
-    try {
-      const topLoc = locationData[0]?.name;
-      if (!topLoc) {
-        alert('Add location details to member records before searching for nearby community resources.');
-        return;
-      }
-      const res = await scoutOutreachLocations(`${resourceType} near ${topLoc} for community service and benevolence ministry`);
-      setResourceResults(res);
-    } catch (e) {
-      alert('Failed to find locations.');
-    } finally {
-      setIsFindingResources(false);
-    }
-  };
-
-
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -137,7 +111,6 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
         <div className="flex bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm overflow-x-auto no-scrollbar glass-card self-start">
           {[
             { id: 'DEMOGRAPHICS', label: 'Congregation', icon: Users },
-            { id: 'RESOURCES', label: 'Resources', icon: MapIcon },
             { id: 'GROWTH', label: 'Growth', icon: ArrowUpRight },
             { id: 'ENGAGEMENT', label: 'Engagement', icon: Activity }
           ].map(tab => (
@@ -156,113 +129,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
         </div>
       </div>
 
-      {activeTab === 'RESOURCES' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 animate-in zoom-in duration-300">
-           <div className="lg:col-span-4 space-y-6">
-              <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-8">
-                 <div className="flex items-center gap-3">
-                    <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-lg"><Target size={24}/></div>
-                    <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Location Finder</h3>
-                 </div>
-                 
-                 <p className="text-sm text-slate-400 font-medium leading-relaxed">
-                   Find nearby community facilities using the most common location in member records.
-                 </p>
-
-                 <div className="space-y-4">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-2 tracking-widest">Asset Category</label>
-                    <div className="grid grid-cols-2 gap-2">
-                       {[
-                         { id: 'Schools', icon: GraduationCap },
-                         { id: 'Hospitals', icon: Stethoscope },
-                         { id: 'Social Halls', icon: Building2 },
-                         { id: 'Police Stations', icon: ShieldAlert }
-                       ].map(type => (
-                         <button 
-                           key={type.id} 
-                           onClick={() => setResourceType(type.id)}
-                           className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${resourceType === type.id ? 'bg-brand-primary text-white border-brand-primary' : 'bg-slate-50 border-transparent text-slate-400 hover:border-slate-100'}`}
-                         >
-                            <type.icon size={20} className="mb-2"/>
-                            <span className="text-[9px] font-black uppercase">{type.id}</span>
-                         </button>
-                       ))}
-                    </div>
-                    <button 
-                      onClick={handleFindResources}
-                      disabled={isFindingResources}
-                      className="w-full py-4 bg-brand-primary text-white rounded-lg font-black shadow-sm hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                    >
-                       {isFindingResources ? <Loader2 className="animate-spin" size={18}/> : <Search size={18}/>}
-                       {isFindingResources ? 'Processing...' : 'Search'}
-                    </button>
-                 </div>
-              </div>
-
-              <div className="bg-brand-primary p-5 sm:p-6 rounded-xl text-white shadow-sm relative overflow-hidden">
-                 <div className="relative z-10 space-y-4">
-                    <div className="flex items-center gap-2 text-brand-gold">
-                      <Cross size={16}/>
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">Community</span>
-                    </div>
-                    <h4 className="text-lg font-black uppercase leading-tight">Community Resources</h4>
-                    <p className="text-xs text-indigo-100 opacity-70 leading-relaxed font-medium">Identifying partner institutions near member concentrations to streamline church-led community outreach.</p>
-                 </div>
-                 <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
-              </div>
-           </div>
-
-           <div className="lg:col-span-8">
-              {resourceResults ? (
-                <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-10 min-h-[600px]">
-                   <div className="flex justify-between items-center border-b border-slate-50 pb-8">
-                      <div>
-                         <h4 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Results</h4>
-                         <p className="text-[10px] font-black uppercase text-brand-indigo tracking-widest mt-1">Results from Google Maps</p>
-                      </div>
-                      <div className="p-3 bg-brand-emerald/10 text-brand-emerald rounded-xl"><CheckCircle2 size={24}/></div>
-                   </div>
-
-                   <p className="text-lg text-slate-700 font-medium italic border-l-4 border-brand-gold pl-8 py-2">"{resourceResults.text}"</p>
-
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {resourceResults.groundingChunks.map((chunk, i) => (
-                        <div key={i} className="group bg-slate-50 border border-slate-100 p-5 sm:p-6 rounded-xl hover:bg-white hover:shadow-sm transition-all space-y-6">
-                           <div className="flex justify-between items-start">
-                              <div className="p-4 bg-white text-brand-primary rounded-lg shadow-sm group-hover:bg-brand-primary group-hover:text-white transition-all">
-                                 <Building2 size={24}/>
-                              </div>
-                              <span className="text-[9px] font-black uppercase text-slate-300">Result #{i+1}</span>
-                           </div>
-                           <div>
-                              <h5 className="text-xl font-black text-slate-800 line-clamp-1">{chunk.maps?.title || "Local Hub"}</h5>
-                              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Suggested community resource</p>
-                           </div>
-                           <a 
-                             href={chunk.maps?.uri} 
-                             target="_blank" 
-                             rel="noopener noreferrer"
-                             className="w-full py-4 bg-brand-indigo text-white rounded-lg font-black text-[10px] uppercase tracking-widest shadow-sm shadow-indigo-100 hover:bg-brand-primary transition-all flex items-center justify-center gap-2"
-                           >
-                              <ExternalLink size={14}/> View Detailed Map
-                           </a>
-                        </div>
-                      ))}
-                   </div>
-                </div>
-              ) : (
-                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl h-full min-h-[600px] flex flex-col items-center justify-center text-center p-12">
-                   <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-inner mb-6">
-                      <Sparkles size={48} className="text-slate-200"/>
-                   </div>
-                   <h4 className="text-xl font-black text-slate-400 uppercase">No Results Yet</h4>
-                   <p className="max-w-xs text-sm font-medium text-slate-300 mt-2 leading-relaxed">Choose a resource category and search to see suggestions.</p>
-                </div>
-              )}
-           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {(() => {
             const active = members.filter(member => member.status === 'ACTIVE').length;
             const now = new Date();
@@ -299,8 +166,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
       )}
 
       {/* Main Content Area (Hidden if in Resources tab for cleaner UI) */}
-      {activeTab !== 'RESOURCES' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
           <div className="lg:col-span-8 space-y-8">
             {activeTab === 'DEMOGRAPHICS' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
@@ -445,8 +311,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
              </div>
           </div>
         </div>
-      )}
-
+      </div>
 
     </div>
   );

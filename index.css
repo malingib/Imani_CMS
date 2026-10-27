@@ -232,7 +232,7 @@
 .imani-page [class*="rounded-[1.5rem]"], .imani-page [class*="rounded-[1.25rem]"],
 .imani-page [class*="rounded-[1rem]"] { border-radius: 0.65rem !important; }
 .imani-page [class*="bg-white"][class*="rounded-"] { border-color: var(--page-rule) !important; box-shadow: none !important; }
-.imani-page input:not([type="checkbox"]):not([type="radio]), .imani-page select, .imani-page textarea {
+.imani-page input:not([type="checkbox"]):not([type="radio"]), .imani-page select, .imani-page textarea {
   min-height: 2.65rem; border-color: var(--page-rule) !important; border-radius: 0.5rem !important;
   background-color: var(--page-paper); box-shadow: none !important; font-weight: 450 !important;
 }

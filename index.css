@@ -394,7 +394,7 @@
   .imani-dashboard { gap: 1.25rem; }
   .imani-dashboard header h1 { font-size: 1.7rem; line-height: 1.2; }
   .imani-dashboard section { min-width: 0; }
-  .imani-dashboard [role="region"] { min-width: 0; }
+  .imani-dashboard [role=region] { min-width: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .imani-workspace *, .imani-platform *, .imani-dashboard * {

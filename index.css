@@ -1,40 +1,38 @@
-/* Hallmark · macrostructure: operational-index · tone: restrained pastoral · anchor hue: slate */
-/* Critique: inconsistent page chrome, oversized radii and uppercase-heavy controls obscured core tasks. */
+/* Hallmark · macrostructure: operational-index · tone: restrained pastoral · anchor hue: deep teal */
+/* Palette: deep teal anchors the brand; warm brass is a small accent; semantic green is reserved for success. */
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Oak & Grid', serif;
-
-  --color-brand-primary: #1E293B;
-  --color-brand-primary-50: #F8FAFC;
-  --color-brand-primary-100: #F1F5F9;
-  --color-brand-primary-200: #E2E8F0;
-  --color-brand-primary-300: #CBD5E1;
-  --color-brand-primary-400: #94A3B8;
-  --color-brand-primary-500: #64748B;
-  --color-brand-primary-600: #1E293B;
-  --color-brand-primary-700: #0F172A;
-  --color-brand-primary-800: #020617;
-  --color-brand-primary-900: #000000;
-
-  --color-brand-indigo: #4F46E5;
-  --color-brand-indigo-50: #EEF2FF;
-  --color-brand-indigo-100: #E0E7FF;
-  --color-brand-indigo-500: #4F46E5;
-  --color-brand-indigo-600: #4338CA;
-  --color-brand-indigo-700: #3730A3;
-
-  --color-brand-gold: #FFB800;
-  --color-brand-gold-50: #FFFBEB;
-  --color-brand-gold-100: #FEF3C7;
-  --color-brand-gold-500: #FFB800;
-  --color-brand-gold-600: #D97706;
-
-  --color-brand-emerald: #10B981;
-  --color-brand-emerald-50: #ECFDF5;
-  --color-brand-emerald-100: #D1FAE5;
-  --color-brand-emerald-500: #10B981;
-  --color-brand-emerald-600: #059669;
+  --font-sans: 'DM Sans', Inter, ui-sans-serif, system-ui, sans-serif;
+  /* Imani palette: deep teal, warm neutral surfaces, restrained brass. */
+  --color-brand-primary: #173B3A;
+  --color-brand-primary-50: #F5F8F7;
+  --color-brand-primary-100: #E8F0EE;
+  --color-brand-primary-200: #D2E1DD;
+  --color-brand-primary-300: #B0C9C3;
+  --color-brand-primary-400: #83A69F;
+  --color-brand-primary-500: #527D77;
+  --color-brand-primary-600: #285653;
+  --color-brand-primary-700: #173B3A;
+  --color-brand-primary-800: #102D2D;
+  --color-brand-primary-900: #0A2020;
+  /* Legacy token name retained to avoid touching component behavior. */
+  --color-brand-indigo: #0F766E;
+  --color-brand-indigo-50: #F0FDFA;
+  --color-brand-indigo-100: #CCFBF1;
+  --color-brand-indigo-500: #0F766E;
+  --color-brand-indigo-600: #0D625B;
+  --color-brand-indigo-700: #115E59;
+  --color-brand-gold: #B58A45;
+  --color-brand-gold-50: #FAF7F0;
+  --color-brand-gold-100: #F1E7D2;
+  --color-brand-gold-500: #B58A45;
+  --color-brand-gold-600: #8D682F;
+  --color-brand-emerald: #16806D;
+  --color-brand-emerald-50: #EFF8F4;
+  --color-brand-emerald-100: #D5EEE4;
+  --color-brand-emerald-500: #16806D;
+  --color-brand-emerald-600: #116957;
 }
 
 @keyframes retry-pulse {
@@ -50,10 +48,10 @@
 
 /* Imani workspace design system — intentionally scoped away from login/signup. */
 .imani-workspace {
-  --imani-border: #e2e8f0;
-  --imani-muted: #64748b;
-  --imani-ink: #0f172a;
-  background: #f8fafc;
+  --imani-border: #dce6e2;
+  --imani-muted: #647a76;
+  --imani-ink: #173b3a;
+  background: #f7f9f8;
   color: var(--imani-ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -81,7 +79,7 @@
 .imani-workspace select,
 .imani-workspace textarea {
   border-radius: 0.5rem;
-  border-color: #cbd5e1;
+  border-color: #c4d5d0;
   box-shadow: none;
 }
 .imani-workspace button { transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease; }
@@ -90,19 +88,19 @@
 .imani-workspace input:focus-visible,
 .imani-workspace select:focus-visible,
 .imani-workspace textarea:focus-visible {
-  outline: 2px solid #64748b;
+  outline: 2px solid #647a76;
   outline-offset: 2px;
 }
 .imani-sidebar {
   box-shadow: none !important;
-  border-color: #e2e8f0 !important;
+  border-color: #dce6e2 !important;
 }
 .imani-sidebar nav button { border-radius: 0.5rem !important; }
 .imani-sidebar nav button[class*="bg-brand-primary/5"] {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
+  background: #edf3f1 !important;
+  color: #173b3a !important;
 }
-.imani-sidebar nav button[class*="bg-brand-primary/5"] svg { color: #334155 !important; }
+.imani-sidebar nav button[class*="bg-brand-primary/5"] svg { color: #285653 !important; }
 @media (max-width: 640px) {
   .imani-workspace { overflow-x: clip; }
   .imani-workspace [class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -113,30 +111,30 @@
 .imani-workspace,
 .imani-platform {
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #173b3a;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --muted: #f8fafc;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #94a3b8;
+  --card-foreground: #173b3a;
+  --muted: #f7f9f8;
+  --muted-foreground: #647a76;
+  --border: #dce6e2;
+  --input: #dce6e2;
+  --ring: #527d77;
 }
 .imani-platform {
-  background: #f8fafc;
-  color: #0f172a;
+  background: #f7f9f8;
+  color: #173b3a;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 .imani-platform aside {
   box-shadow: none !important;
-  border-color: #e2e8f0 !important;
+  border-color: #dce6e2 !important;
 }
 .imani-platform nav button { border-radius: 0.5rem !important; }
 .imani-platform nav button[class*="bg-brand-primary"] {
-  background: #f1f5f9 !important;
-  color: #0f172a !important;
+  background: #edf3f1 !important;
+  color: #173b3a !important;
 }
-.imani-platform nav button[class*="bg-brand-primary"] svg { color: #334155 !important; }
+.imani-platform nav button[class*="bg-brand-primary"] svg { color: #285653 !important; }
 .imani-platform [class*="bg-gradient-to-"],
 .imani-workspace [class*="bg-gradient-to-"] {
   background-image: none !important;
@@ -161,25 +159,25 @@
   border-spacing: 0;
 }
 .imani-platform thead,
-.imani-workspace thead { background-color: #f8fafc; }
+.imani-workspace thead { background-color: #f7f9f8; }
 .imani-platform th,
 .imani-workspace th {
-  color: #64748b;
+  color: #647a76;
   font-weight: 500;
   white-space: nowrap;
 }
 .imani-platform td,
 .imani-platform th,
 .imani-workspace td,
-.imani-workspace th { border-bottom-color: #e2e8f0; }
+.imani-workspace th { border-bottom-color: #dce6e2; }
 .imani-platform [role="dialog"],
-.imani-workspace [role="dialog"] { border: 1px solid #e2e8f0; }
+.imani-workspace [role="dialog"] { border: 1px solid #dce6e2; }
 .imani-platform button:focus-visible,
 .imani-platform a:focus-visible,
 .imani-platform input:focus-visible,
 .imani-platform select:focus-visible,
 .imani-platform textarea:focus-visible {
-  outline: 2px solid #64748b;
+  outline: 2px solid #647a76;
   outline-offset: 2px;
 }
 @media (max-width: 640px) {
@@ -190,14 +188,14 @@
 
 /* KPI blocks follow the quiet, compact shadcn dashboard treatment. */
 .imani-platform .grid > div > div > div[class*="bg-brand-"] {
-  background: #f1f5f9 !important;
-  color: #475569 !important;
+  background: #edf3f1 !important;
+  color: #526d68 !important;
   border-radius: 0.5rem !important;
   box-shadow: none !important;
 }
-.imani-platform .grid > div > div > div[class*="bg-brand-"] svg { color: #475569 !important; }
+.imani-platform .grid > div > div > div[class*="bg-brand-"] svg { color: #526d68 !important; }
 .imani-platform .grid > div[class*="bg-white"][class*="rounded-"] {
-  border-color: #e2e8f0 !important;
+  border-color: #dce6e2 !important;
   box-shadow: none !important;
 }
 

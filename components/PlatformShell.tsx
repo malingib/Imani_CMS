@@ -34,8 +34,8 @@ const PlatformShell: React.FC<Props> = ({ onOpenClient, onSelectClient, onLogout
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
-      <aside className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+    <div className="imani-platform min-h-screen bg-slate-50 text-slate-800">
+      <aside className={`imani-sidebar fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-6">
           <div className="h-11 w-11"><ImaniLogoIcon /></div>
           <div><p className="text-base font-black uppercase tracking-tight text-brand-primary">Imani CMS</p><p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Platform Control</p></div>

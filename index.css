@@ -316,3 +316,91 @@
     scroll-behavior: auto !important; transition-duration: 0.01ms !important;
   }
 }
+
+
+/* Product-wide interaction and workflow refinements. Kept scoped to signed-in workspaces. */
+.imani-workspace :is(button, a, input, select, textarea, [role="button"]):focus-visible,
+.imani-platform :is(button, a, input, select, textarea, [role="button"]):focus-visible,
+.imani-page :is(button, a, input, select, textarea, [role="button"]):focus-visible {
+  outline: 2px solid #285653;
+  outline-offset: 2px;
+}
+.imani-workspace button:disabled,
+.imani-platform button:disabled,
+.imani-page button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.imani-workspace input[aria-invalid="true"],
+.imani-workspace select[aria-invalid="true"],
+.imani-workspace textarea[aria-invalid="true"],
+.imani-platform input[aria-invalid="true"],
+.imani-platform select[aria-invalid="true"],
+.imani-platform textarea[aria-invalid="true"],
+.imani-page input[aria-invalid="true"],
+.imani-page select[aria-invalid="true"],
+.imani-page textarea[aria-invalid="true"] {
+  border-color: #b42318 !important;
+  box-shadow: 0 0 0 1px #b42318 !important;
+}
+.imani-workspace :is(input, select, textarea)::placeholder,
+.imani-platform :is(input, select, textarea)::placeholder {
+  color: #718581;
+  opacity: 1;
+}
+.imani-workspace :is(label, legend),
+.imani-platform :is(label, legend),
+.imani-page :is(label, legend) {
+  line-height: 1.45;
+}
+.imani-workspace table th,
+.imani-platform table th,
+.imani-page table th {
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+  text-align: left;
+}
+.imani-workspace table td,
+.imani-platform table td,
+.imani-page table td {
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+  vertical-align: middle;
+}
+.imani-workspace tbody tr:last-child td,
+.imani-platform tbody tr:last-child td,
+.imani-page tbody tr:last-child td {
+  border-bottom-width: 0;
+}
+.imani-workspace :is(input, select, textarea),
+.imani-platform :is(input, select, textarea),
+.imani-page :is(input, select, textarea) {
+  max-width: 100%;
+}
+.imani-dashboard {
+  min-width: 0;
+  color: #173b3a;
+}
+.imani-dashboard :is(h1, h2, h3) {
+  text-wrap: balance;
+}
+.imani-dashboard button {
+  -webkit-tap-highlight-color: transparent;
+}
+.imani-dashboard .recharts-wrapper {
+  max-width: 100%;
+}
+@media (max-width: 640px) {
+  .imani-dashboard { gap: 1.25rem; }
+  .imani-dashboard header h1 { font-size: 1.7rem; line-height: 1.2; }
+  .imani-dashboard section { min-width: 0; }
+  .imani-dashboard [role="region"] { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .imani-workspace *, .imani-platform *, .imani-dashboard * {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

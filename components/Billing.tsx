@@ -78,7 +78,7 @@ const Billing: React.FC<BillingProps> = ({ churchId }) => {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 pb-12">
+    <div className="imani-page imani-page--billing mx-auto max-w-6xl space-y-8 pb-12">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">Account</p>

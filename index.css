@@ -105,3 +105,83 @@
   .imani-workspace { overflow-x: clip; }
   .imani-workspace [class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+
+/* Shared shadcn-inspired dashboard treatment for both church and platform workspaces. */
+.imani-workspace,
+.imani-platform {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --muted: #f8fafc;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #94a3b8;
+}
+.imani-platform {
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.imani-platform aside {
+  box-shadow: none !important;
+  border-color: #e2e8f0 !important;
+}
+.imani-platform nav button { border-radius: 0.5rem !important; }
+.imani-platform nav button[class*="bg-brand-primary"] {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+.imani-platform nav button[class*="bg-brand-primary"] svg { color: #334155 !important; }
+.imani-platform [class*="bg-gradient-to-"],
+.imani-workspace [class*="bg-gradient-to-"] {
+  background-image: none !important;
+}
+.imani-platform [class*="shadow-xl"],
+.imani-platform [class*="shadow-2xl"],
+.imani-platform [class*="shadow-lg"],
+.imani-workspace [class*="shadow-xl"],
+.imani-workspace [class*="shadow-2xl"],
+.imani-workspace [class*="shadow-lg"] {
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
+}
+.imani-platform [class*="rounded-3xl"],
+.imani-platform [class*="rounded-[2.5rem]"],
+.imani-workspace [class*="rounded-3xl"],
+.imani-workspace [class*="rounded-[2.5rem]"] {
+  border-radius: 0.75rem !important;
+}
+.imani-platform table,
+.imani-workspace table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.imani-platform thead,
+.imani-workspace thead { background-color: #f8fafc; }
+.imani-platform th,
+.imani-workspace th {
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.imani-platform td,
+.imani-platform th,
+.imani-workspace td,
+.imani-workspace th { border-bottom-color: #e2e8f0; }
+.imani-platform [role="dialog"],
+.imani-workspace [role="dialog"] { border: 1px solid #e2e8f0; }
+.imani-platform button:focus-visible,
+.imani-platform a:focus-visible,
+.imani-platform input:focus-visible,
+.imani-platform select:focus-visible,
+.imani-platform textarea:focus-visible {
+  outline: 2px solid #64748b;
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .imani-platform { overflow-x: clip; }
+  .imani-platform [class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .imani-platform main > div { min-width: 0; }
+}

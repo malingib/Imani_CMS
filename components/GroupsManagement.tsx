@@ -82,7 +82,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="imani-page imani-page--groups space-y-8 animate-in fade-in duration-500">
       {successMessage && (
         <div className="fixed top-24 right-8 bg-brand-primary text-white px-6 py-4 rounded-2xl shadow-sm flex items-center gap-3 animate-in slide-in-from-right-8 z-[100]">
           <CheckCircle2 size={24} />

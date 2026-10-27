@@ -161,9 +161,9 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
             <button onClick={() => onNavigate('REPORTS')} className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary hover:underline">View reports <ChevronRight size={15} /></button>
           </div>
-          <div className="h-[280px] w-full">
+          <div className="h-[280px] min-h-[280px] min-w-0 w-full" style={{ width: '100%', minWidth: 0, height: 280, minHeight: 280 }}>
             {performanceData.some(item => item.tithes > 0) ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280} debounce={80}>
                 <BarChart data={performanceData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />

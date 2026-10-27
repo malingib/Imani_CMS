@@ -53,7 +53,7 @@
   --imani-border: #e2e8f0;
   --imani-muted: #64748b;
   --imani-ink: #0f172a;
-  background: #f8fafc;
+  background: var(--page-subtle);
   color: var(--imani-ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -63,7 +63,7 @@
 }
 .imani-workspace [class*="bg-gradient-to-"] {
   background-image: none !important;
-  background-color: #fff !important;
+  background-color: var(--page-paper) !important;
 }
 .imani-workspace [class*="rounded-[2.5rem]"],
 .imani-workspace [class*="rounded-3xl"] {
@@ -99,7 +99,7 @@
 }
 .imani-sidebar nav button { border-radius: 0.5rem !important; }
 .imani-sidebar nav button[class*="bg-brand-primary/5"] {
-  background: #f1f5f9 !important;
+  background: var(--page-subtle-strong) !important;
   color: #0f172a !important;
 }
 .imani-sidebar nav button[class*="bg-brand-primary/5"] svg { color: #334155 !important; }
@@ -112,18 +112,18 @@
 /* Shared shadcn-inspired dashboard treatment for both church and platform workspaces. */
 .imani-workspace,
 .imani-platform {
-  --background: #ffffff;
+  --background: var(--page-paper)fff;
   --foreground: #0f172a;
-  --card: #ffffff;
+  --card: var(--page-paper)fff;
   --card-foreground: #0f172a;
-  --muted: #f8fafc;
+  --muted: var(--page-subtle);
   --muted-foreground: #64748b;
   --border: #e2e8f0;
   --input: #e2e8f0;
   --ring: #94a3b8;
 }
 .imani-platform {
-  background: #f8fafc;
+  background: var(--page-subtle);
   color: #0f172a;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -133,7 +133,7 @@
 }
 .imani-platform nav button { border-radius: 0.5rem !important; }
 .imani-platform nav button[class*="bg-brand-primary"] {
-  background: #f1f5f9 !important;
+  background: var(--page-subtle-strong) !important;
   color: #0f172a !important;
 }
 .imani-platform nav button[class*="bg-brand-primary"] svg { color: #334155 !important; }
@@ -161,7 +161,7 @@
   border-spacing: 0;
 }
 .imani-platform thead,
-.imani-workspace thead { background-color: #f8fafc; }
+.imani-workspace thead { background-color: var(--page-subtle); }
 .imani-platform th,
 .imani-workspace th {
   color: #64748b;
@@ -190,7 +190,7 @@
 
 /* KPI blocks follow the quiet, compact shadcn dashboard treatment. */
 .imani-platform .grid > div > div > div[class*="bg-brand-"] {
-  background: #f1f5f9 !important;
+  background: var(--page-subtle-strong) !important;
   color: #475569 !important;
   border-radius: 0.5rem !important;
   box-shadow: none !important;
@@ -209,7 +209,9 @@
   --page-rule: var(--color-brand-primary-200);
   --page-muted: var(--color-brand-primary-500);
   --page-ink: var(--color-brand-primary);
-  --page-paper: #ffffff;
+  --page-paper: var(--page-paper)fff;
+  --page-subtle: var(--page-subtle);
+  --page-subtle-strong: var(--page-subtle-strong);
   color: var(--page-ink);
   min-width: 0;
   overflow-wrap: break-word;
@@ -271,7 +273,7 @@
 .imani-page input::placeholder,
 .imani-page textarea::placeholder { color: var(--page-muted); font-weight: 400; }
 .imani-page table { width: 100%; border-collapse: separate; border-spacing: 0; }
-.imani-page thead { background: #f8fafc; }
+.imani-page thead { background: var(--page-subtle); }
 .imani-page th {
   color: var(--page-muted) !important;
   font-size: 0.75rem !important;
@@ -282,7 +284,7 @@
 }
 .imani-page td,
 .imani-page th { border-bottom-color: var(--page-rule) !important; }
-.imani-page tbody tr:hover { background-color: #f8fafc; }
+.imani-page tbody tr:hover { background-color: var(--page-subtle); }
 .imani-page [class*="text-[9px]"],
 .imani-page [class*="text-[8px]"] { font-size: 0.72rem !important; }
 .imani-page [class*="uppercase"][class*="tracking-widest"] {
@@ -293,7 +295,7 @@
 .imani-page [class*="bg-brand-primary/5"],
 .imani-page [class*="bg-brand-gold/5"],
 .imani-page [class*="bg-brand-emerald/10"] {
-  background-color: #f1f5f9 !important;
+  background-color: var(--page-subtle-strong) !important;
 }
 .imani-page [class*="text-brand-indigo"],
 .imani-page [class*="text-brand-gold"],
@@ -313,7 +315,7 @@
 .imani-page--finance > .grid:first-of-type > div {
   border: 1px solid var(--page-rule);
   border-radius: 0.65rem;
-  background: #fff;
+  background: var(--page-paper);
   box-shadow: none;
 }
 .imani-page--finance [class*="bg-brand-primary"] { box-shadow: none !important; }
@@ -328,7 +330,7 @@
 .imani-page--events [class*="bg-brand-gold"],
 .imani-page--events [class*="bg-brand-emerald"],
 .imani-page--events [class*="bg-purple-"],
-.imani-page--events [class*="bg-pink-"] { background-color: #f1f5f9 !important; }
+.imani-page--events [class*="bg-pink-"] { background-color: var(--page-subtle-strong) !important; }
 
 /* Groups: directory rows stay visually quiet until the user needs an action. */
 .imani-page--groups [class*="grid"] > div[class*="bg-white"] {
@@ -366,7 +368,6 @@
 .imani-page--billing table { font-variant-numeric: tabular-nums; }
 
 @media (max-width: 640px) {
-  html, body { overflow-x: clip; }
   .imani-page { overflow-x: clip; }
   .imani-page > header,
   .imani-page > div:first-child { gap: 1rem; }

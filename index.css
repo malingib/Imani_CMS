@@ -262,7 +262,7 @@
 .imani-page--members tbody tr { transition: background-color 140ms ease; }
 
 /* Finance: ledger-first hierarchy and compact, comparable totals. */
-.imani-page--finance > .grid:first-of-type { gap: 0.75rem !important; }
+.imani-page--finance > .grid { gap: 0.75rem !important; }
 .imani-page--finance > .grid:first-of-type > div {
   border: 1px solid var(--page-rule); border-radius: 0.65rem; background: var(--page-paper); box-shadow: none;
 }

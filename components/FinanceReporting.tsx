@@ -43,6 +43,8 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
 }) => {
   const [filterType, setFilterType] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
   const [showFormModal, setShowFormModal] = useState<Transaction | 'NEW_INCOME' | 'NEW_EXPENSE' | null>(null);
   const [viewingTransaction, setViewingTransaction] = useState<Transaction | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -68,12 +70,18 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
     return transactions.filter(t => {
       const matchesType = filterType === 'All'
         || (filterType === 'Expense' ? t.category === 'Expense' : t.type === filterType);
-      const matchesSearch = 
-        (t.memberName || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-        (t.reference || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const query = searchTerm.trim().toLowerCase();
+      const matchesSearch = !query ||
+        (t.memberName || '').toLowerCase().includes(query) ||
+        (t.reference || '').toLowerCase().includes(query) ||
+        (t.type || '').toLowerCase().includes(query) ||
+        (t.notes || '').toLowerCase().includes(query);
       return matchesType && matchesSearch;
-    });
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [transactions, filterType, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginatedTransactions = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const totalIncome = transactions.filter(t => t.category === 'Income').reduce((sum, t) => sum + t.amount, 0);
   const totalExpenses = transactions.filter(t => t.category === 'Expense').reduce((sum, t) => sum + t.amount, 0);
@@ -222,11 +230,11 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                 placeholder="Find records by name or reference..." 
                 className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-normal text-slate-800 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
                 value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
               />
             </div>
             <div className="flex gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-               <select className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 outline-none hover:border-slate-400 focus:ring-2 focus:ring-slate-200" onChange={e => setFilterType(e.target.value)}>
+               <select aria-label="Filter transactions by type" value={filterType} className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 outline-none hover:border-slate-400 focus:ring-2 focus:ring-slate-200" onChange={e => { setFilterType(e.target.value); setCurrentPage(1); }}>
                 <option value="All">All Transactions</option>
                 <option value="Tithe">Tithes Only</option>
                 <option value="Expense">Expenses Only</option>
@@ -242,7 +250,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
           <div className="min-h-[420px] overflow-hidden border-y border-slate-200 bg-white">
              <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 sm:px-5">
                 <div><h3 className="text-sm font-semibold text-slate-900">Transactions</h3><p className="mt-0.5 text-xs text-slate-500">Search, review and manage recorded income and expenses.</p></div>
-                <p className="whitespace-nowrap text-xs tabular-nums text-slate-500">{filtered.length} records</p>
+                <p className="whitespace-nowrap text-xs tabular-nums text-slate-500">{filtered.length ? (currentPage - 1) * pageSize + 1 : 0}–{Math.min(currentPage * pageSize, filtered.length)} of {filtered.length}</p>
              </div>
              
              {filtered.length > 0 ? (
@@ -259,7 +267,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
-                        {filtered.map(t => (
+                        {paginatedTransactions.map(t => (
                           <tr key={t.id} className="hover:bg-slate-50 transition-colors group">
                              <td className="px-4 py-3 sm:px-5">
                                 <p className="font-mono text-xs font-medium text-slate-700 mb-1">{t.reference}</p>
@@ -343,6 +351,15 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                   </div>
                </div>
              )}
+            {filtered.length > 0 && (
+              <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                <p className="text-xs text-slate-500">Page {currentPage} of {totalPages} · sorted newest first</p>
+                <div className="flex items-center gap-2">
+                  <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage(page => Math.max(1, page - 1))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+                  <button type="button" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 import {
   Users, MessageSquare, Wallet, CalendarDays, HandCoins, UserPlus,
-  CalendarPlus, ArrowUpRight, Clock3, ChevronRight, Smartphone
+  CalendarPlus, ArrowUpRight, Clock3, ChevronRight
 } from 'lucide-react';
 import { Member, Transaction, ChurchEvent, AppView, MemberStatus } from '../types';
 
@@ -31,6 +31,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   const monthLabel = now.toLocaleDateString('en-KE', { month: 'long', year: 'numeric' });
   const dateLabel = now.toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -41,7 +42,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const stats = useMemo(() => {
     const monthIncome = transactions.reduce((sum, transaction) => {
       const date = validDate(transaction.date);
-      return transaction.category === 'Income' && date && date >= startOfMonth ? sum + transaction.amount : sum;
+      return transaction.category === 'Income' && date && date >= startOfMonth && date < startOfNextMonth ? sum + transaction.amount : sum;
     }, 0);
     const newMembers = members.filter(member => {
       const date = validDate(member.joinDate);
@@ -57,7 +58,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       { label: 'Upcoming events', value: upcomingEvents.toLocaleString('en-KE'), detail: 'Scheduled from today', icon: CalendarDays, view: 'EVENTS' as AppView },
       { label: 'New members', value: newMembers.toLocaleString('en-KE'), detail: `Joined in ${monthLabel}`, icon: UserPlus, view: 'MEMBERS' as AppView },
     ];
-  }, [transactions, members, events, activeMembers, startOfMonth.getTime(), startOfToday.getTime(), monthLabel]);
+  }, [transactions, members, events, activeMembers, startOfMonth.getTime(), startOfNextMonth.getTime(), startOfToday.getTime(), monthLabel]);
 
   const performanceData = useMemo(() => {
     const monthly = new Map<string, number>();

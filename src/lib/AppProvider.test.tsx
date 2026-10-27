@@ -60,6 +60,7 @@ vi.mock("./app-data", () => ({
   createChurchAppDataService: vi.fn(() => ({
     loadChurchAppData: (...args: any[]) => mockLoadChurchData(...args),
     loadDashboardTransactions: vi.fn().mockResolvedValue([]),
+    loadLifetimeTitheTransactions: vi.fn().mockResolvedValue([]),
     createAuditLog: (...args: any[]) => mockCreateAuditLog(...args),
   })),
 }));

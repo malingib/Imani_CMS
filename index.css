@@ -1,3 +1,5 @@
+/* Hallmark · macrostructure: operational-index · tone: restrained pastoral · anchor hue: slate */
+/* Critique: inconsistent page chrome, oversized radii and uppercase-heavy controls obscured core tasks. */
 @import "tailwindcss";
 
 @theme {
@@ -197,4 +199,191 @@
 .imani-platform .grid > div[class*="bg-white"][class*="rounded-"] {
   border-color: #e2e8f0 !important;
   box-shadow: none !important;
+}
+
+
+/* Hallmark · macrostructure: operational-index · tone: restrained pastoral · anchor hue: slate */
+/* Critique: oversized radii, uppercase-heavy labels and repeated card treatments were competing with the work each screen needs to support. */
+/* Scope: client workspace pages only. The dashboard and login/signup retain their current composition. */
+.imani-page {
+  --page-rule: var(--color-brand-primary-200);
+  --page-muted: var(--color-brand-primary-500);
+  --page-ink: var(--color-brand-primary);
+  --page-paper: #ffffff;
+  color: var(--page-ink);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.imani-page h1,
+.imani-page h2,
+.imani-page h3,
+.imani-page h4 {
+  color: var(--page-ink);
+  letter-spacing: -0.025em;
+  text-transform: none !important;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.imani-page h1,
+.imani-page h2 { font-weight: 650 !important; }
+.imani-page h2 { font-size: clamp(1.45rem, 2vw, 1.8rem) !important; line-height: 1.2 !important; }
+.imani-page p { overflow-wrap: anywhere; }
+.imani-page button {
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  font-weight: 550 !important;
+  border-radius: 0.55rem !important;
+  box-shadow: none !important;
+  min-height: 2.5rem;
+}
+.imani-page button:focus-visible,
+.imani-page a:focus-visible,
+.imani-page input:focus-visible,
+.imani-page select:focus-visible,
+.imani-page textarea:focus-visible {
+  outline: 2px solid var(--color-brand-primary-500);
+  outline-offset: 2px;
+}
+.imani-page [class*="bg-gradient-to-"] {
+  background-image: none !important;
+  background-color: var(--page-paper) !important;
+}
+.imani-page [class*="shadow-"] { box-shadow: none !important; }
+.imani-page [class*="rounded-3xl"],
+.imani-page [class*="rounded-2xl"],
+.imani-page [class*="rounded-[1.5rem]"],
+.imani-page [class*="rounded-[1.25rem]"],
+.imani-page [class*="rounded-[1rem]"] { border-radius: 0.65rem !important; }
+.imani-page [class*="bg-white"][class*="rounded-"] {
+  border-color: var(--page-rule) !important;
+  box-shadow: none !important;
+}
+.imani-page input:not([type="checkbox"]):not([type="radio"]),
+.imani-page select,
+.imani-page textarea {
+  min-height: 2.65rem;
+  border-color: var(--page-rule) !important;
+  border-radius: 0.5rem !important;
+  background-color: var(--page-paper);
+  box-shadow: none !important;
+  font-weight: 450 !important;
+}
+.imani-page input::placeholder,
+.imani-page textarea::placeholder { color: var(--page-muted); font-weight: 400; }
+.imani-page table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.imani-page thead { background: #f8fafc; }
+.imani-page th {
+  color: var(--page-muted) !important;
+  font-size: 0.75rem !important;
+  font-weight: 550 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  white-space: nowrap;
+}
+.imani-page td,
+.imani-page th { border-bottom-color: var(--page-rule) !important; }
+.imani-page tbody tr:hover { background-color: #f8fafc; }
+.imani-page [class*="text-[9px]"],
+.imani-page [class*="text-[8px]"] { font-size: 0.72rem !important; }
+.imani-page [class*="uppercase"][class*="tracking-widest"] {
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+.imani-page [class*="bg-brand-indigo-50"],
+.imani-page [class*="bg-brand-primary/5"],
+.imani-page [class*="bg-brand-gold/5"],
+.imani-page [class*="bg-brand-emerald/10"] {
+  background-color: #f1f5f9 !important;
+}
+.imani-page [class*="text-brand-indigo"],
+.imani-page [class*="text-brand-gold"],
+.imani-page [class*="text-brand-emerald"] { color: var(--page-ink); }
+.imani-page > div { min-width: 0; }
+
+/* Members: a searchable registry, with the table as the primary surface. */
+.imani-page--members > div:nth-child(2) { border-radius: 0.65rem; }
+.imani-page--members table th:first-child,
+.imani-page--members table td:first-child { padding-left: 1.25rem; }
+.imani-page--members table th:last-child,
+.imani-page--members table td:last-child { padding-right: 1.25rem; }
+.imani-page--members tbody tr { transition: background-color 140ms ease; }
+
+/* Finance: ledger-first hierarchy and compact, comparable totals. */
+.imani-page--finance > .grid:first-of-type { gap: 0.75rem !important; }
+.imani-page--finance > .grid:first-of-type > div {
+  border: 1px solid var(--page-rule);
+  border-radius: 0.65rem;
+  background: #fff;
+  box-shadow: none;
+}
+.imani-page--finance [class*="bg-brand-primary"] { box-shadow: none !important; }
+
+/* Events: let the schedule and event information carry the page, not decoration. */
+.imani-page--events [class*="grid"] > div[class*="bg-white"] {
+  border: 1px solid var(--page-rule);
+  border-radius: 0.65rem;
+  box-shadow: none;
+}
+.imani-page--events [class*="bg-brand-indigo"],
+.imani-page--events [class*="bg-brand-gold"],
+.imani-page--events [class*="bg-brand-emerald"],
+.imani-page--events [class*="bg-purple-"],
+.imani-page--events [class*="bg-pink-"] { background-color: #f1f5f9 !important; }
+
+/* Groups: directory rows stay visually quiet until the user needs an action. */
+.imani-page--groups [class*="grid"] > div[class*="bg-white"] {
+  border: 1px solid var(--page-rule);
+  border-radius: 0.65rem;
+  box-shadow: none;
+}
+.imani-page--groups [class*="text-[10px]"] { font-size: 0.75rem !important; }
+
+/* Reports: report selector and charts use a document-like hierarchy. */
+.imani-page--reports [class*="grid-cols-4"] { gap: 0.75rem !important; }
+.imani-page--reports [class*="grid-cols-4"] > div {
+  border: 1px solid var(--page-rule);
+  border-radius: 0.65rem;
+  box-shadow: none;
+}
+.imani-page--reports [class*="grid-cols-4"] > div [class*="absolute bottom-0"] { display: none; }
+
+/* Settings: clear section tabs and compact, aligned form surfaces. */
+.imani-page--settings [class*="uppercase"][class*="tracking-widest"] { text-transform: none !important; }
+.imani-page--settings [class*="border-dashed"] { border-style: solid !important; }
+.imani-page--settings [class*="space-y-10"] { row-gap: 1.5rem !important; }
+
+/* Communications: compact workspace tabs; no fake automation state or inflated chrome. */
+.imani-page--communication [class*="rounded-2xl"][class*="border"] { border-radius: 0.65rem !important; }
+.imani-page--communication [class*="bg-brand-primary"][class*="text-white"] { background-color: var(--color-brand-primary) !important; }
+
+/* Billing: calm account overview with invoice records as the focal point. */
+.imani-page--billing > section { gap: 0.75rem !important; }
+.imani-page--billing > section > div {
+  border-color: var(--page-rule) !important;
+  border-radius: 0.65rem !important;
+  box-shadow: none !important;
+}
+.imani-page--billing table { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  html, body { overflow-x: clip; }
+  .imani-page { overflow-x: clip; }
+  .imani-page > header,
+  .imani-page > div:first-child { gap: 1rem; }
+  .imani-page [class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .imani-page table { min-width: 42rem; }
+  .imani-page--members table { min-width: 0; }
+  .imani-page--members th:nth-child(2),
+  .imani-page--members td:nth-child(2) { padding-left: 0.75rem; padding-right: 0.75rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .imani-page *,
+  .imani-page *::before,
+  .imani-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

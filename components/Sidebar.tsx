@@ -118,9 +118,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                   key={item.id}
                   onClick={() => setView(item.id as AppView)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={isActive ? "group flex w-full items-center gap-3 rounded-lg bg-slate-100 px-3 py-2.5 text-left font-semibold text-slate-950 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400" : "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"}
+                  className={isActive ? "group flex w-full items-center gap-3 rounded-lg border-l-2 border-brand-primary bg-brand-primary-50 px-3 py-2.5 text-left font-semibold text-brand-primary transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary" : "group flex w-full items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-2.5 text-left text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"}
                 >
-                  <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} className={isActive ? "text-slate-900" : "text-slate-400 group-hover:text-slate-700"} />
+                  <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} className={isActive ? "text-brand-primary" : "text-slate-400 group-hover:text-slate-700"} />
                   <span className="flex-1 text-[13px]">{item.label}</span>
                   {isActive && <span className="h-1.5 w-1.5 rounded-full bg-slate-700" aria-hidden="true" />}
                 </button>
@@ -133,8 +133,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="border-t border-slate-200 p-3 space-y-2">
         {currentUser.role !== UserRole.MEMBER && (
           <button onClick={() => setView('SETTINGS')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}>
-            <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
+            className={`w-full flex items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 transition-colors group ${currentView === 'SETTINGS' ? 'border-brand-primary bg-brand-primary-50 text-brand-primary font-semibold' : 'border-transparent text-slate-600 hover:bg-slate-50'}`}>
+            <SettingsIcon size={18} className={currentView === 'SETTINGS' ? 'text-brand-primary' : 'text-slate-400 group-hover:text-brand-primary'} />
             <span className="text-sm">Church Settings</span>
           </button>
         )}

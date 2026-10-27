@@ -334,7 +334,7 @@ const Membership: React.FC<MembershipProps> = ({
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-12">
+    <div className="imani-page imani-page--members space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">

@@ -153,7 +153,14 @@ const AccountShell = () => {
       <Sidebar currentView={pathToView(location.pathname) || 'DASHBOARD'} setView={(v) => { navigate(v); setSidebarOpen(false); }} currentUser={currentUser} branches={[]} onBranchChange={() => {}} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="imani-workspace flex-1 min-h-screen lg:ml-64 transition-all">
         <header className="h-16 sm:h-20 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-10 flex items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center gap-4"><button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg" aria-label="Open navigation"><Menu size={22} /></button><div className="lg:hidden w-8 h-8"><ImaniLogoIcon /></div><div className="hidden lg:block"><p className="text-sm font-semibold text-slate-900">{ROUTES[currentView]?.label || 'Dashboard'}</p></div></div>
+          <div className="flex items-center gap-4"><button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg" aria-label="Open navigation"><Menu size={22} /></button><div className="lg:hidden w-8 h-8"><ImaniLogoIcon /></div><div className="hidden lg:block">
+            <nav aria-label="Breadcrumb" className="mb-1 flex items-center gap-2 text-xs text-slate-500">
+              <button type="button" onClick={() => navigate('DASHBOARD')} className="rounded-sm hover:text-brand-primary hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">Workspace</button>
+              <span aria-hidden="true">/</span>
+              <span aria-current="page" className="font-medium text-slate-600">{ROUTES[currentView]?.label || 'Dashboard'}</span>
+            </nav>
+            <p className="text-sm font-semibold text-slate-900">{ROUTES[currentView]?.label || 'Dashboard'}</p>
+          </div></div>
           <div className="flex items-center gap-4 relative">
             <div ref={notifRef} className="relative">
               <button onClick={() => setNotifOpen(!notifOpen)} className="p-2 rounded-xl text-slate-400 hover:text-brand-primary hover:bg-slate-50 relative"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>{unreadCount > 0 && <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-brand-primary text-white text-[9px] font-black rounded-full border-2 border-white px-1">{unreadCount > 99 ? '99+' : unreadCount}</span>}</button>

@@ -39,6 +39,8 @@ const Membership: React.FC<MembershipProps> = ({
   currentUserRole 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [groupFilter, setGroupFilter] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -72,12 +74,15 @@ const Membership: React.FC<MembershipProps> = ({
 
   const filteredMembers = useMemo(() => {
     return members.filter(m => {
-      const matchesSearch = `${m.firstName} ${m.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) || m.phone.includes(searchTerm);
+      const matchesSearch = `${m.firstName} ${m.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) || m.phone.includes(searchTerm) || (m.email || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = statusFilter === 'All' || m.status === statusFilter;
       const matchesGroup = groupFilter === 'All' || (m.groups && m.groups.includes(groupFilter));
       return matchesSearch && matchesStatus && matchesGroup;
     });
   }, [members, searchTerm, statusFilter, groupFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
+  const paginatedMembers = filteredMembers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const memberGivings = useMemo(() => {
     if (!selectedMember) return [];
@@ -380,14 +385,14 @@ const Membership: React.FC<MembershipProps> = ({
               placeholder="Search by name, phone or email..." 
               className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-normal text-slate-800 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             />
           </div>
           <div className="flex gap-3 w-full xl:w-auto overflow-x-auto no-scrollbar pb-1 xl:pb-0">
             <select 
               className="shrink-0 cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 outline-none hover:border-slate-400 focus:ring-2 focus:ring-slate-200"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
             >
               <option value="All">All Statuses</option>
               {Object.values(MemberStatus).map(s => <option key={s} value={s}>{s}</option>)}
@@ -395,7 +400,7 @@ const Membership: React.FC<MembershipProps> = ({
             <select 
               className="px-6 py-4 border border-slate-200 rounded-2xl text-[10px] font-black uppercase bg-white outline-none shrink-0 cursor-pointer hover:border-brand-primary transition-colors shadow-sm"
               value={groupFilter}
-              onChange={(e) => setGroupFilter(e.target.value)}
+              onChange={(e) => { setGroupFilter(e.target.value); setCurrentPage(1); }}
             >
               <option value="All">All Ministries</option>
               {allPossibleGroups.map(g => <option key={g} value={g}>{g}</option>)}
@@ -405,7 +410,7 @@ const Membership: React.FC<MembershipProps> = ({
 
         <div className="flex flex-col gap-1 border-b border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div><h3 className="text-sm font-semibold text-slate-900">Member directory</h3><p className="mt-0.5 text-xs text-slate-500">Browse and manage congregation records.</p></div>
-          <p className="text-xs tabular-nums text-slate-500"><span className="font-semibold text-slate-900">{filteredMembers.length}</span> of {members.length} members</p>
+          <p className="text-xs tabular-nums text-slate-500"><span className="font-semibold text-slate-900">{filteredMembers.length ? (currentPage - 1) * pageSize + 1 : 0}–{Math.min(currentPage * pageSize, filteredMembers.length)}</span> of {filteredMembers.length} matching · {members.length} total</p>
         </div>
 
         {/* Member Table */}
@@ -421,7 +426,7 @@ const Membership: React.FC<MembershipProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredMembers.map((member) => (
+              {paginatedMembers.map((member) => (
                 <tr key={member.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 sm:px-5 py-3">
                     <div className="flex items-center gap-4">
@@ -508,6 +513,15 @@ const Membership: React.FC<MembershipProps> = ({
             <Users size={48} className="text-slate-200 mb-4" />
             <p className="text-sm font-semibold text-slate-900">No members found</p>
             <p className="mt-1 text-sm text-slate-500">Try adjusting your search or filters.</p>
+          </div>
+        )}
+        {filteredMembers.length > 0 && (
+          <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <p className="text-xs text-slate-500">Page {currentPage} of {totalPages} · {pageSize} records per page</p>
+            <div className="flex items-center gap-2">
+              <button type="button" disabled={currentPage === 1} onClick={() => setCurrentPage(page => Math.max(1, page - 1))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+              <button type="button" disabled={currentPage >= totalPages} onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+            </div>
           </div>
         )}
       </div>

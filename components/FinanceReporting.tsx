@@ -214,84 +214,81 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white p-4 sm:p-6 rounded-lg border border-slate-100 shadow-sm flex flex-col sm:flex-row gap-4 items-center">
+          <div className="flex flex-col gap-3 border-y border-slate-200 bg-white py-4 sm:flex-row sm:items-center sm:gap-4">
             <div className="relative flex-1 w-full">
-              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="text" 
                 placeholder="Find records by name or reference..." 
-                className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-brand-primary text-sm shadow-inner"
+                className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-normal text-slate-800 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="flex gap-2 w-full sm:w-auto overflow-x-auto no-scrollbar pb-1 sm:pb-0">
-               <select className="px-6 py-4 bg-white border border-slate-200 rounded-2xl text-[10px] font-black uppercase text-slate-700 outline-none cursor-pointer hover:border-brand-primary" onChange={e => setFilterType(e.target.value)}>
+               <select className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 outline-none hover:border-slate-400 focus:ring-2 focus:ring-slate-200" onChange={e => setFilterType(e.target.value)}>
                 <option value="All">All Transactions</option>
                 <option value="Tithe">Tithes Only</option>
                 <option value="Expense">Expenses Only</option>
                 <option value="Offering">Offerings</option>
                 <option value="Salary">Staff Salaries</option>
               </select>
-              <button onClick={handleExportCSV} className="p-4 bg-slate-100 text-slate-500 rounded-2xl hover:bg-brand-primary hover:text-white transition-all shadow-sm">
+              <button onClick={handleExportCSV} className="rounded-lg border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                  <Download size={20}/>
               </button>
             </div>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm min-h-[500px]">
-             <div className="p-8 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
-                <h3 className="text-xl font-black text-brand-primary uppercase tracking-tight">Transactions</h3>
-                <div className="flex items-center gap-2">
-                   <div className="w-2 h-2 rounded-full bg-brand-emerald animate-pulse" />
-                    <span className="text-[10px] font-black uppercase text-brand-emerald tracking-widest">Active</span>
-                </div>
+          <div className="min-h-[420px] overflow-hidden border-y border-slate-200 bg-white">
+             <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 sm:px-5">
+                <div><h3 className="text-sm font-semibold text-slate-900">Transactions</h3><p className="mt-0.5 text-xs text-slate-500">Search, review and manage recorded income and expenses.</p></div>
+                <p className="whitespace-nowrap text-xs tabular-nums text-slate-500">{filtered.length} records</p>
              </div>
              
              {filtered.length > 0 ? (
                <div className="overflow-x-auto">
-                  <table className="w-full text-left min-w-[800px]">
-                     <thead className="bg-slate-50 text-[10px] uppercase text-slate-400 font-black tracking-widest border-b border-slate-100">
+                  <table className="w-full min-w-[760px] text-left">
+                     <thead className="border-b border-slate-200 bg-slate-50/70 text-xs font-medium text-slate-500">
                         <tr>
-                           <th className="px-10 py-6">Transaction Meta</th>
+                           <th className="px-4 py-3 sm:px-5">Transaction Meta</th>
                            <th className="px-10 py-6">Payer / Recipient</th>
                            <th className="px-10 py-6">Category</th>
                            <th className="px-10 py-6">Source</th>
-                           <th className="px-10 py-6 text-right">Settled (KES)</th>
+                           <th className="px-4 py-3 text-right sm:px-5">Settled (KES)</th>
                            <th className="px-10 py-6"></th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
                         {filtered.map(t => (
-                          <tr key={t.id} className="hover:bg-slate-50 transition-all group">
-                             <td className="px-10 py-8">
-                                <p className="font-mono text-[10px] text-brand-indigo font-black mb-1">{t.reference}</p>
-                                <p className="text-[9px] text-slate-400 font-bold uppercase">{t.date}</p>
+                          <tr key={t.id} className="hover:bg-slate-50 transition-colors group">
+                             <td className="px-4 py-3 sm:px-5">
+                                <p className="font-mono text-xs font-medium text-slate-700 mb-1">{t.reference}</p>
+                                <p className="text-xs text-slate-500">{t.date}</p>
                              </td>
                              <td className="px-10 py-8">
-                                <p className="font-black text-slate-700 text-sm">{t.memberName}</p>
-                                <p className="text-[9px] text-slate-400 uppercase font-black tracking-tighter mt-1 truncate max-w-[150px]">{t.notes || 'No notes'}</p>
+                                <p className="text-sm font-medium text-slate-900">{t.memberName}</p>
+                                <p className="mt-0.5 max-w-[240px] truncate text-xs text-slate-500">{t.notes || 'No notes'}</p>
                              </td>
                              <td className="px-10 py-8">
-                                <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${t.category === 'Income' ? 'bg-brand-emerald/10 text-brand-emerald' : 'bg-brand-gold/10 text-brand-gold'}`}>
+                                <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${t.category === 'Income' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
                                    {t.type}
                                 </span>
                              </td>
                              <td className="px-10 py-8">
                                 <div className="flex flex-col">
-                                   <span className={`text-[8px] font-black uppercase ${t.source === 'INTEGRATED' ? 'text-brand-indigo' : 'text-slate-400'}`}>
+                                   <span className={`text-xs font-medium ${t.source === 'INTEGRATED' ? 'text-indigo-700' : 'text-slate-500'}`}>
                                       {t.source}
                                    </span>
                                    <div className="flex items-center gap-2 mt-1">
                                       {t.paymentMethod === 'M-Pesa' ? <Smartphone size={12} className="text-brand-indigo"/> : <Banknote size={12} className="text-brand-emerald"/>}
-                                      <span className="text-[10px] font-black text-slate-500 uppercase">{t.paymentMethod}</span>
+                                      <span className="text-xs text-slate-600">{t.paymentMethod}</span>
                                    </div>
                                 </div>
                              </td>
-                             <td className={`px-10 py-8 text-right font-black text-lg ${t.category === 'Expense' ? 'text-brand-gold' : 'text-slate-900'}`}>
+                             <td className={`px-10 py-8 text-right font-semibold text-sm ${t.category === 'Expense' ? 'text-brand-gold' : 'text-slate-900'}`}>
                                {t.category === 'Expense' ? '-' : ''}{t.amount.toLocaleString()}
                              </td>
-                             <td className="px-6 py-8 text-right relative">
+                             <td className="px-4 py-3 text-right relative">
                                 <button 
                                   onClick={() => setOpenActionId(openActionId === t.id ? null : t.id)}
                                   className="p-2 text-slate-300 hover:text-slate-600 transition-all"

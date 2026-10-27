@@ -52,36 +52,42 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
   const filteredItems = adminItems.filter(item => item.roles.includes(currentUser.role));
+  const navSections = [
+    { label: 'Workspace', ids: ['DASHBOARD'] },
+    { label: 'Church operations', ids: ['MEMBERS', 'GROUPS', 'EVENTS', 'COMMUNICATION'] },
+    { label: 'Finance & insights', ids: ['FINANCE', 'REPORTS', 'ANALYTICS'] },
+    { label: 'Administration', ids: ['AUDIT_LOGS', 'BILLING', 'PLATFORM_DASHBOARD', 'TENANTS'] },
+  ].map(section => ({ ...section, items: filteredItems.filter(item => section.ids.includes(item.id)) })).filter(section => section.items.length > 0);
 
   return (
     <aside className={`imani-sidebar
-      w-64 h-full bg-white text-slate-600 fixed left-0 top-0 flex flex-col border-r border-slate-100 shadow-sm lg:shadow-sm z-[70] transition-transform duration-300 ease-in-out
+      w-64 h-full bg-white text-slate-600 fixed left-0 top-0 flex flex-col border-r border-slate-200 z-[70] transition-transform duration-200 ease-out
       ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
     `}>
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-8">
+      <div className="px-5 pb-4 pt-5">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10"><ImaniLogoIcon /></div>
             <div>
-              <h1 className="text-lg font-black tracking-tight text-brand-primary uppercase">Imani CMS</h1>
-              <p className="text-[8px] text-slate-400 uppercase tracking-widest font-black">Church Management</p>
+              <h1 className="text-base font-semibold tracking-tight text-slate-900">Imani CMS</h1>
+              <p className="mt-0.5 text-[10px] font-medium text-slate-500">Church Management</p>
             </div>
           </div>
           <button onClick={onClose} className="lg:hidden p-2 text-slate-400" aria-label="Close navigation"><X size={20} /></button>
         </div>
 
         {currentUser.role !== UserRole.MEMBER && branches.length > 1 && (
-          <div className="mb-6 relative">
+          <div className="mb-2 relative">
             <button
               onClick={() => setIsBranchMenuOpen(!isBranchMenuOpen)}
-              className="w-full flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-brand-primary transition-all"
+              className="w-full flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2.5 group hover:border-slate-400 transition-colors"
               aria-expanded={isBranchMenuOpen}
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Building2 size={16} className="text-brand-primary" />
                 <div className="text-left min-w-0">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Branch</p>
-                  <p className="text-xs font-bold text-slate-700 truncate">{currentUser.branch || branches[0]}</p>
+                  <p className="text-[10px] font-medium text-slate-500 leading-none mb-1">Branch</p>
+                  <p className="text-xs font-medium text-slate-800 truncate">{currentUser.branch || branches[0]}</p>
                 </div>
               </div>
               <ChevronDown size={14} className={`text-slate-300 transition-transform ${isBranchMenuOpen ? 'rotate-180' : ''}`} />
@@ -100,22 +106,31 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto no-scrollbar" aria-label="Main navigation">
-        <p className="px-4 pt-2 pb-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">Navigation</p>
-        {filteredItems.map(item => {
-          const Icon = item.icon;
-          const isActive = currentView === item.id;
-          return (
-            <button key={item.id} onClick={() => setView(item.id as AppView)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${isActive ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}>
-              <Icon size={18} className={isActive ? 'text-brand-indigo' : 'text-slate-400 group-hover:text-brand-indigo'} />
-              <span className="text-sm">{item.label}</span>
-            </button>
-          );
-        })}
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 pb-4 no-scrollbar" aria-label="Main navigation">
+        {navSections.map(section => (
+          <section key={section.label} aria-label={section.label} className="space-y-1">
+            <p className="px-3 pb-1 text-[10px] font-semibold text-slate-400">{section.label}</p>
+            {section.items.map(item => {
+              const Icon = item.icon;
+              const isActive = currentView === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setView(item.id as AppView)}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={isActive ? "group flex w-full items-center gap-3 rounded-lg bg-slate-100 px-3 py-2.5 text-left font-semibold text-slate-950 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400" : "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"}
+                >
+                  <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} className={isActive ? "text-slate-900" : "text-slate-400 group-hover:text-slate-700"} />
+                  <span className="flex-1 text-[13px]">{item.label}</span>
+                  {isActive && <span className="h-1.5 w-1.5 rounded-full bg-slate-700" aria-hidden="true" />}
+                </button>
+              );
+            })}
+          </section>
+        ))}
       </nav>
 
-      <div className="p-4 border-t border-slate-100 space-y-2">
+      <div className="border-t border-slate-200 p-3 space-y-2">
         {currentUser.role !== UserRole.MEMBER && (
           <button onClick={() => setView('SETTINGS')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${currentView === 'SETTINGS' ? 'bg-brand-primary/5 text-brand-indigo font-bold' : 'text-slate-500 hover:bg-slate-50'}`}>
@@ -124,11 +139,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         )}
 
-        <div className="mt-4 p-4 rounded-2xl bg-slate-50 flex items-center gap-3 border border-slate-100/50">
+        <div className="mt-3 flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3">
           <img src={currentUser.avatar} alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-white flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-slate-800 truncate">{currentUser.name}</p>
-            <p className="text-[9px] text-slate-400 uppercase font-black tracking-tighter truncate">{currentUser.role}</p>
+            <p className="truncate text-xs font-semibold text-slate-900">{currentUser.name}</p>
+            <p className="truncate text-[10px] text-slate-500">{currentUser.role}</p>
           </div>
           <button onClick={onLogout} className="text-slate-300 hover:text-rose-500 transition-colors p-1" title="Logout"><LogOut size={16} /></button>
         </div>

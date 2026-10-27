@@ -185,3 +185,16 @@
   .imani-platform [class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .imani-platform main > div { min-width: 0; }
 }
+
+/* KPI blocks follow the quiet, compact shadcn dashboard treatment. */
+.imani-platform .grid > div > div > div[class*="bg-brand-"] {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+}
+.imani-platform .grid > div > div > div[class*="bg-brand-"] svg { color: #475569 !important; }
+.imani-platform .grid > div[class*="bg-white"][class*="rounded-"] {
+  border-color: #e2e8f0 !important;
+  box-shadow: none !important;
+}

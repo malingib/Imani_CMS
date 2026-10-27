@@ -151,7 +151,7 @@ const AccountShell = () => {
     <>
       <div className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`} onClick={() => setSidebarOpen(false)} />
       <Sidebar currentView={pathToView(location.pathname) || 'DASHBOARD'} setView={(v) => { navigate(v); setSidebarOpen(false); }} currentUser={currentUser} branches={[]} onBranchChange={() => {}} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <main className="flex-1 min-h-screen lg:ml-64 transition-all">
+      <main className="imani-workspace flex-1 min-h-screen lg:ml-64 transition-all">
         <header className="h-16 sm:h-20 bg-white border-b border-slate-200 px-4 sm:px-6 lg:px-10 flex items-center justify-between sticky top-0 z-40">
           <div className="flex items-center gap-4"><button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg" aria-label="Open navigation"><Menu size={22} /></button><div className="lg:hidden w-8 h-8"><ImaniLogoIcon /></div><div className="hidden lg:block"><p className="text-sm font-semibold text-slate-900">{ROUTES[currentView]?.label || 'Dashboard'}</p></div></div>
           <div className="flex items-center gap-4 relative">

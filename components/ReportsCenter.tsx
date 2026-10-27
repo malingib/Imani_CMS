@@ -339,7 +339,7 @@ const ReportsCenter: React.FC<ReportsCenterProps> = ({ transactions, members, ev
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+    <div className="imani-page imani-page--reports space-y-8 animate-in fade-in duration-500 pb-12">
       <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 print:hidden">
         <div>
           <h2 className="text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Reports</h2>

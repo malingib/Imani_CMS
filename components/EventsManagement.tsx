@@ -151,7 +151,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+    <div className="imani-page imani-page--events space-y-8 animate-in fade-in duration-500 pb-10">
       {eventError && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{eventError}</p>}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>

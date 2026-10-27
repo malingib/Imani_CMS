@@ -72,7 +72,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
   );
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500 overflow-x-hidden pb-12">
+    <div className="imani-page imani-page--communication space-y-6 sm:space-y-8 animate-in fade-in duration-500 overflow-x-hidden pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Communication</h2>

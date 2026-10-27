@@ -59,10 +59,6 @@
 .imani-workspace h1, .imani-workspace h2, .imani-workspace h3, .imani-workspace h4 {
   letter-spacing: -0.025em;
 }
-.imani-workspace [class*="bg-gradient-to-"] {
-  background-image: none !important;
-  background-color: #fff !important;
-}
 .imani-workspace [class*="rounded-[2.5rem]"],
 .imani-workspace [class*="rounded-3xl"] {
   border-radius: 0.75rem !important;
@@ -130,15 +126,8 @@
   border-color: #dce6e2 !important;
 }
 .imani-platform nav button { border-radius: 0.5rem !important; }
-.imani-platform nav button[class*="bg-brand-primary"] {
-  background: #edf3f1 !important;
-  color: #173b3a !important;
-}
-.imani-platform nav button[class*="bg-brand-primary"] svg { color: #285653 !important; }
-.imani-platform [class*="bg-gradient-to-"],
-.imani-workspace [class*="bg-gradient-to-"] {
-  background-image: none !important;
-}
+.imani-platform nav button[aria-current="page"] { background: #edf3f1; color: #173b3a; }
+.imani-platform nav button[aria-current="page"] svg { color: #285653; }
 .imani-platform [class*="shadow-xl"],
 .imani-platform [class*="shadow-2xl"],
 .imani-platform [class*="shadow-lg"],
@@ -226,7 +215,6 @@
 .imani-page button:focus-visible, .imani-page a:focus-visible,
 .imani-page input:focus-visible, .imani-page select:focus-visible,
 .imani-page textarea:focus-visible { outline: 2px solid var(--color-brand-primary-500); outline-offset: 2px; }
-.imani-page [class*="bg-gradient-to-"] { background-image: none !important; background-color: var(--page-paper) !important; }
 .imani-page [class*="shadow-"] { box-shadow: none !important; }
 .imani-page [class*="rounded-3xl"], .imani-page [class*="rounded-2xl"],
 .imani-page [class*="rounded-[1.5rem]"], .imani-page [class*="rounded-[1.25rem]"],
@@ -247,10 +235,6 @@
 .imani-page tbody tr:hover { background-color: var(--page-subtle); }
 .imani-page [class*="text-[9px]"], .imani-page [class*="text-[8px]"] { font-size: 0.72rem !important; }
 .imani-page [class*="uppercase"][class*="tracking-widest"] { letter-spacing: normal !important; text-transform: none !important; }
-.imani-page [class*="bg-brand-indigo-50"], .imani-page [class*="bg-brand-primary/5"],
-.imani-page [class*="bg-brand-gold/5"], .imani-page [class*="bg-brand-emerald/10"] { background-color: var(--page-subtle-strong) !important; }
-.imani-page [class*="text-brand-indigo"], .imani-page [class*="text-brand-gold"],
-.imani-page [class*="text-brand-emerald"] { color: var(--page-ink); }
 .imani-page > div { min-width: 0; }
 
 /* Members: a searchable registry, with the table as the primary surface. */
@@ -270,9 +254,6 @@
 .imani-page--events [class*="grid"] > div[class*="bg-white"] {
   border: 1px solid var(--page-rule); border-radius: 0.65rem; box-shadow: none;
 }
-.imani-page--events [class*="bg-brand-indigo"], .imani-page--events [class*="bg-brand-gold"],
-.imani-page--events [class*="bg-brand-emerald"], .imani-page--events [class*="bg-purple-"],
-.imani-page--events [class*="bg-pink-"] { background-color: var(--page-subtle-strong) !important; }
 
 /* Groups: directory entries stay quiet until the user needs an action. */
 .imani-page--groups [class*="grid"] > div[class*="bg-white"] {
@@ -404,3 +385,11 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Contrast safeguards: preserve semantic palettes while keeping controls readable. */
+.imani-workspace :is(button, a), .imani-platform :is(button, a), .imani-page :is(button, a) { text-decoration-thickness: 1px; }
+.imani-page button:disabled, .imani-workspace button:disabled, .imani-platform button:disabled { opacity: .6; }
+.imani-sidebar nav button[aria-current="page"] { background-color: #e8f0ee; color: #173b3a; border-left-color: #173b3a; }
+.imani-sidebar nav button[aria-current="page"] svg { color: #173b3a; }
+.imani-sidebar nav button:not([aria-current="page"]):hover { background-color: #f1f5f4; color: #102d2d; }
+.imani-sidebar nav button:not([aria-current="page"]):hover svg { color: #285653; }

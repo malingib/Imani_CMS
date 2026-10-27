@@ -10,44 +10,44 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'Inter', 'sans-serif'],
+        sans: ['DM Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       colors: {
         brand: {
           primary: {
-            DEFAULT: '#1E293B', // Warm Navy
-            50: '#F8FAFC',
-            100: '#F1F5F9',
-            200: '#E2E8F0',
-            300: '#CBD5E1',
-            400: '#94A3B8',
-            500: '#64748B',
-            600: '#1E293B',
-            700: '#0F172A',
-            800: '#020617',
-            900: '#000000',
+            DEFAULT: '#173B3A', // Deep teal
+            50: '#F5F8F7',
+            100: '#E8F0EE',
+            200: '#D2E1DD',
+            300: '#B0C9C3',
+            400: '#83A69F',
+            500: '#527D77',
+            600: '#285653',
+            700: '#173B3A',
+            800: '#102D2D',
+            900: '#0A2020',
           },
           indigo: {
-            DEFAULT: '#4F46E5', // Indigo
-            50: '#EEF2FF',
-            100: '#E0E7FF',
-            500: '#4F46E5',
-            600: '#4338CA',
-            700: '#3730A3',
+            DEFAULT: '#0F766E', // Teal
+            50: '#F0FDFA',
+            100: '#CCFBF1',
+            500: '#0F766E',
+            600: '#0D625B',
+            700: '#115E59',
           },
           gold: {
-            DEFAULT: '#FFB800', // Gold
-            50: '#FFFBEB',
-            100: '#FEF3C7',
-            500: '#FFB800',
-            600: '#D97706',
+            DEFAULT: '#B58A45', // Restrained brass
+            50: '#FAF7F0',
+            100: '#F1E7D2',
+            500: '#B58A45',
+            600: '#8D682F',
           },
           emerald: {
-            DEFAULT: '#10B981', // Emerald
-            50: '#ECFDF5',
-            100: '#D1FAE5',
-            500: '#10B981',
-            600: '#059669',
+            DEFAULT: '#16806D', // Semantic success green
+            50: '#EFF8F4',
+            100: '#D5EEE4',
+            500: '#16806D',
+            600: '#116957',
           }
         }
       }

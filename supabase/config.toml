@@ -394,3 +394,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # declarative_schema_path = "./declarative"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# Public Safaricom callback is handled inside the function; initiation validates Supabase JWT itself.
+[functions.mpesa-stk]
+verify_jwt = false

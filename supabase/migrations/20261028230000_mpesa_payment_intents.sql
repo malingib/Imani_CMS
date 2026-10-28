@@ -29,17 +29,9 @@ create index if not exists mpesa_payment_intents_status_idx
 
 alter table public.mpesa_payment_intents enable row level security;
 revoke all on public.mpesa_payment_intents from anon, authenticated;
-grant select on public.mpesa_payment_intents to authenticated;
-
-drop policy if exists "church members can read their church mpesa intents" on public.mpesa_payment_intents;
-create policy "church members can read their church mpesa intents"
-  on public.mpesa_payment_intents for select to authenticated
-  using (exists (
-    select 1 from public.church_memberships cm
-    where cm.church_id = mpesa_payment_intents.church_id
-      and cm.user_id = auth.uid()
-      and cm.status = 'active'
-  ));
+revoke all on public.mpesa_payment_intents from anon, authenticated;
+-- Status is exposed through the authenticated mpesa-status Edge Function only, so
+-- checkout IDs, phone numbers, callback payloads, and receipts are not directly readable.
 
 create or replace function public.set_mpesa_payment_intent_updated_at()
 returns trigger language plpgsql set search_path = public as $$

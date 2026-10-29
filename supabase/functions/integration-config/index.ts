@@ -104,7 +104,11 @@ Deno.serve(async (req: Request) => {
     }
     const payload = { scope, church_id: scope === "church" ? churchId : null, provider, enabled, config,
       secret_ciphertext: ciphertext, secret_iv: iv, updated_by: user.id, updated_at: new Date().toISOString() };
-    const { error: saveError } = await admin.from("integration_credentials").upsert(payload, { onConflict: "scope,church_id,provider" });
+    const saveQuery = existing
+      ? admin.from("integration_credentials").update(payload).eq("scope", scope).eq("provider", provider)
+      : admin.from("integration_credentials").insert(payload);
+    const scopedSave = scope === "platform" ? saveQuery.is("church_id", null) : saveQuery.eq("church_id", churchId);
+    const { error: saveError } = await scopedSave;
     if (saveError) throw saveError;
     return json(200, { provider, scope, churchId, enabled, configured: Boolean(ciphertext), config, updatedAt: payload.updated_at });
   } catch (error) {

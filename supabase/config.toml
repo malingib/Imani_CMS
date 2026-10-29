@@ -394,3 +394,14 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # declarative_schema_path = "./declarative"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# The STK endpoint also receives Safaricom's unauthenticated callback. It validates
+# the callback against a server-created checkout intent; initiation validates the JWT in code.
+[functions.mpesa-stk]
+verify_jwt = false
+
+[functions.mpesa-status]
+verify_jwt = true
+
+[functions.integration-config]
+verify_jwt = true

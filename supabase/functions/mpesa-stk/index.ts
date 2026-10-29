@@ -20,13 +20,49 @@ function normalizePhone(input: unknown): string {
 function callbackValue(items: Array<{Name?: string; Value?: unknown}>, name: string) {
   return items.find((item) => item.Name === name)?.Value;
 }
-async function accessToken(key: string, secret: string) {
-  const response = await fetch("https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", {
+async function accessToken(key: string, secret: string, environment: string) {
+  const host = environment === "sandbox" ? "https://sandbox.safaricom.co.ke" : "https://api.safaricom.co.ke";
+  const response = await fetch(host + "/oauth/v1/generate?grant_type=client_credentials", {
     headers: { Authorization: "Basic " + btoa(key + ":" + secret) },
   });
   const body = await response.json();
   if (!response.ok || !body.access_token) throw new Error("Daraja authentication failed.");
   return String(body.access_token);
+}
+function decodeBase64(value: string) {
+  return Uint8Array.from(atob(value), c => c.charCodeAt(0));
+}
+async function decryptSecrets(ciphertext: string, iv: string) {
+  const keyValue = Deno.env.get("INTEGRATION_ENCRYPTION_KEY");
+  if (!keyValue) throw new Error("Integration encryption key is not configured.");
+  const rawKey = decodeBase64(keyValue);
+  if (rawKey.length !== 32) throw new Error("Invalid integration encryption key.");
+  const key = await crypto.subtle.importKey("raw", rawKey, "AES-GCM", false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: decodeBase64(iv) }, key, decodeBase64(ciphertext));
+  return JSON.parse(new TextDecoder().decode(plain)) as Record<string, string>;
+}
+async function loadDarajaConfig(admin: ReturnType<typeof createClient>, churchId: string) {
+  const { data: churchConfig, error: churchError } = await admin.from("integration_credentials")
+    .select("enabled,config,secret_ciphertext,secret_iv").eq("scope", "church").eq("church_id", churchId).eq("provider", "daraja").maybeSingle();
+  if (churchError) throw churchError;
+  let row = churchConfig;
+  if (!row?.enabled || !row.secret_ciphertext || !row.secret_iv) {
+    const { data: platformConfig, error: platformError } = await admin.from("integration_credentials")
+      .select("enabled,config,secret_ciphertext,secret_iv").eq("scope", "platform").is("church_id", null).eq("provider", "daraja").maybeSingle();
+    if (platformError) throw platformError;
+    row = platformConfig;
+  }
+  if (!row?.enabled || !row.secret_ciphertext || !row.secret_iv) return null;
+  const secrets = await decryptSecrets(row.secret_ciphertext, row.secret_iv);
+  const config = (row.config ?? {}) as Record<string, string>;
+  const environment = String(config.environment ?? "production").toLowerCase();
+  return {
+    key: secrets.consumerKey, secret: secrets.consumerSecret, passkey: secrets.passkey,
+    shortcode: String(config.shortcode ?? ""), callbackUrl: String(config.callbackUrl ?? ""),
+    transactionType: String(config.transactionType ?? "CustomerPayBillOnline"),
+    partyB: String(config.partyB ?? config.shortcode ?? ""),
+    environment: environment === "sandbox" ? "sandbox" : "production",
+  };
 }
 function darajaPassword(shortcode: string, passkey: string) {
   const timestamp = new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
@@ -123,14 +159,13 @@ Deno.serve(async (req: Request) => {
     .eq("status", "active").maybeSingle();
   if (!membership) return json(403, { error: "You do not have access to this church." });
 
-  const key = Deno.env.get("MPESA_CONSUMER_KEY");
-  const secret = Deno.env.get("MPESA_CONSUMER_SECRET");
-  const shortcode = Deno.env.get("MPESA_SHORTCODE");
-  const passkey = Deno.env.get("MPESA_PASSKEY");
-  const callbackUrl = Deno.env.get("MPESA_CALLBACK_URL");
-  if (!key || !secret || !shortcode || !passkey || !callbackUrl) {
-    return json(503, { error: "Daraja production credentials are not fully configured." });
+  let daraja: Awaited<ReturnType<typeof loadDarajaConfig>>;
+  try { daraja = await loadDarajaConfig(admin, churchId); }
+  catch { return json(500, { error: "Daraja configuration could not be read securely." }); }
+  if (!daraja?.key || !daraja.secret || !daraja.shortcode || !daraja.passkey || !daraja.callbackUrl) {
+    return json(503, { error: "Daraja is not enabled or its credentials are incomplete for this church." });
   }
+  const { key, secret, shortcode, passkey, callbackUrl, environment, transactionType, partyB } = daraja;
 
   const accountReference = "IM" + crypto.randomUUID().replace(/-/g, "").slice(0, 10);
   const { data: intent, error: insertError } = await admin.from("mpesa_payment_intents").insert({
@@ -140,19 +175,20 @@ Deno.serve(async (req: Request) => {
   if (insertError || !intent) return json(500, { error: "Could not create payment request." });
 
   try {
-    const token = await accessToken(key, secret);
+    const token = await accessToken(key, secret, environment);
     const { timestamp, password } = darajaPassword(shortcode, passkey);
-    const response = await fetch("https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
+    const host = environment === "sandbox" ? "https://sandbox.safaricom.co.ke" : "https://api.safaricom.co.ke";
+    const response = await fetch(host + "/mpesa/stkpush/v1/processrequest", {
       method: "POST",
       headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
       body: JSON.stringify({
         BusinessShortCode: shortcode,
         Password: password,
         Timestamp: timestamp,
-        TransactionType: Deno.env.get("MPESA_TRANSACTION_TYPE") ?? "CustomerPayBillOnline",
+        TransactionType: transactionType,
         Amount: amount,
         PartyA: phone,
-        PartyB: Deno.env.get("MPESA_PARTY_B") ?? shortcode,
+        PartyB: partyB || shortcode,
         PhoneNumber: phone,
         CallBackURL: callbackUrl,
         AccountReference: accountReference,

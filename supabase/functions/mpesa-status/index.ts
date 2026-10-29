@@ -28,9 +28,13 @@ Deno.serve(async (req: Request) => {
     .eq("id", paymentId).maybeSingle();
   if (error || !intent) return reply(404, { error: "Payment request not found." });
 
-  const { data: membership } = await admin.from("church_memberships").select("id")
+  const { data: membership } = await admin.from("church_memberships").select("id,role")
     .eq("church_id", intent.church_id).eq("user_id", userData.user.id).eq("status", "active").maybeSingle();
-  if (!membership || intent.created_by !== userData.user.id) return reply(403, { error: "You cannot view this payment request." });
+  const role = String(membership?.role ?? "").toLowerCase();
+  const financeRole = ["admin", "administrator", "treasurer"].includes(role);
+  if (!membership || (intent.created_by !== userData.user.id && !financeRole)) {
+    return reply(403, { error: "You cannot view this payment request." });
+  }
 
   return reply(200, {
     payment_id: intent.id, status: intent.status, amount: intent.amount,

@@ -18,3 +18,5 @@ create table if not exists public.integration_credentials (
 alter table public.integration_credentials enable row level security;
 revoke all on public.integration_credentials from anon, authenticated;
 comment on table public.integration_credentials is 'Server-only integration configuration. Access only through the authenticated integration-config Edge Function; never expose secret ciphertext to clients.';
+create unique index if not exists integration_credentials_scope_provider_unique_idx
+  on public.integration_credentials (scope, coalesce(church_id, '00000000-0000-0000-0000-000000000000'::uuid), provider);

@@ -128,6 +128,44 @@ Deno.serve(async (req: Request) => {
       update.status = "succeeded";
     }
     await admin.from("mpesa_payment_intents").update(update).eq("id", intent.id);
+
+    // Post to the church ledger once, only after the callback's receipt, amount and phone match.
+    if (update.status === "succeeded" && receipt) {
+      const { data: currentIntent } = await admin.from("mpesa_payment_intents")
+        .select("member_id,purpose,church_id,phone_number,amount").eq("id", intent.id).maybeSingle();
+      const { data: alreadyPosted } = await admin.from("transactions").select("id")
+        .eq("reference", receipt).eq("source", "INTEGRATED").eq("payment_method", "M-Pesa").maybeSingle();
+      if (currentIntent && !alreadyPosted) {
+        let memberName: string | null = null;
+        if (currentIntent.member_id) {
+          const { data: member } = await admin.from("members").select("first_name,last_name,church_id")
+            .eq("id", currentIntent.member_id).maybeSingle();
+          if (member?.church_id === currentIntent.church_id) memberName = [member.first_name, member.last_name].filter(Boolean).join(" ");
+        }
+        const allowedTypes = new Set(["Tithe", "Offering", "Project", "Harambee", "Benevolence"]);
+        const transactionType = allowedTypes.has(String(currentIntent.purpose)) ? String(currentIntent.purpose) : "Offering";
+        const { error: ledgerError } = await admin.from("transactions").insert({
+          church_id: currentIntent.church_id,
+          member_id: currentIntent.member_id,
+          member_name: memberName,
+          amount: currentIntent.amount,
+          type: transactionType,
+          payment_method: "M-Pesa",
+          date: new Date().toISOString().slice(0, 10),
+          reference: receipt,
+          category: "Income",
+          notes: "Confirmed via M-Pesa STK Push",
+          phone_number: currentIntent.phone_number,
+          source: "INTEGRATED",
+        });
+        if (ledgerError && ledgerError.code !== "23505") {
+          await admin.from("mpesa_payment_intents").update({
+            status: "verification_required",
+            result_description: "Payment callback matched but ledger posting failed; reconciliation is required.",
+          }).eq("id", intent.id);
+        }
+      }
+    }
     return json(200, { ResultCode: 0, ResultDesc: "Callback acknowledged." });
   }
 
@@ -152,6 +190,14 @@ Deno.serve(async (req: Request) => {
   if (!/^[0-9a-f-]{36}$/i.test(churchId) || !Number.isInteger(amount) || amount < 1 || amount > 250000 ||
       purpose.length < 1 || purpose.length > 120) {
     return json(400, { error: "Valid church, whole-KES amount (1–250,000), and payment purpose are required." });
+  }
+
+  if (memberId) {
+    const { data: member, error: memberError } = await admin.from("members")
+      .select("id,church_id").eq("id", memberId).maybeSingle();
+    if (memberError || !member || member.church_id !== churchId) {
+      return json(400, { error: "The selected member does not belong to this church." });
+    }
   }
 
   const { data: membership } = await admin.from("church_memberships")

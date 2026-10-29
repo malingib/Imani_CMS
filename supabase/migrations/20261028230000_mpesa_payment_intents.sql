@@ -45,3 +45,8 @@ drop trigger if exists set_mpesa_payment_intent_updated_at on public.mpesa_payme
 create trigger set_mpesa_payment_intent_updated_at
 before update on public.mpesa_payment_intents
 for each row execute function public.set_mpesa_payment_intent_updated_at();
+
+-- One integrated M-Pesa ledger row per Safaricom receipt, even if callbacks are retried.
+create unique index if not exists transactions_integrated_mpesa_reference_unique
+  on public.transactions (reference)
+  where source = 'INTEGRATED' and payment_method = 'M-Pesa' and reference is not null;

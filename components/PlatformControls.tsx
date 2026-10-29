@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, Ban, BellRing, CheckCircle2, CreditCard, LoaderCircle, RefreshCw, Save, ShieldAlert, SlidersHorizontal, UploadCloud } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
 import { useChurch } from '../src/lib/church-context';
+import IntegrationSettingsPanel from './IntegrationSettingsPanel';
 
 type ChurchControl = {
   id: string; name: string; tier: string; status: string; billing_status: string;
@@ -132,6 +133,7 @@ const PlatformControls: React.FC = () => {
     </div>
     {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>}
     {notice && <div role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"><CheckCircle2 size={17}/>{notice}</div>}
+    <IntegrationSettingsPanel target={{ scope: 'platform' }} title="Platform-wide Integrations" />
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white p-4">
       <span className={`h-2.5 w-2.5 rounded-full ${church.status === 'suspended' ? 'bg-rose-500' : 'bg-emerald-500'}`}/>
       <strong className="text-sm">{church.name}</strong><span className="text-xs text-slate-500">Plan: {church.tier}</span><span className="text-xs text-slate-500">Status: {church.status}</span><span className="text-xs text-slate-500">Billing: {church.billing_status}</span>

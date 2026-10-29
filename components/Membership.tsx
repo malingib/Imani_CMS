@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Member, MemberStatus, MembershipType, MaritalStatus, Transaction, ChurchEvent, UserRole } from '../types';
 import { CsvMemberSchema, MemberFormSchema, validateFormData } from '../src/lib/validation';
+import { parseCsv, stringifyCsv } from '../src/lib/csv';
 
 interface MembershipProps {
   members: Member[];
@@ -118,26 +119,24 @@ const Membership: React.FC<MembershipProps> = ({
     reader.onload = async (event) => {
       try {
         const text = event.target?.result as string;
-        const lines = text.split('\n');
+        const rows = parseCsv(text);
         
-        if (lines.length < 2) {
+        if (rows.length < 2) {
           setImportMessage('The CSV has no member rows. Add at least one row and try again.');
           return;
         }
 
-        const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const header = rows[0].map(h => h.trim().toLowerCase());
         
         const importedMembers: Member[] = [];
         const errors: string[] = [];
         const existingPhones = new Set(members.map(m => m.phone));
         const genId = () => crypto.randomUUID?.() ?? 'id-' + Math.random().toString(36).slice(2, 11);
 
-        lines.slice(1).forEach((line, rowIndex) => {
-          const trimmedLine = line.trim();
-          if (!trimmedLine) return; // Skip empty rows
+        rows.slice(1).forEach((values, rowIndex) => {
+          if (values.every(value => value.trim() === '')) return;
 
           try {
-            const values = line.split(',').map(v => v.trim());
             const obj: any = {};
             
             header.forEach((h, i) => {
@@ -159,9 +158,10 @@ const Membership: React.FC<MembershipProps> = ({
             const phone = validationResult.data.phone;
             if (existingPhones.has(phone)) {
               const dup = members.find(m => m.phone === phone);
-              errors.push(`Row ${rowIndex + 2}: Phone ${phone} already belongs to ${dup?.firstName} ${dup?.lastName} — skipped`);
+              errors.push(`Row ${rowIndex + 2}: Phone ${phone} ${dup ? `already belongs to ${dup.firstName} ${dup.lastName}` : 'is duplicated in this file'} — skipped`);
               return;
             }
+            existingPhones.add(phone);
 
             // Map to Member with defaults
             const member: Member = {
@@ -214,11 +214,11 @@ const Membership: React.FC<MembershipProps> = ({
   };
 
   const handleExportCSV = () => {
-    const headers = "ID,FirstName,LastName,Phone,Email,Location,Groups,Status,JoinDate\n";
-    const rows = filteredMembers.map(m => 
-      `${m.id},${m.firstName},${m.lastName},${m.phone},${m.email},${m.location},"${m.groups.join(';')}",${m.status},${m.joinDate}`
-    ).join("\n");
-    const blob = new Blob([headers + rows], { type: 'text/csv' });
+    const rows = [
+      ['ID', 'FirstName', 'LastName', 'Phone', 'Email', 'Location', 'Groups', 'Status', 'JoinDate'],
+      ...filteredMembers.map(m => [m.id, m.firstName, m.lastName, m.phone, m.email, m.location, m.groups.join(';'), m.status, m.joinDate]),
+    ];
+    const blob = new Blob([stringifyCsv(rows)], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

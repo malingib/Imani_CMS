@@ -56,6 +56,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   const [selectedRoleId, setSelectedRoleId] = useState('role-1');
   const [isSaving, setIsSaving] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'connected' | 'failed'>('idle');
+  const [saveFeedback, setSaveFeedback] = useState<{ ok: boolean; message: string } | null>(null);
 
   const [churchInfo, setChurchInfo] = useState({
     name: 'Imani Central Parish',
@@ -82,19 +83,11 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   ];
 
   const handleSaveProfile = async () => {
-    setIsSaving(true);
-    try {
-      await platformSettingsService.saveSetting('church_profiles', { ...churchInfo, churchId });
-    } catch { /* persist silently */ }
-    setIsSaving(false);
+    await persistSetting('church_profiles', { ...churchInfo, churchId }, 'Church profile');
   };
 
   const handleSaveNotificationPrefs = async () => {
-    setIsSaving(true);
-    try {
-      await platformSettingsService.saveSetting('notification_prefs', notificationPrefs);
-    } catch { /* persist silently */ }
-    setIsSaving(false);
+    await persistSetting('notification_prefs', notificationPrefs, 'Notification preferences');
   };
 
   const handleTestConnection = async () => {
@@ -112,6 +105,19 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
 
   const isAdmin = currentUserRole === UserRole.ADMIN;
   const isFinance = currentUserRole === UserRole.TREASURER || isAdmin;
+
+  const persistSetting = async (key: string, value: unknown, label: string) => {
+    setIsSaving(true);
+    setSaveFeedback(null);
+    try {
+      await platformSettingsService.saveSetting(key, value);
+      setSaveFeedback({ ok: true, message: `${label} saved.` });
+    } catch {
+      setSaveFeedback({ ok: false, message: `${label} could not be saved. Check your access and connection, then try again.` });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -146,6 +152,12 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
           </button>
         ))}
       </div>
+
+      {saveFeedback && (
+        <p role={saveFeedback.ok ? 'status' : 'alert'} className={`rounded-lg border px-4 py-3 text-sm ${saveFeedback.ok ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-800'}`}>
+          {saveFeedback.message}
+        </p>
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:gap-8">
         {activeTab === 'PROFILE' && (
@@ -220,9 +232,9 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                          <h4 className="text-xl font-semibold tracking-tight">Payment Integration</h4>
                        </div>
                        <p className="text-indigo-100 text-sm font-medium leading-relaxed">
-                         Authorize <span className="text-white font-black">Direct M-Pesa</span> and <span className="text-white font-black">Paystack Africa</span>. Requires C2B/B2C credentials from Daraja portal.
+                         Configure the payment backend connection used for M-Pesa STK Push. Paystack is not enabled in this workflow.
                        </p>
-                       <p className="text-brand-gold/70 text-[10px] font-black uppercase tracking-widest">Secrets managed in deployment config, not in-browser.</p>
+                       <p className="text-brand-gold/70 text-[10px] font-black uppercase tracking-widest">Daraja credentials are not collected in this browser UI.</p>
                    </div>
                    <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
                 </div>
@@ -231,25 +243,17 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                    <h4 className="text-sm font-black uppercase text-slate-400 flex items-center gap-3">
                       <ShieldCheck size={18} className="text-brand-indigo"/> Security
                    </h4>
-                   <p className="text-xs text-slate-500 leading-relaxed">All transaction signals are verified against Safaricom G2 Public IP headers. Integration keys are strictly siloed from application logs.</p>
-                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
-                      <div className="flex items-center justify-between">
-                         <span className="text-[10px] font-black uppercase text-slate-400">Security Mode</span>
-                         <span className="text-[10px] font-black uppercase text-brand-emerald">ENCRYPTED</span>
-                      </div>
-                      <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
-                         <div className="h-full bg-brand-emerald w-full" />
-                      </div>
-                   </div>
+                   <p className="text-xs text-slate-500 leading-relaxed">This app delegates STK Push requests to the configured payment backend. This check confirms backend reachability only; payment success must come from a verified provider callback.</p>
+                   <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">Confirm credential storage, callback validation, and reconciliation in the payment backend before enabling production payments.</div>
                 </div>
 
                 <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-5 rounded-xl space-y-4">
                    <ShieldQuestion size={32} className="text-slate-300 mx-auto"/>
                    <h5 className="text-center font-black text-slate-600 uppercase text-xs tracking-tight">Need Daraja Help?</h5>
                    <p className="text-center text-[10px] text-slate-400 font-medium">Follow our integration guide to obtain your Consumer Key and Secret from the Safaricom Developer Portal.</p>
-                   <button className="w-full py-3 bg-white border border-slate-200 text-brand-indigo rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
+                   <a href="https://developer.safaricom.co.ke/" target="_blank" rel="noreferrer" className="w-full py-3 bg-white border border-slate-200 text-brand-indigo rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
                       <ExternalLink size={12}/> API Documentation
-                   </button>
+                   </a>
                 </div>
              </div>
 
@@ -266,9 +270,9 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                             <p className="text-[10px] font-black uppercase text-slate-400 mt-1">M-Pesa STK Push</p>
                          </div>
                       </div>
-                      <div className={`px-5 py-2 rounded-full border flex items-center gap-2 ${integrations.mpesaEnabled ? 'bg-brand-emerald/10 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200 text-slate-400'}`}>
-                         <div className={`w-2 h-2 rounded-full ${integrations.mpesaEnabled ? 'bg-brand-emerald animate-pulse' : 'bg-slate-300'}`}/>
-                         <span className="text-[10px] font-black uppercase tracking-widest">{integrations.mpesaEnabled ? 'Connected' : 'Disconnected'}</span>
+                      <div className={`px-5 py-2 rounded-full border flex items-center gap-2 ${integrations.mpesaEnabled ? 'bg-brand-emerald/10 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200 text-slate-500'}`}>
+                         <div className={`w-2 h-2 rounded-full ${integrations.mpesaEnabled ? 'bg-brand-emerald' : 'bg-slate-300'}`}/>
+                         <span className="text-[10px] font-black uppercase tracking-widest">{integrations.mpesaEnabled ? 'Enabled' : 'Disabled'}</span>
                       </div>
                    </div>
 
@@ -326,27 +330,18 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                           </button>
                           <div className="flex items-center gap-2 text-slate-400">
                              <Database size={14}/>
-                             <span className="text-[10px] font-black uppercase">{connectionStatus === 'connected' ? 'Connected' : connectionStatus === 'failed' ? 'Failed' : 'Idle'}</span>
+                            <span className="text-[10px] font-black uppercase">{connectionStatus === 'connected' ? 'Backend reachable' : connectionStatus === 'failed' ? 'Backend unavailable' : connectionStatus === 'testing' ? 'Checking' : 'Not tested'}</span>
                           </div>
                        </div>
                        <div className="flex items-center gap-3">
                           <button
-                            onClick={async () => {
-                              setIsSaving(true);
-                              try {
-                                 await platformSettingsService.saveSetting('integrations', {
+                            onClick={() => void persistSetting('integrations', {
                                    mpesaEnabled: integrations.mpesaEnabled,
                                    paystackEnabled: integrations.paystackEnabled,
                                    mpesaEnv: integrations.mpesaEnv,
                                    mpesaShortcode: integrations.mpesaShortcode,
                                    paystackPubKey: integrations.paystackPubKey,
-                                 });
-                              } catch {
-                                // persist failure
-                              } finally {
-                                setIsSaving(false);
-                              }
-                            }}
+                                 }, 'Integration settings')}
                             disabled={isSaving}
                             className="px-6 py-3 bg-brand-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-indigo transition-all flex items-center gap-2 disabled:opacity-50"
                           >
@@ -357,7 +352,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                             onClick={() => setIntegrations({...integrations, mpesaEnabled: !integrations.mpesaEnabled})}
                             className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm ${integrations.mpesaEnabled ? 'bg-slate-900 text-white hover:bg-rose-600' : 'bg-brand-emerald text-white hover:shadow-emerald-100'}`}
                           >
-                            {integrations.mpesaEnabled ? 'Revoke Gateway Access' : 'Initialize Direct Bridge'}
+                            {integrations.mpesaEnabled ? 'Disable integration' : 'Enable integration'}
                           </button>
                        </div>
                     </div>

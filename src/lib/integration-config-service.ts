@@ -13,13 +13,6 @@ export type IntegrationConfig = {
 };
 
 export async function getIntegrationConfig(provider: IntegrationProvider, target: IntegrationScope) {
-  const { data, error } = await supabase.functions.invoke('integration-config', {
-    method: 'GET',
-    body: undefined,
-    // Edge Function accepts query params; invoke does not support them consistently,
-    // so use the authenticated function URL directly below.
-  });
-  if (!error && data) return data as IntegrationConfig;
   const { data: sessionData } = await supabase.auth.getSession();
   const session = sessionData.session;
   if (!session) throw new Error('Please sign in again to manage integrations.');

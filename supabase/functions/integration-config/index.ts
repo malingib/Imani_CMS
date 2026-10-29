@@ -68,19 +68,20 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    const { data: row, error: readError } = await admin.from("integration_credentials")
-      .select("scope,church_id,provider,enabled,config,secret_ciphertext,secret_iv,updated_at")
-      .eq("scope", scope).eq("provider", provider)
-      .is("church_id", scope === "platform" ? null : undefined)
-      .maybeSingle();
-    // The scoped query below avoids using any client-supplied church ID for platform rows.
-    let existing = row;
-    if (scope === "church") {
-      const result = await admin.from("integration_credentials").select("scope,church_id,provider,enabled,config,secret_ciphertext,secret_iv,updated_at")
-        .eq("scope", scope).eq("church_id", churchId).eq("provider", provider).maybeSingle();
-      if (result.error) throw result.error; existing = result.data;
+    let existing: Record<string, unknown> | null = null;
+    if (scope === "platform") {
+      const result = await admin.from("integration_credentials")
+        .select("scope,church_id,provider,enabled,config,secret_ciphertext,secret_iv,updated_at")
+        .eq("scope", "platform").is("church_id", null).eq("provider", provider).maybeSingle();
+      if (result.error) throw result.error;
+      existing = result.data;
+    } else {
+      const result = await admin.from("integration_credentials")
+        .select("scope,church_id,provider,enabled,config,secret_ciphertext,secret_iv,updated_at")
+        .eq("scope", "church").eq("church_id", churchId).eq("provider", provider).maybeSingle();
+      if (result.error) throw result.error;
+      existing = result.data;
     }
-    if (readError) throw readError;
 
     if (req.method === "GET") {
       return json(200, { provider, scope, churchId, enabled: existing?.enabled ?? false,

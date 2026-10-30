@@ -1,3 +1,4 @@
+
 create or replace function public.is_church_member(target_church_id uuid)
 returns boolean
 language sql
@@ -68,4 +69,4 @@ begin
       scope_column, '00000000-0000-0000-0000-000000000001', scope_column
     );
   end loop;
-end $$;;
+end $$;

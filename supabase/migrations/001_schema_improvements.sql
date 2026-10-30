@@ -8,22 +8,33 @@
 
 -- Index on church_id for all tables (critical for multi-tenant scoping)
 CREATE INDEX IF NOT EXISTS idx_members_church_id ON members(church_id);
+
 CREATE INDEX IF NOT EXISTS idx_transactions_church_id ON transactions(church_id);
+
 CREATE INDEX IF NOT EXISTS idx_church_events_church_id ON church_events(church_id);
+
 CREATE INDEX IF NOT EXISTS idx_budgets_church_id ON budgets(church_id);
+
 CREATE INDEX IF NOT EXISTS idx_recurring_expenses_church_id ON recurring_expenses(church_id);
+
 CREATE INDEX IF NOT EXISTS idx_communications_church_id ON communications(church_id);
+
 CREATE INDEX IF NOT EXISTS idx_notifications_church_id ON notifications(church_id);
+
 CREATE INDEX IF NOT EXISTS idx_audit_logs_church_id ON audit_logs(church_id);
 
 -- Composite indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_members_church_status ON members(church_id, status);
+
 CREATE INDEX IF NOT EXISTS idx_transactions_church_date ON transactions(church_id, date DESC);
+
 CREATE INDEX IF NOT EXISTS idx_event_attendance_event_id ON event_attendance(event_id);
+
 CREATE INDEX IF NOT EXISTS idx_event_attendance_member_id ON event_attendance(member_id);
 
 -- Search indexes
 CREATE INDEX IF NOT EXISTS idx_members_phone ON members(phone);
+
 CREATE INDEX IF NOT EXISTS idx_members_email ON members(email);
 
 -- ============================================================================
@@ -66,7 +77,9 @@ SELECT * FROM transactions WHERE deleted_at IS NULL;
 
 -- Add delivery tracking columns if not exists
 ALTER TABLE communications ADD COLUMN IF NOT EXISTS status VARCHAR DEFAULT 'Sent';
+
 ALTER TABLE communications ADD COLUMN IF NOT EXISTS delivered_count INTEGER DEFAULT 0;
+
 ALTER TABLE communications ADD COLUMN IF NOT EXISTS failed_count INTEGER DEFAULT 0;
 
 -- ============================================================================
@@ -78,6 +91,7 @@ ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS metadata JSONB;
 
 -- Create index on timestamp for audit trail queries
 CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp DESC);
+
 CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
 
 -- ============================================================================
@@ -150,6 +164,7 @@ CREATE TABLE IF NOT EXISTS member_change_log (
 );
 
 CREATE INDEX IF NOT EXISTS idx_member_change_log_member ON member_change_log(member_id);
+
 CREATE INDEX IF NOT EXISTS idx_member_change_log_church ON member_change_log(church_id);
 
 -- ============================================================================
@@ -161,4 +176,4 @@ CREATE INDEX IF NOT EXISTS idx_member_change_log_church ON member_change_log(chu
 
 -- ============================================================================
 -- END OF MIGRATION
--- ============================================================================
+-- ============================================================================;

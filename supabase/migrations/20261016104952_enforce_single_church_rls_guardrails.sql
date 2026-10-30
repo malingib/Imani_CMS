@@ -1,12 +1,10 @@
--- Imani single-church production RLS guardrails.
--- Applied to Supabase project rmwqkqkhdkslezoskiol on 2026-10-16.
--- Existing role-specific permissive policies are preserved. Restrictive guards
--- enforce the canonical Demo Church boundary even for SUPER_ADMIN sessions.
-
 begin;
 
+-- Enable RLS for the only church-scoped table that was not protected.
 alter table public.member_change_log enable row level security;
 
+-- Change history contains before/after values, so only active church managers
+-- may read it. Keep logs append-only through the Data API.
 drop policy if exists member_change_log_manager_read on public.member_change_log;
 create policy member_change_log_manager_read
   on public.member_change_log
@@ -27,6 +25,7 @@ create policy member_change_log_manager_insert
     and church_membership_role(church_id) = any (array['ADMIN','PASTOR','STAFF']::text[])
   );
 
+-- Fail closed if the canonical church is not the one expected.
 do $preflight$
 begin
   if not exists (
@@ -39,6 +38,8 @@ begin
 end
 $preflight$;
 
+-- Add restrictive canonical-church predicates to every public base table
+-- carrying church_id. Existing role/permission policies remain in force.
 do $guard$
 declare
   t record;
@@ -82,6 +83,7 @@ begin
 end
 $guard$;
 
+-- Postcondition: no church-scoped public table may remain without RLS or guard.
 do $postcheck$
 declare
   bad_table text;

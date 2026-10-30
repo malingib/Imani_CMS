@@ -39,4 +39,4 @@ alter function public.get_member_counts_v2(uuid[]) set search_path = public, pg_
 alter function public.provision_tenant_church(text,text,text,text,text) set search_path = public, pg_catalog;
 alter function public.member_age(text) set search_path = public, pg_catalog;
 alter view public.active_members set (security_invoker = true);
-alter view public.active_transactions set (security_invoker = true);;
+alter view public.active_transactions set (security_invoker = true);

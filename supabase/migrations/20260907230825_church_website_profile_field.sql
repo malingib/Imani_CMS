@@ -14,4 +14,4 @@ BEGIN
  RETURN v_church;
 END; $$;
 REVOKE ALL ON FUNCTION public.admin_update_church_profile(UUID,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.admin_update_church_profile(UUID,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) TO authenticated;;
+GRANT EXECUTE ON FUNCTION public.admin_update_church_profile(UUID,TEXT,TEXT,TEXT,TEXT,TEXT,TEXT) TO authenticated;

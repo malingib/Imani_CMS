@@ -110,4 +110,4 @@ create policy financial_audit_select on public.financial_audit_log for select to
 create policy financial_audit_insert on public.financial_audit_log for insert to authenticated with check (public.is_church_member(church_id) and actor_id=auth.uid());
 revoke all on table public.funds,public.church_projects,public.expenses,public.financial_audit_log,public.member_attendance_notes from anon;
 grant select,insert,update,delete on public.funds,public.church_projects,public.expenses,public.member_attendance_notes to authenticated;
-grant select,insert on public.financial_audit_log to authenticated;;
+grant select,insert on public.financial_audit_log to authenticated;

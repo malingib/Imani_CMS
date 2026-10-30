@@ -2,19 +2,33 @@
 
 -- Enums
 CREATE TYPE member_status AS ENUM ('Active', 'Inactive', 'Visitor', 'Youth', 'Deceased', 'Archived');
+
 CREATE TYPE marital_status AS ENUM ('Single', 'Married', 'Widowed', 'Divorced');
+
 CREATE TYPE membership_type AS ENUM ('Full Member', 'Probation', 'Associate', 'Clergy', 'Non-Communicant');
+
 CREATE TYPE transaction_type AS ENUM ('Tithe', 'Offering', 'Project', 'Harambee', 'Benevolence', 'Expense', 'Salary', 'Utility', 'Maintenance');
+
 CREATE TYPE payment_method AS ENUM ('M-Pesa', 'Cash', 'Bank Transfer', 'Cheque');
+
 CREATE TYPE transaction_category AS ENUM ('Income', 'Expense');
+
 CREATE TYPE transaction_source AS ENUM ('MANUAL', 'INTEGRATED');
+
 CREATE TYPE frequency AS ENUM ('Weekly', 'Monthly', 'Quarterly', 'Yearly');
+
 CREATE TYPE event_type AS ENUM ('WORSHIP', 'BIBLE_STUDY', 'PRAYER', 'OUTREACH', 'YOUTH', 'OTHER');
+
 CREATE TYPE recurrence AS ENUM ('NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'ANNUALLY');
+
 CREATE TYPE communication_type AS ENUM ('SMS', 'Email', 'WhatsApp');
+
 CREATE TYPE communication_status AS ENUM ('Sent', 'Scheduled', 'Failed');
+
 CREATE TYPE activity_type AS ENUM ('PAYMENT', 'EVENT_RSVP', 'PROFILE_UPDATE', 'GROUP_JOIN');
+
 CREATE TYPE notification_type AS ENUM ('SYSTEM', 'MPESA', 'MEMBER', 'EVENT');
+
 CREATE TYPE severity AS ENUM ('INFO', 'WARN', 'CRITICAL');
 
 -- Members

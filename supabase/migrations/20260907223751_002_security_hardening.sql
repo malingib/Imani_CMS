@@ -32,8 +32,6 @@ COMMENT ON FUNCTION public.app_role() IS
 COMMENT ON FUNCTION public.app_church_id() IS
   'Returns only the server-controlled Supabase app_metadata church_id. Invalid or absent values resolve to NULL.';
 
--- Prevent unauthenticated callers from executing these helpers directly while
--- retaining authenticated access required by RLS evaluation.
 REVOKE EXECUTE ON FUNCTION public.app_role() FROM anon;
 REVOKE EXECUTE ON FUNCTION public.app_church_id() FROM anon;
 GRANT EXECUTE ON FUNCTION public.app_role() TO authenticated;

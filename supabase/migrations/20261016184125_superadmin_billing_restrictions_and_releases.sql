@@ -1,3 +1,4 @@
+
 alter table public.churches
   add column if not exists billing_status text not null default 'trial',
   add column if not exists monthly_fee numeric(12,2) not null default 0,
@@ -30,4 +31,4 @@ create policy platform_releases_superadmin_all on public.platform_releases
 grant select, insert, update, delete on public.platform_releases to authenticated;
 
 create index if not exists platform_releases_status_published_idx
-  on public.platform_releases(status, published_at desc);;
+  on public.platform_releases(status, published_at desc);

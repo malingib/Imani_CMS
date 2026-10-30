@@ -1,29 +1,12 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  Home, Shield, Settings2, Bell, Globe, 
-  Smartphone, Save, Camera, RefreshCcw,
-  ToggleRight, ToggleLeft, Plus, X, Loader2,
-  Mail, MessageSquare, UserPlus, Calendar,
-  CheckCircle2, Share2, Key, Link as LinkIcon,
-  Zap, Database, ShieldAlert, CreditCard,
-  ShieldCheck, Lock, Eye, EyeOff, Activity,
-  SmartphoneNfc, Landmark, ExternalLink,
-  ShieldQuestion, AlertCircle
-} from 'lucide-react';
+import { Home, Shield, Bell, Smartphone, Save, Camera, ToggleRight, ToggleLeft, Plus, Loader2, Mail, MessageSquare, UserPlus, Calendar, CheckCircle2, Lock, SmartphoneNfc } from 'lucide-react';
 import { SystemRole, UserRole } from '../types';
 import { createPlatformSettingsService } from '../src/lib/platform-settings-service';
 import { supabase } from '../src/lib/supabase';
+import IntegrationSettingsPanel from './IntegrationSettingsPanel';
 
 const platformSettingsService = createPlatformSettingsService(supabase);
-
-const DEFAULT_INTEGRATIONS = {
-  mpesaEnabled: true,
-  paystackEnabled: false,
-  mpesaEnv: 'Sandbox',
-  mpesaShortcode: '174379',
-  paystackPubKey: '',
-};
 
 interface SettingsProps {
   currentUserRole: UserRole;
@@ -42,11 +25,12 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
     if (currentUserRole === UserRole.ADMIN) {
       tabs.push({ id: 'ROLES', label: 'Access Control', icon: Shield });
       tabs.push({ id: 'PREFERENCES', label: 'System Alerts', icon: Bell });
-      tabs.push({ id: 'INTEGRATIONS', label: 'Payments', icon: SmartphoneNfc });
-    } else if (currentUserRole === UserRole.PASTOR) {
+      tabs.push({ id: 'INTEGRATIONS', label: 'Integrations', icon: SmartphoneNfc });
+    } else if (currentUserRole === UserRole.PASTOR || currentUserRole === UserRole.SECRETARY) {
       tabs.push({ id: 'PREFERENCES', label: 'Notifications', icon: Bell });
+      tabs.push({ id: 'INTEGRATIONS', label: 'Integrations', icon: SmartphoneNfc });
     } else if (currentUserRole === UserRole.TREASURER) {
-      tabs.push({ id: 'INTEGRATIONS', label: 'Payments', icon: SmartphoneNfc });
+      tabs.push({ id: 'INTEGRATIONS', label: 'Integrations', icon: SmartphoneNfc });
     }
 
     return tabs;
@@ -55,7 +39,6 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   const [activeTab, setActiveTab] = useState<SettingTab>('PROFILE');
   const [selectedRoleId, setSelectedRoleId] = useState('role-1');
   const [isSaving, setIsSaving] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'connected' | 'failed'>('idle');
   const [saveFeedback, setSaveFeedback] = useState<{ ok: boolean; message: string } | null>(null);
 
   const [churchInfo, setChurchInfo] = useState({
@@ -75,7 +58,6 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
     mpesaConfirmationsEmail: true
   });
 
-  const [integrations, setIntegrations] = useState(DEFAULT_INTEGRATIONS);
 
   const roles: SystemRole[] = [
     { id: 'role-1', name: 'Finance Team', memberCount: 3, description: 'Manage treasury records.', modules: [] },
@@ -90,22 +72,12 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
     await persistSetting('notification_prefs', notificationPrefs, 'Notification preferences');
   };
 
-  const handleTestConnection = async () => {
-    setConnectionStatus('testing');
-    const { testDarajaConnection } = await import('../src/lib/mpesa-service');
-    const ok = await testDarajaConnection();
-    setConnectionStatus(ok ? 'connected' : 'failed');
-    setTimeout(() => setConnectionStatus('idle'), ok ? 3000 : 5000);
-  };
-
   const togglePref = (key: keyof typeof notificationPrefs) => {
     if (currentUserRole !== UserRole.ADMIN && currentUserRole !== UserRole.PASTOR) return;
     setNotificationPrefs(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const isAdmin = currentUserRole === UserRole.ADMIN;
-  const isFinance = currentUserRole === UserRole.TREASURER || isAdmin;
-
   const persistSetting = async (key: string, value: unknown, label: string) => {
     setIsSaving(true);
     setSaveFeedback(null);
@@ -122,8 +94,6 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   useEffect(() => {
     (async () => {
       try {
-        const savedIntegrations = await platformSettingsService.getSetting('integrations', DEFAULT_INTEGRATIONS) as any;
-        if (savedIntegrations) setIntegrations(prev => ({ ...prev, ...savedIntegrations }));
         const savedProfile = await platformSettingsService.getSetting('church_profiles', {}) as any;
         if (savedProfile?.name) setChurchInfo(savedProfile);
         const savedPrefs = await platformSettingsService.getSetting('notification_prefs', {}) as any;
@@ -138,7 +108,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
     <div className="imani-page imani-page--settings space-y-6 sm:space-y-8 animate-in fade-in duration-500 max-w-[1200px] mx-auto pb-12">
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase leading-tight">System Settings</h2>
-        <p className="text-slate-500 text-sm sm:text-lg font-medium">Global configuration for identity, security, and integrations.</p>
+        <p className="text-slate-500 text-sm sm:text-lg font-medium">Manage church identity, access, notifications, and provider integrations.</p>
       </div>
 
       <div className="flex overflow-x-auto border-b border-slate-200 no-scrollbar gap-4 sm:gap-8 pb-px max-w-full">
@@ -222,195 +192,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
           </div>
         )}
 
-        {activeTab === 'INTEGRATIONS' && isFinance && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in slide-in-from-bottom-2 duration-500">
-             <div className="lg:col-span-4 space-y-6">
-                <div className="bg-brand-primary p-6 rounded-xl text-white shadow-sm relative overflow-hidden group">
-                   <div className="relative z-10 space-y-6">
-                      <div className="flex items-center gap-3">
-                         <div className="p-3 bg-white/10 rounded-2xl text-brand-gold"><Zap size={24}/></div>
-                         <h4 className="text-xl font-semibold tracking-tight">Payment Integration</h4>
-                       </div>
-                       <p className="text-indigo-100 text-sm font-medium leading-relaxed">
-                         Configure the payment backend connection used for M-Pesa STK Push. Paystack is not enabled in this workflow.
-                       </p>
-                       <p className="text-brand-gold/70 text-[10px] font-black uppercase tracking-widest">Daraja credentials are not collected in this browser UI.</p>
-                   </div>
-                   <div className="absolute top-[-20%] right-[-20%] w-64 h-64 bg-indigo-500 rounded-full blur-[80px] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
-                </div>
-
-                <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm space-y-6">
-                   <h4 className="text-sm font-black uppercase text-slate-400 flex items-center gap-3">
-                      <ShieldCheck size={18} className="text-brand-indigo"/> Security
-                   </h4>
-                   <p className="text-xs text-slate-500 leading-relaxed">This app delegates STK Push requests to the configured payment backend. This check confirms backend reachability only; payment success must come from a verified provider callback.</p>
-                   <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">Confirm credential storage, callback validation, and reconciliation in the payment backend before enabling production payments.</div>
-                </div>
-
-                <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-5 rounded-xl space-y-4">
-                   <ShieldQuestion size={32} className="text-slate-300 mx-auto"/>
-                   <h5 className="text-center font-black text-slate-600 uppercase text-xs tracking-tight">Need Daraja Help?</h5>
-                   <p className="text-center text-[10px] text-slate-400 font-medium">Follow our integration guide to obtain your Consumer Key and Secret from the Safaricom Developer Portal.</p>
-                   <a href="https://developer.safaricom.co.ke/" target="_blank" rel="noreferrer" className="w-full py-3 bg-white border border-slate-200 text-brand-indigo rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
-                      <ExternalLink size={12}/> API Documentation
-                   </a>
-                </div>
-             </div>
-
-             <div className="lg:col-span-8 space-y-8">
-                {/* M-Pesa Card */}
-                <div className="bg-white p-5 sm:p-6 rounded-xl border border-slate-100 shadow-sm space-y-10">
-                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <div className="flex items-center gap-4">
-                         <div className="w-16 h-16 bg-brand-emerald/10 text-brand-emerald rounded-2xl flex items-center justify-center shadow-inner">
-                            <Smartphone size={36}/>
-                         </div>
-                         <div>
-                            <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Lipa Na M-Pesa</h3>
-                            <p className="text-[10px] font-black uppercase text-slate-400 mt-1">M-Pesa STK Push</p>
-                         </div>
-                      </div>
-                      <div className={`px-5 py-2 rounded-full border flex items-center gap-2 ${integrations.mpesaEnabled ? 'bg-brand-emerald/10 border-brand-emerald/30 text-brand-emerald' : 'bg-slate-100 border-slate-200 text-slate-500'}`}>
-                         <div className={`w-2 h-2 rounded-full ${integrations.mpesaEnabled ? 'bg-brand-emerald' : 'bg-slate-300'}`}/>
-                         <span className="text-[10px] font-black uppercase tracking-widest">{integrations.mpesaEnabled ? 'Enabled' : 'Disabled'}</span>
-                      </div>
-                   </div>
-
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Daraja Environment</label>
-                         <div className="flex p-1 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
-                            {['Sandbox', 'Live'].map(env => (
-                               <button 
-                                 key={env} 
-                                 onClick={() => setIntegrations({...integrations, mpesaEnv: env})}
-                                 className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${integrations.mpesaEnv === env ? 'bg-white text-brand-primary shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                               >
-                                  {env}
-                               </button>
-                            ))}
-                         </div>
-                      </div>
-                      <div className="space-y-2">
-                         <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Paybill / Till Shortcode</label>
-                         <div className="relative">
-                            <Landmark className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18}/>
-                            <input type="text" className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-sm focus:ring-2 focus:ring-brand-primary outline-none shadow-inner" value={integrations.mpesaShortcode} onChange={e => setIntegrations({...integrations, mpesaShortcode: e.target.value})} />
-                         </div>
-                      </div>
-                       <div className="md:col-span-2 space-y-2">
-                          <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Consumer Key</label>
-                          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-xs font-bold text-slate-500">
-                            Secret keys are managed outside the browser in secure server environment variables.
-                          </div>
-                       </div>
-                       <div className="md:col-span-2 space-y-2">
-                          <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Consumer Secret</label>
-                          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-xs font-bold text-slate-500">
-                            Stored securely on the backend. Rotate through deployment secrets, not this page.
-                          </div>
-                       </div>
-                       <div className="md:col-span-2 space-y-2">
-                          <label className="text-[10px] font-black uppercase text-slate-400 ml-2">LNM Online Passkey</label>
-                          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-xs font-bold text-slate-500">
-                            Hidden by design. Keep production passkeys in Supabase or deployment secrets.
-                          </div>
-                       </div>
-                   </div>
-
-                    <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-6">
-                       <div className="flex items-center gap-3">
-                          <button 
-                            onClick={handleTestConnection}
-                            disabled={connectionStatus === 'testing'}
-                            className="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2"
-                          >
-                             {connectionStatus === 'testing' ? <Loader2 className="animate-spin" size={14}/> : <Activity size={14}/>}
-                             {connectionStatus === 'testing' ? 'Testing...' : 'Test Connection'}
-                          </button>
-                          <div className="flex items-center gap-2 text-slate-400">
-                             <Database size={14}/>
-                            <span className="text-[10px] font-black uppercase">{connectionStatus === 'connected' ? 'Backend reachable' : connectionStatus === 'failed' ? 'Backend unavailable' : connectionStatus === 'testing' ? 'Checking' : 'Not tested'}</span>
-                          </div>
-                       </div>
-                       <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => void persistSetting('integrations', {
-                                   mpesaEnabled: integrations.mpesaEnabled,
-                                   paystackEnabled: integrations.paystackEnabled,
-                                   mpesaEnv: integrations.mpesaEnv,
-                                   mpesaShortcode: integrations.mpesaShortcode,
-                                   paystackPubKey: integrations.paystackPubKey,
-                                 }, 'Integration settings')}
-                            disabled={isSaving}
-                            className="px-6 py-3 bg-brand-primary text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-indigo transition-all flex items-center gap-2 disabled:opacity-50"
-                          >
-                            {isSaving ? <Loader2 className="animate-spin" size={14}/> : <Save size={14}/>}
-                            {isSaving ? 'Saving...' : 'Save Settings'}
-                          </button>
-                          <button 
-                            onClick={() => setIntegrations({...integrations, mpesaEnabled: !integrations.mpesaEnabled})}
-                            className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm ${integrations.mpesaEnabled ? 'bg-slate-900 text-white hover:bg-rose-600' : 'bg-brand-emerald text-white hover:shadow-emerald-100'}`}
-                          >
-                            {integrations.mpesaEnabled ? 'Disable integration' : 'Enable integration'}
-                          </button>
-                       </div>
-                    </div>
-                </div>
-
-                {/* Alternative Gateway: Paystack */}
-                <div className="bg-slate-50 p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm space-y-8 group transition-all hover:bg-white hover:border-slate-100">
-                   <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                         <div className="w-14 h-14 bg-white text-brand-indigo rounded-2xl flex items-center justify-center shadow-sm">
-                            <CreditCard size={28}/>
-                         </div>
-                         <div>
-                            <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Paystack Africa</h3>
-                            <p className="text-[10px] font-black uppercase text-slate-400 mt-1">International & Card Processing</p>
-                         </div>
-                      </div>
-                      <div className={`px-4 py-2 rounded-xl border flex items-center gap-2 ${integrations.paystackEnabled ? 'bg-indigo-50 border-indigo-100 text-brand-indigo' : 'bg-white border-slate-100 text-slate-300'}`}>
-                         <span className="text-[10px] font-black uppercase tracking-widest">{integrations.paystackEnabled ? 'Authorized' : 'Disabled'}</span>
-                      </div>
-                   </div>
-
-                   {integrations.paystackEnabled ? (
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in duration-500">
-                        <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase text-slate-400 ml-2">Public Key</label>
-                           <input type="text" readOnly className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl font-mono text-xs text-slate-400" value={integrations.paystackPubKey} />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-[9px] font-black uppercase text-slate-400 ml-2">Secret Key</label>
-                            <div className="w-full rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4 font-mono text-xs text-slate-400">Managed in server secrets</div>
-                        </div>
-                     </div>
-                   ) : (
-                     <div className="py-6 text-center space-y-4">
-                        <p className="text-sm font-medium text-slate-500">Accept credit cards and bank transfers.</p>
-                        <button 
-                           onClick={() => setIntegrations({...integrations, paystackEnabled: true})}
-                           className="px-8 py-3 bg-white border border-slate-200 text-brand-indigo rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-sm"
-                        >
-                           Enable Paystack
-                        </button>
-                     </div>
-                   )}
-                </div>
-
-                <div className="p-5 bg-brand-gold/5 border border-brand-gold/20 rounded-xl flex items-start gap-6">
-                   <AlertCircle className="text-brand-gold shrink-0 mt-1" size={24}/>
-                   <div className="space-y-2">
-                      <h4 className="font-black text-brand-gold text-sm uppercase tracking-tight">Important</h4>
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                        Ensure your Daraja production app has been fully whitelisted by Safaricom before switching to 'Live' mode. Sandbox transactions will not settle to the church's bank account. Audit logs capture all credential modifications.
-                      </p>
-                   </div>
-                </div>
-             </div>
-          </div>
-        )}
+        {activeTab === 'INTEGRATIONS' && <IntegrationSettingsPanel scope="church" churchId={churchId} role={currentUserRole} />}
 
         {activeTab === 'ROLES' && isAdmin && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 animate-in slide-in-from-right-4 duration-500">

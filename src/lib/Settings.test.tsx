@@ -3,14 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { UserRole } from '../../types';
 
-const { mockFrom } = vi.hoisted(() => ({ mockFrom: vi.fn() }));
+const { mockFrom, mockInvoke } = vi.hoisted(() => ({ mockFrom: vi.fn(), mockInvoke: vi.fn() }));
 
-vi.mock('../../src/lib/supabase', () => ({ supabase: { from: mockFrom } }));
+vi.mock('../../src/lib/supabase', () => ({ supabase: { from: mockFrom, functions: { invoke: mockInvoke } } }));
 
 import Settings from '../../components/Settings';
 
 describe('Settings integration feedback', () => {
   beforeEach(() => {
+    mockInvoke.mockResolvedValue({ data: { configured: false, settings: {} }, error: null });
     mockFrom.mockImplementation(() => ({
       select: () => ({ single: async () => ({ data: { id: 'global', flags: {} }, error: null }) }),
       upsert: async () => ({ error: { message: 'row level security denied' } }),
@@ -22,13 +23,14 @@ describe('Settings integration feedback', () => {
     vi.clearAllMocks();
   });
 
-  it('does not report the enabled flag as a verified payment connection', async () => {
-    render(<Settings currentUserRole={UserRole.TREASURER} churchId="church-1" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Payments' }));
+  it('shows provider credentials as unconfigured until saved', async () => {
+    render(<Settings currentUserRole={UserRole.ADMIN} churchId="church-1" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Integrations' }));
 
-    expect(await screen.findByText('Enabled')).toBeTruthy();
-    expect(screen.getByText('Not tested')).toBeTruthy();
-    expect(screen.queryByText('Connected')).toBeNull();
+    expect(await screen.findByText('M-Pesa Daraja')).toBeTruthy();
+    expect(screen.getByText('MobiWave SMS')).toBeTruthy();
+    expect(screen.queryByText('Credentials saved')).toBeNull();
+    expect(screen.queryByText('Connection verified.')).toBeNull();
   });
 
   it('shows a save error when RLS rejects a settings update', async () => {

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Activity, Building2, ChevronRight, Globe, LogOut, Network, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Activity, Building2, ChevronRight, Globe, LogOut, Network, RefreshCw, ShieldCheck, PlugZap } from 'lucide-react';
 import PlatformDashboard from './PlatformDashboard';
 import TenantRegistry from './TenantRegistry';
 import PlatformControls from './PlatformControls';
+import IntegrationSettingsPanel from './IntegrationSettingsPanel';
 import { ImaniLogoIcon } from './Sidebar';
 
 type Props = {
@@ -22,14 +23,16 @@ const PlatformShell: React.FC<Props> = ({ onOpenClient, onSelectClient, onLogout
   const isSuspensions = location.pathname.startsWith('/platform/suspensions');
   const isUpdates = location.pathname.startsWith('/platform/updates');
   const isActivity = location.pathname.startsWith('/platform/activity');
+  const isIntegrations = location.pathname.startsWith('/platform/integrations');
   const isControls = isBilling || isRestrictions || isSuspensions || isUpdates || isActivity;
   const items = [
-    { label: 'Overview', path: '/platform', icon: Activity, active: !isTenants && !isControls },
+    { label: 'Overview', path: '/platform', icon: Activity, active: !isTenants && !isControls && !isIntegrations },
     { label: 'Billing & Plans', path: '/platform/billing', icon: Building2, active: isBilling },
     { label: 'Restrictions', path: '/platform/restrictions', icon: ShieldCheck, active: isRestrictions },
     { label: 'Suspensions', path: '/platform/suspensions', icon: Network, active: isSuspensions },
     { label: 'Updates & Releases', path: '/platform/updates', icon: RefreshCw, active: isUpdates },
     { label: 'Audit & Activity', path: '/platform/activity', icon: Activity, active: isActivity },
+    { label: 'Integrations', path: '/platform/integrations', icon: PlugZap, active: isIntegrations },
     { label: 'Client Workspace', path: '/tenants', icon: Globe, active: isTenants },
   ];
 
@@ -64,6 +67,8 @@ const PlatformShell: React.FC<Props> = ({ onOpenClient, onSelectClient, onLogout
         <div className="mx-auto max-w-[1500px] p-5 sm:p-5 lg:p-6">
           {isTenants
             ? <TenantRegistry onImpersonate={onSelectClient} />
+            : isIntegrations
+              ? <IntegrationSettingsPanel scope="platform" role="SUPER_ADMIN" />
             : isControls
               ? <PlatformControls />
               : <PlatformDashboard onOpenClient={onOpenClient} />}

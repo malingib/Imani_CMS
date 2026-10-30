@@ -265,7 +265,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const nextAttendance = isRSVPing
         ? Array.from(new Set([...event.attendance, memberId]))
         : event.attendance.filter(id => id !== memberId);
-      await persistence.replaceEventAttendance(eventId, nextAttendance, requireChurchId());
+      await persistence.setEventRSVP(eventId, memberId, isRSVPing, requireChurchId());
       setState(prev => ({ ...prev, events: prev.events.map(e => e.id === eventId ? { ...e, attendance: nextAttendance } : e) }));
       addToast(isRSVPing ? 'RSVP saved' : 'RSVP removed');
       createAudit(`${isRSVPing ? 'RSVPd for' : 'Cancelled RSVP for'} ${eventId}`, 'EVENTS');

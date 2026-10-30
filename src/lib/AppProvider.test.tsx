@@ -33,6 +33,7 @@ const { mockUseSession, mockUseChurch, mockLoadChurchData, mockCreateAuditLog, m
     createEvent: vi.fn(),
     deleteEvent: vi.fn(),
     replaceEventAttendance: vi.fn(),
+    setEventRSVP: vi.fn(),
     createBudget: vi.fn(),
     updateBudget: vi.fn(),
     createRecurringExpense: vi.fn(),

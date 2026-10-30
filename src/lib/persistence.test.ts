@@ -252,6 +252,19 @@ describe("createPersistenceService", () => {
     expect(client.from().insert).toHaveBeenCalled();
   });
 
+  it("sets one member RSVP without replacing the attendance list", async () => {
+    const { client, result } = mockClient();
+    const service = createPersistenceService(client);
+    result.error = null;
+
+    await service.setEventRSVP("event-1", "member-1", true, churchId);
+    expect(client.from).toHaveBeenCalledWith("event_attendance");
+    expect(client.from().upsert).toHaveBeenCalledWith(
+      { event_id: "event-1", member_id: "member-1", church_id: churchId },
+      { onConflict: "event_id,member_id", ignoreDuplicates: true }
+    );
+  });
+
   it("handles platform settings", async () => {
     const { client, result } = mockClient();
     const service = createPersistenceService(client);

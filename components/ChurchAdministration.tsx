@@ -21,6 +21,8 @@ const STEPS: Array<{ id: ChurchProfile['onboarding_step']; label: string }> = [
 const ROLE_LABELS: Record<InvitationRole, string> = {
   ADMIN: 'Administrator',
   PASTOR: 'Pastor',
+  TREASURER: 'Treasurer',
+  SECRETARY: 'Secretary',
   STAFF: 'Staff',
   MEMBER: 'Member',
 };

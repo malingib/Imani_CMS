@@ -5,7 +5,7 @@ const SERVICE_ROLE_KEY = Deno.env.get('SERVICE_ROLE_KEY');
 const ANON_KEY = Deno.env.get('VITE_SUPABASE_ANON_KEY') ?? '';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json', ...corsHeaders };
-const VALID_CHURCH_ROLES = new Set(['ADMIN', 'PASTOR', 'STAFF', 'MEMBER']);
+const VALID_CHURCH_ROLES = new Set(['ADMIN', 'PASTOR', 'TREASURER', 'SECRETARY', 'STAFF', 'MEMBER']);
 
 function badRequest(message: string) {
   return new Response(JSON.stringify({ error: message }), { status: 400, headers: JSON_HEADERS });

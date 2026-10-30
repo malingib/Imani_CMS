@@ -107,7 +107,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   return (
     <div className="imani-page imani-page--settings space-y-6 sm:space-y-8 animate-in fade-in duration-500 max-w-[1200px] mx-auto pb-12">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase leading-tight">System Settings</h2>
+        <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase leading-tight">Church Settings</h2>
         <p className="text-slate-500 text-sm sm:text-lg font-medium">Manage church identity, access, notifications, and provider integrations.</p>
       </div>
 

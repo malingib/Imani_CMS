@@ -8,7 +8,7 @@ import {
   Music, BookOpen, HeartHandshake, Globe, Zap, HelpCircle,
   User, Phone, CalendarClock, ExternalLink, Navigation, Eye,
   Save, Heart, CalendarPlus, UserMinus, Info, ClipboardList,
-  BellRing, Mail
+  Mail
 } from 'lucide-react';
 import { ChurchEvent, Member, RecurrenceType, ChurchEventType, User as UserType, UserRole } from '../types';
 
@@ -36,7 +36,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
   const [viewMode, setViewMode] = useState<'GRID' | 'CALENDAR'>('GRID');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState<string | null>(null);
-  const [showReminderModal, setShowReminderModal] = useState<ChurchEvent | null>(null);
   const [viewingEvent, setViewingEvent] = useState<ChurchEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<ChurchEvent | null>(null);
   const [eventError, setEventError] = useState('');
@@ -127,6 +126,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
   };
 
   const handleDeleteEvent = async (eventId: string) => {
+    if (!window.confirm('Delete this event? This action cannot be undone.')) return;
     setEventError('');
     try {
       await onDeleteEvent(eventId);
@@ -242,36 +242,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
             const going = isUserRSVPd(event);
             
             return (
-              <div key={event.id} className="relative bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group hover:shadow-sm hover:scale-[1.03] transition-all duration-300">
-                {/* Quick Actions Overlay */}
-                <div className="absolute inset-0 bg-brand-primary/95 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-5 space-y-3 z-20">
-                  <p className="text-brand-gold font-black uppercase tracking-[0.2em] text-[10px] mb-2">Quick Actions</p>
-                  
-                  <button onClick={() => setViewingEvent(event)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-white text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-brand-indigo hover:text-white transition-all shadow-sm">
-                    <Eye size={16}/> View Details
-                  </button>
-
-                  <button onClick={() => setShowReminderModal(event)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-indigo text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-brand-primary transition-all shadow-sm">
-                    <BellRing size={16}/> Set Reminder
-                  </button>
-
-                  {currentUser?.role !== UserRole.MEMBER && (
-                    <>
-                      <button onClick={() => { setEditingEvent(event); setNewEvent({ ...event }); }} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-indigo text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-brand-primary transition-all shadow-sm">
-                        <Edit2 size={16}/> Edit Event
-                      </button>
-                      <button onClick={() => setShowAttendanceModal(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-brand-gold text-brand-primary rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white transition-all shadow-sm">
-                        <UserCheck size={16}/> Mark Attendance
-                      </button>
-                      <button onClick={() => void handleDeleteEvent(event.id)} className="w-full flex items-center justify-center gap-3 py-3.5 bg-rose-500 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-sm">
-                        <Trash2 size={16}/> Delete Event
-                      </button>
-                    </>
-                  )}
-                  
-                  <button className="text-white/40 text-[9px] font-black uppercase tracking-widest hover:text-white transition-colors mt-2" onClick={(e) => e.stopPropagation()}>Dismiss</button>
-                </div>
-
+              <div key={event.id} className="relative bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col transition-shadow hover:shadow-md">
                 <div className="p-5 flex-1 space-y-4">
                   <div className="flex justify-between items-start">
                     <div className={`p-3 rounded-2xl text-white shadow-sm ${config.color}`}>
@@ -292,7 +263,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                   </div>
                   <div>
                     <p className="text-[10px] font-black uppercase text-brand-indigo tracking-widest">{config.label}</p>
-                    <h3 className="text-xl font-black text-slate-800 leading-tight group-hover:text-brand-primary transition-colors mt-1">{event.title}</h3>
+                    <h3 className="text-xl font-black text-slate-800 leading-tight mt-1">{event.title}</h3>
                   </div>
                   <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed font-medium">{event.description}</p>
                   
@@ -310,33 +281,32 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                     </div>
                   </div>
                 </div>
-                <div className="bg-slate-50 p-6 border-t border-slate-100 flex items-center justify-between">
+                <div className="bg-slate-50 px-4 py-4 border-t border-slate-100 space-y-3">
                   <div className="flex items-center gap-3 text-slate-700 font-black text-sm">
                     <Users size={18} className="text-brand-primary" /> 
                     {event.attendance.length} <span className="hidden sm:inline">Registered</span>
+                    <span className="ml-auto px-3 py-1.5 bg-white text-brand-primary text-[10px] font-black rounded-lg border border-indigo-50 uppercase tracking-widest">Live</span>
                   </div>
-                  <div className="px-4 py-1.5 bg-white text-brand-primary text-[10px] font-black rounded-lg border border-indigo-50 shadow-sm uppercase tracking-widest">Live</div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => setViewingEvent(event)} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
+                      <Eye size={14} className="mr-1.5 inline" aria-hidden="true" />Details
+                    </button>
+                    {currentUser?.role !== UserRole.MEMBER && <>
+                      <button type="button" onClick={() => { setEditingEvent(event); setNewEvent({ ...event }); }} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
+                        <Edit2 size={14} className="mr-1.5 inline" aria-hidden="true" />Edit
+                      </button>
+                      <button type="button" onClick={() => setShowAttendanceModal(event.id)} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
+                        <UserCheck size={14} className="mr-1.5 inline" aria-hidden="true" />Attendance
+                      </button>
+                      <button type="button" onClick={() => void handleDeleteEvent(event.id)} className="min-h-10 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700">
+                        <Trash2 size={14} className="mr-1.5 inline" aria-hidden="true" />Delete
+                      </button>
+                    </>}
+                  </div>
                 </div>
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Reminder scheduling is not connected to a persisted scheduler/provider. Be explicit instead of implying dispatch. */}
-      {showReminderModal && (
-        <div className="fixed inset-0 bg-slate-900/60 z-[500] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reminder-unavailable-title">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-sm p-6 space-y-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 id="reminder-unavailable-title" className="text-xl font-bold text-slate-900">Event reminders unavailable</h3>
-                <p className="mt-1 text-sm text-slate-600">{showReminderModal.title}</p>
-              </div>
-              <button type="button" aria-label="Close reminder dialog" onClick={() => setShowReminderModal(null)} className="p-2 rounded-lg hover:bg-slate-100"><X size={20}/></button>
-            </div>
-            <p className="text-sm leading-6 text-slate-600">Reminder scheduling is not configured yet. No SMS or email will be sent from this screen. You can use the Communications module to send a message manually.</p>
-            <button type="button" onClick={() => setShowReminderModal(null)} className="w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-bold text-white">Close</button>
-          </div>
         </div>
       )}
 

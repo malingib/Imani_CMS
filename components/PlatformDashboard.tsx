@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
 import { createPlatformDashboardService, type PlatformDashboardStats } from '../src/lib/platform-dashboard-service';
-import { Building2, Users, DollarSign, Activity, TrendingUp, AlertCircle } from 'lucide-react';
+import { Building2, Users, Activity, TrendingUp } from 'lucide-react';
 
 const platformDashboardService = createPlatformDashboardService(supabase);
 
@@ -31,53 +31,50 @@ const PlatformDashboard: React.FC<{ onOpenClient?: () => void }> = ({ onOpenClie
     return () => { mounted = false; };
   }, []);
 
-  const healthPct = stats.totalChurches > 0 ? (stats.activeChurches / stats.totalChurches) * 100 : 100;
-  const healthLabel = healthPct >= 90 ? 'Good' : healthPct >= 70 ? 'Fair' : 'Degraded';
-  const healthColor = healthPct >= 90 ? 'bg-brand-emerald' : healthPct >= 70 ? 'bg-brand-gold' : 'bg-rose-500';
-  const healthSub = `${stats.activeChurches}/${stats.totalChurches} churches active`;
+  const healthPct = stats.totalChurches > 0 ? (stats.activeChurches / stats.totalChurches) * 100 : 0;
+  const healthLabel = stats.totalChurches === 0 ? 'No clients yet' : healthPct >= 90 ? 'Healthy' : healthPct >= 70 ? 'Needs attention' : 'Degraded';
+  const healthColor = stats.totalChurches === 0 ? 'bg-slate-100 text-slate-600' : healthPct >= 90 ? 'bg-emerald-50 text-emerald-800' : healthPct >= 70 ? 'bg-amber-50 text-amber-900' : 'bg-rose-50 text-rose-800';
+  const formatRevenue = new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES', notation: 'compact', maximumFractionDigits: 1 });
+  const healthSub = `${stats.activeChurches} of ${stats.totalChurches} client workspaces active`;
 
   const cards = [
-    { label: 'Configured Clients', value: stats.totalChurches, sub: `${stats.activeChurches} active`, icon: Building2, color: 'bg-brand-indigo' },
-    { label: 'Total Members', value: stats.totalMembers, sub: 'across all churches', icon: Users, color: 'bg-brand-primary' },
-    { label: 'Church Income', value: `KES ${(stats.totalRevenue / 1000).toFixed(0)}K`, sub: 'recorded giving and income · all time', icon: TrendingUp, color: 'bg-brand-emerald' },
-    { label: 'System Health', value: healthLabel, sub: healthSub, icon: Activity, color: healthColor },
+    { label: 'Client workspaces', value: stats.totalChurches.toLocaleString('en-KE'), sub: `${stats.activeChurches.toLocaleString('en-KE')} active`, icon: Building2 },
+    { label: 'Members', value: stats.totalMembers.toLocaleString('en-KE'), sub: 'Across configured workspaces', icon: Users },
+    { label: 'Recorded income', value: formatRevenue.format(stats.totalRevenue), sub: 'All-time church income', icon: TrendingUp },
+    { label: 'Platform health', value: healthLabel, sub: healthSub, icon: Activity, status: true },
   ];
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-7 pb-10">
+      <header className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black text-brand-primary tracking-tight">Superadmin Dashboard</h1>
-          <p className="text-slate-500 font-medium mt-1">Platform controls and the configured Demo Church workspace</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Platform overview</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Monitor configured client workspaces and platform-wide activity.</p>
         </div>
-        {onOpenClient && <button onClick={onOpenClient} className="px-5 py-3 rounded-xl bg-brand-primary text-white text-sm font-bold hover:bg-brand-primary/90">Open client workspace</button>}
-      </div>
-      {error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"><strong>Dashboard data unavailable:</strong> {error}</div>}
+        {onOpenClient && <button type="button" onClick={onOpenClient} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brand-primary-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary"><Building2 size={16} aria-hidden="true" />Open client workspace</button>}
+      </header>
+      {error && <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800"><strong>Platform data unavailable.</strong> {error}</div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <section aria-label="Platform key metrics" className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map(card => (
-          <div key={card.label} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-            <div className="flex items-center gap-4">
-              <div className={`w-14 h-14 ${card.color} rounded-2xl flex items-center justify-center shadow-sm`}>
-                <card.icon size={24} className="text-white" />
-              </div>
-              <div>
-                <p className="text-3xl font-black text-slate-800">{loading ? '…' : card.value}</p>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{card.label}</p>
-              </div>
+          <article key={card.label} className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-medium text-slate-600">{card.label}</p>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-primary-50 text-brand-primary"><card.icon size={16} aria-hidden="true" /></span>
             </div>
-            <p className="mt-4 text-xs font-bold text-slate-400">{card.sub}</p>
-          </div>
+            {loading
+              ? <div className="mt-4 h-8 w-2/3 animate-pulse rounded-md bg-slate-100" aria-label={`Loading ${card.label}`} />
+              : <p className={`mt-4 truncate font-semibold tracking-tight tabular-nums ${card.status ? `inline-flex max-w-full rounded-md px-2.5 py-1 text-sm ${healthColor}` : 'text-2xl text-slate-950'}`}>{card.value}</p>}
+            <p className="mt-3 text-xs leading-5 text-slate-500">{card.sub}</p>
+          </article>
         ))}
-      </div>
+      </section>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex items-center gap-4">
-        <AlertCircle size={24} className="text-amber-600 shrink-0" />
-        <div>
-          <p className="font-black text-amber-800 text-sm">Platform Overview</p>
-          <p className="text-amber-700 text-xs font-bold mt-1">Use Billing & Plans, Restrictions, Suspensions, and Updates in the platform navigation to administer Demo Church independently from church operations.</p>
-        </div>
-      </div>
+      <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6" aria-labelledby="platform-actions-title">
+        <h2 id="platform-actions-title" className="text-base font-semibold text-slate-900">Platform administration</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">Use the navigation to manage client access, billing, integrations, releases, and audit activity.</p>
+        {stats.totalChurches === 0 && !loading && <p className="mt-4 rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-600">No client workspaces are configured yet. Add a workspace from Client Workspace to begin.</p>}
+      </section>
     </div>
   );
 };

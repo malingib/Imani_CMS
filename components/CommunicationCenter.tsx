@@ -170,7 +170,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                      <div className={`p-3 rounded-2xl ${t.type === 'SMS' ? 'bg-brand-indigo/10 text-brand-indigo' : t.type === 'Email' ? 'bg-brand-gold/10 text-brand-gold' : 'bg-brand-emerald/10 text-brand-emerald'}`}>
                         {t.type === 'SMS' ? <Smartphone size={20}/> : t.type === 'Email' ? <Mail size={20}/> : <Share2 size={20}/>}
                      </div>
-                     <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-slate-300">Standard</span>
+                     <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-slate-500">Example · customize before use</span>
                   </div>
                   <h4 className="text-lg sm:text-xl font-black text-slate-800 mb-4">{t.name}</h4>
                   <p className="text-xs sm:text-sm text-slate-500 leading-relaxed italic font-medium">"{t.content}"</p>

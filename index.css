@@ -46,102 +46,77 @@
 
 
 
-/* Imani workspace design system — intentionally scoped away from login/signup. */
-.imani-workspace {
-  --imani-border: #dce6e2;
-  --imani-muted: #647a76;
-  --imani-ink: #173b3a;
-  background: #f7f9f8;
-  color: var(--imani-ink);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-.imani-workspace > div:not([class*="fixed"]) { min-width: 0; }
-.imani-workspace h1, .imani-workspace h2, .imani-workspace h3, .imani-workspace h4 {
-  letter-spacing: -0.025em;
-}
-.imani-workspace [class*="rounded-[2.5rem]"],
-.imani-workspace [class*="rounded-3xl"] {
-  border-radius: 0.75rem !important;
-}
-.imani-workspace [class*="rounded-2xl"] { border-radius: 0.65rem; }
-.imani-workspace [class*="shadow-xl"],
-.imani-workspace [class*="shadow-2xl"],
-.imani-workspace [class*="shadow-lg"] { box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important; }
-.imani-workspace [class*="bg-white"][class*="rounded-"] {
-  border-color: var(--imani-border);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.035);
-}
-.imani-workspace input:not([type="checkbox"]):not([type="radio"]),
-.imani-workspace select,
-.imani-workspace textarea {
-  border-radius: 0.5rem;
-  border-color: #c4d5d0;
-  box-shadow: none;
-}
-.imani-workspace button { transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease; }
-.imani-workspace button:focus-visible,
-.imani-workspace a:focus-visible,
-.imani-workspace input:focus-visible,
-.imani-workspace select:focus-visible,
-.imani-workspace textarea:focus-visible {
-  outline: 2px solid #647a76;
-  outline-offset: 2px;
-}
-.imani-sidebar {
-  box-shadow: none !important;
-  border-color: #dce6e2 !important;
-}
-.imani-sidebar nav button { border-radius: 0.5rem !important; }
-.imani-sidebar nav button[class*="bg-brand-primary/5"] {
-  background: #edf3f1 !important;
-  color: #173b3a !important;
-}
-.imani-sidebar nav button[class*="bg-brand-primary/5"] svg { color: #285653 !important; }
-@media (max-width: 640px) {
-  .imani-workspace { overflow-x: clip; }
-  .imani-workspace [class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-
-/* Shared shadcn-inspired dashboard treatment for both church and platform workspaces. */
+/* Shared dashboard system. Auth and public pages are outside these scopes. */
 .imani-workspace,
 .imani-platform {
+  --imani-bg: #f7f9f8;
+  --imani-surface: #ffffff;
+  --imani-surface-muted: #f1f5f3;
+  --imani-ink: #173b3a;
+  --imani-muted: #647a76;
+  --imani-border: #dce6e2;
+  --imani-focus: #527d77;
   --background: #ffffff;
-  --foreground: #173b3a;
+  --foreground: var(--imani-ink);
   --card: #ffffff;
-  --card-foreground: #173b3a;
-  --muted: #f7f9f8;
-  --muted-foreground: #647a76;
-  --border: #dce6e2;
-  --input: #dce6e2;
-  --ring: #527d77;
-}
-.imani-platform {
-  background: #f7f9f8;
-  color: #173b3a;
+  --card-foreground: var(--imani-ink);
+  --muted: var(--imani-bg);
+  --muted-foreground: var(--imani-muted);
+  --border: var(--imani-border);
+  --input: var(--imani-border);
+  --ring: var(--imani-focus);
+  min-width: 0;
+  color: var(--imani-ink);
+  background: var(--imani-bg);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-.imani-platform aside {
-  box-shadow: none !important;
-  border-color: #dce6e2 !important;
+.imani-workspace > div, .imani-platform > main { min-width: 0; }
+.imani-workspace h1, .imani-workspace h2, .imani-workspace h3,
+.imani-platform h1, .imani-platform h2, .imani-platform h3 {
+  color: var(--imani-ink);
+  letter-spacing: -0.025em;
 }
-.imani-platform nav button { border-radius: 0.5rem !important; }
-.imani-platform nav button[aria-current="page"] { background: #edf3f1; color: #173b3a; }
-.imani-platform nav button[aria-current="page"] svg { color: #285653; }
-.imani-platform [class*="shadow-xl"],
-.imani-platform [class*="shadow-2xl"],
-.imani-platform [class*="shadow-lg"],
-.imani-workspace [class*="shadow-xl"],
-.imani-workspace [class*="shadow-2xl"],
-.imani-workspace [class*="shadow-lg"] {
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04) !important;
+.imani-workspace aside, .imani-platform aside {
+  border-color: var(--imani-border);
+  background: var(--imani-surface);
+  box-shadow: none;
 }
-.imani-platform [class*="rounded-3xl"],
-.imani-platform [class*="rounded-[2.5rem]"],
-.imani-workspace [class*="rounded-3xl"],
-.imani-workspace [class*="rounded-[2.5rem]"] {
-  border-radius: 0.75rem !important;
+.imani-workspace header, .imani-platform main > header {
+  border-color: var(--imani-border);
+  background: var(--imani-surface);
 }
+.imani-workspace input:not([type="checkbox"]):not([type="radio"]),
+.imani-workspace select, .imani-workspace textarea,
+.imani-platform input:not([type="checkbox"]):not([type="radio"]),
+.imani-platform select, .imani-platform textarea {
+  border-color: var(--imani-border);
+  border-radius: 0.5rem;
+  background-color: var(--imani-surface);
+  box-shadow: none;
+}
+.imani-workspace button, .imani-platform button {
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.imani-workspace button:focus-visible, .imani-workspace a:focus-visible,
+.imani-workspace input:focus-visible, .imani-workspace select:focus-visible,
+.imani-workspace textarea:focus-visible,
+.imani-platform button:focus-visible, .imani-platform a:focus-visible,
+.imani-platform input:focus-visible, .imani-platform select:focus-visible,
+.imani-platform textarea:focus-visible {
+  outline: 2px solid var(--imani-focus);
+  outline-offset: 2px;
+}
+.imani-sidebar nav button[aria-current="page"] {
+  background: var(--imani-surface-muted);
+  color: #102d2d;
+  font-weight: 600;
+}
+.imani-sidebar nav button[aria-current="page"] svg { color: var(--color-brand-primary-600); }
+.imani-sidebar nav button:not([aria-current="page"]):hover { background: var(--imani-bg); }
+.imani-workspace [class*="rounded-3xl"], .imani-workspace [class*="rounded-[2.5rem]"],
+.imani-platform [class*="rounded-3xl"], .imani-platform [class*="rounded-[2.5rem]"] { border-radius: 0.75rem; }
+.imani-workspace [class*="shadow-xl"], .imani-workspace [class*="shadow-2xl"],
+.imani-platform [class*="shadow-xl"], .imani-platform [class*="shadow-2xl"] { box-shadow: none; }
 .imani-platform table,
 .imani-workspace table {
   border-collapse: separate;
@@ -159,33 +134,11 @@
 .imani-platform th,
 .imani-workspace td,
 .imani-workspace th { border-bottom-color: #dce6e2; }
-.imani-platform [role="dialog"],
-.imani-workspace [role="dialog"] { border: 1px solid #dce6e2; }
-.imani-platform button:focus-visible,
-.imani-platform a:focus-visible,
-.imani-platform input:focus-visible,
-.imani-platform select:focus-visible,
-.imani-platform textarea:focus-visible {
-  outline: 2px solid #647a76;
-  outline-offset: 2px;
-}
+.imani-platform [role="dialog"], .imani-workspace [role="dialog"] { border: 1px solid var(--imani-border); }
 @media (max-width: 640px) {
-  .imani-platform { overflow-x: clip; }
-  .imani-platform [class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .imani-workspace, .imani-platform { overflow-x: clip; }
+  .imani-workspace [class*="grid-cols-4"], .imani-platform [class*="grid-cols-4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .imani-platform main > div { min-width: 0; }
-}
-
-/* KPI blocks follow the quiet, compact shadcn dashboard treatment. */
-.imani-platform .grid > div > div > div[class*="bg-brand-"] {
-  background: #edf3f1 !important;
-  color: #526d68 !important;
-  border-radius: 0.5rem !important;
-  box-shadow: none !important;
-}
-.imani-platform .grid > div > div > div[class*="bg-brand-"] svg { color: #526d68 !important; }
-.imani-platform .grid > div[class*="bg-white"][class*="rounded-"] {
-  border-color: #dce6e2 !important;
-  box-shadow: none !important;
 }
 
 

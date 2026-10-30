@@ -18,9 +18,9 @@ const ADMIN_VIEWS: AppView[] = [
 const ROLE_VIEWS: Record<UserRole, AppView[]> = {
   SUPER_ADMIN: [...ADMIN_VIEWS, 'PLATFORM_DASHBOARD', 'TENANTS'],
   ADMIN: ADMIN_VIEWS,
-  PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS'],
-  TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS'],
-  SECRETARY: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION'],
+  PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS', 'SETTINGS'],
+  TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS', 'SETTINGS'],
+  SECRETARY: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'SETTINGS'],
   MEMBER: [],
 };
 
@@ -130,6 +130,7 @@ const AccountShell = () => {
   if (currentUser.role === UserRole.SUPER_ADMIN && !viewingChurch) {
     return (
       <PlatformShell
+        administratorName={currentUser.name}
         onOpenClient={() => {
           if (activeChurchId) {
             handleSelectChurch(activeChurchId);

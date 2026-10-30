@@ -382,6 +382,7 @@ const Membership: React.FC<MembershipProps> = ({
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
               type="text" 
+              aria-label="Search members by name, phone, or email"
               placeholder="Search by name, phone or email..." 
               className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-normal text-slate-800 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
               value={searchTerm}
@@ -436,6 +437,11 @@ const Membership: React.FC<MembershipProps> = ({
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold leading-5 text-slate-900">{member.firstName} {member.lastName}</p>
                         <p className="mt-0.5 truncate text-xs font-normal text-slate-500">{member.membershipType}</p>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 sm:hidden">
+                          <span className="max-w-full truncate text-xs text-slate-600">{member.phone || 'No phone listed'}</span>
+                          <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${member.status === MemberStatus.ACTIVE ? 'bg-brand-emerald/10 text-brand-emerald' : 'bg-slate-100 text-slate-600'}`}>{member.status}</span>
+                          {!!member.groups?.length && <span className="max-w-full truncate text-xs text-slate-500">{member.groups.join(', ')}</span>}
+                        </div>
                       </div>
                     </div>
                   </td>

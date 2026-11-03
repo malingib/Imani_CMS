@@ -162,15 +162,22 @@ Deno.serve(async (req: Request) => {
     }
 
     const providerMessageId = String(result.data?.id || '');
+    if (!providerMessageId) {
+      const description = 'MobiWave accepted the request but returned no message reference. Verify the dispatch in the MobiWave dashboard before retrying.';
+      await rest('sms_dispatches?church_id=eq.' + encodeURIComponent(churchId) + '&idempotency_key=eq.' + encodeURIComponent(idempotencyKey), {
+        method: 'PATCH', body: JSON.stringify({ status: 'verification_required', result_description: description }),
+      });
+      return reply(502, { success: false, status: 'verification_required', error: description });
+    }
     await rest('sms_dispatches?church_id=eq.' + encodeURIComponent(churchId) + '&idempotency_key=eq.' + encodeURIComponent(idempotencyKey), {
       method: 'PATCH', body: JSON.stringify({
-        status: 'sent', provider_message_id: providerMessageId || null,
+        status: 'sent', provider_message_id: providerMessageId,
         result_description: 'Accepted by MobiWave SMS API.',
       }),
     });
     return reply(200, {
       success: true, status: 'sent', sent: recipients.length,
-      provider_message_id: providerMessageId || null,
+      provider_message_id: providerMessageId,
       message: 'MobiWave accepted the SMS dispatch. Delivery reports are separate from API acceptance.',
     });
   } catch (error) {

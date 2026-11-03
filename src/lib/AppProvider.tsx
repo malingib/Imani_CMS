@@ -59,7 +59,6 @@ interface AppActions {
   handleMarkAllNotificationsRead: () => Promise<void>;
   handleDeleteNotification: (id: string) => Promise<void>;
   handleSelectChurch: (id: string | null) => void;
-  handleUpdateProfile: (m: Member) => Promise<void>;
   handleAddGroup: (g: Group) => Promise<void>;
   handleUpdateGroup: (g: Group) => Promise<void>;
   handleDeleteGroup: (id: string) => Promise<void>;
@@ -429,15 +428,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setState(prev => ({ ...prev, viewingPlatform: true, viewingChurch: false, loading: 'ready', dataError: null }));
         addToast('Returned to superadmin dashboard');
       }
-    },
-    handleUpdateProfile: async (m) => {
-      const saved = await persistence.updateMember(m, requireChurchId());
-      setState(prev => ({ ...prev, members: prev.members.map(x => x.id === saved.id ? saved : x) }));
-      if (state.currentUser?.memberId === saved.id) {
-        setState(prev => ({ ...prev, currentUser: prev.currentUser ? { ...prev.currentUser, name: `${saved.firstName} ${saved.lastName}`.trim(), avatar: saved.photo || prev.currentUser.avatar } : null }));
-      }
-      addToast('Profile updated');
-      createAudit('Updated profile', 'MY_PORTAL');
     },
     requireChurchId,
     refreshData: async () => {

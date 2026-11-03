@@ -181,7 +181,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
           <p className="text-slate-500 mt-2 text-base sm:text-lg">Full-cycle financial control: M-Pesa, Cash, and Expenses.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <MpesaPaymentDialog churchId={churchId} />
+          {[UserRole.ADMIN, UserRole.TREASURER, UserRole.SUPER_ADMIN].includes(currentUserRole) && <MpesaPaymentDialog churchId={churchId} />}
           {currentUserRole !== UserRole.MEMBER && (
             <>
               <button 

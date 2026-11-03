@@ -224,7 +224,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
           {events.map(event => {
             const config = EVENT_TYPE_CONFIG[event.type] || EVENT_TYPE_CONFIG.OTHER;
             const Icon = config.icon;
-            const going = isUserRSVPd(event);
             
             return (
               <div key={event.id} className="relative bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col transition-shadow hover:shadow-md">
@@ -234,11 +233,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                       <Icon size={20} />
                     </div>
                     <div className="flex gap-2">
-                      {going && (
-                        <span className="px-3 py-1 bg-brand-emerald text-white text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1">
-                          <CheckCircle2 size={10}/> Going
-                        </span>
-                      )}
                       {event.recurrence && event.recurrence !== 'NONE' && (
                         <span className="px-3 py-1 bg-slate-100 text-slate-400 text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1">
                           <Repeat size={10}/> {event.recurrence}
@@ -269,7 +263,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                 <div className="bg-slate-50 px-4 py-4 border-t border-slate-100 space-y-3">
                   <div className="flex items-center gap-3 text-slate-700 font-black text-sm">
                     <Users size={18} className="text-brand-primary" /> 
-                    {event.attendance.length} <span className="hidden sm:inline">Registered</span>
+                    {event.attendance.length} <span className="hidden sm:inline">Attendees</span>
                     <span className="ml-auto px-3 py-1.5 bg-white text-brand-primary text-[10px] font-black rounded-lg border border-indigo-50 uppercase tracking-widest">Live</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -353,7 +347,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                     <div className="space-y-4">
                        <div className="flex justify-between items-end">
                           <p className="text-2xl font-semibold tracking-tighter">{viewingEvent.attendance.length} People</p>
-                          <p className="text-[10px] font-black text-indigo-300 uppercase">Confirmed RSVP</p>
+                          <p className="text-[10px] font-black text-indigo-300 uppercase">Attendance recorded</p>
                        </div>
                        <div className="flex -space-x-3 overflow-hidden">
                           {viewingEvent.attendance.slice(0, 8).map((id, i) => (

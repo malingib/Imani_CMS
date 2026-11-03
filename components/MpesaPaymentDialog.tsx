@@ -89,8 +89,12 @@ const MpesaPaymentDialog: React.FC<Props> = ({ churchId }) => {
       if (data?.error) throw new Error(String(data.error));
       if (!data?.payment_id) throw new Error('Safaricom did not return a payment reference.');
       setPaymentId(String(data.payment_id));
-      setStatus(data.status === 'verification_required' ? 'verification_required' : 'pending');
-      setMessage(String(data.customer_message || 'Check the phone and enter the M-Pesa PIN.'));
+      const returnedStatus = String(data.status || 'pending') as PaymentStatus;
+      setStatus(['pending', 'verification_required', 'succeeded', 'failed'].includes(returnedStatus) ? returnedStatus : 'pending');
+      if (data.receipt_number) setReceipt(String(data.receipt_number));
+      setMessage(returnedStatus === 'succeeded'
+        ? 'Payment confirmed and posted to the church finance ledger.'
+        : String(data.customer_message || 'Check the phone and enter the M-Pesa PIN.'));
     } catch (e) {
       setStatus('idle');
       setMessage('');

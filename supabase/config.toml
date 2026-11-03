@@ -399,3 +399,6 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # Safaricom callback is public; each request is protected by a one-time callback token.
 [functions.mpesa-stk]
 verify_jwt = false
+
+[functions.mpesa-status]
+verify_jwt = false

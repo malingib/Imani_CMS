@@ -27,6 +27,7 @@ jobs:
           deno check --node-modules-dir=auto supabase/functions/mpesa-status/index.ts
           deno check --node-modules-dir=auto supabase/functions/mobiwave-send/index.ts
           deno check --node-modules-dir=auto supabase/functions/mobiwave-status/index.ts
+          deno check --node-modules-dir=auto supabase/functions/invite-claim/index.ts
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:run

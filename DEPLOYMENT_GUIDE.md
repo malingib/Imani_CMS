@@ -1,472 +1,85 @@
 # Imani CMS Deployment Guide
 
-## Pre-Deployment Checklist
+## Production architecture
 
-- [ ] All environment variables configured
-- [ ] Supabase database migrations applied
-- [ ] TypeScript compiles without errors (`npm run typecheck`)
-- [ ] All tests passing (`npm run test`)
-- [ ] Sensitive data removed from code (API keys, tokens)
-- [ ] Browser console has no errors in production build
-- [ ] Mobile responsive design tested
-- [ ] Core user flows tested (login, add member, finance, etc.)
+- **Frontend hosting:** Cloudflare Pages
+- **Production domain:** `imani.co.ke` (existing Cloudflare Worker binding; do not replace without an approved cutover)
+- **Pages project:** `imani-cms`
+- **Git repository:** `malingib/Imani_CMS`
+- **Production branch:** `main`
+- **Build command:** `npm run build`
+- **Build output:** `dist`
+- **Frontend backend:** Supabase project `rmwqkqkhdkslezoskiol`
+- **Supabase Edge Functions:** deployed and managed separately from Pages
 
----
+Cloudflare Pages is the production deployment target. Do not deploy this application to Vercel.
 
-## Environment Variables
+## Cloudflare Pages configuration
 
-### Required Variables
+The Pages project is configured to build from the GitHub repository's `main` branch. A push to `main` should trigger a production deployment when the Git integration webhook is active.
 
-Create a `.env.production` file with:
+Required build-time variables (set separately for Production and Preview):
 
-```
-# Supabase
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
+| Variable | Value |
+|---|---|
+| `VITE_SUPABASE_URL` | `https://rmwqkqkhdkslezoskiol.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Supabase publishable/anon key |
 
-# AI Services
-GEMINI_API_KEY=your-gemini-api-key
+The anon key is intended for browser use and is protected by Supabase Auth and Row Level Security. Never put a Supabase service-role key, Daraja secret, MobiWave API secret, or other server credential in a `VITE_*` variable. Provider credentials belong in the server-side Supabase integration/Vault configuration.
 
-# Optional: Stripe for billing
-VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
+Cloudflare Pages settings:
+- Framework preset: Vite (or no preset with the same build settings)
+- Root directory: `/`
+- Build command: `npm run build`
+- Build output directory: `dist`
+- Node.js: use the version supported by the lockfile and current Cloudflare Pages build image
 
-# Optional: Analytics
-VITE_ANALYTICS_KEY=your-analytics-key
-```
+## Local verification
 
-**Security Notes:**
-- Never commit `.env.production` to version control
-- Store secrets in your hosting provider's environment variable settings
-- Use separate Supabase projects for development and production
-- Rotate API keys regularly (quarterly minimum)
-
----
-
-## Vercel Deployment (Recommended)
-
-### 1. Connect Repository
+Run before merging application changes:
 
 ```bash
-vercel link
-```
-
-### 2. Configure Project
-
-In Vercel dashboard:
-
-1. Go to Settings → Environment Variables
-2. Add all required variables
-3. Set to production environment
-
-### 3. Deploy
-
-```bash
-vercel --prod
-```
-
-Or automatically deploy on git push:
-- Push to main branch triggers production deploy
-- Push to feature branches triggers preview deploy
-
-### 4. Monitor Deployment
-
-- Check Vercel dashboard for build status
-- View logs for any errors
-- Test deployed site thoroughly
-
----
-
-## Database Migrations
-
-### Before First Deployment
-
-Run Supabase migrations to set up indexes and improvements:
-
-```bash
-# Using Supabase CLI
-supabase migration new schema_improvements
-
-# Copy migration from /supabase/migrations/001_schema_improvements.sql
-# Then apply:
-supabase db push
-```
-
-### Production Migration Safety
-
-1. **Test first:** Always test migrations in staging environment
-2. **Backup:** Create database backup before running migrations
-3. **Minimal downtime:** Plan migrations during low-traffic windows
-4. **Monitoring:** Monitor database performance after migration
-
----
-
-## Performance Optimization
-
-### 1. Build Optimization
-
-```bash
+npm ci
+npm run typecheck
+npm run test:run
 npm run build
 ```
 
-Check bundle size:
-```bash
-npm run build -- --stats
-```
-
-Target sizes:
-- Main bundle: < 300KB (gzipped)
-- Lazy chunks: < 100KB each
-
-### 2. Image Optimization
-
-- Use WebP format where possible
-- Compress SVGs and PNGs
-- Implement lazy loading for images
-- Consider CDN (Vercel provides automatic CDN)
-
-### 3. Database Optimization
-
-Already implemented:
-- Indexes on `church_id` for multi-tenant queries
-- Indexes on common filter fields
-- Composite indexes for joins
-
-Monitor with:
-```sql
--- Check slow queries
-SELECT * FROM pg_stat_statements 
-ORDER BY mean_exec_time DESC 
-LIMIT 10;
-```
-
----
-
-## Security Configuration
-
-### 1. HTTPS
-
-✅ Automatically configured by Vercel
-- All traffic redirected to HTTPS
-- HSTS header enabled
-- Certificate auto-renewed
-
-### 2. CORS (Cross-Origin Resource Sharing)
-
-Supabase handles CORS automatically. If issues:
-
-```typescript
-// In headers configuration
-{
-  'Access-Control-Allow-Origin': 'https://yourdomain.com',
-  'Access-Control-Allow-Credentials': 'true'
-}
-```
-
-### 3. CSP (Content Security Policy)
-
-Add to vercel.json:
-```json
-{
-  "headers": [{
-    "source": "/(.*)",
-    "headers": [{
-      "key": "Content-Security-Policy",
-      "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;"
-    }]
-  }]
-}
-```
-
-### 4. Rate Limiting
-
-For production, implement rate limiting on Supabase Edge Functions:
-
-```typescript
-// Example in Supabase Edge Function
-const limiter = new RateLimiter();
-if (!limiter.check(userId)) {
-  throw new HTTPException(429, 'Rate limit exceeded');
-}
-```
-
-### 5. Regular Security Audits
+Supabase Edge Functions are deployed separately. Type-check them with Deno:
 
 ```bash
-# Check for vulnerable dependencies
-npm audit
-
-# Fix automatically
-npm audit fix
-
-# Update dependencies
-npm update
+deno check --node-modules-dir=auto supabase/functions/mpesa-stk/index.ts
+deno check --node-modules-dir=auto supabase/functions/mpesa-status/index.ts
+deno check --node-modules-dir=auto supabase/functions/mobiwave-send/index.ts
+deno check --node-modules-dir=auto supabase/functions/mobiwave-status/index.ts
+deno check --node-modules-dir=auto supabase/functions/invite-claim/index.ts
 ```
 
----
+## Custom domains and cutover
 
-## Monitoring & Logging
+The existing apex hostname `imani.co.ke` is attached to a separate Cloudflare Worker service named `imani`. Do not remove that Worker domain or its DNS record as part of a routine Pages setup.
 
-### 1. Application Monitoring
+The Pages project has a separate `www.imani.co.ke` custom-domain entry. Its CNAME target is `imani-cms.pages.dev`. Confirm Pages domain verification and certificate issuance before using it as a public production hostname.
 
-Use Vercel Analytics:
-- Web Vitals (LCP, FID, CLS)
-- Performance metrics
-- Error tracking
+Apex cutover to Pages requires an explicit migration plan for the existing Worker binding and its current traffic. Do not delete or overwrite the Worker-managed apex record without confirming the current service and an approved cutover window.
 
-### 2. Database Monitoring
+## Release verification
 
-Supabase dashboard provides:
-- Query performance
-- Connection pooling status
-- Storage usage
-- Row counts per table
+After a Git push to `main`:
 
-Alert thresholds:
-- Database usage > 80%
-- Query time > 1 second
-- Error rate > 1%
+1. Confirm a new Cloudflare Pages production deployment was created for the expected commit.
+2. Confirm the install/build stages complete successfully and the deployment is marked successful.
+3. Confirm the Pages deployment URL serves the app.
+4. Confirm the custom domain is verified and its TLS certificate is active before routing users to it.
+5. Test sign-in, platform-owner workspace, church/client workspace, tenant isolation, finance views, and settings.
+6. Test M-Pesa and MobiWave SMS only after production provider credentials have been securely configured. A successful frontend deployment does not prove payment or SMS readiness.
 
-### 3. Error Tracking
+## Database and provider configuration
 
-Configure Sentry for production:
+Supabase schema migrations and Edge Function deployments are independent of Cloudflare Pages deployments. Review and apply database migrations through the approved Supabase migration workflow.
 
-```typescript
-import * as Sentry from '@sentry/react';
+Configure Daraja and MobiWave SMS credentials through the application's secured integration settings/Vault flow. Do not store provider secrets in GitHub, Cloudflare frontend build variables, browser storage, or source files.
 
-Sentry.init({
-  dsn: 'https://your-sentry-dsn@sentry.io/...',
-  environment: 'production',
-  tracesSampleRate: 0.1,
-});
-```
+## Rollback
 
----
-
-## Scaling Considerations
-
-### Database Scaling
-
-- **Reads**: Supabase automatically handles read scaling
-- **Writes**: Consider write replicas for high-volume scenarios
-- **Storage**: Monitor and archive old audit logs (>1 year old)
-
-### Application Scaling
-
-Vercel handles automatic scaling:
-- Auto-scales functions based on demand
-- Global CDN for static assets
-- Serverless functions in 35+ regions
-
-### Recommended Architecture for 10K+ Churches
-
-```
-├── Frontend (Vercel)
-│   ├── Main app (React)
-│   └── API routes (serverless)
-├── Database (Supabase)
-│   ├── Main (Postgres)
-│   └── Read replica (optional)
-├── Storage (Vercel Blob)
-│   └── Member photos, documents
-└── Cache (Redis - Upstash)
-    ├── Session cache
-    └── Query cache
-```
-
----
-
-## Rollback Procedure
-
-If deployment fails:
-
-### Option 1: Vercel Rollback
-```bash
-vercel rollback
-```
-
-### Option 2: Manual Deployment
-```bash
-# Deploy previous commit
-git checkout <previous-commit>
-vercel --prod
-```
-
-### Option 3: Database Rollback
-
-If schema changes caused issues:
-```bash
-# Supabase rollback
-supabase db push --reset-schema
-supabase db pull  # Restore from backup
-```
-
----
-
-## Testing in Production
-
-### Smoke Tests
-
-Essential checks after deployment:
-- [ ] Login works
-- [ ] Dashboard loads
-- [ ] Can add a member
-- [ ] Can view members
-- [ ] Financial transactions work
-- [ ] Events display correctly
-- [ ] Settings accessible
-
-### Load Testing
-
-For large-scale deployments:
-```bash
-# Using Apache Bench
-ab -n 1000 -c 10 https://yourdomain.com
-
-# Using k6
-k6 run loadtest.js
-```
-
----
-
-## Maintenance
-
-### Weekly
-- Monitor error logs
-- Check database performance
-- Verify backups completed
-
-### Monthly
-- Review security audit logs
-- Update dependencies
-- Check disk space usage
-
-### Quarterly
-- Rotate API keys
-- Review and update CSP headers
-- Performance optimization review
-
----
-
-## Troubleshooting
-
-### Issue: Slow Dashboard Load
-
-**Diagnosis:**
-```sql
--- Check member count per church
-SELECT church_id, COUNT(*) FROM members 
-GROUP BY church_id ORDER BY COUNT(*) DESC;
-```
-
-**Solution:**
-- Implement pagination (load first 50 members)
-- Add lazy loading for tabs
-- Use React.memo for components
-
-### Issue: 500 Error on Member Create
-
-**Check:**
-1. Supabase status (https://status.supabase.com)
-2. RLS policies allow operation
-3. Required fields present in request
-
-**Debug:**
-```typescript
-// Add detailed logging
-try {
-  const result = await createMember(member, churchId);
-} catch (error) {
-  console.error('Full error:', JSON.stringify(error, null, 2));
-}
-```
-
-### Issue: High Database Costs
-
-**Investigate:**
-- N+1 queries (load entire table instead of paginating)
-- Missing indexes on frequently-queried columns
-- Unnecessary data loading
-
-**Solutions:**
-- Implement query optimization
-- Add missing indexes (see migrations)
-- Cache read-heavy queries
-
----
-
-## Disaster Recovery
-
-### Database Backup Strategy
-
-Supabase provides automated backups:
-- Daily backups (15-day retention)
-- Point-in-time recovery available
-
-Manual backup:
-```bash
-# Export database
-pg_dump -Fc postgresql://user:pass@db.host/dbname > backup.dump
-
-# Restore
-pg_restore -d dbname backup.dump
-```
-
-### Data Recovery
-
-**For deleted records:**
-- Check soft_delete columns (deleted_at field)
-- Query from member_change_log table for history
-
-**For corrupted data:**
-1. Stop application
-2. Restore from backup
-3. Notify users of data loss window
-4. Resume application
-
----
-
-## Performance Benchmarks
-
-Target metrics for optimal experience:
-
-| Metric | Target | Current |
-|--------|--------|---------|
-| Largest Contentful Paint (LCP) | < 2.5s | TBD |
-| First Input Delay (FID) | < 100ms | TBD |
-| Cumulative Layout Shift (CLS) | < 0.1 | TBD |
-| Time to Interactive (TTI) | < 3.8s | TBD |
-| API Response Time | < 200ms | TBD |
-
-Monitor with:
-```typescript
-// Web Vitals measurement
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
-
-getCLS(console.log);
-getFID(console.log);
-getFCP(console.log);
-getLCP(console.log);
-getTTFB(console.log);
-```
-
----
-
-## Support & Documentation
-
-- **Vercel Docs**: https://vercel.com/docs
-- **Supabase Docs**: https://supabase.com/docs
-- **React Docs**: https://react.dev
-- **TypeScript Docs**: https://www.typescriptlang.org/docs/
-
----
-
-## Emergency Contacts
-
-- Vercel Support: support@vercel.com
-- Supabase Support: support@supabase.com
-- Application Owner: [Contact info]
-
----
-
-**Last Updated:** 2026-07-02
-**Version:** 1.0
+Use Cloudflare Pages deployment history to inspect and roll back a failed frontend release. A Pages rollback does not roll back Supabase database migrations or Edge Function versions; those require their own reviewed recovery procedures.

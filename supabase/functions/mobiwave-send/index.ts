@@ -169,12 +169,16 @@ Deno.serve(async (req: Request) => {
       });
       return reply(502, { success: false, status: 'verification_required', error: description });
     }
-    await rest('sms_dispatches?church_id=eq.' + encodeURIComponent(churchId) + '&idempotency_key=eq.' + encodeURIComponent(idempotencyKey), {
-      method: 'PATCH', body: JSON.stringify({
-        status: 'sent', provider_message_id: providerMessageId,
-        result_description: 'Accepted by MobiWave SMS API.',
-      }),
+    const updatePath = 'sms_dispatches?church_id=eq.' + encodeURIComponent(churchId) + '&idempotency_key=eq.' + encodeURIComponent(idempotencyKey);
+    const updateBody = JSON.stringify({
+      status: 'sent', provider_message_id: providerMessageId,
+      result_description: 'Accepted by MobiWave SMS API.',
     });
+    let saved = await rest(updatePath, { method: 'PATCH', body: updateBody });
+    if (!saved.response.ok) saved = await rest(updatePath, { method: 'PATCH', body: updateBody });
+    if (!saved.response.ok) {
+      return reply(502, { success: false, status: 'verification_required', provider_message_id: providerMessageId, error: 'MobiWave accepted the dispatch, but the provider reference could not be saved. Check the MobiWave dashboard before retrying.' });
+    }
     return reply(200, {
       success: true, status: 'sent', sent: recipients.length,
       provider_message_id: providerMessageId,

@@ -10,13 +10,11 @@ import {
   Save, Heart, CalendarPlus, UserMinus, Info, ClipboardList,
   Mail
 } from 'lucide-react';
-import { ChurchEvent, Member, RecurrenceType, ChurchEventType, User as UserType, UserRole } from '../types';
+import { ChurchEvent, Member, RecurrenceType, ChurchEventType } from '../types';
 
 interface EventsManagementProps {
   events: ChurchEvent[];
   members: Member[];
-  currentUser: UserType | null;
-  onRSVP: (eventId: string, isRSVPing: boolean) => Promise<void> | void;
   onAddEvent: (event: ChurchEvent) => Promise<void> | void;
   onUpdateEvent: (event: ChurchEvent) => Promise<void> | void;
   onDeleteEvent: (id: string) => Promise<void> | void;
@@ -32,7 +30,7 @@ const EVENT_TYPE_CONFIG: Record<ChurchEventType, { icon: any, color: string, lab
   OTHER: { icon: HelpCircle, color: 'bg-slate-600', label: 'Other Event' }
 };
 
-const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, currentUser, onRSVP, onAddEvent, onUpdateEvent, onDeleteEvent, onUpdateAttendance }) => {
+const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, onAddEvent, onUpdateEvent, onDeleteEvent, onUpdateAttendance }) => {
   const [viewMode, setViewMode] = useState<'GRID' | 'CALENDAR'>('GRID');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState<string | null>(null);
@@ -94,7 +92,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       type: newEvent.type as ChurchEventType,
       coordinator: newEvent.coordinator,
       contactPerson: newEvent.contactPerson,
-      rsvpDeadline: newEvent.rsvpDeadline,
       recurrence: newEvent.recurrence as RecurrenceType,
       attendance: [],
     };
@@ -136,19 +133,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
     }
   };
 
-  const handleRSVPAction = async (eventId: string, isRSVPing: boolean) => {
-    setEventError('');
-    try {
-      await onRSVP(eventId, isRSVPing);
-    } catch (error) {
-      console.error('Unable to update RSVP:', error);
-      setEventError('Your RSVP was not saved. Check your connection and try again.');
-    }
-  };
-
-  const isUserRSVPd = (event: ChurchEvent) => {
-    return currentUser?.memberId && event.attendance.includes(currentUser.memberId);
-  };
 
   return (
     <div className="imani-page imani-page--events space-y-8 animate-in fade-in duration-500 pb-10">
@@ -159,11 +143,9 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
           <p className="text-slate-500 mt-2 text-lg">Manage church events and track attendance.</p>
         </div>
         <div className="flex gap-3">
-          {currentUser?.role !== UserRole.MEMBER && (
-            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 text-xs sm:text-sm">
+          <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 text-xs sm:text-sm">
                <Plus size={20} /> Schedule Event
             </button>
-          )}
         </div>
       </div>
 
@@ -239,7 +221,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
           {events.map(event => {
             const config = EVENT_TYPE_CONFIG[event.type] || EVENT_TYPE_CONFIG.OTHER;
             const Icon = config.icon;
-            const going = isUserRSVPd(event);
             
             return (
               <div key={event.id} className="relative bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col transition-shadow hover:shadow-md">
@@ -249,11 +230,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                       <Icon size={20} />
                     </div>
                     <div className="flex gap-2">
-                      {going && (
-                        <span className="px-3 py-1 bg-brand-emerald text-white text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1">
-                          <CheckCircle2 size={10}/> Going
-                        </span>
-                      )}
                       {event.recurrence && event.recurrence !== 'NONE' && (
                         <span className="px-3 py-1 bg-slate-100 text-slate-400 text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1">
                           <Repeat size={10}/> {event.recurrence}
@@ -284,14 +260,14 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                 <div className="bg-slate-50 px-4 py-4 border-t border-slate-100 space-y-3">
                   <div className="flex items-center gap-3 text-slate-700 font-black text-sm">
                     <Users size={18} className="text-brand-primary" /> 
-                    {event.attendance.length} <span className="hidden sm:inline">Registered</span>
+                    {event.attendance.length} <span className="hidden sm:inline">Recorded</span>
                     <span className="ml-auto px-3 py-1.5 bg-white text-brand-primary text-[10px] font-black rounded-lg border border-indigo-50 uppercase tracking-widest">Live</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button type="button" onClick={() => setViewingEvent(event)} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
                       <Eye size={14} className="mr-1.5 inline" aria-hidden="true" />Details
                     </button>
-                    {currentUser?.role !== UserRole.MEMBER && <>
+                    <>
                       <button type="button" onClick={() => { setEditingEvent(event); setNewEvent({ ...event }); }} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
                         <Edit2 size={14} className="mr-1.5 inline" aria-hidden="true" />Edit
                       </button>
@@ -301,7 +277,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                       <button type="button" onClick={() => void handleDeleteEvent(event.id)} className="min-h-10 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700">
                         <Trash2 size={14} className="mr-1.5 inline" aria-hidden="true" />Delete
                       </button>
-                    </>}
+                    </>
                   </div>
                 </div>
               </div>
@@ -368,7 +344,7 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                     <div className="space-y-4">
                        <div className="flex justify-between items-end">
                           <p className="text-2xl font-semibold tracking-tighter">{viewingEvent.attendance.length} People</p>
-                          <p className="text-[10px] font-black text-indigo-300 uppercase">Confirmed RSVP</p>
+                          <p className="text-[10px] font-black text-indigo-300 uppercase">Recorded attendance</p>
                        </div>
                        <div className="flex -space-x-3 overflow-hidden">
                           {viewingEvent.attendance.slice(0, 8).map((id, i) => (
@@ -412,19 +388,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
 
             <div className="p-5 border-t border-slate-100 bg-slate-50/50 flex gap-4 flex-shrink-0">
                <button onClick={() => setViewingEvent(null)} className="flex-1 py-5 font-black text-slate-500 hover:bg-slate-100 rounded-2xl uppercase text-[11px] tracking-widest transition-all">Close</button>
-               {currentUser?.memberId && (
-                 <button 
-                  onClick={() => { onRSVP(viewingEvent.id, !isUserRSVPd(viewingEvent)); setViewingEvent(null); }}
-                  className={`flex-[2] py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-sm transition-all flex items-center justify-center gap-3 ${
-                    isUserRSVPd(viewingEvent) 
-                      ? 'bg-rose-500 text-white hover:bg-rose-600' 
-                      : 'bg-brand-primary text-white hover:bg-brand-indigo'
-                  }`}
-                 >
-                   {isUserRSVPd(viewingEvent) ? <UserMinus size={20}/> : <CheckCircle2 size={20}/>}
-                   {isUserRSVPd(viewingEvent) ? 'Retract My RSVP' : 'Register'}
-                 </button>
-               )}
             </div>
           </div>
         </div>
@@ -551,16 +514,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                             onChange={e => setNewEvent({...newEvent, contactPerson: e.target.value})}
                           />
                         </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-[9px] font-black uppercase text-slate-400 ml-1">RSVP Deadline (Optional)</label>
-                        <input 
-                          type="date"
-                          className="w-full p-3 bg-white border border-slate-100 rounded-xl font-bold text-xs"
-                          value={newEvent.rsvpDeadline}
-                          onChange={e => setNewEvent({...newEvent, rsvpDeadline: e.target.value})}
-                        />
                       </div>
                     </div>
 

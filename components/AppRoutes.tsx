@@ -68,7 +68,9 @@ const AccountShell = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const churchId = activeChurchId ?? currentUser?.churchId ?? null;
+  const churchId = currentUser?.role === UserRole.SUPER_ADMIN && !viewingChurch
+    ? null
+    : activeChurchId ?? currentUser?.churchId ?? null;
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleLogout = async () => {

@@ -8,17 +8,17 @@ const MpesaPaymentDialog:React.FC<Props>=({churchId})=>{
  const {refreshData}=useApp();
  const [open,setOpen]=useState(false),[phone,setPhone]=useState(''),[payer,setPayer]=useState(''),[amount,setAmount]=useState('');
  const [purpose,setPurpose]=useState<MpesaPurpose>('Tithe'),[busy,setBusy]=useState(false),[error,setError]=useState('');
- const [paymentId,setPaymentId]=useState(''),[status,setStatus]=useState<MpesaPaymentStatus|null>(null),[message,setMessage]=useState(''),[refreshed,setRefreshed]=useState(false);
+ const [paymentId,setPaymentId]=useState(''),[status,setStatus]=useState<MpesaPaymentStatus|null>(null),[message,setMessage]=useState(''),[refreshed,setRefreshed]=useState(false),[idempotencyKey,setIdempotencyKey]=useState('');
  useEffect(()=>{if(!paymentId||!status||terminal(status))return;let alive=true,timer:number|undefined;
   const poll=async()=>{try{const next=await getMpesaPaymentStatus(paymentId);if(!alive)return;setStatus(next);setMessage(next.message||'');if(next.status==='succeeded'&&!refreshed){setRefreshed(true);await refreshData();}if(!terminal(next))timer=window.setTimeout(poll,5000);}catch(e){if(alive){setMessage(e instanceof Error?e.message:'Status check failed.');timer=window.setTimeout(poll,8000);}}};
   timer=window.setTimeout(poll,2500);return()=>{alive=false;if(timer)window.clearTimeout(timer);};
  },[paymentId,status?.status,status?.sms_status,status?.receipt_sms_sent_at,refreshed,refreshData]);
- const reset=()=>{setOpen(false);setPaymentId('');setStatus(null);setMessage('');setError('');setPhone('');setPayer('');setAmount('');setRefreshed(false);};
+ const reset=()=>{setOpen(false);setPaymentId('');setStatus(null);setMessage('');setError('');setPhone('');setPayer('');setAmount('');setRefreshed(false);setIdempotencyKey('');};
  const submit=async(e:FormEvent)=>{e.preventDefault();setError('');const value=Number(amount);
   if(!/^(\+?254|0)?[17]\d{8}$/.test(phone.replace(/[\s()-]/g,''))){setError('Enter a valid Kenyan mobile number.');return;}
   if(!Number.isSafeInteger(value)||value<1||value>250000){setError('Enter an amount between KES 1 and KES 250,000.');return;}
   if(!churchId){setError('Church workspace is not configured.');return;}setBusy(true);
-  try{const result=await initiateMpesaPayment({church_id:churchId,phone_number:phone,payer_name:payer.trim(),amount:value,purpose});setPaymentId(result.payment_id);setMessage(result.customer_message);setStatus({payment_id:result.payment_id,status:'pending',amount:value,purpose,phone_number:phone,payer_name:payer,receipt_number:null,sms_status:'not_sent',sms_provider_status:null,sms_last_checked_at:null,receipt_sms_sent_at:null,message:result.customer_message,created_at:new Date().toISOString(),updated_at:new Date().toISOString()});}
+  try{const key=idempotencyKey||crypto.randomUUID();setIdempotencyKey(key);const result=await initiateMpesaPayment({church_id:churchId,phone_number:phone,payer_name:payer.trim(),amount:value,purpose,idempotency_key:key});setPaymentId(result.payment_id);setMessage(result.customer_message);setStatus({payment_id:result.payment_id,status:'pending',amount:value,purpose,phone_number:phone,payer_name:payer,receipt_number:null,sms_status:'not_sent',sms_provider_status:null,sms_last_checked_at:null,receipt_sms_sent_at:null,message:result.customer_message,created_at:new Date().toISOString(),updated_at:new Date().toISOString()});}
   catch(err){setError(err instanceof Error?err.message:'M-Pesa request could not be initiated.');}finally{setBusy(false);}
  };
  const reconcile=async()=>{if(!paymentId)return;setBusy(true);setError('');try{const result=await reconcileMpesaPayment(paymentId);setMessage(result.message);setStatus(old=>old?{...old,status:result.status as MpesaPaymentStatus['status'],message:result.message}:old);}catch(err){setError(err instanceof Error?err.message:'Reconciliation could not be requested.');}finally{setBusy(false);}};

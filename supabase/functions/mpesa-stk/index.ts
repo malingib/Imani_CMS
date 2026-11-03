@@ -35,11 +35,25 @@ Deno.serve(async(req:Request)=>{
  if(!/^[0-9a-f-]{36}$/i.test(churchId)||!Number.isSafeInteger(amount)||amount<1||amount>250000||!['Tithe','Offering','Project','Harambee','Benevolence'].includes(purpose))return json(400,{error:'Enter a valid church, amount and contribution type.'});
  const platformOwner=userData.user.app_metadata?.role==='SUPER_ADMIN';
  if(!platformOwner){const {data:membership,error}=await admin.from('church_memberships').select('role').eq('church_id',churchId).eq('user_id',userData.user.id).eq('status','active').maybeSingle();if(error||!['ADMIN','TREASURER'].includes(String(membership?.role||'')))return json(403,{error:'You need church finance permission to request an M-Pesa payment.'});}
+ const idempotencyKey=String(req.headers.get('Idempotency-Key')||body.idempotency_key||'').trim();
+ if(idempotencyKey.length<8||idempotencyKey.length>128)return json(400,{error:'A valid Idempotency-Key is required.'});
+ const sameRequest=(row:any)=>Number(row.amount)===amount&&String(row.phone_number)===phoneNumber&&String(row.purpose)===purpose&&String(row.payer_name||'')===payerName;
+ const existingResponse=(row:any)=>json(200,{payment_id:row.id,status:row.status,receipt_number:row.mpesa_receipt_number||null,customer_message:row.result_description||'This payment request already exists. Check its current status.'});
+ const {data:existingIntent,error:existingError}=await admin.from('mpesa_payment_intents').select('id,status,amount,phone_number,payer_name,purpose,mpesa_receipt_number,result_description').eq('church_id',churchId).eq('idempotency_key',idempotencyKey).maybeSingle();
+ if(existingError)return json(500,{error:'Could not verify the payment request key.'});
+ if(existingIntent)return sameRequest(existingIntent)?existingResponse(existingIntent):json(409,{error:'This Idempotency-Key was already used with different payment details. Start a new payment request.'});
  let config;try{config=await loadEffectiveMpesa(admin,churchId);}catch{return json(500,{error:'Daraja configuration could not be loaded securely.'});}
  if(!config||!config.key||!config.secret||!config.passkey||!config.shortcode)return json(503,{error:'Configure M-Pesa Daraja credentials in Integrations before requesting payments.'});
  const callbackToken=crypto.randomUUID(),accountReference=(config.accountReference.slice(0,7)+crypto.randomUUID().slice(0,5)).slice(0,12);
- const {data:intent,error:insertError}=await admin.from('mpesa_payment_intents').insert({church_id:churchId,created_by:userData.user.id,payer_name:payerName,phone_number:phoneNumber,amount,purpose,account_reference:accountReference,callback_token_hash:await digest(callbackToken),status:'initiating'}).select('id').single();
- if(insertError||!intent)return json(500,{error:'Could not create the payment request.'});
+ const {data:intent,error:insertError}=await admin.from('mpesa_payment_intents').insert({church_id:churchId,created_by:userData.user.id,payer_name:payerName,phone_number:phoneNumber,amount,purpose,account_reference:accountReference,idempotency_key:idempotencyKey,callback_token_hash:await digest(callbackToken),status:'initiating'}).select('id').single();
+ if(insertError){
+  if(insertError.code==='23505'){
+   const {data:raced}=await admin.from('mpesa_payment_intents').select('id,status,amount,phone_number,payer_name,purpose,mpesa_receipt_number,result_description').eq('church_id',churchId).eq('idempotency_key',idempotencyKey).maybeSingle();
+   if(raced)return sameRequest(raced)?existingResponse(raced):json(409,{error:'This Idempotency-Key was already used with different payment details. Start a new payment request.'});
+  }
+  return json(500,{error:'Could not create the payment request.'});
+ }
+ if(!intent)return json(500,{error:'Could not create the payment request.'});
  const callbackUrl=new URL(SUPABASE_URL.replace(/\/$/,'')+'/functions/v1/mpesa-stk');callbackUrl.searchParams.set('payment_id',intent.id);callbackUrl.searchParams.set('token',callbackToken);
  const host=config.environment==='sandbox'?'https://sandbox.safaricom.co.ke':'https://api.safaricom.co.ke';
  try{

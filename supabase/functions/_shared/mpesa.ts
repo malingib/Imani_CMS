@@ -56,3 +56,33 @@ export async function postConfirmedPayment(admin:ReturnType<typeof createClient>
  catch{await admin.from('mpesa_payment_intents').update({status:'succeeded',sms_status:'failed',sms_error:'Receipt SMS request failed.',reconciliation_status:'confirmed',result_description:'Payment confirmed by Safaricom and posted to the church ledger. Receipt SMS failed.'}).eq('id',intent.id);}
  return {duplicate:false};
 }
+
+export async function refreshReceiptSmsStatus(admin:ReturnType<typeof createClient>,intent:Record<string,any>){
+ if(intent.sms_status!=='sent'||!intent.sms_provider_message_id)return intent;
+ if(intent.sms_last_checked_at&&Date.now()-Date.parse(intent.sms_last_checked_at)<15000)return intent;
+ const config=await loadProviderConfig(admin,'church',String(intent.church_id),'mobiwave').catch(()=>null)||await loadProviderConfig(admin,'platform',null,'mobiwave').catch(()=>null);
+ if(!config||!config.secrets.apiToken)return intent;
+ const checkedAt=new Date().toISOString();
+ try{
+  const response=await fetch('https://sms.mobiwave.co.ke/api/v3/sms/'+encodeURIComponent(String(intent.sms_provider_message_id)),{
+   headers:{Authorization:'Bearer '+String(config.secrets.apiToken),Accept:'application/json'},
+   signal:AbortSignal.timeout(10000)
+  });
+  const data=await response.json().catch(()=>null);
+  if(!response.ok||data?.status!=='success'){
+   await admin.from('mpesa_payment_intents').update({sms_last_checked_at:checkedAt}).eq('id',intent.id);
+   return {...intent,sms_last_checked_at:checkedAt};
+  }
+  const report=Array.isArray(data.data)?data.data[0]:(data.data||{});
+  const raw=String(report.status||report.delivery_status||report.deliveryStatus||report.state||'');
+  const normalized=raw.toLowerCase().replace(/[^a-z]/g,'');
+  const delivered=normalized.includes('deliver')||['completed','success'].includes(normalized);
+  const failed=normalized.includes('fail')||normalized.includes('undeliver')||normalized.includes('reject')||normalized.includes('expire');
+  const next=delivered?'delivered':failed?'failed':'sent';
+  await admin.from('mpesa_payment_intents').update({sms_status:next,sms_provider_status:raw||'accepted',sms_last_checked_at:checkedAt}).eq('id',intent.id);
+  return {...intent,sms_status:next,sms_provider_status:raw||'accepted',sms_last_checked_at:checkedAt};
+ }catch{
+  await admin.from('mpesa_payment_intents').update({sms_last_checked_at:checkedAt}).eq('id',intent.id);
+  return {...intent,sms_last_checked_at:checkedAt};
+ }
+}

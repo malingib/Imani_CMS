@@ -7,7 +7,7 @@ import {
   Filter, Sparkles, Loader2, UserCheck, Search as SearchIcon,
   Music, BookOpen, HeartHandshake, Globe, Zap, HelpCircle,
   User, Phone, CalendarClock, ExternalLink, Navigation, Eye,
-  Save, Heart, CalendarPlus, UserMinus, Info, ClipboardList,
+  Save, Heart, CalendarPlus, Info, ClipboardList,
   Mail
 } from 'lucide-react';
 import { ChurchEvent, Member, RecurrenceType, ChurchEventType, User as UserType, UserRole } from '../types';
@@ -16,7 +16,6 @@ interface EventsManagementProps {
   events: ChurchEvent[];
   members: Member[];
   currentUser: UserType | null;
-  onRSVP: (eventId: string, isRSVPing: boolean) => Promise<void> | void;
   onAddEvent: (event: ChurchEvent) => Promise<void> | void;
   onUpdateEvent: (event: ChurchEvent) => Promise<void> | void;
   onDeleteEvent: (id: string) => Promise<void> | void;
@@ -134,20 +133,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
       console.error('Unable to delete event:', error);
       setEventError('Event was not deleted. Check your connection and permissions, then try again.');
     }
-  };
-
-  const handleRSVPAction = async (eventId: string, isRSVPing: boolean) => {
-    setEventError('');
-    try {
-      await onRSVP(eventId, isRSVPing);
-    } catch (error) {
-      console.error('Unable to update RSVP:', error);
-      setEventError('Your RSVP was not saved. Check your connection and try again.');
-    }
-  };
-
-  const isUserRSVPd = (event: ChurchEvent) => {
-    return currentUser?.memberId && event.attendance.includes(currentUser.memberId);
   };
 
   return (
@@ -412,19 +397,6 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
 
             <div className="p-5 border-t border-slate-100 bg-slate-50/50 flex gap-4 flex-shrink-0">
                <button onClick={() => setViewingEvent(null)} className="flex-1 py-5 font-black text-slate-500 hover:bg-slate-100 rounded-2xl uppercase text-[11px] tracking-widest transition-all">Close</button>
-               {currentUser?.memberId && (
-                 <button 
-                  onClick={() => { onRSVP(viewingEvent.id, !isUserRSVPd(viewingEvent)); setViewingEvent(null); }}
-                  className={`flex-[2] py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-sm transition-all flex items-center justify-center gap-3 ${
-                    isUserRSVPd(viewingEvent) 
-                      ? 'bg-rose-500 text-white hover:bg-rose-600' 
-                      : 'bg-brand-primary text-white hover:bg-brand-indigo'
-                  }`}
-                 >
-                   {isUserRSVPd(viewingEvent) ? <UserMinus size={20}/> : <CheckCircle2 size={20}/>}
-                   {isUserRSVPd(viewingEvent) ? 'Retract My RSVP' : 'Register'}
-                 </button>
-               )}
             </div>
           </div>
         </div>

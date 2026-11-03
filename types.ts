@@ -37,7 +37,6 @@ export interface User {
   name: string;
   role: UserRole;
   avatar: string;
-  memberId?: string;
   branch?: string;
   churchId?: string;
 }
@@ -76,25 +75,6 @@ export interface Transaction {
   notes?: string;
   phoneNumber?: string;
   source: 'MANUAL' | 'INTEGRATED';
-}
-
-export interface StewardshipPledge {
-  id: string;
-  memberId: string;
-  category: TransactionType;
-  targetAmount: number;
-  period: 'Monthly' | 'Yearly';
-  startDate: string;
-  status: 'ACTIVE' | 'FULFILLED' | 'CANCELLED';
-}
-
-export interface MemberActivity {
-  id: string;
-  memberId: string;
-  type: 'PAYMENT' | 'EVENT_RSVP' | 'PROFILE_UPDATE' | 'GROUP_JOIN';
-  description: string;
-  timestamp: string;
-  metadata?: any;
 }
 
 export interface Budget {

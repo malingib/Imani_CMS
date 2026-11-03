@@ -84,8 +84,8 @@ const AccountShell = () => {
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-600"><ShieldAlert size={28} /></div>
-          <h1 className="text-2xl font-black text-slate-900">Member portal temporarily unavailable</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Self-service profiles, event RSVPs and personal giving are paused while these features are reviewed. Please contact your church administrator for assistance.</p>
+          <h1 className="text-2xl font-black text-slate-900">Account access not provisioned</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">This account is not assigned to a church staff or platform owner role. Contact the platform owner to request authorised access.</p>
           <button onClick={handleLogout} className="mt-6 rounded-lg bg-brand-primary px-5 py-3 text-sm font-bold text-white">Sign out</button>
         </div>
       </div>
@@ -181,7 +181,7 @@ const AccountShell = () => {
                   <Route path={ROUTES.TENANTS.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <TenantRegistry onImpersonate={(id) => { handleSelectChurch(id); navigate('DASHBOARD'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
                   <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} dashboardTransactions={dashboardTransactions} lifetimeTitheTransactions={lifetimeTitheTransactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
-                  <Route path={ROUTES.FINANCE.path} element={<FinanceReporting transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
+                  <Route path={ROUTES.FINANCE.path} element={<FinanceReporting churchId={churchId || ''} transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
                   <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} onOpenCommunications={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
                   <Route path={ROUTES.COMMUNICATION.path} element={<CommunicationCenter members={members} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} addToast={addToast} />} />

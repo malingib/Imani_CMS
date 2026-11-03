@@ -1,6 +1,6 @@
 # Imani CMS
 
-Church management platform with Supabase backend and AI-powered insights. Imani is deployed as **one church per installation**; the app has no tenant registry or church switcher.
+Church management platform with Supabase backend and AI-powered insights. Imani has two authenticated workspaces: the platform-owner console and the church/client workspace. Church members are managed as administrative records; there is no member self-service portal.
 
 ## Setup
 
@@ -26,6 +26,7 @@ npm run dev
 - **Frontend:** React 19 + TypeScript + Vite
 - **Backend:** Supabase (Postgres, Auth, Edge Functions)
 - **Data layer:** `src/lib/` services with injectable clients for testability
+- **Workspaces:** platform owner console and church/client administration; no member portal or personal giving dashboard
 - **Tests:** Vitest for unit tests, Playwright for e2e
 
 ## Environment
@@ -41,7 +42,7 @@ See `.env.example` for required variables.
 | PASTOR | Church-wide (limited) | Manage members, sermons, groups; view finance |
 | TREASURER | Finance | Finance workflows and reports |
 | SECRETARY | Operations | Manage members, events, communications |
-| MEMBER | Self-service | View profile, activities, own giving |
+| MEMBER | No dashboard access | Member records are managed by authorised church staff; member self-service is not available |
 
 Database RLS and server-side role checks remain enabled. The database retains church ownership IDs and membership-backed policies for compatibility and defense in depth; the application does not provide tenant switching.
 
@@ -50,8 +51,8 @@ Database RLS and server-side role checks remain enabled. The database retains ch
 - Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 - Set `VITE_CHURCH_ID` to the church record assigned to this installation when using a `SUPER_ADMIN` account or when an account has more than one active church membership.
 - If a normal user has exactly one active church membership, Imani resolves that church automatically.
-- Each church runs its own deployment and Supabase project. Do not use the application to create or switch between churches.
-- This refactor does not delete historical church records or drop database columns. Schema consolidation must preserve existing records and be handled as a separate, reviewed migration.
+- The platform owner console manages client workspaces; authorised church staff operate within their church/client workspace.
+- Removing member self-service does not delete church member records, financial history, or historical database rows.
 
 ## Provider Setup
 

@@ -1,5 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
+import FinanceOverview from './FinanceOverview';
+import MpesaPaymentDialog from './MpesaPaymentDialog';
 import { 
   Filter, Download, TrendingUp, TrendingDown, 
   Search, Wallet, Calendar, PieChart as PieIcon,
@@ -27,6 +29,7 @@ interface FinanceReportingProps {
   recurringExpenses: RecurringExpense[];
   onAddRecurring: (expense: RecurringExpense) => void;
   currentUserRole: UserRole;
+  churchId: string;
 }
 
 const FinanceReporting: React.FC<FinanceReportingProps> = ({ 
@@ -39,7 +42,8 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
   onSetBudget,
   recurringExpenses,
   onAddRecurring,
-  currentUserRole
+  currentUserRole,
+  churchId
 }) => {
   const [filterType, setFilterType] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
@@ -177,6 +181,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
           <p className="text-slate-500 mt-2 text-base sm:text-lg">Full-cycle financial control: M-Pesa, Cash, and Expenses.</p>
         </div>
         <div className="flex flex-wrap gap-3">
+          <MpesaPaymentDialog churchId={churchId} />
           {currentUserRole !== UserRole.MEMBER && (
             <>
               <button 
@@ -196,29 +201,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-        {[
-          { label: 'Total Revenue', val: totalIncome, color: 'emerald', icon: TrendingUp, detail: 'All recorded income' },
-          { label: 'Operating Costs', val: totalExpenses, color: 'gold', icon: TrendingDown, detail: 'All recorded expenses' },
-          { label: 'Net Cash Position', val: totalIncome - totalExpenses, color: 'primary', icon: Landmark, detail: 'Revenue less expenses' }
-        ].map((c, i) => (
-          <div key={i} className="p-8 sm:p-10 rounded-xl border border-slate-100 shadow-sm bg-white relative overflow-hidden group hover:shadow-xl transition-all">
-             <div className="relative z-10">
-                <div className="flex justify-between items-start mb-6">
-                  <div className={`p-4 bg-brand-${c.color}-50 text-brand-${c.color}-500 rounded-2xl group-hover:scale-110 transition-transform`}>
-                    <c.icon size={24}/>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-slate-500">{c.detail}</p>
-                  </div>
-                </div>
-                <p className="text-[9px] sm:text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">{c.label}</p>
-                <h4 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tighter">KES {c.val.toLocaleString()}</h4>
-             </div>
-             <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50/50 rounded-full translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        ))}
-      </div>
+      <FinanceOverview transactions={transactions} budgets={budgets} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
         <div className="lg:col-span-8 space-y-8">

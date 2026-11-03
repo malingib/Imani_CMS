@@ -163,8 +163,6 @@ export type AppView =
   | 'SETTINGS' 
   | 'AUDIT_LOGS'
   | 'BILLING'
-  | 'MY_PORTAL' 
-  | 'MY_GIVING' 
   | 'PRIVACY' 
   | 'COMPLIANCE' 
   | 'SECURITY'

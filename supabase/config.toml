@@ -394,3 +394,8 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # declarative_schema_path = "./declarative"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+
+# Safaricom callback is public; each request is protected by a one-time callback token.
+[functions.mpesa-stk]
+verify_jwt = false

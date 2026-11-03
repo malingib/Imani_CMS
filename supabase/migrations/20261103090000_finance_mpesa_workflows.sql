@@ -15,6 +15,7 @@ CREATE INDEX IF NOT EXISTS mpesa_payment_intents_church_created_idx ON public.mp
 CREATE INDEX IF NOT EXISTS mpesa_payment_intents_status_idx ON public.mpesa_payment_intents(status,created_at DESC);
 ALTER TABLE public.mpesa_payment_intents ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.mpesa_payment_intents FROM PUBLIC,anon,authenticated;
+GRANT ALL ON TABLE public.mpesa_payment_intents TO service_role;
 CREATE OR REPLACE FUNCTION public.set_mpesa_payment_intent_updated_at() RETURNS trigger LANGUAGE plpgsql SET search_path=public AS $$
 BEGIN NEW.updated_at=now(); RETURN NEW; END;
 $$;

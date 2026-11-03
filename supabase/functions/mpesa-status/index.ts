@@ -14,13 +14,13 @@ Deno.serve(async(req:Request)=>{
   if(!/^[0-9a-f-]{36}$/i.test(paymentId)||token.length<32)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});
   const {data:intent,error}=await admin.from('mpesa_payment_intents').select('id,church_id,amount,phone_number,payer_name,purpose,status,mpesa_receipt_number,reconcile_token_hash').eq('id',paymentId).maybeSingle();
   if(error||!intent)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});
-  if(intent.status==='succeeded')return json(200,{ResultCode:0,ResultDesc:'Reconciliation callback already processed.'});
+  if(intent.status==='succeeded'||(!intent.reconcile_token_hash&&intent.reconciliation_status&&intent.reconciliation_status!=='requested'&&intent.reconciliation_status!=='requesting'))return json(200,{ResultCode:0,ResultDesc:'Reconciliation callback already processed.'});
   if(!intent.reconcile_token_hash||await digest(token)!==intent.reconcile_token_hash)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});
   const result=body.Result,params=Array.isArray(result.ResultParameters?.ResultParameter)?result.ResultParameters.ResultParameter:[];
   const value=(key:string)=>params.find((p:any)=>p.Key===key)?.Value;
   const receipt=String(value('ReceiptNo')||result.TransactionID||''),amount=Number(value('Amount')),txStatus=String(value('TransactionStatus')||'').toLowerCase(),resultCode=Number(result.ResultCode);
   const confirmed=resultCode===0&&txStatus==='completed'&&receipt===String(intent.mpesa_receipt_number||'')&&Number.isFinite(amount)&&amount===Number(intent.amount);
-  const failed=resultCode===0&&['cancelled','declined','expired','reversed'].includes(txStatus);
+  const failed=resultCode===0&&['cancelled','declined','expired','reversed','failed'].includes(txStatus);
   const nextStatus=confirmed?'succeeded':failed?'failed':'verification_required';
   const {data:claimed,error:updateError}=await admin.from('mpesa_payment_intents').update({status:nextStatus,reconciliation_status:confirmed?'confirmed':failed?'failed':'mismatch',result_code:Number.isFinite(resultCode)?resultCode:null,result_description:confirmed?'Safaricom transaction status confirmed the receipt.':String(result.ResultDesc||'Transaction status requires manual review.').slice(0,500),reconcile_token_hash:null}).eq('id',paymentId).neq('status','succeeded').select('id').maybeSingle();
   if(updateError)return json(500,{ResultCode:1,ResultDesc:'Reconciliation callback could not be saved.'});
@@ -37,6 +37,7 @@ Deno.serve(async(req:Request)=>{
  const platformOwner=userData.user.app_metadata?.role==='SUPER_ADMIN';
  if(!platformOwner){const {data:membership,error:membershipError}=await admin.from('church_memberships').select('role').eq('church_id',intent.church_id).eq('user_id',userData.user.id).eq('status','active').maybeSingle();if(membershipError||!['ADMIN','TREASURER'].includes(String(membership?.role||'')))return json(403,{error:'You cannot view this payment request.'});}
  if(body.action==='reconcile'){
+  if(intent.status==='succeeded')return json(200,{status:'succeeded',message:'This payment is already reconciled.'});
   if(!intent.mpesa_receipt_number)return json(400,{error:'A Safaricom receipt is required before transaction-status reconciliation.'});
   let config;try{config=await loadEffectiveMpesa(admin,intent.church_id);}catch{return json(500,{error:'Daraja configuration could not be loaded.'});}
   if(!config)return json(503,{error:'Daraja configuration is not available.'});

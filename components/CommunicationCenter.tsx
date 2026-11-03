@@ -9,9 +9,11 @@ import {
   Save, Loader2, Copy, Bookmark
 } from 'lucide-react';
 import { CommunicationLog, Member, CommunicationTemplate } from '../types';
+import { supabase } from '../src/lib/supabase';
 
 interface CommunicationCenterProps {
   members: Member[];
+  churchId: string;
   logs: CommunicationLog[];
   onSendBroadcast: (log: CommunicationLog) => void;
   currentUser: { name: string };
@@ -19,7 +21,7 @@ interface CommunicationCenterProps {
   smsCredits?: number;
 }
 
-const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs, onSendBroadcast, currentUser, addToast, smsCredits }) => {
+const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, churchId, logs, onSendBroadcast, currentUser, addToast, smsCredits }) => {
   const [activeTab, setActiveTab] = useState<'LOGS' | 'COMPOSE' | 'AUTOMATION' | 'TEMPLATES'>('LOGS');
   const [searchTerm, setSearchTerm] = useState('');
   const [messageType, setMessageType] = useState<'SMS' | 'Email' | 'WhatsApp'>('SMS');
@@ -41,14 +43,68 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
 
   // Automation State
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!content.trim()) {
       addToast?.('Enter a message before sending.', 'error');
       return;
     }
-    // This UI has no configured delivery adapter. Never fabricate a sent log,
-    // delivery counts, opens, or a scheduled job. Keep the user's draft intact.
-    addToast?.('Message not sent: no SMS, email, or WhatsApp delivery provider is configured for this workflow. Your draft has been kept.', 'error');
+    if (messageType !== 'SMS') {
+      addToast?.('Only SMS delivery is connected. Email and WhatsApp are not enabled in this workspace.', 'error');
+      return;
+    }
+    if (!churchId) {
+      addToast?.('The church workspace is not configured.', 'error');
+      return;
+    }
+    const excluded = new Set(['inactive', 'deceased', 'archived']);
+    const selected = members.filter(member => {
+      const state = String(member.status || '').toLowerCase();
+      const matchesTarget = broadcastTarget === 'All Members' || (member.groups || []).includes(broadcastTarget);
+      return matchesTarget && !excluded.has(state) && !!String(member.phone || '').trim();
+    });
+    const recipients = [...new Set(selected.map(member => String(member.phone).trim()))];
+    if (!recipients.length) {
+      addToast?.('No members with valid phone numbers were found in this recipient selection.', 'error');
+      return;
+    }
+
+    setIsSending(true);
+    const idempotencyKey = crypto.randomUUID();
+    let accepted = false;
+    let providerMessageId = '';
+    try {
+      const { data, error } = await supabase.functions.invoke('mobiwave-send', {
+        body: { church_id: churchId, recipients, message: content.trim(), idempotency_key: idempotencyKey },
+        headers: { 'Idempotency-Key': idempotencyKey },
+      });
+      if (error) throw new Error(error.message || 'MobiWave SMS request failed.');
+      if (data?.success !== true || data?.status !== 'sent') {
+        throw new Error(String(data?.error || 'MobiWave did not confirm acceptance. Check dispatch status before retrying.'));
+      }
+      accepted = true;
+      providerMessageId = String(data.provider_message_id || '');
+    } catch (error) {
+      addToast?.(error instanceof Error ? error.message : 'SMS dispatch failed. Your draft has been kept.', 'error');
+      return;
+    } finally {
+      if (!accepted) setIsSending(false);
+    }
+
+    const log: CommunicationLog = {
+      id: crypto.randomUUID(), type: 'SMS', recipientCount: recipients.length,
+      targetGroupName: broadcastTarget, subject: subject.trim() || 'SMS broadcast',
+      content: content.trim(), date: new Date().toISOString(), status: 'Sent', sender: currentUser.name,
+    };
+    try {
+      await onSendBroadcast(log);
+      addToast?.('MobiWave accepted the SMS dispatch for ' + recipients.length + ' recipients. Delivery confirmation is tracked separately.', 'success');
+      resetForm();
+      setActiveTab('LOGS');
+    } catch {
+      addToast?.('MobiWave accepted the SMS dispatch, but the local communication log could not be saved. Provider reference: ' + (providerMessageId || 'not returned'), 'error');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const useTemplate = (t: CommunicationTemplate) => {
@@ -206,8 +262,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                 <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Recipients</label>
                 <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-[1.5rem] font-black text-xs text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo cursor-pointer shadow-inner" value={broadcastTarget} onChange={(e) => setBroadcastTarget(e.target.value)}>
                    <option>All Members</option>
-                   <option>Youth Fellowship</option>
-                   <option>Women of Grace</option>
+                   {[...new Set(members.flatMap(member => member.groups || []))].sort().map(group => <option key={group} value={group}>{group}</option>)}
                 </select>
               </div>
             </div>

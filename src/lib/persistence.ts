@@ -1,5 +1,5 @@
-import { mapActivity, mapBudget, mapCommunication, mapEvent, mapGroup, mapMember, mapNotification, mapRecurringExpense, mapTransaction } from "./mappers";
-import type { AppNotification, Budget, ChurchEvent, CommunicationLog, Group, Member, MemberActivity, RecurringExpense, Transaction } from "../../types";
+import { mapBudget, mapCommunication, mapEvent, mapGroup, mapMember, mapNotification, mapRecurringExpense, mapTransaction } from "./mappers";
+import type { AppNotification, Budget, ChurchEvent, CommunicationLog, Group, Member, RecurringExpense, Transaction } from "../../types";
 
 export type SupabaseLikeClient = {
   from(table: string): any;
@@ -233,23 +233,6 @@ export function createPersistenceService(client: SupabaseLikeClient) {
       if (error) throw new Error(error.message);
     },
 
-    async setEventRSVP(eventId: string, memberId: string, isRSVPing: boolean, churchId: string) {
-      if (isRSVPing) {
-        const { error } = await client.from("event_attendance").upsert(
-          { event_id: eventId, member_id: memberId, church_id: churchId },
-          { onConflict: "event_id,member_id", ignoreDuplicates: true }
-        );
-        if (error) throw new Error(error.message);
-        return;
-      }
-
-      const { error } = await client.from("event_attendance").delete()
-        .eq("event_id", eventId)
-        .eq("member_id", memberId)
-        .eq("church_id", churchId);
-      if (error) throw new Error(error.message);
-    },
-
     async createBudget(budget: Budget, churchId: string) {
       const { data, error } = await client
         .from("budgets")
@@ -450,18 +433,6 @@ export function createPersistenceService(client: SupabaseLikeClient) {
         .eq("group_id", groupId)
         .eq("member_id", memberId);
       if (error) throw new Error(error.message);
-    },
-
-    async getActivities(memberId: string, churchId: string) {
-      const { data, error } = await client
-        .from("activities")
-        .select("*")
-        .eq("member_id", memberId)
-        .eq("church_id", churchId)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (error) throw new Error(error.message);
-      return (data || []).map(mapActivity);
     },
 
     async getMembers(churchId: string) {

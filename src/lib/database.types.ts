@@ -101,18 +101,6 @@ export interface CommunicationRow {
   church_id: string | null;
 }
 
-export interface ActivityRow {
-  id: string;
-  member_id: string | null;
-  type: string;
-  description: string | null;
-  timestamp: string | null;
-  metadata: unknown | null;
-  tenant_id: string | null;
-  created_at: string | null;
-  church_id: string | null;
-}
-
 export interface BudgetRow {
   id: string;
   category: string;

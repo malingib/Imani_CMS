@@ -44,7 +44,6 @@ interface AppActions {
   handleAddMembersBulk: (items: Member[]) => Promise<void>;
   handleUpdateMember: (m: Member) => Promise<void>;
   handleDeleteMember: (id: string) => Promise<void>;
-  handleRSVP: (eventId: string, isRSVPing: boolean) => Promise<void>;
   handleAddEvent: (e: ChurchEvent) => Promise<void>;
   handleUpdateEvent: (e: ChurchEvent) => Promise<void>;
   handleDeleteEvent: (id: string) => Promise<void>;
@@ -59,7 +58,6 @@ interface AppActions {
   handleMarkAllNotificationsRead: () => Promise<void>;
   handleDeleteNotification: (id: string) => Promise<void>;
   handleSelectChurch: (id: string | null) => void;
-  handleUpdateProfile: (m: Member) => Promise<void>;
   handleAddGroup: (g: Group) => Promise<void>;
   handleUpdateGroup: (g: Group) => Promise<void>;
   handleDeleteGroup: (id: string) => Promise<void>;
@@ -257,19 +255,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addToast('Member removed');
       createAudit('Deleted member', 'MEMBERS');
     },
-    handleRSVP: async (eventId, isRSVPing) => {
-      const memberId = state.currentUser?.memberId;
-      if (!memberId) { addToast('Only registered members can RSVP', 'error'); return; }
-      const event = state.events.find(e => e.id === eventId);
-      if (!event) { addToast('Event not found', 'error'); return; }
-      const nextAttendance = isRSVPing
-        ? Array.from(new Set([...event.attendance, memberId]))
-        : event.attendance.filter(id => id !== memberId);
-      await persistence.setEventRSVP(eventId, memberId, isRSVPing, requireChurchId());
-      setState(prev => ({ ...prev, events: prev.events.map(e => e.id === eventId ? { ...e, attendance: nextAttendance } : e) }));
-      addToast(isRSVPing ? 'RSVP saved' : 'RSVP removed');
-      createAudit(`${isRSVPing ? 'RSVPd for' : 'Cancelled RSVP for'} ${eventId}`, 'EVENTS');
-    },
     handleAddEvent: async (e) => {
       const saved = await persistence.createEvent(e, requireChurchId());
       setState(prev => ({ ...prev, events: [saved, ...prev.events] }));
@@ -429,15 +414,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setState(prev => ({ ...prev, viewingPlatform: true, viewingChurch: false, loading: 'ready', dataError: null }));
         addToast('Returned to superadmin dashboard');
       }
-    },
-    handleUpdateProfile: async (m) => {
-      const saved = await persistence.updateMember(m, requireChurchId());
-      setState(prev => ({ ...prev, members: prev.members.map(x => x.id === saved.id ? saved : x) }));
-      if (state.currentUser?.memberId === saved.id) {
-        setState(prev => ({ ...prev, currentUser: prev.currentUser ? { ...prev.currentUser, name: `${saved.firstName} ${saved.lastName}`.trim(), avatar: saved.photo || prev.currentUser.avatar } : null }));
-      }
-      addToast('Profile updated');
-      createAudit('Updated profile', 'MY_PORTAL');
     },
     requireChurchId,
     refreshData: async () => {

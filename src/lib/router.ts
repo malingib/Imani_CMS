@@ -24,8 +24,6 @@ export const ROUTES: Record<AppView, Route> = {
   SETTINGS: { view: 'SETTINGS', path: '/settings', label: 'Settings' },
   AUDIT_LOGS: { view: 'AUDIT_LOGS', path: '/audit-logs', label: 'Audit Logs' },
   BILLING: { view: 'BILLING', path: '/billing', label: 'Billing' },
-  MY_PORTAL: { view: 'MY_PORTAL', path: '/my-portal', label: 'My Portal' },
-  MY_GIVING: { view: 'MY_GIVING', path: '/my-giving', label: 'My Giving' },
   PRIVACY: { view: 'PRIVACY', path: '/privacy', label: 'Privacy Policy' },
   COMPLIANCE: { view: 'COMPLIANCE', path: '/compliance', label: 'Compliance' },
   SECURITY: { view: 'SECURITY', path: '/security', label: 'Security' },

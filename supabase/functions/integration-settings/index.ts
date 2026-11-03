@@ -167,7 +167,7 @@ Deno.serve(async (req) => {
       const credentials = { ...existingSecrets };
       if (suppliedSecrets && typeof suppliedSecrets === 'object' && !Array.isArray(suppliedSecrets)) {
         const allowedKeys = provider === 'mpesa'
-          ? ['consumerKey', 'consumerSecret', 'passkey']
+          ? ['consumerKey', 'consumerSecret', 'passkey', 'initiatorName', 'securityCredential']
           : ['apiToken'];
         for (const key of allowedKeys) {
           const value = (suppliedSecrets as JsonObject)[key];

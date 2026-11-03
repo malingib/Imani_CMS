@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.mpesa_payment_intents (
   merchant_request_id text,
   checkout_request_id text UNIQUE,
   mpesa_receipt_number text UNIQUE,
-  callback_token_hash text NOT NULL,
+  callback_token_hash text NOT NULL UNIQUE,
   result_code integer,
   result_description text,
   callback_payload jsonb,

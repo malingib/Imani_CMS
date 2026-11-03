@@ -55,6 +55,7 @@ export function ChurchProvider({ children }: { children: ReactNode; churchId: st
       setChurches([]);
       setResolvedChurchId(null);
       setAssignedChurchId(null);
+      setIsSuperAdmin(false);
       setConfigurationError('Unable to verify the signed-in user. Please sign in again.');
       return;
     }
@@ -102,10 +103,22 @@ export function ChurchProvider({ children }: { children: ReactNode; churchId: st
       return;
     }
 
+    const appChurchId = typeof user.app_metadata?.church_id === 'string'
+      ? user.app_metadata.church_id.trim()
+      : '';
+    if (!appChurchId) {
+      setChurches([]);
+      setResolvedChurchId(null);
+      setAssignedChurchId(null);
+      setConfigurationError('This staff account has no assigned client workspace. Contact the platform owner.');
+      return;
+    }
+
     const { data: membership, error: membershipError } = await supabase
       .from('church_memberships')
       .select('church_id, role, status')
       .eq('user_id', user.id)
+      .eq('church_id', appChurchId)
       .eq('status', 'active')
       .maybeSingle();
 

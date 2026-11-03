@@ -18,6 +18,7 @@ const MpesaPaymentDialog: React.FC<Props> = ({ churchId }) => {
   const [message, setMessage] = useState('');
   const [receipt, setReceipt] = useState('');
   const [error, setError] = useState('');
+  const [reconciling, setReconciling] = useState(false);
 
   useEffect(() => {
     if (!paymentId || status === 'succeeded' || status === 'failed' || status === 'idle') return;
@@ -97,6 +98,21 @@ const MpesaPaymentDialog: React.FC<Props> = ({ churchId }) => {
     }
   };
 
+  const reconcile = async () => {
+    if (!paymentId) return;
+    setReconciling(true); setError('');
+    try {
+      const { data, error: invokeError } = await supabase.functions.invoke('mpesa-reconcile', { body: { payment_id: paymentId } });
+      if (invokeError) throw new Error(invokeError.message || 'Safaricom status check failed.');
+      if (data?.error) throw new Error(String(data.error));
+      if (data?.status) setStatus(data.status as PaymentStatus);
+      setMessage(String(data?.message || 'Safaricom status query completed.'));
+      if (data?.receipt_number) setReceipt(String(data.receipt_number));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Safaricom status check failed.');
+    } finally { setReconciling(false); }
+  };
+
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-indigo-200 bg-white px-4 py-2.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">
@@ -130,6 +146,8 @@ const MpesaPaymentDialog: React.FC<Props> = ({ churchId }) => {
                     </div>
                   </div>
                   {receipt && <div className="rounded-lg bg-slate-50 p-3 text-sm"><span className="text-slate-500">M-Pesa receipt</span><strong className="ml-2 font-semibold text-slate-900">{receipt}</strong></div>}
+                  {(status === 'pending' || status === 'verification_required') && <button type="button" disabled={reconciling} onClick={() => void reconcile()} className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-200 px-4 py-2.5 text-sm font-semibold text-indigo-700 disabled:opacity-60">{reconciling ? <Loader2 size={16} className="animate-spin" /> : <Smartphone size={16} />} Reconcile with Safaricom</button>}
+                  {error && <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">{error}</p>}
                   <div className="flex justify-between gap-2 border-t border-slate-100 pt-4"><button type="button" onClick={() => { reset(); }} className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600">New request</button><button type="button" onClick={() => setOpen(false)} className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white">Close</button></div>
                 </div>
               )}

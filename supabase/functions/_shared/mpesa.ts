@@ -46,12 +46,13 @@ async function sendReceiptSms(admin:ReturnType<typeof createClient>,churchId:str
  const message='Imani: Thank you'+(name?', '+name:'')+'. We have received KES '+amount+' via M-Pesa. Receipt: '+receipt+'.';
  const response=await fetch('https://sms.mobiwave.co.ke/api/v3/sms/send',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({recipient:String(intent.phone_number),sender_id:sender,type:'plain',message}),signal:AbortSignal.timeout(12000)});
  const data=await response.json().catch(()=>null);if(!response.ok||data?.status!=='success')return {status:'failed' as const,error:String(data?.message||'MobiWave rejected the receipt SMS.').slice(0,300)};
- return {status:'sent' as const,messageId:String(data?.data?.id||data?.id||data?.message_id||'')};
+ return {status:'sent' as const,messageId:String(data?.data?.uid||data?.data?.id||data?.uid||data?.id||data?.message_id||'')};
 }
 export async function postConfirmedPayment(admin:ReturnType<typeof createClient>,intent:Record<string,any>,receipt:string){
  const {error}=await admin.from('transactions').insert({church_id:intent.church_id,member_id:null,member_name:intent.payer_name||null,amount:intent.amount,type:intent.purpose,payment_method:'M-Pesa',date:new Date().toISOString().slice(0,10),reference:receipt,category:'Income',notes:'Confirmed by Safaricom transaction-status API',phone_number:intent.phone_number,source:'INTEGRATED'});
  if(error&&error.code==='23505')return {duplicate:true};if(error){await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'ledger_post_failed',result_description:'Safaricom confirmed the payment, but ledger posting failed. Reconcile before retrying.'}).eq('id',intent.id);throw error;}
- try{const sms=await sendReceiptSms(admin,intent.church_id,intent,receipt);await admin.from('mpesa_payment_intents').update({status:'succeeded',sms_status:sms.status,sms_provider_message_id:'messageId' in sms?sms.messageId:null,sms_error:'error' in sms?sms.error:null,receipt_sms_sent_at:sms.status==='sent'?new Date().toISOString():null,reconciliation_status:'confirmed',result_description:'Payment confirmed by Safaricom and posted to the church ledger.'}).eq('id',intent.id);}
+ try{const sms=await sendReceiptSms(admin,intent.church_id,intent,receipt);await admin.from('mpesa_payment_intents').update({status:'succeeded',sms_status:sms.status,sms_provider_message_id:'messageId' in sms?sms.messageId:null,sms_error:'error' in sms?sms.error:null,receipt_sms_sent_at:sms.status==='sent'?new Date().toISOString():null,
+      sms_provider_status:sms.status==='sent'?'accepted':null,reconciliation_status:'confirmed',result_description:'Payment confirmed by Safaricom and posted to the church ledger.'}).eq('id',intent.id);}
  catch{await admin.from('mpesa_payment_intents').update({status:'succeeded',sms_status:'failed',sms_error:'Receipt SMS request failed.',reconciliation_status:'confirmed',result_description:'Payment confirmed by Safaricom and posted to the church ledger. Receipt SMS failed.'}).eq('id',intent.id);}
  return {duplicate:false};
 }

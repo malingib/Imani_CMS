@@ -15,7 +15,7 @@ interface CommunicationCenterProps {
   members: Member[];
   churchId: string;
   logs: CommunicationLog[];
-  onSendBroadcast: (log: CommunicationLog) => void;
+  onSendBroadcast: (log: CommunicationLog) => Promise<void>;
   currentUser: { name: string };
   addToast?: (msg: string, type?: 'success' | 'error' | 'info') => void;
   smsCredits?: number;
@@ -32,6 +32,8 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
   const [scheduledTime, setScheduledTime] = useState('');
   const [showLogDetails, setShowLogDetails] = useState<CommunicationLog | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [deliveryStatuses, setDeliveryStatuses] = useState<Record<string, { status: string; deliveredAt?: string }>>({});
+  const [checkingStatusId, setCheckingStatusId] = useState<string | null>(null);
 
   // Templates
   const templates: CommunicationTemplate[] = [
@@ -94,6 +96,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
       id: crypto.randomUUID(), type: 'SMS', recipientCount: recipients.length,
       targetGroupName: broadcastTarget, subject: subject.trim() || 'SMS broadcast',
       content: content.trim(), date: new Date().toISOString(), status: 'Sent', sender: currentUser.name,
+      ...(providerMessageId ? { deliveryBreakdown: { delivered: 0, opened: 0, failed: 0, providerMessageId, providerStatus: 'sent' } } : {}),
     };
     try {
       await onSendBroadcast(log);
@@ -105,6 +108,25 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
     } finally {
       setIsSending(false);
     }
+  };
+
+  const checkDelivery = async (log: CommunicationLog) => {
+    const messageId = log.deliveryBreakdown?.providerMessageId;
+    if (!messageId || !churchId) return;
+    setCheckingStatusId(log.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('mobiwave-status', {
+        body: { church_id: churchId, message_id: messageId },
+      });
+      if (error) throw new Error(error.message || 'Delivery report lookup failed.');
+      if (data?.error) throw new Error(String(data.error));
+      const status = String(data?.provider_status || 'unknown').toLowerCase();
+      const deliveredAt = data?.delivered_at ? String(data.delivered_at) : undefined;
+      setDeliveryStatuses(previous => ({ ...previous, [log.id]: { status, deliveredAt } }));
+      addToast?.('MobiWave delivery status: ' + status + '.', 'info');
+    } catch (error) {
+      addToast?.(error instanceof Error ? error.message : 'Could not retrieve the delivery report.', 'error');
+    } finally { setCheckingStatusId(null); }
   };
 
   const useTemplate = (t: CommunicationTemplate) => {
@@ -198,12 +220,12 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className={`px-4 py-1.5 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${
-                    log.status === 'Sent' ? 'bg-brand-emerald/10 text-brand-emerald' : 'bg-brand-gold/10 text-brand-gold'
-                  }`}>
-                    {log.status}
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <span className={`px-4 py-1.5 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${log.status === 'Sent' ? 'bg-brand-emerald/10 text-brand-emerald' : 'bg-brand-gold/10 text-brand-gold'}`}>{log.status}</span>
+                    {deliveryStatuses[log.id] && <p className="mt-1 text-[10px] font-semibold text-slate-500">{deliveryStatuses[log.id].status}{deliveryStatuses[log.id].deliveredAt ? ' · ' + deliveryStatuses[log.id].deliveredAt : ''}</p>}
+                  </div>
+                  {log.type === 'SMS' && log.deliveryBreakdown?.providerMessageId && <button type="button" disabled={checkingStatusId === log.id} onClick={() => void checkDelivery(log)} className="rounded-lg border border-indigo-100 px-3 py-2 text-[10px] font-semibold text-indigo-700 hover:bg-indigo-50 disabled:opacity-50">{checkingStatusId === log.id ? 'Checking…' : 'Check delivery'}</button>}
                   <button onClick={() => setShowLogDetails(log)} className="p-3 text-brand-indigo hover:bg-brand-indigo/10 rounded-xl transition-all"><ChevronRight size={20}/></button>
                 </div>
               </div>

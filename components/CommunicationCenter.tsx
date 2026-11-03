@@ -50,6 +50,10 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
       addToast?.('Enter a message before sending.', 'error');
       return;
     }
+    if (/\\{(?:name|amount|ref|location|date)\\}/i.test(content)) {
+      addToast?.('Replace the template placeholders before sending. Personalised variable expansion is not enabled for this dispatch.', 'error');
+      return;
+    }
     if (messageType !== 'SMS') {
       addToast?.('Only SMS delivery is connected. Email and WhatsApp are not enabled in this workspace.', 'error');
       return;
@@ -154,7 +158,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Communication</h2>
-          <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">Send SMS, email, and WhatsApp messages to members.</p>
+          <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">Send SMS through MobiWave and review provider delivery reports.</p>
         </div>
         <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm self-start lg:self-center overflow-x-auto no-scrollbar max-w-full">
           {[
@@ -276,7 +280,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
                 <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Channel</label>
                 <div className="flex gap-2">
                   {(['SMS', 'Email', 'WhatsApp'] as const).map(t => (
-                    <button key={t} onClick={() => setMessageType(t)} className={`flex-1 py-3 rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] transition-all border-2 ${messageType === t ? 'bg-brand-primary text-white border-brand-primary shadow-sm' : 'bg-slate-50 text-slate-400 border-slate-50 hover:bg-slate-100'}`}>{t}</button>
+                    <button key={t} onClick={() => setMessageType(t)} disabled={t !== 'SMS'} title={t === 'SMS' ? 'MobiWave SMS delivery is connected' : t + ' delivery is not connected'} className={`flex-1 py-3 rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] transition-all border-2 disabled:cursor-not-allowed disabled:opacity-40 ${messageType === t ? 'bg-brand-primary text-white border-brand-primary shadow-sm' : 'bg-slate-50 text-slate-400 border-slate-50 hover:bg-slate-100'}`}>{t}</button>
                   ))}
                 </div>
               </div>
@@ -309,18 +313,18 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
              <div className="bg-brand-primary p-5 rounded-xl sm:rounded-xl text-white shadow-sm relative overflow-hidden">
                 <div className="relative z-10 space-y-4">
                    <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-indigo-300">Quick Tags</h4>
-                   <p className="text-xs sm:text-sm font-medium leading-relaxed">Map variables automatically: <code className="bg-white/10 px-1.5 rounded">{'{name}'}</code> or <code className="bg-white/10 px-1.5 rounded">{'{amount}'}</code> for bulk personalization.</p>
+                   <p className="text-xs sm:text-sm font-medium leading-relaxed">Messages are submitted securely through the church's MobiWave integration. Delivery confirmation can be checked from the History tab.</p>
                 </div>
                 <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl opacity-20"></div>
              </div>
              
              <div className="bg-white p-5 rounded-xl sm:rounded-xl border border-slate-100 shadow-sm space-y-6">
-                <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">SMS Credits</h4>
+                <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">Delivery provider</h4>
                 <div className="flex items-center justify-between">
-                    <p className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tighter">{typeof smsCredits === 'number' ? smsCredits.toLocaleString() : 'Not configured'}</p>
-                   <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Zap size={20}/></div>
+                    <p className="text-xl sm:text-2xl font-semibold text-slate-800 tracking-tight">MobiWave SMS</p>
+                   <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-xl"><Zap size={20}/></div>
                 </div>
-                <button type="button" disabled title="SMS provider billing is not connected" className="w-full py-4 bg-slate-100 text-slate-500 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Top-up not configured</button>
+                <p className="text-xs leading-5 text-slate-500">Provider acceptance and handset delivery are separate states. Use History to query the latest available delivery report.</p>
              </div>
           </div>
         </div>

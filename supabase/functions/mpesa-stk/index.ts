@@ -127,9 +127,22 @@ Deno.serve(async (req: Request) => {
     const checkoutId = String(callback.CheckoutRequestID || '');
     const token = new URL(req.url).searchParams.get('token') || '';
     if (!checkoutId || token.length < 32) return reply(401, { error: 'Invalid callback credentials.' });
+    const tokenHash = await sha256(token);
     const found = await rest('mpesa_payment_intents?select=id,callback_token_hash&checkout_request_id=eq.' + encodeURIComponent(checkoutId));
-    const intent = Array.isArray(found.data) ? found.data[0] as Obj | undefined : undefined;
-    if (!found.response.ok || !intent || await sha256(token) !== String(intent.callback_token_hash || '')) {
+    let intent = Array.isArray(found.data) ? found.data[0] as Obj | undefined : undefined;
+    if (!found.response.ok) return reply(502, { error: 'Could not resolve the payment callback.' });
+    // If Safaricom calls back before the initiation response's database update
+    // completes, recover the intent using its one-time callback token.
+    if (!intent) {
+      const byToken = await rest('mpesa_payment_intents?select=id,callback_token_hash&callback_token_hash=eq.' + encodeURIComponent(tokenHash));
+      intent = Array.isArray(byToken.data) ? byToken.data[0] as Obj | undefined : undefined;
+      if (intent && String(intent.callback_token_hash || '') === tokenHash) {
+        await rest('mpesa_payment_intents?id=eq.' + encodeURIComponent(String(intent.id)), {
+          method: 'PATCH', body: JSON.stringify({ checkout_request_id: checkoutId }),
+        });
+      }
+    }
+    if (!intent || tokenHash !== String(intent.callback_token_hash || '')) {
       return reply(401, { error: 'Callback could not be authenticated.' });
     }
 

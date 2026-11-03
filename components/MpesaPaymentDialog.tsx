@@ -15,7 +15,7 @@ const MpesaPaymentDialog:React.FC<Props>=({churchId})=>{
  },[paymentId,status?.status,refreshed,refreshData]);
  const reset=()=>{setOpen(false);setPaymentId('');setStatus(null);setMessage('');setError('');setPhone('');setPayer('');setAmount('');setRefreshed(false);};
  const submit=async(e:FormEvent)=>{e.preventDefault();setError('');const value=Number(amount);
-  if(!/^(+?254|0)?[17]\d{8}$/.test(phone.replace(/[\s()-]/g,''))){setError('Enter a valid Kenyan mobile number.');return;}
+  if(!/^(\+?254|0)?[17]\d{8}$/.test(phone.replace(/[\s()-]/g,''))){setError('Enter a valid Kenyan mobile number.');return;}
   if(!Number.isSafeInteger(value)||value<1||value>250000){setError('Enter an amount between KES 1 and KES 250,000.');return;}
   if(!churchId){setError('Church workspace is not configured.');return;}setBusy(true);
   try{const result=await initiateMpesaPayment({church_id:churchId,phone_number:phone,payer_name:payer.trim(),amount:value,purpose});setPaymentId(result.payment_id);setMessage(result.customer_message);setStatus({payment_id:result.payment_id,status:'pending',amount:value,purpose,phone_number:phone,payer_name:payer,receipt_number:null,sms_status:'not_sent',message:result.customer_message,created_at:new Date().toISOString(),updated_at:new Date().toISOString()});}

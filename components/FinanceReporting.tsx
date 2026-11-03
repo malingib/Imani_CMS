@@ -16,7 +16,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   PieChart, Pie, Legend, AreaChart, Area
 } from 'recharts';
-import { Transaction, Member, Budget, RecurringExpense, UserRole, TransactionType } from '../types';
+import { Transaction, Member, Budget, RecurringExpense, TransactionType } from '../types';
 
 interface FinanceReportingProps {
   transactions: Transaction[];
@@ -28,7 +28,6 @@ interface FinanceReportingProps {
   onSetBudget: (budget: Budget) => void;
   recurringExpenses: RecurringExpense[];
   onAddRecurring: (expense: RecurringExpense) => void;
-  currentUserRole: UserRole;
   churchId: string;
 }
 
@@ -42,7 +41,6 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
   onSetBudget,
   recurringExpenses,
   onAddRecurring,
-  currentUserRole,
   churchId
 }) => {
   const [filterType, setFilterType] = useState('All');
@@ -182,8 +180,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
         </div>
         <div className="flex flex-wrap gap-3">
           <MpesaPaymentDialog churchId={churchId} />
-          {currentUserRole !== UserRole.MEMBER && (
-            <>
+          <>
               <button 
                 onClick={() => handleOpenForm('NEW_EXPENSE')}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-4 bg-white text-brand-gold border border-brand-gold/20 rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-brand-gold/5 transition-all shadow-sm"
@@ -196,8 +193,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
               >
                 <Plus size={18} /> Record Income
               </button>
-            </>
-          )}
+          </>
         </div>
       </div>
 

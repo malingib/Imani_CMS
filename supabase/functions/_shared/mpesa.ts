@@ -32,7 +32,7 @@ export async function requestTransactionStatus(admin:ReturnType<typeof createCli
   const data=await response.json().catch(()=>null);
   if(!response.ok||!data||String(data.ResponseCode)!=='0'){
    const message=String(data?.ResponseDescription||data?.errorMessage||'Safaricom did not accept the transaction-status query.').slice(0,500);
-   await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'rejected',reconcile_token_hash:null,result_description:message}).eq('id',intent.id);
+   await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'rejected',reconcile_token_hash:null,result_description:message}).eq('id',intent.id).eq('status','reconciliation_pending').eq('reconciliation_status','requesting');
    return {status:'verification_required',message};
   }
   const {error}=await admin.from('mpesa_payment_intents').update({status:'reconciliation_pending',reconciliation_status:'requested',reconciliation_conversation_id:data.ConversationID||null,result_description:'Safaricom accepted the transaction-status query. Waiting for its result callback.'}).eq('id',intent.id).eq('status','reconciliation_pending').eq('reconciliation_status','requesting');

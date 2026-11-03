@@ -1,6 +1,6 @@
-import type { AppNotification, CommunicationLog, Member, MemberStatus, MaritalStatus, MembershipType, Transaction, TransactionType, ChurchEvent, ChurchEventType, AuditLog, Budget, RecurringExpense, Group, MemberActivity } from '../../types';
+import type { AppNotification, CommunicationLog, Member, MemberStatus, MaritalStatus, MembershipType, Transaction, TransactionType, ChurchEvent, ChurchEventType, AuditLog, Budget, RecurringExpense, Group } from '../../types';
 import type { AppView } from '../../types';
-import type { MemberRow, TransactionRow, ChurchEventRow, BudgetRow, RecurringExpenseRow, CommunicationRow, NotificationRow, GroupRow, ActivityRow, AuditLogRow } from './database.types';
+import type { MemberRow, TransactionRow, ChurchEventRow, BudgetRow, RecurringExpenseRow, CommunicationRow, NotificationRow, GroupRow, AuditLogRow } from './database.types';
 
 export function mapMember(r: MemberRow): Member {
   return {
@@ -112,17 +112,6 @@ export function mapGroup(r: GroupRow): Group {
     churchId: r.church_id,
     createdAt: r.created_at || '',
     updatedAt: r.updated_at || '',
-  };
-}
-
-export function mapActivity(r: ActivityRow): MemberActivity {
-  return {
-    id: r.id,
-    memberId: r.member_id,
-    type: r.type as MemberActivity['type'],
-    description: r.description || '',
-    timestamp: r.timestamp || r.created_at || '',
-    metadata: r.metadata,
   };
 }
 

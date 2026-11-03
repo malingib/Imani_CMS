@@ -1,5 +1,5 @@
-import { mapActivity, mapBudget, mapCommunication, mapEvent, mapGroup, mapMember, mapNotification, mapRecurringExpense, mapTransaction } from "./mappers";
-import type { AppNotification, Budget, ChurchEvent, CommunicationLog, Group, Member, MemberActivity, RecurringExpense, Transaction } from "../../types";
+import { mapBudget, mapCommunication, mapEvent, mapGroup, mapMember, mapNotification, mapRecurringExpense, mapTransaction } from "./mappers";
+import type { AppNotification, Budget, ChurchEvent, CommunicationLog, Group, Member, RecurringExpense, Transaction } from "../../types";
 
 export type SupabaseLikeClient = {
   from(table: string): any;

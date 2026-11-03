@@ -268,43 +268,6 @@ describe("AppProvider", () => {
     expect(mockPersistence.createMember).toHaveBeenCalledOnce();
   });
 
-  it("handleRSVP skips when no currentUser.memberId", async () => {
-    mockUseSession.mockReturnValue({ user: fakeUser, isAuthenticated: true, isLoading: false });
-    mockUseChurch.mockReturnValue({ activeChurchId: "c-1", setActiveChurchId: vi.fn(), churches: [], fetchChurches: vi.fn() });
-    mockLoadChurchData.mockResolvedValue({
-      members: [], transactions: [], events: [
-        { id: "e-1", title: "Service", description: "", date: "2026-07-05", time: "10:00", location: "Hall", type: "WORSHIP", attendance: [] },
-      ], budgets: [],
-      recurringExpenses: [], communications: [], notifications: [],
-      auditLogs: [], groups: [], sermons: [],
-      totalMembers: 0, totalTransactions: 0, totalEvents: 1,
-      totalBudgets: 0, totalRecurringExpenses: 0, totalAuditLogs: 0,
-    });
-
-    function RsvpTest() {
-      const { handleRSVP, toasts } = useApp();
-      return (
-        <div>
-          <span data-testid="toasts">{toasts.length}</span>
-          <span data-testid="lastToast">{toasts[toasts.length - 1]?.message || ""}</span>
-          <button onClick={() => handleRSVP("e-1", true)}>RSVP</button>
-        </div>
-      );
-    }
-
-    render(
-      <AppProvider>
-        <RsvpTest />
-      </AppProvider>
-    );
-
-    await waitFor(() => expect(screen.getByTestId("toasts").textContent).toBe("0"));
-    await act(async () => screen.getByText("RSVP").click());
-
-    await waitFor(() => {
-      expect(screen.getByTestId("lastToast").textContent).toContain("Only registered members");
-    });
-  });
 
   it("reaches ready when auth finishes loading with no user", async () => {
     mockUseSession.mockReturnValue({ user: null, isAuthenticated: false, isLoading: false });

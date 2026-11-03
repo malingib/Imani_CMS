@@ -435,18 +435,6 @@ export function createPersistenceService(client: SupabaseLikeClient) {
       if (error) throw new Error(error.message);
     },
 
-    async getActivities(memberId: string, churchId: string) {
-      const { data, error } = await client
-        .from("activities")
-        .select("*")
-        .eq("member_id", memberId)
-        .eq("church_id", churchId)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (error) throw new Error(error.message);
-      return (data || []).map(mapActivity);
-    },
-
     async getMembers(churchId: string) {
       const { data, error } = await client
         .from("members")

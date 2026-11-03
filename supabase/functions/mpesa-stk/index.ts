@@ -137,9 +137,10 @@ Deno.serve(async (req: Request) => {
       const byToken = await rest('mpesa_payment_intents?select=id,callback_token_hash&callback_token_hash=eq.' + encodeURIComponent(tokenHash));
       intent = Array.isArray(byToken.data) ? byToken.data[0] as Obj | undefined : undefined;
       if (intent && String(intent.callback_token_hash || '') === tokenHash) {
-        await rest('mpesa_payment_intents?id=eq.' + encodeURIComponent(String(intent.id)), {
+        const recovered = await rest('mpesa_payment_intents?id=eq.' + encodeURIComponent(String(intent.id)), {
           method: 'PATCH', body: JSON.stringify({ checkout_request_id: checkoutId }),
         });
+        if (!recovered.response.ok) return reply(500, { ResultCode: 1, ResultDesc: 'Could not recover callback correlation; retry delivery.' });
       }
     }
     if (!intent || tokenHash !== String(intent.callback_token_hash || '')) {
@@ -154,7 +155,7 @@ Deno.serve(async (req: Request) => {
     const receipt = value('MpesaReceiptNumber');
     const phone = value('PhoneNumber');
     try {
-      await rpc('record_mpesa_stk_callback', {
+      const processed = await rpc('record_mpesa_stk_callback', {
         p_checkout_request_id: checkoutId,
         p_result_code: Number.isFinite(resultCode) ? resultCode : null,
         p_result_description: String(callback.ResultDesc || 'Safaricom callback received'),
@@ -162,7 +163,8 @@ Deno.serve(async (req: Request) => {
         p_receipt: receipt === undefined ? null : String(receipt),
         p_phone: phone === undefined ? null : String(phone),
         p_callback_payload: body,
-      });
+      }) as Obj;
+      if (processed?.status === 'not_found') return reply(500, { ResultCode: 1, ResultDesc: 'Payment intent not yet correlated; retry delivery.' });
     } catch (error) {
       console.error('M-Pesa callback processing failed', error instanceof Error ? error.message : 'unknown');
       return reply(500, { ResultCode: 1, ResultDesc: 'Callback processing failed; retry delivery.' });

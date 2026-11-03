@@ -12,7 +12,7 @@ Deno.serve(async(req:Request)=>{
  if(body?.Result){
   const query=new URL(req.url).searchParams,paymentId=query.get('payment_id')||'',token=query.get('token')||'';
   if(!/^[0-9a-f-]{36}$/i.test(paymentId)||token.length<32)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});
-  const {data:intent,error}=await admin.from('mpesa_payment_intents').select('id,church_id,amount,phone_number,payer_name,purpose,status,mpesa_receipt_number,reconcile_token_hash').eq('id',paymentId).maybeSingle();
+  const {data:intent,error}=await admin.from('mpesa_payment_intents').select('id,church_id,amount,phone_number,payer_name,purpose,status,reconciliation_status,mpesa_receipt_number,reconcile_token_hash').eq('id',paymentId).maybeSingle();
   if(error||!intent)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});
   if(intent.status==='succeeded'||(!intent.reconcile_token_hash&&intent.reconciliation_status&&intent.reconciliation_status!=='requested'&&intent.reconciliation_status!=='requesting'))return json(200,{ResultCode:0,ResultDesc:'Reconciliation callback already processed.'});
   if(!intent.reconcile_token_hash||await digest(token)!==intent.reconcile_token_hash)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});

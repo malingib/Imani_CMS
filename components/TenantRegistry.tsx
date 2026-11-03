@@ -30,7 +30,7 @@ interface TenantRegistryProps {
 }
 
 const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
-  const { activeChurchId } = useChurch();
+  const { activeChurchId, fetchChurches: refreshChurchContext } = useChurch();
   const [churches, setChurches] = useState<ChurchRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -51,8 +51,8 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
     setLoading(true);
     try {
       const data = await tenantsService.listChurchesWithMemberCounts();
-      // This deployment is intentionally bound to the configured Demo Church.
-      setChurches(data.filter(church => church.id === activeChurchId));
+      setChurches(data.filter(church => church.status !== 'archived'));
+      await refreshChurchContext();
     } finally {
       setLoading(false);
     }

@@ -24,7 +24,6 @@ const ROLE_LABELS: Record<InvitationRole, string> = {
   TREASURER: 'Treasurer',
   SECRETARY: 'Secretary',
   STAFF: 'Staff',
-  MEMBER: 'Member',
 };
 
 const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) => {
@@ -36,7 +35,7 @@ const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) =>
   const [message, setMessage] = useState('');
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<InvitationRole>('MEMBER');
+  const [inviteRole, setInviteRole] = useState<InvitationRole>('STAFF');
   const [inviteSaving, setInviteSaving] = useState(false);
   const [profile, setProfile] = useState({ name: '', address: '', phone: '', email: '', website: '', logoUrl: '' });
 
@@ -95,7 +94,7 @@ const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) =>
     setInviteSaving(true); setMessage('');
     try {
       await service.createInvitation({ churchId, email: inviteEmail, role: inviteRole, expiresDays: 7 });
-      setInviteEmail(''); setInviteRole('MEMBER'); setInviteOpen(false);
+      setInviteEmail(''); setInviteRole('STAFF'); setInviteOpen(false);
       setMessage('Invitation created. The recipient can complete account setup from the invitation link.');
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to create invitation.'); }
     finally { setInviteSaving(false); }
@@ -141,7 +140,7 @@ const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) =>
             <div className="mt-8 space-y-5">{STEPS.map((step, index) => <div key={step.id} className="flex items-center gap-4"><div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-black ${index <= currentStepIndex ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-400'}`}>{index < currentStepIndex ? '✓' : index + 1}</div><div className="flex-1"><p className="font-black text-slate-700">{step.label}</p><div className="h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden"><div className="h-full bg-brand-primary rounded-full transition-all" style={{ width: index < currentStepIndex ? '100%' : index === currentStepIndex ? '55%' : '0%' }} /></div></div></div>)}</div>
             <button disabled={currentStepIndex >= STEPS.length - 1} onClick={advanceOnboarding} className="mt-8 px-6 py-3 rounded-xl bg-slate-900 text-white font-black text-xs uppercase tracking-widest disabled:opacity-40 flex items-center gap-2">{currentStepIndex >= STEPS.length - 1 ? 'Setup complete' : 'Continue setup'}<ChevronRight size={16}/></button>
           </section>
-          <section className="bg-white rounded-xl border border-slate-100 p-7 shadow-sm space-y-5"><div className="w-12 h-12 rounded-2xl bg-brand-primary/10 text-brand-primary flex items-center justify-center"><Users /></div><h3 className="text-xl font-black text-slate-800">Team access</h3><p className="text-sm text-slate-500 leading-relaxed">{memberships.filter(m => m.status === 'active').length} active church memberships are provisioned. Invite staff without granting direct database access.</p><button onClick={() => { setTab('TEAM'); setInviteOpen(true); }} className="w-full py-3 rounded-xl bg-brand-primary text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"><UserPlus size={16}/> Invite a team member</button></section>
+          <section className="bg-white rounded-xl border border-slate-100 p-7 shadow-sm space-y-5"><div className="w-12 h-12 rounded-2xl bg-brand-primary/10 text-brand-primary flex items-center justify-center"><Users /></div><h3 className="text-xl font-black text-slate-800">Team access</h3><p className="text-sm text-slate-500 leading-relaxed">{memberships.filter(m => m.status === 'active').length} active church memberships are provisioned. Invite staff without granting direct database access.</p><button onClick={() => { setTab('TEAM'); setInviteOpen(true); }} className="w-full py-3 rounded-xl bg-brand-primary text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"><UserPlus size={16}/> Invite church staff</button></section>
         </div>
       )}
 
@@ -157,7 +156,7 @@ const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) =>
 
       {tab === 'TEAM' && (
         <section className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-7 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authoritative memberships</p><h3 className="text-2xl font-black text-slate-800 mt-2">Team & access</h3></div><button onClick={() => setInviteOpen(true)} className="px-5 py-3 rounded-xl bg-brand-primary text-white font-black text-xs uppercase tracking-widest flex items-center gap-2"><UserPlus size={16}/> Invite member</button></div>
+          <div className="p-7 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authoritative memberships</p><h3 className="text-2xl font-black text-slate-800 mt-2">Team & access</h3></div><button onClick={() => setInviteOpen(true)} className="px-5 py-3 rounded-xl bg-brand-primary text-white font-black text-xs uppercase tracking-widest flex items-center gap-2"><UserPlus size={16}/> Invite staff</button></div>
           <div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400"><tr><th className="px-7 py-4">Person</th><th className="px-7 py-4">Role</th><th className="px-7 py-4">Status</th><th className="px-7 py-4">Action</th></tr></thead><tbody className="divide-y divide-slate-100">{memberships.map(row => <tr key={row.id}><td className="px-7 py-5"><p className="font-black text-slate-700">{row.name || 'Unnamed user'}</p><p className="text-xs text-slate-400 flex items-center gap-1 mt-1"><Mail size={12}/>{row.email || 'No email'}</p></td><td className="px-7 py-5"><select value={row.role} onChange={e => void changeRole(row, e.target.value as InvitationRole)} className="border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold bg-white">{(Object.keys(ROLE_LABELS) as InvitationRole[]).map(role => <option key={role} value={role}>{ROLE_LABELS[role]}</option>)}</select></td><td className="px-7 py-5"><span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase ${row.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{row.status}</span></td><td className="px-7 py-5"><button onClick={() => void changeStatus(row)} className="text-xs font-black text-brand-primary">{row.status === 'active' ? 'Suspend' : 'Restore'}</button></td></tr>)}</tbody></table></div>
           {memberships.length === 0 && <div className="p-6 text-center text-slate-400 font-medium">No church memberships found yet.</div>}
         </section>

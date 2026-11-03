@@ -19,7 +19,7 @@ export type MembershipAdminRow = {
   id: string;
   user_id: string;
   church_id: string;
-  role: 'ADMIN' | 'PASTOR' | 'TREASURER' | 'SECRETARY' | 'STAFF' | 'MEMBER';
+  role: 'ADMIN' | 'PASTOR' | 'TREASURER' | 'SECRETARY' | 'STAFF';
   status: 'active' | 'suspended';
   email: string | null;
   name: string | null;

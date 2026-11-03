@@ -68,7 +68,9 @@ const AccountShell = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const churchId = activeChurchId ?? currentUser?.churchId ?? null;
+  const churchId = currentUser?.role === UserRole.SUPER_ADMIN && !viewingChurch
+    ? null
+    : activeChurchId ?? currentUser?.churchId ?? null;
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleLogout = async () => {
@@ -177,7 +179,7 @@ const AccountShell = () => {
             {(!viewAllowed || !featureAllowed) ? <div className="flex flex-col items-center justify-center py-20"><div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center"><h2 className="text-2xl font-black text-brand-primary mb-2">Access Restricted</h2><p className="text-slate-500 font-medium">{!featureAllowed ? 'This module has been disabled by the platform administrator for this client.' : 'Your role does not have permission to view this page.'}</p><button onClick={() => navigate(getDefaultViewForUserRole(currentUser.role))} className="mt-6 px-6 py-3 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary/90 transition-all">Go to your dashboard</button></div></div> : (
               <Routes>
 
-                  <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <PlatformDashboard onOpenClient={() => { if (activeChurchId) { handleSelectChurch(activeChurchId); navigate('DASHBOARD'); } else addToast('No configured client church is available.', 'error'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
+                  <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <PlatformDashboard onOpenClient={() => { if (activeChurchId) { handleSelectChurch(activeChurchId); navigate('DASHBOARD'); } else navigate('TENANTS'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
                   <Route path={ROUTES.TENANTS.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <TenantRegistry onImpersonate={(id) => { handleSelectChurch(id); navigate('DASHBOARD'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
                   <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} dashboardTransactions={dashboardTransactions} lifetimeTitheTransactions={lifetimeTitheTransactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />

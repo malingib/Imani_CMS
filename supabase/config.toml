@@ -402,3 +402,6 @@ verify_jwt = false
 
 [functions.mpesa-status]
 verify_jwt = false
+
+[functions.invite-claim]
+verify_jwt = false

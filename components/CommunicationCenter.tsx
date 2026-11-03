@@ -9,17 +9,18 @@ import {
   Save, Loader2, Copy, Bookmark
 } from 'lucide-react';
 import { CommunicationLog, Member, CommunicationTemplate } from '../types';
+import { supabase } from '../src/lib/supabase';
 
 interface CommunicationCenterProps {
   members: Member[];
+  churchId: string;
   logs: CommunicationLog[];
-  onSendBroadcast: (log: CommunicationLog) => void;
+  onSendBroadcast: (log: CommunicationLog) => Promise<void>;
   currentUser: { name: string };
   addToast?: (msg: string, type?: 'success' | 'error' | 'info') => void;
-  smsCredits?: number;
 }
 
-const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs, onSendBroadcast, currentUser, addToast, smsCredits }) => {
+const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, churchId, logs, onSendBroadcast, currentUser, addToast }) => {
   const [activeTab, setActiveTab] = useState<'LOGS' | 'COMPOSE' | 'AUTOMATION' | 'TEMPLATES'>('LOGS');
   const [searchTerm, setSearchTerm] = useState('');
   const [messageType, setMessageType] = useState<'SMS' | 'Email' | 'WhatsApp'>('SMS');
@@ -30,6 +31,8 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
   const [scheduledTime, setScheduledTime] = useState('');
   const [showLogDetails, setShowLogDetails] = useState<CommunicationLog | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [deliveryStatuses, setDeliveryStatuses] = useState<Record<string, { status: string; deliveredAt?: string }>>({});
+  const [checkingStatusId, setCheckingStatusId] = useState<string | null>(null);
 
   // Templates
   const templates: CommunicationTemplate[] = [
@@ -41,14 +44,92 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
 
   // Automation State
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!content.trim()) {
       addToast?.('Enter a message before sending.', 'error');
       return;
     }
-    // This UI has no configured delivery adapter. Never fabricate a sent log,
-    // delivery counts, opens, or a scheduled job. Keep the user's draft intact.
-    addToast?.('Message not sent: no SMS, email, or WhatsApp delivery provider is configured for this workflow. Your draft has been kept.', 'error');
+    if (/\{(?:name|amount|ref|location|date)\}/i.test(content)) {
+      addToast?.('Replace the template placeholders before sending. Personalised variable expansion is not enabled for this dispatch.', 'error');
+      return;
+    }
+    if (messageType !== 'SMS') {
+      addToast?.('Only SMS delivery is connected. Email and WhatsApp are not enabled in this workspace.', 'error');
+      return;
+    }
+    if (!churchId) {
+      addToast?.('The church workspace is not configured.', 'error');
+      return;
+    }
+    const excluded = new Set(['inactive', 'deceased', 'archived']);
+    const selected = members.filter(member => {
+      const state = String(member.status || '').toLowerCase();
+      const matchesTarget = broadcastTarget === 'All Members' || (member.groups || []).includes(broadcastTarget);
+      return matchesTarget && !excluded.has(state) && !!String(member.phone || '').trim();
+    });
+    const recipients = [...new Set(selected.map(member => String(member.phone).trim()))];
+    if (!recipients.length) {
+      addToast?.('No members with valid phone numbers were found in this recipient selection.', 'error');
+      return;
+    }
+
+    setIsSending(true);
+    const idempotencyKey = crypto.randomUUID();
+    let accepted = false;
+    let providerMessageId = '';
+    try {
+      const { data, error } = await supabase.functions.invoke('mobiwave-send', {
+        body: { church_id: churchId, recipients, message: content.trim(), idempotency_key: idempotencyKey },
+        headers: { 'Idempotency-Key': idempotencyKey },
+      });
+      if (error) throw new Error(error.message || 'MobiWave SMS request failed.');
+      if (data?.success !== true || data?.status !== 'sent') {
+        throw new Error(String(data?.error || 'MobiWave did not confirm acceptance. Check dispatch status before retrying.'));
+      }
+      accepted = true;
+      providerMessageId = String(data.provider_message_id || '');
+    } catch (error) {
+      addToast?.(error instanceof Error ? error.message : 'SMS dispatch failed. Your draft has been kept.', 'error');
+      return;
+    } finally {
+      if (!accepted) setIsSending(false);
+    }
+
+    const log: CommunicationLog = {
+      id: crypto.randomUUID(), type: 'SMS', recipientCount: recipients.length,
+      targetGroupName: broadcastTarget, subject: subject.trim() || 'SMS broadcast',
+      content: content.trim(), date: new Date().toISOString(), status: 'Sent', sender: currentUser.name,
+      ...(providerMessageId ? { deliveryBreakdown: { delivered: 0, opened: 0, failed: 0, providerMessageId, providerStatus: 'sent' } } : {}),
+    };
+    try {
+      await onSendBroadcast(log);
+      addToast?.('MobiWave accepted the SMS dispatch for ' + recipients.length + ' recipients. Delivery confirmation is tracked separately.', 'success');
+      resetForm();
+      setActiveTab('LOGS');
+    } catch {
+      addToast?.('MobiWave accepted the SMS dispatch, but the local communication log could not be saved. Provider reference: ' + (providerMessageId || 'not returned'), 'error');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const checkDelivery = async (log: CommunicationLog) => {
+    const messageId = log.deliveryBreakdown?.providerMessageId;
+    if (!messageId || !churchId) return;
+    setCheckingStatusId(log.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('mobiwave-status', {
+        body: { church_id: churchId, message_id: messageId },
+      });
+      if (error) throw new Error(error.message || 'Delivery report lookup failed.');
+      if (data?.error) throw new Error(String(data.error));
+      const status = String(data?.provider_status || 'unknown').toLowerCase();
+      const deliveredAt = data?.delivered_at ? String(data.delivered_at) : undefined;
+      setDeliveryStatuses(previous => ({ ...previous, [log.id]: { status, deliveredAt } }));
+      addToast?.('MobiWave delivery status: ' + status + '.', 'info');
+    } catch (error) {
+      addToast?.(error instanceof Error ? error.message : 'Could not retrieve the delivery report.', 'error');
+    } finally { setCheckingStatusId(null); }
   };
 
   const useTemplate = (t: CommunicationTemplate) => {
@@ -76,7 +157,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tight text-brand-primary uppercase">Communication</h2>
-          <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">Send SMS, email, and WhatsApp messages to members.</p>
+          <p className="text-slate-500 mt-2 text-sm sm:text-lg font-medium">Send SMS through MobiWave and review provider delivery reports.</p>
         </div>
         <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm self-start lg:self-center overflow-x-auto no-scrollbar max-w-full">
           {[
@@ -142,12 +223,12 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className={`px-4 py-1.5 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${
-                    log.status === 'Sent' ? 'bg-brand-emerald/10 text-brand-emerald' : 'bg-brand-gold/10 text-brand-gold'
-                  }`}>
-                    {log.status}
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <span className={`px-4 py-1.5 rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${log.status === 'Sent' ? 'bg-brand-emerald/10 text-brand-emerald' : 'bg-brand-gold/10 text-brand-gold'}`}>{log.status}</span>
+                    {deliveryStatuses[log.id] && <p className="mt-1 text-[10px] font-semibold text-slate-500">{deliveryStatuses[log.id].status}{deliveryStatuses[log.id].deliveredAt ? ' · ' + deliveryStatuses[log.id].deliveredAt : ''}</p>}
+                  </div>
+                  {log.type === 'SMS' && log.deliveryBreakdown?.providerMessageId && <button type="button" disabled={checkingStatusId === log.id} onClick={() => void checkDelivery(log)} className="rounded-lg border border-indigo-100 px-3 py-2 text-[10px] font-semibold text-indigo-700 hover:bg-indigo-50 disabled:opacity-50">{checkingStatusId === log.id ? 'Checking…' : 'Check delivery'}</button>}
                   <button onClick={() => setShowLogDetails(log)} className="p-3 text-brand-indigo hover:bg-brand-indigo/10 rounded-xl transition-all"><ChevronRight size={20}/></button>
                 </div>
               </div>
@@ -198,7 +279,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                 <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Channel</label>
                 <div className="flex gap-2">
                   {(['SMS', 'Email', 'WhatsApp'] as const).map(t => (
-                    <button key={t} onClick={() => setMessageType(t)} className={`flex-1 py-3 rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] transition-all border-2 ${messageType === t ? 'bg-brand-primary text-white border-brand-primary shadow-sm' : 'bg-slate-50 text-slate-400 border-slate-50 hover:bg-slate-100'}`}>{t}</button>
+                    <button key={t} onClick={() => setMessageType(t)} disabled={t !== 'SMS'} title={t === 'SMS' ? 'MobiWave SMS delivery is connected' : t + ' delivery is not connected'} className={`flex-1 py-3 rounded-xl sm:rounded-2xl font-black text-[9px] sm:text-[10px] transition-all border-2 disabled:cursor-not-allowed disabled:opacity-40 ${messageType === t ? 'bg-brand-primary text-white border-brand-primary shadow-sm' : 'bg-slate-50 text-slate-400 border-slate-50 hover:bg-slate-100'}`}>{t}</button>
                   ))}
                 </div>
               </div>
@@ -206,8 +287,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
                 <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Recipients</label>
                 <select className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-[1.5rem] font-black text-xs text-slate-700 outline-none focus:ring-2 focus:ring-brand-indigo cursor-pointer shadow-inner" value={broadcastTarget} onChange={(e) => setBroadcastTarget(e.target.value)}>
                    <option>All Members</option>
-                   <option>Youth Fellowship</option>
-                   <option>Women of Grace</option>
+                   {[...new Set(members.flatMap(member => member.groups || []))].sort().map(group => <option key={group} value={group}>{group}</option>)}
                 </select>
               </div>
             </div>
@@ -231,19 +311,19 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, logs
           <div className="space-y-6 sm:space-y-8">
              <div className="bg-brand-primary p-5 rounded-xl sm:rounded-xl text-white shadow-sm relative overflow-hidden">
                 <div className="relative z-10 space-y-4">
-                   <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-indigo-300">Quick Tags</h4>
-                   <p className="text-xs sm:text-sm font-medium leading-relaxed">Map variables automatically: <code className="bg-white/10 px-1.5 rounded">{'{name}'}</code> or <code className="bg-white/10 px-1.5 rounded">{'{amount}'}</code> for bulk personalization.</p>
+                   <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-indigo-300">Delivery reporting</h4>
+                   <p className="text-xs sm:text-sm font-medium leading-relaxed">Messages are submitted securely through the church's MobiWave integration. Delivery confirmation can be checked from the History tab.</p>
                 </div>
                 <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl opacity-20"></div>
              </div>
              
              <div className="bg-white p-5 rounded-xl sm:rounded-xl border border-slate-100 shadow-sm space-y-6">
-                <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">SMS Credits</h4>
+                <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-slate-400 text-center sm:text-left">Delivery provider</h4>
                 <div className="flex items-center justify-between">
-                    <p className="text-3xl sm:text-2xl font-semibold text-slate-800 tracking-tighter">{typeof smsCredits === 'number' ? smsCredits.toLocaleString() : 'Not configured'}</p>
-                   <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl"><Zap size={20}/></div>
+                    <p className="text-xl sm:text-2xl font-semibold text-slate-800 tracking-tight">MobiWave SMS</p>
+                   <div className="p-3 bg-brand-indigo/10 text-brand-indigo rounded-xl"><Zap size={20}/></div>
                 </div>
-                <button type="button" disabled title="SMS provider billing is not connected" className="w-full py-4 bg-slate-100 text-slate-500 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Top-up not configured</button>
+                <p className="text-xs leading-5 text-slate-500">Provider acceptance and handset delivery are separate states. Use History to query the latest available delivery report.</p>
              </div>
           </div>
         </div>

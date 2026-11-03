@@ -1,88 +1,165 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { supabase } from './supabase';
 
-interface Church { id: string; name: string; slug: string; tier: string; status: string; restrictions?: Record<string, boolean>; billing_status?: string; monthly_fee?: number; billing_period_end?: string | null; suspension_reason?: string | null; }
+interface Church {
+  id: string;
+  name: string;
+  slug: string;
+  tier: string;
+  status: string;
+  restrictions?: Record<string, boolean>;
+  billing_status?: string;
+  monthly_fee?: number;
+  billing_period_end?: string | null;
+  suspension_reason?: string | null;
+}
+
 interface ChurchContextType {
   activeChurchId: string | null;
   setActiveChurchId: (id: string | null) => void;
   churches: Church[];
-  fetchChurches: () => void;
+  fetchChurches: () => Promise<void>;
   activeChurch: Church | null;
   configurationError: string | null;
 }
 
-const CANONICAL_CHURCH_ID = '00000000-0000-0000-0000-000000000001';
-const configuredChurchId =
-  (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() || CANONICAL_CHURCH_ID;
+const STAFF_ROLES = new Set(['ADMIN', 'PASTOR', 'TREASURER', 'SECRETARY', 'STAFF']);
+const CHURCH_FIELDS = 'id, name, slug, tier, status, restrictions, billing_status, monthly_fee, billing_period_end, suspension_reason';
 
 export const ChurchContext = createContext<ChurchContextType>({
-  activeChurchId: configuredChurchId,
+  activeChurchId: null,
   setActiveChurchId: () => {},
   churches: [],
-  fetchChurches: () => {},
+  fetchChurches: async () => {},
   activeChurch: null,
   configurationError: null,
 });
+
 export const useChurch = () => useContext(ChurchContext);
 
 /**
- * Imani is deployed for one church only. The canonical church ID is the default;
- * VITE_CHURCH_ID is retained as an explicit deployment override for a separately
- * provisioned installation. No membership-based tenant discovery or switching
- * occurs in the browser.
+ * Platform owners can discover and switch between all client workspaces.
+ * Church users are scoped to the single active staff membership provisioned
+ * in server-managed app_metadata and revalidated by database RLS.
  */
-export function ChurchProvider({ children, churchId: initialChurchId }: { children: ReactNode; churchId: string | null }) {
-  const deploymentChurchId =
-    (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() ||
-    initialChurchId ||
-    CANONICAL_CHURCH_ID;
-  const [activeChurchId, setResolvedChurchId] = useState<string | null>(deploymentChurchId);
+export function ChurchProvider({ children }: { children: ReactNode; churchId: string | null }) {
+  const [activeChurchId, setResolvedChurchId] = useState<string | null>(null);
   const [churches, setChurches] = useState<Church[]>([]);
   const [configurationError, setConfigurationError] = useState<string | null>(null);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [assignedChurchId, setAssignedChurchId] = useState<string | null>(null);
 
   const fetchChurches = useCallback(async () => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError) {
       setChurches([]);
       setResolvedChurchId(null);
+      setAssignedChurchId(null);
       setConfigurationError('Unable to verify the signed-in user. Please sign in again.');
       return;
     }
+
     if (!user) {
       setChurches([]);
-      setResolvedChurchId(deploymentChurchId);
+      setResolvedChurchId(null);
+      setAssignedChurchId(null);
+      setIsSuperAdmin(false);
       setConfigurationError(null);
       return;
     }
 
-    const { data, error } = await supabase
-      .from('churches')
-      .select('id, name, slug, tier, status, restrictions, billing_status, monthly_fee, billing_period_end, suspension_reason')
-      .eq('id', deploymentChurchId)
-      .maybeSingle();
+    const appRole = typeof user.app_metadata?.role === 'string' ? user.app_metadata.role : '';
+    const superAdmin = appRole === 'SUPER_ADMIN';
+    setIsSuperAdmin(superAdmin);
 
-    const isSuperAdmin = user.app_metadata?.role === 'SUPER_ADMIN';
-    if (error || !data || data.status === 'archived' || (data.status === 'suspended' && !isSuperAdmin)) {
-      setChurches([]);
-      setResolvedChurchId(null);
-      setConfigurationError(
-        'The configured church is unavailable. Verify VITE_CHURCH_ID and the deployment database.'
-      );
+    if (superAdmin) {
+      const { data, error } = await supabase
+        .from('churches')
+        .select(CHURCH_FIELDS)
+        .order('name');
+
+      if (error) {
+        setChurches([]);
+        setResolvedChurchId(null);
+        setAssignedChurchId(null);
+        setConfigurationError('Unable to load client workspaces. Check platform-owner permissions.');
+        return;
+      }
+
+      const available = ((data || []) as Church[]).filter(church => church.status !== 'archived');
+      setChurches(available);
+      setAssignedChurchId(null);
+      setResolvedChurchId(previous => previous && available.some(church => church.id === previous) ? previous : null);
+      setConfigurationError(null);
       return;
     }
 
-    setChurches([data as Church]);
-    setResolvedChurchId(data.id);
+    if (!STAFF_ROLES.has(appRole)) {
+      setChurches([]);
+      setResolvedChurchId(null);
+      setAssignedChurchId(null);
+      setConfigurationError('This account does not have a church staff role. Member self-service is not available.');
+      return;
+    }
+
+    const { data: membership, error: membershipError } = await supabase
+      .from('church_memberships')
+      .select('church_id, role, status')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (membershipError || !membership || membership.role !== appRole) {
+      setChurches([]);
+      setResolvedChurchId(null);
+      setAssignedChurchId(null);
+      setConfigurationError('No matching active church staff membership was found. Contact the platform owner.');
+      return;
+    }
+
+    const { data: churchRecord, error: churchError } = await supabase
+      .from('churches')
+      .select(CHURCH_FIELDS)
+      .eq('id', membership.church_id)
+      .maybeSingle();
+
+    if (churchError || !churchRecord || !['active', 'trialing', 'onboarding'].includes(churchRecord.status)) {
+      setChurches([]);
+      setResolvedChurchId(null);
+      setAssignedChurchId(null);
+      setConfigurationError('Your church workspace is unavailable or suspended. Contact the platform owner.');
+      return;
+    }
+
+    const church = churchRecord as Church;
+    setChurches([church]);
+    setAssignedChurchId(church.id);
+    setResolvedChurchId(church.id);
     setConfigurationError(null);
-  }, [deploymentChurchId]);
+  }, []);
 
-  const activeChurch = churches.find(c => c.id === activeChurchId) || null;
-  useEffect(() => { void fetchChurches(); }, [fetchChurches]);
-
-  // A single-church deployment never permits browser-driven church switching.
   const safeSetActiveChurchId = useCallback((id: string | null) => {
-    if (id === deploymentChurchId) setResolvedChurchId(deploymentChurchId);
-  }, [deploymentChurchId]);
+    if (isSuperAdmin) {
+      if (id === null) {
+        setResolvedChurchId(null);
+        return;
+      }
+      if (churches.some(church => church.id === id && church.status !== 'archived')) {
+        setResolvedChurchId(id);
+      }
+      return;
+    }
+
+    if (id === null || id === assignedChurchId) {
+      setResolvedChurchId(assignedChurchId);
+    }
+  }, [isSuperAdmin, churches, assignedChurchId]);
+
+  const activeChurch = churches.find(church => church.id === activeChurchId) || null;
+
+  useEffect(() => {
+    void fetchChurches();
+  }, [fetchChurches]);
 
   return (
     <ChurchContext.Provider value={{

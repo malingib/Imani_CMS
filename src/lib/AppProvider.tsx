@@ -44,7 +44,6 @@ interface AppActions {
   handleAddMembersBulk: (items: Member[]) => Promise<void>;
   handleUpdateMember: (m: Member) => Promise<void>;
   handleDeleteMember: (id: string) => Promise<void>;
-  handleRSVP: (eventId: string, isRSVPing: boolean) => Promise<void>;
   handleAddEvent: (e: ChurchEvent) => Promise<void>;
   handleUpdateEvent: (e: ChurchEvent) => Promise<void>;
   handleDeleteEvent: (id: string) => Promise<void>;
@@ -255,19 +254,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setState(prev => ({ ...prev, members: prev.members.filter(m => m.id !== id) }));
       addToast('Member removed');
       createAudit('Deleted member', 'MEMBERS');
-    },
-    handleRSVP: async (eventId, isRSVPing) => {
-      const memberId = state.currentUser?.memberId;
-      if (!memberId) { addToast('Only registered members can RSVP', 'error'); return; }
-      const event = state.events.find(e => e.id === eventId);
-      if (!event) { addToast('Event not found', 'error'); return; }
-      const nextAttendance = isRSVPing
-        ? Array.from(new Set([...event.attendance, memberId]))
-        : event.attendance.filter(id => id !== memberId);
-      await persistence.setEventRSVP(eventId, memberId, isRSVPing, requireChurchId());
-      setState(prev => ({ ...prev, events: prev.events.map(e => e.id === eventId ? { ...e, attendance: nextAttendance } : e) }));
-      addToast(isRSVPing ? 'RSVP saved' : 'RSVP removed');
-      createAudit(`${isRSVPing ? 'RSVPd for' : 'Cancelled RSVP for'} ${eventId}`, 'EVENTS');
     },
     handleAddEvent: async (e) => {
       const saved = await persistence.createEvent(e, requireChurchId());

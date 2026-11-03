@@ -65,6 +65,36 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+## M-Pesa and MobiWave SMS
+
+The application has two workspaces only: the platform-owner console and the church/client workspace. Church members remain staff-managed records; there is no member self-service portal or personal-giving dashboard.
+
+### Configure providers
+
+- In the **Platform Owner** console, configure platform-level M-Pesa and MobiWave credentials.
+- In the **Church** workspace, authorised administrators can configure church-specific credentials. Church credentials take precedence; platform credentials are used only when no church credentials are configured.
+- Credentials are stored through the existing Supabase Vault-backed integration settings. Do not add Daraja or MobiWave secrets to Vite environment variables or source control.
+
+### Deploy the database and functions
+
+After linking the existing Imani Supabase project, apply the repository migrations and deploy the Edge Functions:
+
+\`\`\`bash
+supabase link --project-ref rmwqkqkhdkslezoskiol
+supabase db push
+supabase functions deploy mpesa-stk --no-verify-jwt
+supabase functions deploy mpesa-status
+supabase functions deploy mpesa-reconcile
+supabase functions deploy mobiwave-send
+supabase functions deploy mobiwave-status
+\`\`\`
+
+\`mpesa-stk\` disables gateway JWT verification only because Safaricom callbacks are unauthenticated; the function validates a Supabase user JWT for initiation and a per-payment callback token for Safaricom. The callback posts to the ledger only when the checkout reference, amount, phone number and receipt metadata match. Receipt uniqueness and an atomic database function prevent duplicate ledger entries.
+
+The Finance workspace can query Safaricom's STK status when a callback is delayed. A status query alone does not create a ledger entry: a receipt-bearing callback with matching metadata is required before the payment is posted.
+
+MobiWave SMS is dispatched server-side using the configured Vault token. Dispatch requests are idempotent, and uncertain provider outcomes are not automatically resent. A provider acceptance response is not the same as handset delivery; the Communication History view can query the MobiWave delivery report using the provider message reference.
+
 ## Admin User Setup
 
 1. Sign up at the app URL — the first user is auto-assigned as church admin

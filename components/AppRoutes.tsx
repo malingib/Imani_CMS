@@ -61,7 +61,7 @@ function Protected({ children }: { children: React.ReactNode }) {
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, dashboardTransactions, lifetimeTitheTransactions, events, budgets, recurringExpenses, communications, groups, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleRSVP, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
+  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, dashboardTransactions, lifetimeTitheTransactions, events, budgets, recurringExpenses, communications, groups, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
   const { activeChurchId, activeChurch } = useChurch();
   const location = useLocation();
   const navigateToPath = useNavigate();

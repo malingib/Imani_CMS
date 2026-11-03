@@ -17,6 +17,16 @@ jobs:
           node-version: 20
           cache: npm
 
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check Supabase Edge Functions
+        run: |
+          deno check supabase/functions/mpesa-stk/index.ts
+          deno check supabase/functions/mpesa-status/index.ts
+          deno check supabase/functions/mpesa-reconcile/index.ts
+          deno check supabase/functions/mobiwave-send/index.ts
+          deno check supabase/functions/mobiwave-status/index.ts
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:run

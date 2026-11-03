@@ -77,8 +77,8 @@ const AccountShell = () => {
     await supabase.auth.signOut();
   };
 
-  // Member self-service is intentionally paused. Keep staff-facing congregation
-  // management available, but do not expose member profile, RSVP or giving pages.
+  // Member self-service has been removed. Church members remain administrative
+  // records managed by authorised church staff; only the two staff workspaces exist.
   if (currentUser.role === UserRole.MEMBER) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
@@ -180,7 +180,7 @@ const AccountShell = () => {
                   <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <PlatformDashboard onOpenClient={() => { if (activeChurchId) { handleSelectChurch(activeChurchId); navigate('DASHBOARD'); } else addToast('No configured client church is available.', 'error'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
                   <Route path={ROUTES.TENANTS.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <TenantRegistry onImpersonate={(id) => { handleSelectChurch(id); navigate('DASHBOARD'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
                   <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} dashboardTransactions={dashboardTransactions} lifetimeTitheTransactions={lifetimeTitheTransactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
-                  <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
+                  <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} />} />
                   <Route path={ROUTES.FINANCE.path} element={<FinanceReporting churchId={churchId || ''} transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
                   <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} onOpenCommunications={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onRSVP={handleRSVP} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />

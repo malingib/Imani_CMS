@@ -7,7 +7,7 @@ import {
   Filter, Sparkles, Loader2, UserCheck, Search as SearchIcon,
   Music, BookOpen, HeartHandshake, Globe, Zap, HelpCircle,
   User, Phone, CalendarClock, ExternalLink, Navigation, Eye,
-  Save, Heart, CalendarPlus, UserMinus, Info, ClipboardList,
+  Save, Heart, CalendarPlus, Info, ClipboardList,
   Mail
 } from 'lucide-react';
 import { ChurchEvent, Member, RecurrenceType, ChurchEventType } from '../types';

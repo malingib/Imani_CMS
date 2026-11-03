@@ -10,4 +10,4 @@ For automatic reconciliation, configure consumer key, consumer secret, Lipa na M
 
 MobiWave SMS: configure API token and sender ID. After payment confirmation and ledger insertion, a server-side Edge Function sends a transactional receipt SMS. SMS failure is recorded separately and does not reverse a confirmed payment.
 
-Deployment: apply supabase/migrations/20261103090000_finance_mpesa_workflows.sql; deploy mpesa-stk and mpesa-status; deploy frontend; test sandbox OAuth, STK, both callbacks, reconciliation, duplicate handling, ledger posting and receipt SMS. Enable production only after Daraja Go Live approval and a controlled low-value payment.
+Deployment: apply supabase/migrations/20261103092428_finance_mpesa_workflows.sql; deploy mpesa-stk and mpesa-status; deploy frontend; test sandbox OAuth, STK, both callbacks, reconciliation, duplicate handling, ledger posting and receipt SMS. Enable production only after Daraja Go Live approval and a controlled low-value payment.

@@ -18,10 +18,9 @@ interface CommunicationCenterProps {
   onSendBroadcast: (log: CommunicationLog) => Promise<void>;
   currentUser: { name: string };
   addToast?: (msg: string, type?: 'success' | 'error' | 'info') => void;
-  smsCredits?: number;
 }
 
-const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, churchId, logs, onSendBroadcast, currentUser, addToast, smsCredits }) => {
+const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, churchId, logs, onSendBroadcast, currentUser, addToast }) => {
   const [activeTab, setActiveTab] = useState<'LOGS' | 'COMPOSE' | 'AUTOMATION' | 'TEMPLATES'>('LOGS');
   const [searchTerm, setSearchTerm] = useState('');
   const [messageType, setMessageType] = useState<'SMS' | 'Email' | 'WhatsApp'>('SMS');
@@ -50,7 +49,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
       addToast?.('Enter a message before sending.', 'error');
       return;
     }
-    if (/\\{(?:name|amount|ref|location|date)\\}/i.test(content)) {
+    if (/\{(?:name|amount|ref|location|date)\}/i.test(content)) {
       addToast?.('Replace the template placeholders before sending. Personalised variable expansion is not enabled for this dispatch.', 'error');
       return;
     }
@@ -312,7 +311,7 @@ const CommunicationCenter: React.FC<CommunicationCenterProps> = ({ members, chur
           <div className="space-y-6 sm:space-y-8">
              <div className="bg-brand-primary p-5 rounded-xl sm:rounded-xl text-white shadow-sm relative overflow-hidden">
                 <div className="relative z-10 space-y-4">
-                   <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-indigo-300">Quick Tags</h4>
+                   <h4 className="text-xs sm:text-sm font-black uppercase tracking-widest text-indigo-300">Delivery reporting</h4>
                    <p className="text-xs sm:text-sm font-medium leading-relaxed">Messages are submitted securely through the church's MobiWave integration. Delivery confirmation can be checked from the History tab.</p>
                 </div>
                 <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl opacity-20"></div>

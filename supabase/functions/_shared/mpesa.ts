@@ -35,9 +35,9 @@ export async function requestTransactionStatus(admin:ReturnType<typeof createCli
    await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'rejected',reconcile_token_hash:null,result_description:message}).eq('id',intent.id);
    return {status:'verification_required',message};
   }
-  const {error}=await admin.from('mpesa_payment_intents').update({status:'reconciliation_pending',reconciliation_status:'requested',reconciliation_conversation_id:data.ConversationID||null,result_description:'Safaricom accepted the transaction-status query. Waiting for its result callback.'}).eq('id',intent.id);
+  const {error}=await admin.from('mpesa_payment_intents').update({status:'reconciliation_pending',reconciliation_status:'requested',reconciliation_conversation_id:data.ConversationID||null,result_description:'Safaricom accepted the transaction-status query. Waiting for its result callback.'}).eq('id',intent.id).eq('status','reconciliation_pending').eq('reconciliation_status','requesting');
   if(error)throw error;return {status:'reconciliation_pending',message:'Safaricom accepted the reconciliation query. Waiting for the result callback.'};
- }catch(error){await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'request_failed',reconcile_token_hash:null}).eq('id',intent.id);throw error;}
+ }catch(error){await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'request_failed',reconcile_token_hash:null}).eq('id',intent.id).eq('status','reconciliation_pending').eq('reconciliation_status','requesting');throw error;}
 }
 async function sendReceiptSms(admin:ReturnType<typeof createClient>,churchId:string,intent:Record<string,any>,receipt:string){
  const config=await loadProviderConfig(admin,'church',churchId,'mobiwave')||await loadProviderConfig(admin,'platform',null,'mobiwave');if(!config)return {status:'not_configured' as const};
@@ -45,7 +45,7 @@ async function sendReceiptSms(admin:ReturnType<typeof createClient>,churchId:str
  const name=String(intent.payer_name||'').trim(),amount=Number(intent.amount).toLocaleString('en-KE');
  const message='Imani: Thank you'+(name?', '+name:'')+'. We have received KES '+amount+' via M-Pesa. Receipt: '+receipt+'.';
  const response=await fetch('https://sms.mobiwave.co.ke/api/v3/sms/send',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({recipient:String(intent.phone_number),sender_id:sender,type:'plain',message}),signal:AbortSignal.timeout(12000)});
- const data=await response.json().catch(()=>null);if(!response.ok||data?.status==='error')return {status:'failed' as const,error:String(data?.message||'MobiWave rejected the receipt SMS.').slice(0,300)};
+ const data=await response.json().catch(()=>null);if(!response.ok||data?.status!=='success')return {status:'failed' as const,error:String(data?.message||'MobiWave rejected the receipt SMS.').slice(0,300)};
  return {status:'sent' as const,messageId:String(data?.data?.id||data?.id||data?.message_id||'')};
 }
 export async function postConfirmedPayment(admin:ReturnType<typeof createClient>,intent:Record<string,any>,receipt:string){

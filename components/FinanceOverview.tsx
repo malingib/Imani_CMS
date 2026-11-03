@@ -6,7 +6,7 @@ type Props={transactions:Transaction[];budgets:Budget[]};
 const money=(v:number)=>new Intl.NumberFormat('en-KE',{style:'currency',currency:'KES',maximumFractionDigits:0}).format(v);
 const monthKey=(v:string)=>v.slice(0,7);
 const FinanceOverview:React.FC<Props>=({transactions,budgets})=>{
- const now=new Date(),month=now.toISOString().slice(0,7),year=String(now.getFullYear());
+ const now=new Date(),month=String(now.getFullYear())+'-'+String(now.getMonth()+1).padStart(2,'0'),year=String(now.getFullYear());
  const totals=useMemo(()=>{
   const income=transactions.filter(t=>t.category==='Income').reduce((s,t)=>s+Number(t.amount||0),0);
   const expenses=transactions.filter(t=>t.category==='Expense').reduce((s,t)=>s+Number(t.amount||0),0);

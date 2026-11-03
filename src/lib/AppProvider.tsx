@@ -77,7 +77,7 @@ export function useApp() {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const { user: supabaseUser, isAuthenticated, isLoading: authLoading } = useSession();
-  const { activeChurchId, setActiveChurchId, fetchChurches } = useChurch();
+  const { activeChurchId, setActiveChurchId, fetchChurches, churches } = useChurch();
 
   const [state, setState] = useState<AppState>({
     loading: 'auth-loading',
@@ -99,9 +99,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     viewingChurch: false,
   });
 
-  const churchId = activeChurchId ?? state.currentUser?.churchId ?? null;
-  // Superadmins remain in platform mode until they explicitly open the configured church workspace.
   const isPlatformSession = state.currentUser?.role === UserRole.SUPER_ADMIN && !state.viewingChurch;
+  const churchId = isPlatformSession ? null : activeChurchId ?? state.currentUser?.churchId ?? null;
 
   const addToast = useCallback((message: string, type: Toast['type'] = 'success') => {
     const id = crypto.randomUUID();
@@ -168,7 +167,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             : !!(activeChurchId ?? nextUser.churchId),
         };
       });
-      if (!activeChurchId && nextUser.churchId) {
+      if (nextUser.role !== UserRole.SUPER_ADMIN && !activeChurchId && nextUser.churchId) {
         setActiveChurchId(nextUser.churchId);
       }
     } else if (!isAuthenticated) {
@@ -351,24 +350,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     handleSelectChurch: (id) => {
       const actor = state.currentUser;
       if (actor?.role !== UserRole.SUPER_ADMIN) {
-        addToast('Only a superadmin can open the client workspace.', 'error');
+        addToast('Only a platform owner can open a client workspace.', 'error');
         return;
       }
-      // This deployment is single-church. Validate against the configured tenant,
-      // not activeChurchId: auth/context refresh can temporarily leave activeChurchId
-      // null even though the configured Demo Church is valid.
-      const configuredChurchId =
-        (import.meta.env.VITE_CHURCH_ID as string | undefined)?.trim() ||
-        '00000000-0000-0000-0000-000000000001';
-      if (id && id !== configuredChurchId) {
-        addToast('This deployment is restricted to the configured Demo Church.', 'error');
+      const selectedChurch = id
+        ? churches.find(church => church.id === id && church.status !== 'archived')
+        : null;
+      if (id && !selectedChurch) {
+        addToast('Select an available client from the tenant registry.', 'error');
         return;
       }
-      if (id) {
-        // Load the selected church explicitly instead of relying only on the
-        // mode-change effect. This prevents the workspace shell from rendering
-        // with the platform session's empty data arrays while the effect races
-        // the auth/church-context refresh.
+      if (id && selectedChurch) {
         setActiveChurchId(id);
         setState(prev => ({
           ...prev,
@@ -379,6 +371,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           members: [],
           transactions: [],
           dashboardTransactions: [],
+          lifetimeTitheTransactions: [],
           events: [],
           budgets: [],
           recurringExpenses: [],
@@ -387,7 +380,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           auditLogs: [],
           notifications: [],
         }));
-        addToast('Loading Demo Church workspace…');
+        addToast(`Loading ${selectedChurch.name} workspace…`);
         const dateKey = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         const today = new Date();
         const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
@@ -395,10 +388,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         void Promise.all([
           appDataService.loadChurchAppData(id),
           appDataService.loadDashboardTransactions(id, dateKey(start), dateKey(end)),
+          appDataService.loadLifetimeTitheTransactions(id),
         ])
-          .then(([data, dashboardTransactions]) => {
+          .then(([data, dashboardTransactions, lifetimeTitheTransactions]) => {
             setState(prev => prev.currentUser?.role === UserRole.SUPER_ADMIN && prev.viewingChurch
-              ? { ...prev, ...data, dashboardTransactions, loading: 'ready', dataError: null }
+              ? { ...prev, ...data, dashboardTransactions, lifetimeTitheTransactions, loading: 'ready', dataError: null }
               : prev);
           })
           .catch(error => {
@@ -411,8 +405,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
           });
         void writeAudit(actor, `Opened client workspace ${id}`, 'PLATFORM_DASHBOARD', 'WARN', id);
       } else {
-        setState(prev => ({ ...prev, viewingPlatform: true, viewingChurch: false, loading: 'ready', dataError: null }));
-        addToast('Returned to superadmin dashboard');
+        setActiveChurchId(null);
+        setState(prev => ({
+          ...prev,
+          viewingPlatform: true,
+          viewingChurch: false,
+          loading: 'ready',
+          dataError: null,
+          members: [],
+          transactions: [],
+          dashboardTransactions: [],
+          lifetimeTitheTransactions: [],
+          events: [],
+          budgets: [],
+          recurringExpenses: [],
+          communications: [],
+          groups: [],
+          auditLogs: [],
+          notifications: [],
+        }));
+        addToast('Returned to platform owner dashboard');
       }
     },
     requireChurchId,

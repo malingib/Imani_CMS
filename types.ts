@@ -223,6 +223,9 @@ export interface CommunicationLog {
     delivered: number;
     opened: number;
     failed: number;
+    providerMessageId?: string;
+    providerStatus?: string;
+    deliveredAt?: string;
   };
 }
 

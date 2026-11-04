@@ -103,6 +103,25 @@ describe("platform services", () => {
     ]);
   });
 
+  it("sets tenant status explicitly instead of toggling trialing workspaces to active", async () => {
+    const writes: unknown[] = [];
+    const client = {
+      from(table: string) {
+        if (table !== "churches") throw new Error(`unexpected table ${table}`);
+        return {
+          update(payload: unknown) {
+            writes.push(payload);
+            return { eq: async (_column: string, _value: string) => ({ error: null }) };
+          },
+        };
+      },
+    };
+    const service = createTenantsService(client);
+    await service.updateChurchStatus({ id: "church-trial" }, "suspended");
+    await service.updateChurchStatus({ id: "church-suspended" }, "active");
+    expect(writes).toEqual([{ status: "suspended" }, { status: "active" }]);
+  });
+
   it("creates a church with subscription and optional invitation", async () => {
     const inserted: Record<string, any[]> = { churches: [], subscriptions: [], invitations: [] };
     const client = {

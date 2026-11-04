@@ -167,10 +167,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...prev,
           currentUser: nextUser,
           viewingPlatform: nextUser.role === UserRole.SUPER_ADMIN
-            ? (isNewSession ? true : prev.viewingPlatform)
+            ? (isNewSession || !activeChurchId)
             : false,
           viewingChurch: nextUser.role === UserRole.SUPER_ADMIN
-            ? (isNewSession ? false : prev.viewingChurch)
+            ? (!isNewSession && !!activeChurchId)
             : !!(activeChurchId ?? nextUser.churchId),
         };
       });

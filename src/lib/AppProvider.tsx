@@ -375,7 +375,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
       const selectedChurch = id
-        ? churches.find(church => church.id === id && church.status !== 'archived')
+        ? churches.find(church => church.id === id && ['active', 'trialing', 'onboarding'].includes(church.status))
         : null;
       if (id && !selectedChurch) {
         addToast('Select an available client from the tenant registry.', 'error');

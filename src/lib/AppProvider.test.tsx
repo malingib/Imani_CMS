@@ -60,6 +60,7 @@ vi.mock("./persistence", () => ({
 vi.mock("./app-data", () => ({
   createChurchAppDataService: vi.fn(() => ({
     loadChurchAppData: (...args: any[]) => mockLoadChurchData(...args),
+    loadAllTransactions: vi.fn().mockResolvedValue([]),
     loadDashboardTransactions: vi.fn().mockResolvedValue([]),
     loadLifetimeTitheTransactions: vi.fn().mockResolvedValue([]),
     createAuditLog: (...args: any[]) => mockCreateAuditLog(...args),

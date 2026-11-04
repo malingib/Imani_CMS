@@ -181,6 +181,30 @@ describe("createChurchAppDataService", () => {
     expect(calls).toContain("budgets.order:created_at:desc");
   });
 
+  it("loads the complete transaction ledger in ordered pages", async () => {
+    const calls: string[] = [];
+    const rowsByTable: Record<string, unknown[]> = {
+      transactions: [{
+        id: "ledger-1", member_name: "Ada Lovelace", amount: 500, type: "Tithe",
+        payment_method: "M-Pesa", date: "2026-11-03", reference: "LEDGER-1",
+        category: "Income", source: "MANUAL",
+      }],
+    };
+    const service = createChurchAppDataService({
+      from(table: string) { return createQuery(rowsByTable[table] ?? [], table, calls); },
+      rpc() { return { then() { return Promise.resolve({ data: null, error: null }); } }; },
+    });
+
+    const result = await service.loadAllTransactions("church-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("ledger-1");
+    expect(calls).toContain("transactions.eq:church_id:church-1");
+    expect(calls).toContain("transactions.order:date:desc");
+    expect(calls).toContain("transactions.order:created_at:desc");
+    expect(calls).toContain("transactions.range:0:999");
+  });
+
   it("loads all dashboard transactions within the date window, scoped to the church", async () => {
     const calls: string[] = [];
     const rowsByTable: Record<string, unknown[]> = { transactions: [{

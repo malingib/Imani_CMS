@@ -21,7 +21,7 @@ const church = (id: string, name: string, status = 'active') => ({
 });
 
 function ChurchConsumer() {
-  const { activeChurchId, activeChurch, churches, configurationError, setActiveChurchId } = useChurch();
+  const { activeChurchId, activeChurch, churches, configurationError, setActiveChurchId, fetchChurches } = useChurch();
   return (
     <div>
       <span data-testid="church-id">{activeChurchId || 'none'}</span>
@@ -31,6 +31,7 @@ function ChurchConsumer() {
       <button onClick={() => setActiveChurchId('church-b')}>select-client</button>
       <button onClick={() => setActiveChurchId('church-suspended')}>select-suspended</button>
       <button onClick={() => setActiveChurchId(null)}>return-platform</button>
+      <button onClick={() => void fetchChurches()}>refresh-workspaces</button>
     </div>
   );
 }
@@ -147,16 +148,14 @@ describe('ChurchProvider multi-tenant workspace resolution', () => {
       data: { user: { id: 'owner-1', app_metadata: { role: 'SUPER_ADMIN' } } },
       error: null,
     });
+    const clientRows = [
+      church('church-a', 'Alpha Church'),
+      church('church-b', 'Beta Church', 'trialing'),
+      church('church-suspended', 'Suspended Church', 'suspended'),
+    ];
     mockFrom.mockImplementation((table: string) => queryBuilder({
       churches: {
-        list: {
-          data: [
-            church('church-a', 'Alpha Church'),
-            church('church-b', 'Beta Church', 'trialing'),
-            church('church-suspended', 'Suspended Church', 'suspended'),
-          ],
-          error: null,
-        },
+        list: { data: clientRows, error: null },
       },
     }, table));
 
@@ -170,7 +169,8 @@ describe('ChurchProvider multi-tenant workspace resolution', () => {
       expect(screen.getByTestId('church-id').textContent).toBe('church-b');
       expect(screen.getByTestId('church-name').textContent).toBe('Beta Church');
     });
-    fireEvent.click(screen.getByText('return-platform'));
+    clientRows[1].status = 'suspended';
+    fireEvent.click(screen.getByText('refresh-workspaces'));
     await waitFor(() => {
       expect(screen.getByTestId('church-id').textContent).toBe('none');
       expect(screen.getByTestId('church-name').textContent).toBe('none');

@@ -29,6 +29,7 @@ function ChurchConsumer() {
       <span data-testid="church-count">{churches.length}</span>
       <span data-testid="configuration-error">{configurationError || 'none'}</span>
       <button onClick={() => setActiveChurchId('church-b')}>select-client</button>
+      <button onClick={() => setActiveChurchId('church-suspended')}>select-suspended</button>
       <button onClick={() => setActiveChurchId(null)}>return-platform</button>
     </div>
   );
@@ -149,7 +150,11 @@ describe('ChurchProvider multi-tenant workspace resolution', () => {
     mockFrom.mockImplementation((table: string) => queryBuilder({
       churches: {
         list: {
-          data: [church('church-a', 'Alpha Church'), church('church-b', 'Beta Church', 'trialing')],
+          data: [
+            church('church-a', 'Alpha Church'),
+            church('church-b', 'Beta Church', 'trialing'),
+            church('church-suspended', 'Suspended Church', 'suspended'),
+          ],
           error: null,
         },
       },
@@ -157,7 +162,9 @@ describe('ChurchProvider multi-tenant workspace resolution', () => {
 
     render(<ChurchProvider churchId={null}><ChurchConsumer /></ChurchProvider>);
 
-    await waitFor(() => expect(screen.getByTestId('church-count').textContent).toBe('2'));
+    await waitFor(() => expect(screen.getByTestId('church-count').textContent).toBe('3'));
+    fireEvent.click(screen.getByText('select-suspended'));
+    expect(screen.getByTestId('church-id').textContent).toBe('none');
     fireEvent.click(screen.getByText('select-client'));
     await waitFor(() => {
       expect(screen.getByTestId('church-id').textContent).toBe('church-b');

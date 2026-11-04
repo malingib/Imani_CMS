@@ -98,16 +98,47 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
     return Object.entries(groups).map(([label, val]) => ({ label, pct: val / total, amount: val }));
   }, [transactions]);
 
-  const handleSetBudgetAction = () => {
-    onSetBudget({ ...budgetForm, id: budgetForm.id || `budget-${crypto.randomUUID()}` });
-    setShowBudgetModal(false);
-    setBudgetForm({ id: '', category: '', amount: 0, spent: 0, month: new Date().toISOString().slice(0, 7) });
+  const handleSetBudgetAction = async () => {
+    setSaveError('');
+    const monthIsValid = /^\\d{4}-(0[1-9]|1[0-2])$/.test(budgetForm.month);
+    if (!budgetForm.category.trim() || !Number.isFinite(budgetForm.amount) || budgetForm.amount <= 0
+      || !Number.isFinite(budgetForm.spent) || budgetForm.spent < 0 || !monthIsValid) {
+      setSaveError('Enter a category, a positive budget, a valid spent amount and a month in YYYY-MM format.');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await onSetBudget({ ...budgetForm, category: budgetForm.category.trim(), id: budgetForm.id || `budget-${crypto.randomUUID()}` });
+      setShowBudgetModal(false);
+      setBudgetForm({ id: '', category: '', amount: 0, spent: 0, month: new Date().toISOString().slice(0, 7) });
+    } catch (error) {
+      console.error('Unable to save budget:', error);
+      setSaveError('Budget was not saved. Your entries have been kept. Check your connection and permissions, then try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const handleAddRecurringAction = () => {
-    onAddRecurring({ ...recurringForm, id: recurringForm.id || `recur-${crypto.randomUUID()}` });
-    setShowRecurringModal(false);
-    setRecurringForm({ id: '', category: '', amount: 0, frequency: 'Monthly', nextDate: new Date().toISOString().split('T')[0] });
+  const handleAddRecurringAction = async () => {
+    setSaveError('');
+    if (!recurringForm.category.trim() || !Number.isFinite(recurringForm.amount) || recurringForm.amount <= 0
+      || !recurringForm.nextDate) {
+      setSaveError('Enter a category, a positive amount and a valid next due date.');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      await onAddRecurring({ ...recurringForm, category: recurringForm.category.trim(), id: recurringForm.id || `recur-${crypto.randomUUID()}` });
+      setShowRecurringModal(false);
+      setRecurringForm({ id: '', category: '', amount: 0, frequency: 'Monthly', nextDate: new Date().toISOString().split('T')[0] });
+    } catch (error) {
+      console.error('Unable to save recurring expense:', error);
+      setSaveError('Recurring expense was not saved. Your entries have been kept. Check your connection and permissions, then try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleExportCSV = () => {
@@ -601,9 +632,10 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                   value={budgetForm.month} onChange={e => setBudgetForm({...budgetForm, month: e.target.value})} placeholder="2026-07" />
               </div>
             </div>
+            {saveError && <p role="alert" className="text-sm text-rose-700">{saveError}</p>}
             <div className="flex gap-4">
-              <button onClick={() => setShowBudgetModal(false)} className="flex-1 py-4 font-black text-slate-400 hover:bg-slate-50 rounded-2xl uppercase text-xs">Cancel</button>
-              <button onClick={handleSetBudgetAction} className="flex-[2] py-4 bg-brand-primary text-white rounded-2xl font-black uppercase text-xs shadow-xl hover:bg-brand-indigo transition-all">Save Budget</button>
+              <button onClick={() => { setSaveError(''); setShowBudgetModal(false); }} disabled={isProcessing} className="flex-1 py-4 font-black text-slate-400 hover:bg-slate-50 rounded-2xl uppercase text-xs disabled:opacity-50">Cancel</button>
+              <button onClick={handleSetBudgetAction} disabled={isProcessing} className="flex-[2] py-4 bg-brand-primary text-white rounded-2xl font-black uppercase text-xs shadow-xl hover:bg-brand-indigo transition-all disabled:cursor-wait disabled:opacity-60">{isProcessing ? 'Saving…' : 'Save Budget'}</button>
             </div>
           </div>
         </div>
@@ -641,9 +673,10 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                   value={recurringForm.nextDate} onChange={e => setRecurringForm({...recurringForm, nextDate: e.target.value})} />
               </div>
             </div>
+            {saveError && <p role="alert" className="text-sm text-rose-700">{saveError}</p>}
             <div className="flex gap-4">
-              <button onClick={() => setShowRecurringModal(false)} className="flex-1 py-4 font-black text-slate-400 hover:bg-slate-50 rounded-2xl uppercase text-xs">Cancel</button>
-              <button onClick={handleAddRecurringAction} className="flex-[2] py-4 bg-brand-primary text-white rounded-2xl font-black uppercase text-xs shadow-xl hover:bg-brand-indigo transition-all">Save Recurring</button>
+              <button onClick={() => { setSaveError(''); setShowRecurringModal(false); }} disabled={isProcessing} className="flex-1 py-4 font-black text-slate-400 hover:bg-slate-50 rounded-2xl uppercase text-xs disabled:opacity-50">Cancel</button>
+              <button onClick={handleAddRecurringAction} disabled={isProcessing} className="flex-[2] py-4 bg-brand-primary text-white rounded-2xl font-black uppercase text-xs shadow-xl hover:bg-brand-indigo transition-all disabled:cursor-wait disabled:opacity-60">{isProcessing ? 'Saving…' : 'Save Recurring'}</button>
             </div>
           </div>
         </div>

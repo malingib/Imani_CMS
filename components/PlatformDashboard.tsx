@@ -69,7 +69,7 @@ const PlatformDashboard: React.FC<{ onOpenClient?: () => void }> = ({ onOpenClie
           <div className="max-w-2xl">
             <p className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-teal-200"><span className="h-2 w-2 rounded-full bg-teal-300" /> Platform control centre</p>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Platform overview</h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">A live view of your church workspaces, platform activity and recorded income.</p>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300">Manage client workspaces, monitor platform health and review recorded income from one control centre.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <button type="button" onClick={() => navigate('/tenants')} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-white/20 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"><Building2 size={16} />Manage workspaces</button>

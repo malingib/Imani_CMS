@@ -157,7 +157,7 @@ export function ChurchProvider({ children }: { children: ReactNode; churchId: st
         setResolvedChurchId(null);
         return;
       }
-      if (churches.some(church => church.id === id && church.status !== 'archived')) {
+      if (churches.some(church => church.id === id && ['active', 'trialing', 'onboarding'].includes(church.status))) {
         setResolvedChurchId(id);
       }
       return;

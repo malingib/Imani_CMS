@@ -13,20 +13,29 @@ type SupabaseLikeClient = { from(table: string): any };
 export function createPlatformDashboardService(client: SupabaseLikeClient) {
   return {
     async getStats(): Promise<PlatformDashboardStats> {
-      const [churchesResult, activeChurchesResult, membersResult, transactionsResult] = await Promise.all([
-        client.from('churches').select('*', { count: 'exact', head: true }),
+      const [churchesResult, activeChurchesResult, membersResult] = await Promise.all([
+        client.from('churches').select('*', { count: 'exact', head: true }).neq('status', 'archived'),
         client.from('churches').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         client.from('members').select('*', { count: 'exact', head: true }),
-        client.from('transactions').select('amount, category').eq('category', 'Income'),
       ]);
-      const failed = [churchesResult, activeChurchesResult, membersResult, transactionsResult].find(result => result.error);
+      const failed = [churchesResult, activeChurchesResult, membersResult].find(result => result.error);
       if (failed?.error) throw new Error(failed.error.message || 'Unable to load platform statistics');
 
       const churches = churchesResult.count;
       const activeChurches = activeChurchesResult.count;
       const members = membersResult.count;
-      const transactions = transactionsResult.data;
-      const totalRevenue = (transactions || []).reduce((sum: number, transaction: { amount: number | string }) => sum + Number(transaction.amount), 0);
+      const transactions: { amount: number | string }[] = [];
+      for (let start = 0; ; start += 1000) {
+        const { data, error } = await client.from('transactions')
+          .select('amount, category')
+          .eq('category', 'Income')
+          .range(start, start + 999);
+        if (error) throw new Error(error.message || 'Unable to load platform income');
+        const page = (data || []) as { amount: number | string }[];
+        transactions.push(...page);
+        if (page.length < 1000) break;
+      }
+      const totalRevenue = transactions.reduce((sum, transaction) => sum + Number(transaction.amount), 0);
 
       return {
         totalChurches: churches || 0,

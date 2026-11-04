@@ -14,6 +14,13 @@ import { createToastRecord } from './view-routing';
 const appDataService = createChurchAppDataService(supabase);
 const persistence = createPersistenceService(supabase);
 
+const isTitheIncome = (transaction: Transaction) =>
+  transaction.type === 'Tithe' && transaction.category === 'Income';
+
+const updateTitheCache = (current: Transaction[], transaction: Transaction) =>
+  [...current.filter(item => item.id !== transaction.id), ...(isTitheIncome(transaction) ? [transaction] : [])]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 type LoadingState = 'idle' | 'auth-loading' | 'data-loading' | 'ready' | 'error';
 
 interface AppState {
@@ -192,14 +199,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     Promise.all([
       appDataService.loadChurchAppData(churchId),
+      appDataService.loadAllTransactions(churchId),
       appDataService.loadDashboardTransactions(churchId, dateKey(start), dateKey(end)),
       appDataService.loadLifetimeTitheTransactions(churchId),
     ])
-      .then(([data, dashboardTransactions, lifetimeTitheTransactions]) => {
+      .then(([data, transactions, dashboardTransactions, lifetimeTitheTransactions]) => {
         if (!controller.signal.aborted) {
           setState(prev => ({
             ...prev,
             ...data,
+            transactions,
             dashboardTransactions,
             lifetimeTitheTransactions,
             loading: 'ready',
@@ -280,19 +289,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     handleAddTransaction: async (t) => {
       const saved = await persistence.createTransaction(t, requireChurchId());
-      setState(prev => ({ ...prev, transactions: [saved, ...prev.transactions] }));
+      setState(prev => ({
+        ...prev,
+        transactions: [saved, ...prev.transactions.filter(item => item.id !== saved.id)],
+        lifetimeTitheTransactions: updateTitheCache(prev.lifetimeTitheTransactions, saved),
+      }));
       addToast('Transaction added');
       createAudit(`Added ${t.type}`, 'FINANCE');
     },
     handleUpdateTransaction: async (t) => {
       const saved = await persistence.updateTransaction(t, requireChurchId());
-      setState(prev => ({ ...prev, transactions: prev.transactions.map(x => x.id === saved.id ? saved : x) }));
+      setState(prev => ({
+        ...prev,
+        transactions: prev.transactions.map(x => x.id === saved.id ? saved : x),
+        lifetimeTitheTransactions: updateTitheCache(prev.lifetimeTitheTransactions, saved),
+      }));
       addToast('Transaction updated');
       createAudit(`Updated ${t.type}`, 'FINANCE');
     },
     handleDeleteTransaction: async (id) => {
       await persistence.deleteTransaction(id, requireChurchId());
-      setState(prev => ({ ...prev, transactions: prev.transactions.filter(t => t.id !== id) }));
+      setState(prev => ({
+        ...prev,
+        transactions: prev.transactions.filter(t => t.id !== id),
+        lifetimeTitheTransactions: prev.lifetimeTitheTransactions.filter(t => t.id !== id),
+      }));
       addToast('Transaction removed');
       createAudit('Deleted transaction', 'FINANCE');
     },
@@ -387,12 +408,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         void Promise.all([
           appDataService.loadChurchAppData(id),
+          appDataService.loadAllTransactions(id),
           appDataService.loadDashboardTransactions(id, dateKey(start), dateKey(end)),
           appDataService.loadLifetimeTitheTransactions(id),
         ])
-          .then(([data, dashboardTransactions, lifetimeTitheTransactions]) => {
+          .then(([data, transactions, dashboardTransactions, lifetimeTitheTransactions]) => {
             setState(prev => prev.currentUser?.role === UserRole.SUPER_ADMIN && prev.viewingChurch
-              ? { ...prev, ...data, dashboardTransactions, lifetimeTitheTransactions, loading: 'ready', dataError: null }
+              ? { ...prev, ...data, transactions, dashboardTransactions, lifetimeTitheTransactions, loading: 'ready', dataError: null }
               : prev);
           })
           .catch(error => {
@@ -436,11 +458,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const today = new Date();
       const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
       const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const [data, dashboardTransactions] = await Promise.all([
+      const [data, transactions, dashboardTransactions, lifetimeTitheTransactions] = await Promise.all([
         appDataService.loadChurchAppData(scopedChurchId),
+        appDataService.loadAllTransactions(scopedChurchId),
         appDataService.loadDashboardTransactions(scopedChurchId, dateKey(start), dateKey(end)),
+        appDataService.loadLifetimeTitheTransactions(scopedChurchId),
       ]);
-      setState(prev => ({ ...prev, ...data, dashboardTransactions, loading: 'ready' }));
+      setState(prev => ({ ...prev, ...data, transactions, dashboardTransactions, lifetimeTitheTransactions, loading: 'ready', dataError: null }));
     },
   };
 

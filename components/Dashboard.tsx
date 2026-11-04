@@ -75,9 +75,10 @@ const Dashboard: React.FC<DashboardProps> = ({
     });
   }, [lifetimeTitheTransactions]);
 
-  const recentActivity = useMemo(() => [...transactions]
+  const recentActivity = useMemo(() => [...lifetimeTitheTransactions]
+    .filter(transaction => transaction.type === 'Tithe' && transaction.category === 'Income')
     .sort((a, b) => (validDate(b.date)?.getTime() || 0) - (validDate(a.date)?.getTime() || 0))
-    .slice(0, 6), [transactions]);
+    .slice(0, 5), [lifetimeTitheTransactions]);
 
   const upcomingEvents = useMemo(() => [...events]
     .filter(event => {
@@ -178,8 +179,8 @@ const Dashboard: React.FC<DashboardProps> = ({
 
         <section className="min-w-0 rounded-xl border border-slate-200 bg-white p-5 xl:col-span-2" aria-labelledby="recent-activity-heading">
           <div className="mb-4 flex items-start justify-between gap-3">
-            <div><h2 id="recent-activity-heading" className="text-base font-semibold text-slate-900">Recent financial activity</h2><p className="mt-1 text-sm text-slate-500">Latest recorded transactions</p></div>
-            <button onClick={() => onNavigate('FINANCE')} aria-label="Open finance" className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-brand-primary"><ArrowUpRight size={18} /></button>
+            <div><h2 id="recent-activity-heading" className="text-base font-semibold text-slate-900">Recent tithe records</h2><p className="mt-1 text-sm text-slate-500">The five latest recorded tithe payments</p></div>
+            <button onClick={() => onNavigate('FINANCE')} aria-label="View finance" className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-brand-primary"><ArrowUpRight size={18} /></button>
           </div>
           {recentActivity.length ? <ul className="divide-y divide-slate-100">
             {recentActivity.map(transaction => (
@@ -189,7 +190,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <div className="shrink-0 text-right"><p className="text-sm font-semibold tabular-nums text-slate-900">{currency(transaction.amount)}</p><p className={transaction.category === 'Income' ? 'mt-1 text-xs font-medium text-emerald-700' : 'mt-1 text-xs font-medium text-rose-700'}>{transaction.category}</p></div>
               </li>
             ))}
-          </ul> : <div className="flex min-h-40 flex-col items-center justify-center text-center"><Clock3 size={22} className="text-slate-400" /><p className="mt-3 text-sm font-medium text-slate-700">No activity yet</p><p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">Recorded income and expenses will appear here.</p></div>}
+          </ul> : <div className="flex min-h-40 flex-col items-center justify-center text-center"><Clock3 size={22} className="text-slate-400" /><p className="mt-3 text-sm font-medium text-slate-700">No tithe records yet</p><p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">Recorded tithe payments will appear here.</p></div>}
           <button onClick={() => onNavigate('FINANCE')} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Open finance <ChevronRight size={15} /></button>
         </section>
       </div>

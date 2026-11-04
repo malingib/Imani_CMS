@@ -83,20 +83,20 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
   };
 
   const handleToggleStatus = async (church: ChurchRecord) => {
-    if (church.status === 'suspended' || church.status === 'active') {
-      await tenantsService.toggleChurchStatus(church);
-      fetchChurches();
-    } else {
-      setSuspensionConfirm(church);
+    if (church.status === 'suspended') {
+      await tenantsService.updateChurchStatus(church, 'active');
+      await fetchChurches();
+      return;
     }
+    setSuspensionConfirm(church);
   };
 
   const handleConfirmSuspend = async () => {
     if (!suspensionConfirm) return;
     setIsSuspending(true);
     try {
-      await tenantsService.toggleChurchStatus(suspensionConfirm);
-      fetchChurches();
+      await tenantsService.updateChurchStatus(suspensionConfirm, 'suspended');
+      await fetchChurches();
     } finally {
       setIsSuspending(false);
       setSuspensionConfirm(null);
@@ -280,8 +280,10 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
                            ) : null}
                            <button
                             onClick={() => onImpersonate(c.id)}
-                            className="p-3 bg-white border border-slate-100 text-slate-400 rounded-xl hover:bg-brand-primary hover:text-white transition-all shadow-sm"
-                            title="Open client workspace as superadmin" aria-label="Open client workspace as superadmin"
+                            disabled={c.status === 'suspended'}
+                            className="p-3 bg-white border border-slate-100 text-slate-400 rounded-xl hover:bg-brand-primary hover:text-white transition-all shadow-sm disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-400"
+                            title={c.status === 'suspended' ? 'Suspended workspaces cannot be opened' : 'Open client workspace as superadmin'}
+                            aria-label={c.status === 'suspended' ? 'Suspended workspace unavailable' : 'Open client workspace as superadmin'}
                            >
                               <ExternalLink size={16}/>
                            </button>

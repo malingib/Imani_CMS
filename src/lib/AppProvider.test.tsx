@@ -270,6 +270,61 @@ describe("AppProvider", () => {
   });
 
 
+  it("keeps dashboard tithe records in sync with finance transaction mutations", async () => {
+    mockUseSession.mockReturnValue({ user: fakeUser, isAuthenticated: true, isLoading: false });
+    mockUseChurch.mockReturnValue({ activeChurchId: "c-1", setActiveChurchId: vi.fn(), churches: [], fetchChurches: vi.fn() });
+    mockLoadChurchData.mockResolvedValue({
+      members: [], transactions: [], events: [], budgets: [],
+      recurringExpenses: [], communications: [], notifications: [],
+      auditLogs: [], groups: [], sermons: [],
+      totalMembers: 0, totalTransactions: 0, totalEvents: 0,
+      totalBudgets: 0, totalRecurringExpenses: 0, totalAuditLogs: 0,
+    });
+    mockCreateAuditLog.mockResolvedValue({});
+    const tithe = {
+      id: "t-1", memberName: "Jane Doe", amount: 500, type: "Tithe",
+      paymentMethod: "Cash", date: "2026-11-04", reference: "T-1",
+      category: "Income", source: "MANUAL",
+    } as any;
+    mockPersistence.createTransaction.mockResolvedValue(tithe);
+    mockPersistence.updateTransaction.mockResolvedValue({ ...tithe, type: "Offering" });
+    mockPersistence.deleteTransaction.mockResolvedValue(undefined);
+
+    function FinanceMutationTest() {
+      const { handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, transactions, lifetimeTitheTransactions } = useApp();
+      return (
+        <div>
+          <span data-testid="ledger-count">{transactions.length}</span>
+          <span data-testid="tithe-count">{lifetimeTitheTransactions.length}</span>
+          <button onClick={() => handleAddTransaction(tithe)}>Add tithe</button>
+          <button onClick={() => handleUpdateTransaction({ ...tithe, type: "Offering" })}>Edit as offering</button>
+          <button onClick={() => handleDeleteTransaction("t-1")}>Delete transaction</button>
+        </div>
+      );
+    }
+
+    render(<AppProvider><FinanceMutationTest /></AppProvider>);
+
+    await waitFor(() => expect(screen.getByTestId("ledger-count").textContent).toBe("0"));
+    await act(async () => screen.getByText("Add tithe").click());
+    await waitFor(() => {
+      expect(screen.getByTestId("ledger-count").textContent).toBe("1");
+      expect(screen.getByTestId("tithe-count").textContent).toBe("1");
+    });
+
+    await act(async () => screen.getByText("Edit as offering").click());
+    await waitFor(() => {
+      expect(screen.getByTestId("ledger-count").textContent).toBe("1");
+      expect(screen.getByTestId("tithe-count").textContent).toBe("0");
+    });
+
+    await act(async () => screen.getByText("Delete transaction").click());
+    await waitFor(() => {
+      expect(screen.getByTestId("ledger-count").textContent).toBe("0");
+      expect(screen.getByTestId("tithe-count").textContent).toBe("0");
+    });
+  });
+
   it("reaches ready when auth finishes loading with no user", async () => {
     mockUseSession.mockReturnValue({ user: null, isAuthenticated: false, isLoading: false });
     mockUseChurch.mockReturnValue({ activeChurchId: null, setActiveChurchId: vi.fn(), churches: [], fetchChurches: vi.fn() });

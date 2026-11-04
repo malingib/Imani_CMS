@@ -90,7 +90,9 @@ export function ChurchProvider({ children }: { children: ReactNode; churchId: st
       const available = ((data || []) as Church[]).filter(church => church.status !== 'archived');
       setChurches(available);
       setAssignedChurchId(null);
-      setResolvedChurchId(previous => previous && available.some(church => church.id === previous) ? previous : null);
+      setResolvedChurchId(previous => previous && available.some(church =>
+        church.id === previous && ['active', 'trialing', 'onboarding'].includes(church.status)
+      ) ? previous : null);
       setConfigurationError(null);
       return;
     }

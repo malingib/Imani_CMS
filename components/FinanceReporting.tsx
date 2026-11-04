@@ -174,11 +174,11 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
   };
 
   return (
-    <div className="imani-page imani-page--finance space-y-6 sm:space-y-8 animate-in fade-in duration-500 pb-12">
+    <div className="imani-page imani-page--finance space-y-6 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight text-brand-primary uppercase leading-tight">Finance Management</h2>
-          <p className="text-slate-500 mt-2 text-base sm:text-lg">Full-cycle financial control: M-Pesa, Cash, and Expenses.</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Finance</h2>
+          <p className="mt-1 text-sm text-slate-500">Income, expenses, giving and payment reconciliation.</p>
         </div>
         <div className="flex flex-wrap gap-3">
           {[UserRole.ADMIN, UserRole.TREASURER, UserRole.SUPER_ADMIN].includes(currentUserRole) && <MpesaPaymentDialog churchId={churchId} />}
@@ -186,13 +186,13 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
             <>
               <button 
                 onClick={() => handleOpenForm('NEW_EXPENSE')}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-4 bg-white text-brand-gold border border-brand-gold/20 rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-brand-gold/5 transition-all shadow-sm"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
               >
                 <TrendingDown size={18} /> Record Expense
               </button>
               <button 
                 onClick={() => handleOpenForm('NEW_INCOME')}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-[1.25rem] font-black text-xs uppercase tracking-widest hover:bg-brand-primary-700 transition-all shadow-sm shadow-brand-primary/20"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-800"
               >
                 <Plus size={18} /> Record Income
               </button>
@@ -203,9 +203,9 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
 
       <FinanceOverview transactions={transactions} budgets={budgets} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-        <div className="lg:col-span-8 space-y-8">
-          <div className="flex flex-col gap-3 border-y border-slate-200 bg-white py-4 sm:flex-row sm:items-center sm:gap-4">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <div className="space-y-5 lg:col-span-8">
+          <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 sm:flex-row sm:items-center sm:gap-3">
             <div className="relative flex-1 w-full">
               <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
@@ -230,7 +230,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
             </div>
           </div>
 
-          <div className="min-h-[420px] overflow-hidden border-y border-slate-200 bg-white">
+          <div className="min-h-[360px] overflow-hidden rounded-xl border border-slate-200 bg-white">
              <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 sm:px-5">
                 <div><h3 className="text-sm font-semibold text-slate-900">Transactions</h3><p className="mt-0.5 text-xs text-slate-500">Search, review and manage recorded income and expenses.</p></div>
                 <p className="whitespace-nowrap text-xs tabular-nums text-slate-500">{filtered.length ? (currentPage - 1) * pageSize + 1 : 0}–{Math.min(currentPage * pageSize, filtered.length)} of {filtered.length}</p>
@@ -241,12 +241,12 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                   <table className="w-full min-w-[760px] text-left">
                      <thead className="border-b border-slate-200 bg-slate-50/70 text-xs font-medium text-slate-500">
                         <tr>
-                           <th className="px-4 py-3 sm:px-5">Transaction Meta</th>
-                           <th className="px-10 py-6">Payer / Recipient</th>
-                           <th className="px-10 py-6">Category</th>
-                           <th className="px-10 py-6">Source</th>
-                           <th className="px-4 py-3 text-right sm:px-5">Settled (KES)</th>
-                           <th className="px-10 py-6"></th>
+                           <th className="px-4 py-3 sm:px-5">Date & reference</th>
+                           <th className="px-4 py-3">Payer / recipient</th>
+                           <th className="px-4 py-3">Category</th>
+                           <th className="px-4 py-3">Source</th>
+                           <th className="px-4 py-3 text-right sm:px-5">Amount (KES)</th>
+                           <th className="px-4 py-3"></th>
                         </tr>
                      </thead>
                      <tbody className="divide-y divide-slate-50">
@@ -256,16 +256,16 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                                 <p className="font-mono text-xs font-medium text-slate-700 mb-1">{t.reference}</p>
                                 <p className="text-xs text-slate-500">{t.date}</p>
                              </td>
-                             <td className="px-10 py-8">
+                             <td className="px-4 py-3">
                                 <p className="text-sm font-medium text-slate-900">{t.memberName}</p>
                                 <p className="mt-0.5 max-w-[240px] truncate text-xs text-slate-500">{t.notes || 'No notes'}</p>
                              </td>
-                             <td className="px-10 py-8">
+                             <td className="px-4 py-3">
                                 <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${t.category === 'Income' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
                                    {t.type}
                                 </span>
                              </td>
-                             <td className="px-10 py-8">
+                             <td className="px-4 py-3">
                                 <div className="flex flex-col">
                                    <span className={`text-xs font-medium ${t.source === 'INTEGRATED' ? 'text-indigo-700' : 'text-slate-500'}`}>
                                       {t.source}
@@ -276,7 +276,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                                    </div>
                                 </div>
                              </td>
-                             <td className={`px-10 py-8 text-right font-semibold text-sm ${t.category === 'Expense' ? 'text-brand-gold' : 'text-slate-900'}`}>
+                             <td className={`px-4 py-3 text-right font-semibold text-sm tabular-nums ${t.category === 'Expense' ? 'text-rose-700' : 'text-slate-900'}`}>
                                {t.category === 'Expense' ? '-' : ''}{t.amount.toLocaleString()}
                              </td>
                              <td className="px-4 py-3 text-right relative">
@@ -290,7 +290,7 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                                   <div className="absolute right-10 top-full mt-2 w-48 bg-white border border-slate-100 rounded-2xl shadow-sm z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
                                      <button 
                                       onClick={() => { setViewingTransaction(t); setOpenActionId(null); }}
-                                      className="w-full text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors border-b border-slate-50"
+                                      className="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
                                      >
                                         <Eye size={14} className="text-brand-primary"/> View Detail
                                      </button>
@@ -298,13 +298,13 @@ const FinanceReporting: React.FC<FinanceReportingProps> = ({
                                        <>
                                          <button 
                                           onClick={() => { handleOpenForm(t); setOpenActionId(null); }}
-                                          className="w-full text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-700 hover:bg-brand-indigo/5 flex items-center gap-3 transition-colors border-b border-slate-50"
+                                          className="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
                                          >
                                             <Edit2 size={14} className="text-brand-indigo"/> Modify
                                          </button>
                                          <button 
                                           onClick={() => { setShowDeleteConfirm(t.id); setOpenActionId(null); }}
-                                          className="w-full text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 flex items-center gap-3 transition-colors"
+                                          className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-rose-700 transition-colors hover:bg-rose-50"
                                          >
                                             <Trash2 size={14} className="text-rose-500"/> Delete
                                          </button>

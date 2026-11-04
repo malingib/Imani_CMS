@@ -139,26 +139,26 @@ const TenantRegistry: React.FC<TenantRegistryProps> = ({ onImpersonate }) => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+    <div className="space-y-6 pb-12">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-slate-200 pb-6 lg:flex-row lg:items-end">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 bg-brand-primary text-brand-gold rounded-2xl shadow-sm">
-               <Network size={28} />
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+               <Network size={18} />
             </div>
-            <h2 className="text-4xl font-black text-brand-primary tracking-tight uppercase">Tenant Registry</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Tenant Registry</h2>
           </div>
-          <p className="text-slate-500 text-lg font-medium">Manage global church instances, sub-domains, and platform licenses.</p>
+          <p className="text-sm text-slate-600">Manage global church instances, sub-domains, and platform licenses.</p>
         </div>
 
         <div className="flex gap-3">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-6 py-4 bg-white text-slate-700 border border-slate-200 rounded-[1.5rem] font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+            className="flex h-10 items-center gap-2 rounded-md border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             <Download size={18} /> Export Master CSV
           </button>
-          <div className="px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-bold">Single-church deployment · Demo Church only</div>
+          <div className="flex h-10 items-center rounded-md border border-slate-200 px-3 text-xs text-slate-500">Multi-tenant client registry</div>
         </div>
       </div>
 

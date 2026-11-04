@@ -36,8 +36,7 @@ export function createTenantsService(client: SupabaseLikeClient) {
       return await provisionTenantChurch(client, input) as ChurchRecord;
     },
 
-    async toggleChurchStatus(church: Pick<ChurchRecord, 'id' | 'status'>): Promise<void> {
-      const status = church.status === 'active' ? 'suspended' : 'active';
+    async updateChurchStatus(church: Pick<ChurchRecord, 'id'>, status: 'active' | 'suspended'): Promise<void> {
       const { error } = await client.from('churches').update({ status }).eq('id', church.id);
       if (error) throw new Error(error.message);
     },

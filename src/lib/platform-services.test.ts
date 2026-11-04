@@ -15,6 +15,14 @@ function createQuery(response: any, log: string[]) {
       log.push(`eq:${column}:${String(value)}`);
       return query;
     },
+    neq(column: string, value: unknown) {
+      log.push(`neq:${column}:${String(value)}`);
+      return query;
+    },
+    range(start: number, end: number) {
+      log.push(`range:${start}:${end}`);
+      return query;
+    },
     order(column: string, options?: Record<string, unknown>) {
       log.push(`order:${column}:${JSON.stringify(options || {})}`);
       return query;

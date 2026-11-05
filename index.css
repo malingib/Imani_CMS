@@ -346,3 +346,98 @@
 .imani-sidebar nav button[aria-current="page"] svg { color: #173b3a; }
 .imani-sidebar nav button:not([aria-current="page"]):hover { background-color: #f1f5f4; color: #102d2d; }
 .imani-sidebar nav button:not([aria-current="page"]):hover svg { color: #285653; }
+
+
+/* Complete church workspace redesign — applies to every client route, not
+   only the pages that already carry a page-specific class. */
+.imani-workspace {
+  --client-ink: #183b39;
+  --client-muted: #687c78;
+  --client-line: #dfe8e4;
+  --client-paper: #fff;
+  --client-canvas: #f7f9f8;
+  --client-soft: #eef4f1;
+  --client-accent: #285653;
+  color: var(--client-ink);
+  font-variant-numeric: tabular-nums;
+}
+.imani-workspace :is(h1,h2,h3,h4) {
+  color: var(--client-ink);
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.imani-workspace h1 { font-size: clamp(1.55rem,2.2vw,2rem); line-height: 1.18; font-weight: 650; }
+.imani-workspace h2 { font-size: clamp(1.15rem,1.6vw,1.4rem); line-height: 1.25; font-weight: 620; }
+.imani-workspace h3 { font-size: 1rem; line-height: 1.35; font-weight: 600; }
+.imani-workspace :is(p,span,label) { overflow-wrap: anywhere; }
+.imani-workspace :is(button,a,[role="button"]) { -webkit-tap-highlight-color: transparent; }
+.imani-workspace button {
+  border-radius: .55rem;
+  box-shadow: none;
+  letter-spacing: normal;
+  transition: background-color 140ms ease,border-color 140ms ease,color 140ms ease;
+}
+.imani-workspace button:disabled { cursor: not-allowed; opacity: .55; }
+.imani-workspace :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
+  min-height: 2.55rem;
+  max-width: 100%;
+  border: 1px solid var(--client-line);
+  border-radius: .5rem;
+  background: var(--client-paper);
+  color: var(--client-ink);
+  box-shadow: none;
+  font-size: .875rem;
+}
+.imani-workspace :is(input,textarea)::placeholder { color: #82928e; opacity: 1; }
+.imani-workspace :is(button,a,input,select,textarea,[role="button"]):focus-visible {
+  outline: 2px solid var(--client-accent);
+  outline-offset: 2px;
+}
+/* Remove stacked decorative card chrome; keep surfaces distinct with rules. */
+.imani-workspace [class*="shadow-"] { box-shadow: none !important; }
+.imani-workspace [class*="rounded-3xl"],
+.imani-workspace [class*="rounded-[2.5rem]"],
+.imani-workspace [class*="rounded-[2rem]"],
+.imani-workspace [class*="rounded-2xl"] { border-radius: .7rem !important; }
+.imani-workspace [class*="bg-white"][class*="rounded-"] {
+  border-color: var(--client-line);
+}
+.imani-workspace :is(table) { width: 100%; border-collapse: separate; border-spacing: 0; }
+.imani-workspace thead { background: #f4f7f5; }
+.imani-workspace th {
+  padding: .75rem .9rem;
+  color: var(--client-muted);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  text-align: left;
+  white-space: nowrap;
+}
+.imani-workspace td { padding: .8rem .9rem; vertical-align: middle; }
+.imani-workspace :is(td,th) { border-bottom: 1px solid var(--client-line); }
+.imani-workspace tbody tr:last-child td { border-bottom: 0; }
+.imani-workspace tbody tr:hover { background: #f8faf9; }
+.imani-workspace [role="dialog"] {
+  border: 1px solid var(--client-line);
+  border-radius: .8rem;
+  background: #fff;
+  box-shadow: 0 18px 48px rgb(18 48 43 / 12%);
+}
+.imani-workspace .recharts-wrapper { max-width: 100%; }
+.imani-workspace .imani-dashboard { color: var(--client-ink); }
+.imani-workspace .imani-dashboard > :is(section,header) { min-width: 0; }
+@media (max-width: 768px) {
+  .imani-workspace { overflow-x: clip; }
+  .imani-workspace > div { min-width: 0; }
+  .imani-workspace [class*="grid-cols-4"] { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .imani-workspace table { display: block; max-width: 100%; overflow-x: auto; }
+  .imani-workspace h1 { font-size: 1.55rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .imani-workspace *, .imani-workspace *::before, .imani-workspace *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

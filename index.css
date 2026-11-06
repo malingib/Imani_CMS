@@ -142,7 +142,7 @@
 }
 
 
-/* Scope: client workspace pages only. Main dashboard and login/signup retain their current composition. */
+/* Scope: every signed-in church workspace page, including dashboard and administration. Login/signup retain their existing composition. */
 .imani-page {
   --page-rule: var(--color-brand-primary-200);
   --page-muted: var(--color-brand-primary-500);
@@ -348,96 +348,93 @@
 .imani-sidebar nav button:not([aria-current="page"]):hover svg { color: #285653; }
 
 
-/* Complete church workspace redesign — applies to every client route, not
-   only the pages that already carry a page-specific class. */
-.imani-workspace {
-  --client-ink: #183b39;
-  --client-muted: #687c78;
-  --client-line: #dfe8e4;
-  --client-paper: #fff;
-  --client-canvas: #f7f9f8;
-  --client-soft: #eef4f1;
-  --client-accent: #285653;
-  color: var(--client-ink);
-  font-variant-numeric: tabular-nums;
+
+/* Dashboard: concise metrics, clear action hierarchy and report-led panels. */
+.imani-page--dashboard > header { border-bottom-color: var(--page-rule); }
+.imani-page--dashboard > header h1 { font-size: clamp(1.7rem, 2.3vw, 2.1rem) !important; }
+.imani-page--dashboard [aria-label="Church key metrics"] > div:first-child h2,
+.imani-page--dashboard [aria-labelledby="shortcuts-heading"] h2 { font-size: .9rem !important; }
+.imani-page--dashboard [aria-label="Church key metrics"] button,
+.imani-page--dashboard [aria-labelledby="shortcuts-heading"] button {
+  border-color: var(--page-rule); border-radius: .7rem; box-shadow: none;
 }
-.imani-workspace :is(h1,h2,h3,h4) {
-  color: var(--client-ink);
-  letter-spacing: -0.03em;
-  text-wrap: balance;
+.imani-page--dashboard > div > section { border-color: var(--page-rule); border-radius: .7rem; }
+.imani-page--dashboard .recharts-cartesian-grid line { stroke: #e8efec; }
+
+/* Analytics: replace the legacy oversized, high-contrast cards with a quiet
+   reporting workspace and a compact segmented view switcher. */
+.imani-page--analytics > div:first-child { align-items: flex-end; }
+.imani-page--analytics > div:first-child h2 { font-size: clamp(1.65rem, 2.2vw, 2rem) !important; }
+.imani-page--analytics > div:first-child > div:last-child {
+  border: 1px solid var(--page-rule); border-radius: .65rem; box-shadow: none;
 }
-.imani-workspace h1 { font-size: clamp(1.55rem,2.2vw,2rem); line-height: 1.18; font-weight: 650; }
-.imani-workspace h2 { font-size: clamp(1.15rem,1.6vw,1.4rem); line-height: 1.25; font-weight: 620; }
-.imani-workspace h3 { font-size: 1rem; line-height: 1.35; font-weight: 600; }
-.imani-workspace :is(p,span,label) { overflow-wrap: anywhere; }
-.imani-workspace :is(button,a,[role="button"]) { -webkit-tap-highlight-color: transparent; }
-.imani-workspace button {
-  border-radius: .55rem;
-  box-shadow: none;
-  letter-spacing: normal;
-  transition: background-color 140ms ease,border-color 140ms ease,color 140ms ease;
+.imani-page--analytics > div:first-child > div:last-child button {
+  min-height: 2.4rem; padding: .55rem .9rem !important; font-size: .78rem !important;
 }
-.imani-workspace button:disabled { cursor: not-allowed; opacity: .55; }
-.imani-workspace :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) {
-  min-height: 2.55rem;
-  max-width: 100%;
-  border: 1px solid var(--client-line);
-  border-radius: .5rem;
-  background: var(--client-paper);
-  color: var(--client-ink);
-  box-shadow: none;
-  font-size: .875rem;
+.imani-page--analytics > div:nth-child(2) > div,
+.imani-page--analytics [class*="bg-white"][class*="rounded"] {
+  border-color: var(--page-rule); border-radius: .7rem; box-shadow: none;
 }
-.imani-workspace :is(input,textarea)::placeholder { color: #82928e; opacity: 1; }
-.imani-workspace :is(button,a,input,select,textarea,[role="button"]):focus-visible {
-  outline: 2px solid var(--client-accent);
-  outline-offset: 2px;
+.imani-page--analytics h3 { font-size: 1rem !important; font-weight: 620 !important; }
+.imani-page--analytics [class*="space-y-10"] { row-gap: 1.25rem !important; }
+.imani-page--analytics [class*="text-xl"][class*="font-black"] {
+  font-size: 1.05rem !important; font-weight: 620 !important;
 }
-/* Remove stacked decorative card chrome; keep surfaces distinct with rules. */
-.imani-workspace [class*="shadow-"] { box-shadow: none !important; }
-.imani-workspace [class*="rounded-3xl"],
-.imani-workspace [class*="rounded-[2.5rem]"],
-.imani-workspace [class*="rounded-[2rem]"],
-.imani-workspace [class*="rounded-2xl"] { border-radius: .7rem !important; }
-.imani-workspace [class*="bg-white"][class*="rounded-"] {
-  border-color: var(--client-line);
+
+/* Church administration: make the profile, team and system tabs read as one
+   settings area; remove oversized promotional-card styling. */
+.imani-page--church-admin > header h2 { font-size: clamp(1.65rem, 2.2vw, 2rem) !important; font-weight: 650 !important; }
+.imani-page--church-admin > header > p:first-child {
+  font-size: .75rem !important; letter-spacing: .06em !important;
 }
-.imani-workspace :is(table) { width: 100%; border-collapse: separate; border-spacing: 0; }
-.imani-workspace thead { background: #f4f7f5; }
-.imani-workspace th {
-  padding: .75rem .9rem;
-  color: var(--client-muted);
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .01em;
-  text-align: left;
-  white-space: nowrap;
+.imani-page--church-admin > nav { border-bottom: 1px solid var(--page-rule); gap: .35rem; }
+.imani-page--church-admin > nav button {
+  border: 1px solid transparent; border-radius: .55rem !important;
+  padding: .65rem .9rem !important; font-size: .8rem !important;
 }
-.imani-workspace td { padding: .8rem .9rem; vertical-align: middle; }
-.imani-workspace :is(td,th) { border-bottom: 1px solid var(--client-line); }
-.imani-workspace tbody tr:last-child td { border-bottom: 0; }
-.imani-workspace tbody tr:hover { background: #f8faf9; }
-.imani-workspace [role="dialog"] {
-  border: 1px solid var(--client-line);
-  border-radius: .8rem;
-  background: #fff;
-  box-shadow: 0 18px 48px rgb(18 48 43 / 12%);
+.imani-page--church-admin > nav button[class*="bg-brand-primary"] {
+  background: var(--page-subtle-strong) !important; border-color: var(--page-rule) !important;
+  color: var(--page-ink) !important;
 }
-.imani-workspace .recharts-wrapper { max-width: 100%; }
-.imani-workspace .imani-dashboard { color: var(--client-ink); }
-.imani-workspace .imani-dashboard > :is(section,header) { min-width: 0; }
-@media (max-width: 768px) {
-  .imani-workspace { overflow-x: clip; }
-  .imani-workspace > div { min-width: 0; }
-  .imani-workspace [class*="grid-cols-4"] { grid-template-columns: repeat(2,minmax(0,1fr)); }
-  .imani-workspace table { display: block; max-width: 100%; overflow-x: auto; }
-  .imani-workspace h1 { font-size: 1.55rem; }
+.imani-page--church-admin section {
+  border-color: var(--page-rule) !important; border-radius: .7rem !important;
+  box-shadow: none !important;
 }
-@media (prefers-reduced-motion: reduce) {
-  .imani-workspace *, .imani-workspace *::before, .imani-workspace *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: .01ms !important;
-  }
+.imani-page--church-admin section h3 {
+  font-size: 1.05rem !important; font-weight: 620 !important;
+}
+.imani-page--church-admin section :is(label,dt) {
+  font-size: .8rem !important; font-weight: 550 !important; letter-spacing: normal !important;
+}
+.imani-page--church-admin section input,
+.imani-page--church-admin section select,
+.imani-page--church-admin section textarea {
+  width: 100%; border-radius: .5rem !important; font-weight: 450 !important;
+}
+.imani-page--church-admin table th,
+.imani-page--church-admin table td { padding: .8rem 1rem !important; }
+
+/* Audit log: make filters and the activity table the primary interface. */
+.imani-page--audit > header { border-bottom: 1px solid var(--page-rule); padding-bottom: 1.1rem; }
+.imani-page--audit > header h2 { font-size: clamp(1.55rem, 2vw, 1.85rem) !important; }
+.imani-page--audit > header p { font-size: .9rem !important; font-weight: 450 !important; }
+.imani-page--audit > header button {
+  border: 1px solid var(--page-rule) !important; border-radius: .55rem !important;
+  padding: .6rem .85rem !important; font-size: .8rem !important;
+}
+.imani-page--audit > div {
+  border: 1px solid var(--page-rule) !important; border-radius: .7rem !important;
+  box-shadow: none !important; min-height: 0 !important;
+}
+.imani-page--audit > div > div:first-child { background: #f8faf9 !important; border-color: var(--page-rule) !important; }
+.imani-page--audit table th { padding: .8rem 1rem !important; }
+.imani-page--audit table td { padding: .85rem 1rem !important; }
+.imani-page--audit table tbody tr:hover { background: var(--page-subtle); }
+
+@media (max-width: 640px) {
+  .imani-page--analytics > div:first-child { align-items: stretch; }
+  .imani-page--analytics > div:first-child > div:last-child { max-width: 100%; }
+  .imani-page--analytics > div:first-child > div:last-child button { padding-inline: .7rem !important; }
+  .imani-page--church-admin > nav { overflow-x: auto; }
+  .imani-page--audit > div { overflow: hidden; }
 }

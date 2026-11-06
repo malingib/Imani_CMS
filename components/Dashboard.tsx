@@ -96,7 +96,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   ];
 
   return (
-    <div className="imani-dashboard space-y-7 pb-10 text-slate-900">
+    <div className="imani-page imani-page--dashboard imani-dashboard space-y-7 pb-10 text-slate-900">
       <header className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-brand-primary">{dateLabel}</p>

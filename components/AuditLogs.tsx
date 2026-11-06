@@ -19,6 +19,31 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ logs }) => {
     }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [logs, searchTerm, severityFilter]);
 
+  const handleExport = () => {
+    const columns = ['Timestamp', 'User', 'Module', 'Action', 'Severity'];
+    const escapeCsv = (value: unknown) => {
+      const text = String(value ?? '');
+      return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    };
+    const rows = filteredLogs.map(log => [
+      log.timestamp,
+      log.userName,
+      log.module,
+      log.action,
+      log.severity,
+    ]);
+    const csv = [columns, ...rows].map(row => row.map(escapeCsv).join(',')).join('\r\n');
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `imani-audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const getSeverityStyle = (severity: AuditLog['severity']) => {
     switch (severity) {
       case 'CRITICAL': return 'bg-rose-100 text-rose-700 border-rose-200';
@@ -36,14 +61,14 @@ const AuditLogs: React.FC<AuditLogsProps> = ({ logs }) => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+    <div className="imani-page imani-page--audit space-y-8 animate-in fade-in duration-500 pb-20">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-2xl font-semibold text-brand-primary tracking-tight uppercase">Audit Log</h2>
           <p className="text-slate-500 mt-2 text-lg font-medium">Record of all system actions.</p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm">
-          <Download size={16} /> Export
+        <button type="button" onClick={handleExport} className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm" aria-label={`Export ${filteredLogs.length} filtered audit entries as CSV`}>
+          <Download size={16} /> Export CSV
         </button>
       </header>
 

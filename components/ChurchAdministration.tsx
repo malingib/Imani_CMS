@@ -118,7 +118,7 @@ const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) =>
   if (loading) return <div className="p-6 bg-white rounded-xl flex items-center gap-3 text-slate-500 font-bold"><Loader2 className="animate-spin" /> Loading church administration…</div>;
 
   return (
-    <div className="space-y-7 max-w-[1300px] mx-auto pb-12">
+    <div className="imani-page imani-page--church-admin space-y-7 max-w-[1300px] mx-auto pb-12">
       <header>
         <p className="text-[10px] font-black uppercase tracking-[0.25em] text-brand-primary">Administration</p>
         <h2 className="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight mt-2">{church?.name || 'Church administration'}</h2>

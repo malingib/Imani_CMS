@@ -18,9 +18,10 @@ export function createPlatformSettingsService(client: SupabaseLikeClient) {
   return {
     async getPlatformSettings(): Promise<{ id?: string; flags: PlatformFlags }> {
       const { data, error } = await client.from('platform_settings').select('*').single();
-      if (error && data == null) {
+      if (error?.code === 'PGRST116') {
         return { flags: DEFAULT_PLATFORM_FLAGS };
       }
+      if (error) throw new Error(error.message);
       return {
         ...(data || {}),
         flags: { ...DEFAULT_PLATFORM_FLAGS, ...(data?.flags || {}) },

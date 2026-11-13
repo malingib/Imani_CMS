@@ -5,6 +5,7 @@ import { Save, ToggleLeft, ToggleRight, CheckCircle2, Loader2 } from 'lucide-rea
 import IntegrationSettingsPanel from './IntegrationSettingsPanel';
 
 const platformSettingsService = createPlatformSettingsService(supabase);
+type PlatformFeatureFlag = keyof typeof DEFAULT_PLATFORM_FLAGS;
 
 const DEFAULT_LIMITS: PlatformLimits = {
   max_members_basic: 200,
@@ -40,7 +41,7 @@ const PlatformSettings: React.FC = () => {
     return () => { alive = false; };
   }, []);
 
-  const toggle = (key: keyof PlatformFlags) => {
+  const toggle = (key: PlatformFeatureFlag) => {
     setFlags(prev => ({ ...prev, [key]: !prev[key] }));
     setSaved(false);
   };
@@ -66,7 +67,7 @@ const PlatformSettings: React.FC = () => {
     }
   };
 
-  const ToggleSwitch = ({ flag, label, desc }: { flag: keyof PlatformFlags; label: string; desc: string }) => (
+  const ToggleSwitch = ({ flag, label, desc }: { flag: PlatformFeatureFlag; label: string; desc: string }) => (
     <div className="flex items-center justify-between p-6 bg-white rounded-2xl border border-slate-100">
       <div>
         <p className="font-black text-brand-primary text-sm">{label}</p>

@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Home, Bell, Smartphone, Save, Camera, ToggleRight, ToggleLeft, Loader2, Mail, MessageSquare, UserPlus, Calendar, CheckCircle2, Lock, SmartphoneNfc } from 'lucide-react';
+import { Home, Bell, Smartphone, Save, ToggleRight, ToggleLeft, Loader2, Mail, MessageSquare, UserPlus, Calendar, CheckCircle2, Lock, SmartphoneNfc } from 'lucide-react';
 import { UserRole } from '../types';
 import { createChurchSettingsService, DEFAULT_CHURCH_NOTIFICATION_PREFERENCES, EMPTY_CHURCH_PROFILE } from '../src/lib/church-settings-service';
 import { supabase } from '../src/lib/supabase';
@@ -123,12 +123,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
           <div className="bg-white rounded-xl sm:rounded-xl border border-slate-100 shadow-sm p-6 sm:p-6 space-y-10 animate-in slide-in-from-bottom-2 duration-400">
             <div className="flex flex-col lg:flex-row gap-8 sm:gap-12">
                <div className="w-24 h-24 sm:w-32 sm:h-32 lg:w-48 lg:h-48 bg-slate-50 rounded-xl sm:rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center relative group flex-shrink-0 mx-auto lg:mx-0 shadow-inner">
-                  <span className="text-4xl sm:text-6xl font-black text-slate-200">I</span>
-                  {isAdmin && (
-                    <div className="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 rounded-xl sm:rounded-xl transition-all flex items-center justify-center cursor-pointer">
-                      <Camera className="text-brand-primary" size={32}/>
-                    </div>
-                  )}
+                  <span className="text-4xl sm:text-6xl font-black text-slate-300">{churchInfo.name.trim().charAt(0).toUpperCase() || 'C'}</span>
                </div>
                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">

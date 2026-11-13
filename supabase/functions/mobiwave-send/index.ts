@@ -48,6 +48,13 @@ async function canSend(userId: string, churchId: string) {
   const { response, data } = await rest('church_memberships?' + query);
   return response.ok && Array.isArray(data) && ['ADMIN', 'PASTOR', 'SECRETARY'].includes(String(data[0]?.role || ''));
 }
+async function platformSmsEnabled() {
+  const { response, data } = await rest('platform_settings?select=flags&id=eq.global');
+  if (!response.ok) return false;
+  const row = Array.isArray(data) ? data[0] : null;
+  return row?.flags?.sms_integration !== false;
+}
+
 async function loadSmsConfig(churchId: string) {
   const read = async (scope: 'church' | 'platform') => {
     const result = await rpc('integration_config_get', { p_scope: scope, p_church_id: scope === 'church' ? churchId : null, p_provider: 'mobiwave' });
@@ -92,6 +99,7 @@ Deno.serve(async (req: Request) => {
   const churchId = String(body.church_id || '');
   if (!/^[0-9a-f-]{36}$/i.test(churchId)) return reply(400, { error: 'A valid church workspace is required.' });
   if (!await canSend(String(user.id), churchId)) return reply(403, { error: 'You do not have permission to send church SMS.' });
+  if (!await platformSmsEnabled()) return reply(403, { error: 'SMS sending is disabled by the platform administrator.' });
 
   const message = String(body.message || '').trim();
   if (!message || message.length > 1600) return reply(400, { error: 'Enter an SMS message between 1 and 1,600 characters.' });

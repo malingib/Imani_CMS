@@ -1,7 +1,7 @@
 type QueryResult<T> = { data: T | null; error: { message: string; code?: string } | null };
 type SupabaseLikeClient = {
   from(table: string): any;
-  rpc(name: string, args: Record<string, unknown>): Promise<QueryResult<unknown>>;
+  rpc(name: string, args: Record<string, unknown>): PromiseLike<QueryResult<unknown>>;
 };
 
 export type ChurchProfile = {

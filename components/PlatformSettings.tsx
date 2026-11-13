@@ -18,13 +18,17 @@ const PlatformSettings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
     let alive = true;
     platformSettingsService.getPlatformSettings().then((settings) => {
       if (alive) setFlags(settings.flags);
     }).catch((loadError) => {
-      if (alive) setError(loadError instanceof Error ? loadError.message : 'Platform settings could not be loaded.');
+      if (alive) {
+        setLoadFailed(true);
+        setError(loadError instanceof Error ? loadError.message : 'Platform settings could not be loaded.');
+      }
     }).finally(() => {
       if (alive) setLoading(false);
     });
@@ -37,6 +41,7 @@ const PlatformSettings: React.FC = () => {
   };
 
   const save = async () => {
+    if (loadFailed) return;
     setSaving(true);
     setError('');
     setSaved(false);
@@ -107,7 +112,7 @@ const PlatformSettings: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        <button onClick={save} disabled={saving} className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-sm shadow-brand-primary/20 disabled:opacity-70">
+        <button onClick={save} disabled={saving || loadFailed} className="flex items-center gap-2 px-8 py-4 bg-brand-primary text-white rounded-2xl font-black text-sm hover:bg-brand-primary/90 transition-all shadow-sm shadow-brand-primary/20 disabled:opacity-70">
           {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
           {saving ? 'Saving...' : 'Save Settings'}
         </button>

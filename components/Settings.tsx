@@ -25,10 +25,10 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
     if (currentUserRole === UserRole.ADMIN) {
       tabs.push({ id: 'PREFERENCES', label: 'System Alerts', icon: Bell });
       tabs.push({ id: 'INTEGRATIONS', label: 'Integrations', icon: SmartphoneNfc });
-    } else if (currentUserRole === UserRole.PASTOR || currentUserRole === UserRole.SECRETARY) {
+    } else if (currentUserRole === UserRole.PASTOR) {
       tabs.push({ id: 'PREFERENCES', label: 'Notifications', icon: Bell });
       tabs.push({ id: 'INTEGRATIONS', label: 'Integrations', icon: SmartphoneNfc });
-    } else if (currentUserRole === UserRole.TREASURER) {
+    } else if (currentUserRole === UserRole.SECRETARY || currentUserRole === UserRole.TREASURER) {
       tabs.push({ id: 'INTEGRATIONS', label: 'Integrations', icon: SmartphoneNfc });
     }
 

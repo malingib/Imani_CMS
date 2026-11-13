@@ -1,5 +1,3 @@
-import type { PlatformFlags } from './platform-settings-service';
-
 type QueryResult<T> = { data: T | null; error: { message: string; code?: string } | null };
 type SupabaseLikeClient = {
   from(table: string): any;

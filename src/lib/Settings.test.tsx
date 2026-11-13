@@ -44,6 +44,15 @@ describe('Settings integration feedback', () => {
     expect(screen.queryByText('Connection verified.')).toBeNull();
   });
 
+  it('does not request church notification preferences for treasurers', async () => {
+    render(<Settings currentUserRole={UserRole.TREASURER} churchId="church-1" />);
+
+    expect(await screen.findByRole('button', { name: 'Integrations' })).toBeTruthy();
+    expect(mockFrom).toHaveBeenCalledWith('churches');
+    expect(mockFrom).not.toHaveBeenCalledWith('church_settings');
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
   it('shows a save error when RLS rejects a settings update', async () => {
     render(<Settings currentUserRole={UserRole.PASTOR} churchId="church-1" />);
     fireEvent.click(screen.getByRole('button', { name: 'Notifications' }));

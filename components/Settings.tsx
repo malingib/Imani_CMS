@@ -1,19 +1,19 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Home, Shield, Bell, Smartphone, Save, Camera, ToggleRight, ToggleLeft, Plus, Loader2, Mail, MessageSquare, UserPlus, Calendar, CheckCircle2, Lock, SmartphoneNfc } from 'lucide-react';
-import { SystemRole, UserRole } from '../types';
-import { createPlatformSettingsService } from '../src/lib/platform-settings-service';
+import { UserRole } from '../types';
+import { createChurchSettingsService, DEFAULT_CHURCH_NOTIFICATION_PREFERENCES, EMPTY_CHURCH_PROFILE } from '../src/lib/church-settings-service';
 import { supabase } from '../src/lib/supabase';
 import IntegrationSettingsPanel from './IntegrationSettingsPanel';
 
-const platformSettingsService = createPlatformSettingsService(supabase);
+const churchSettingsService = createChurchSettingsService(supabase);
 
 interface SettingsProps {
   currentUserRole: UserRole;
   churchId: string;
 }
 
-type SettingTab = 'PROFILE' | 'ROLES' | 'PREFERENCES' | 'INTEGRATIONS';
+type SettingTab = 'PROFILE' | 'PREFERENCES' | 'INTEGRATIONS';
 
 const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   // Define tab permissions
@@ -23,7 +23,6 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
     ];
 
     if (currentUserRole === UserRole.ADMIN) {
-      tabs.push({ id: 'ROLES', label: 'Access Control', icon: Shield });
       tabs.push({ id: 'PREFERENCES', label: 'System Alerts', icon: Bell });
       tabs.push({ id: 'INTEGRATIONS', label: 'Integrations', icon: SmartphoneNfc });
     } else if (currentUserRole === UserRole.PASTOR || currentUserRole === UserRole.SECRETARY) {
@@ -37,39 +36,19 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   }, [currentUserRole]);
 
   const [activeTab, setActiveTab] = useState<SettingTab>('PROFILE');
-  const [selectedRoleId, setSelectedRoleId] = useState('role-1');
   const [isSaving, setIsSaving] = useState(false);
   const [saveFeedback, setSaveFeedback] = useState<{ ok: boolean; message: string } | null>(null);
 
-  const [churchInfo, setChurchInfo] = useState({
-    name: 'Imani Central Parish',
-    address: '123 Harambee Ave, Nairobi',
-    phone: '+254 700 000 000',
-    email: 'info@imani.org',
-    website: 'www.imani.org'
-  });
+  const [churchInfo, setChurchInfo] = useState(EMPTY_CHURCH_PROFILE);
+  const [notificationPrefs, setNotificationPrefs] = useState(DEFAULT_CHURCH_NOTIFICATION_PREFERENCES);
 
-  const [notificationPrefs, setNotificationPrefs] = useState({
-    memberJoinsEmail: true,
-    memberJoinsSMS: false,
-    eventRemindersEmail: true,
-    eventRemindersSMS: true,
-    mpesaConfirmationsSMS: true,
-    mpesaConfirmationsEmail: true
-  });
-
-
-  const roles: SystemRole[] = [
-    { id: 'role-1', name: 'Finance Team', memberCount: 3, description: 'Manage treasury records.', modules: [] },
-    { id: 'role-2', name: 'Administrator', memberCount: 2, description: 'Full system oversight.', modules: [] },
-  ];
 
   const handleSaveProfile = async () => {
-    await persistSetting('church_profiles', { ...churchInfo, churchId }, 'Church profile');
+    await persistSetting('Church profile', () => churchSettingsService.saveChurchProfile(churchId, churchInfo));
   };
 
   const handleSaveNotificationPrefs = async () => {
-    await persistSetting('notification_prefs', notificationPrefs, 'Notification preferences');
+    await persistSetting('Notification preferences', () => churchSettingsService.saveNotificationPreferences(churchId, notificationPrefs));
   };
 
   const togglePref = (key: keyof typeof notificationPrefs) => {
@@ -78,31 +57,37 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   };
 
   const isAdmin = currentUserRole === UserRole.ADMIN;
-  const persistSetting = async (key: string, value: unknown, label: string) => {
+  const persistSetting = async (label: string, save: () => Promise<void>) => {
     setIsSaving(true);
     setSaveFeedback(null);
     try {
-      await platformSettingsService.saveSetting(key, value);
+      await save();
       setSaveFeedback({ ok: true, message: `${label} saved.` });
-    } catch {
-      setSaveFeedback({ ok: false, message: `${label} could not be saved. Check your access and connection, then try again.` });
+    } catch (error) {
+      setSaveFeedback({ ok: false, message: error instanceof Error ? error.message : `${label} could not be saved. Check your access and connection, then try again.` });
     } finally {
       setIsSaving(false);
     }
   };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const savedProfile = await platformSettingsService.getSetting('church_profiles', {}) as any;
-        if (savedProfile?.name) setChurchInfo(savedProfile);
-        const savedPrefs = await platformSettingsService.getSetting('notification_prefs', {}) as any;
-        if (savedPrefs?.memberJoinsEmail !== undefined) setNotificationPrefs(savedPrefs);
-      } catch {
-        // fallback to defaults
-      }
-    })();
-  }, []);
+    let alive = true;
+    if (!churchId) return () => { alive = false; };
+    void Promise.all([
+      churchSettingsService.getChurchProfile(churchId),
+      churchSettingsService.getNotificationPreferences(churchId),
+    ]).then(([profile, preferences]) => {
+      if (!alive) return;
+      setChurchInfo(profile);
+      setNotificationPrefs(preferences);
+    }).catch((error) => {
+      if (alive) setSaveFeedback({
+        ok: false,
+        message: error instanceof Error ? error.message : 'Could not load church settings.',
+      });
+    });
+    return () => { alive = false; };
+  }, [churchId]);
 
   return (
     <div className="imani-page imani-page--settings space-y-6 sm:space-y-8 animate-in fade-in duration-500 max-w-[1200px] mx-auto pb-12">
@@ -178,14 +163,14 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
             {!isAdmin && (
               <div className="p-6 bg-slate-50 rounded-2xl flex items-start gap-4 border border-slate-100">
                 <Lock className="text-slate-300 shrink-0" size={20}/>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">System-wide profile settings are managed exclusively by the Board Administrator. Contact the IT office to request modifications.</p>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">Only church administrators can update the church profile.</p>
               </div>
             )}
 
             {isAdmin && (
               <div className="flex justify-center lg:justify-start pt-4">
                 <button onClick={handleSaveProfile} disabled={isSaving} className="w-full sm:w-auto px-10 py-5 bg-brand-primary text-white rounded-xl sm:rounded-[1.5rem] font-black flex items-center justify-center gap-2 shadow-sm hover:bg-brand-primary-700 transition-all disabled:opacity-50 text-xs uppercase tracking-widest">
-                  {isSaving ? <Loader2 className="animate-spin" size={18}/> : <Save size={18}/>} {isSaving ? 'Updating...' : 'Save Global Profile'}
+                  {isSaving ? <Loader2 className="animate-spin" size={18}/> : <Save size={18}/>} {isSaving ? 'Updating...' : 'Save Church Profile'}
                 </button>
               </div>
             )}
@@ -193,51 +178,6 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
         )}
 
         {activeTab === 'INTEGRATIONS' && <IntegrationSettingsPanel scope="church" churchId={churchId} role={currentUserRole} />}
-
-        {activeTab === 'ROLES' && isAdmin && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 animate-in slide-in-from-right-4 duration-500">
-            <div className="lg:col-span-4 space-y-4">
-              <div className="p-4 bg-brand-indigo-50 border border-brand-indigo/10 rounded-2xl mb-6">
-                <h4 className="text-[10px] font-black uppercase text-brand-indigo tracking-widest flex items-center gap-2 mb-2"><Shield size={12}/> Roles</h4>
-                <p className="text-[11px] text-slate-600 font-medium leading-relaxed">Map church governance to system permissions. These roles define module visibility.</p>
-              </div>
-              {roles.map(r => (
-                <button key={r.id} onClick={() => setSelectedRoleId(r.id)} className={`w-full p-6 text-left rounded-[1.5rem] sm:rounded-xl border transition-all ${selectedRoleId === r.id ? 'bg-brand-primary text-white shadow-sm shadow-indigo-100 border-brand-primary' : 'bg-white border-slate-100 text-slate-600 hover:bg-slate-50'}`}>
-                  <p className="font-black text-lg">{r.name}</p>
-                  <p className="text-[10px] uppercase font-black tracking-widest mt-1 opacity-60">{r.memberCount} active users</p>
-                </button>
-              ))}
-              <button className="w-full p-6 border-2 border-dashed border-slate-200 rounded-xl text-slate-300 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:border-brand-primary hover:text-brand-primary transition-all">
-                 <Plus size={16}/> Create Custom Role
-              </button>
-            </div>
-            <div className="lg:col-span-8 bg-white p-6 sm:p-6 rounded-xl sm:rounded-xl border border-slate-100 shadow-sm space-y-8">
-               <div className="flex items-center justify-between">
-                  <h3 className="text-xl sm:text-2xl font-black text-slate-800 uppercase tracking-tight">Permission Grid</h3>
-                  <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold text-[9px] font-black uppercase tracking-widest rounded-lg">Admin</span>
-               </div>
-               <div className="space-y-4">
-                  {[
-                    { label: 'Finance Ledger Management', val: true },
-                    { label: 'Membership Data Modification', val: true },
-                    { label: 'Outreach & SMS Broadcasting', val: false },
-                    { label: 'Sermon Lab Generation', val: true }
-                  ].map(perm => (
-                    <div key={perm.label} className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl group transition-all hover:bg-white hover:shadow-md border border-transparent hover:border-slate-100">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${perm.val ? 'bg-brand-emerald' : 'bg-slate-300'}`}/>
-                        <span className="font-bold text-slate-700 text-sm">{perm.label}</span>
-                      </div>
-                      <button className="text-brand-primary group-hover:scale-110 transition-transform"><ToggleRight size={32}/></button>
-                    </div>
-                  ))}
-               </div>
-               <div className="pt-6">
-                 <button className="w-full py-4 bg-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all">Save Permissions</button>
-               </div>
-            </div>
-          </div>
-        )}
 
         {activeTab === 'PREFERENCES' && (isAdmin || currentUserRole === UserRole.PASTOR) && (
           <div className="bg-white rounded-xl sm:rounded-xl border border-slate-100 shadow-sm p-6 sm:p-6 space-y-12 animate-in slide-in-from-left-4 duration-500">

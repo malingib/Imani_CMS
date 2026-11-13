@@ -49,6 +49,7 @@ function scopedQuery(
 ): PromiseLike<QueryResult<unknown>> {
   let query = client.from(table).select(select);
   if (churchId) query = query.eq("church_id", churchId);
+  if (table === "members" || table === "transactions") query = query.is("deleted_at", null);
   if (options?.order) query = query.order(options.order.column, { ascending: options.order.ascending });
   if (options?.range) query = query.range(options.range.start, options.range.end);
   return query;
@@ -63,6 +64,7 @@ async function runQuery<T>(query: PromiseLike<QueryResult<unknown>>, mapRow: (ro
 async function getCount(client: SupabaseLikeClient, table: string, churchId?: string | null): Promise<number> {
   let query = client.from(table).select("*", { count: "exact", head: true });
   if (churchId) query = query.eq("church_id", churchId);
+  if (table === "members" || table === "transactions") query = query.is("deleted_at", null);
   const { count, error } = await query;
   if (error) throw new Error(error.message);
   return count ?? 0;
@@ -86,7 +88,7 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       const pageSize = 1000;
       const rows: unknown[] = [];
       for (let start = 0; ; start += pageSize) {
-        let query = client.from("transactions").select("*");
+        let query = client.from("transactions").select("*").is("deleted_at", null);
         if (churchId) query = query.eq("church_id", churchId);
         const { data, error } = await query
           .order("date", { ascending: false })
@@ -106,7 +108,8 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       for (let start = 0; ; start += pageSize) {
         let query = client.from("transactions").select("*")
           .eq("type", "Tithe")
-          .eq("category", "Income");
+          .eq("category", "Income")
+          .is("deleted_at", null);
         if (churchId) query = query.eq("church_id", churchId);
         const { data, error } = await query
           .order("date", { ascending: false })
@@ -120,7 +123,7 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
     },
 
     async loadDashboardTransactions(churchId: string, startDate: string, endDate: string): Promise<Transaction[]> {
-      let query = client.from("transactions").select("*").gte("date", startDate).lte("date", endDate);
+      let query = client.from("transactions").select("*").is("deleted_at", null).gte("date", startDate).lte("date", endDate);
       if (churchId) query = query.eq("church_id", churchId);
       const { data, error } = await query.order("date", { ascending: true });
       if (error) throw new Error(error.message);

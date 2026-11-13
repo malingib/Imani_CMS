@@ -23,7 +23,9 @@ jobs:
           deno-version: v2.x
       - name: Type-check Supabase Edge Functions
         run: |
+          deno test --no-check --node-modules-dir=auto supabase/functions/_shared/integration-config.test.ts supabase/functions/_shared/mpesa-date.test.ts
           deno check --node-modules-dir=auto supabase/functions/mpesa-stk/index.ts
+        run: |
           deno check --node-modules-dir=auto supabase/functions/mpesa-status/index.ts
           deno check --node-modules-dir=auto supabase/functions/mobiwave-send/index.ts
           deno check --node-modules-dir=auto supabase/functions/mobiwave-status/index.ts

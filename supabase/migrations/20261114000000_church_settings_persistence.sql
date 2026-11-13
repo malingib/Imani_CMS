@@ -2,6 +2,9 @@
 -- Church identity is stored on public.churches; changes go through a narrow RPC.
 BEGIN;
 
+-- Existing churches_updated_at trigger expects this column, but the live schema lacked it.
+ALTER TABLE public.churches ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+
 CREATE TABLE IF NOT EXISTS public.church_settings (
   church_id uuid PRIMARY KEY REFERENCES public.churches(id) ON DELETE CASCADE,
   notification_preferences jsonb NOT NULL DEFAULT '{

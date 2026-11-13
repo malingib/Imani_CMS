@@ -61,13 +61,13 @@ CREATE OR REPLACE FUNCTION public.church_update_profile(
   p_email text,
   p_website text
 )
-RETURNS public.churches
+RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, pg_catalog
 AS $$
 DECLARE
-  v_church public.churches;
+  v_updated boolean := false;
 BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Authentication required';
@@ -91,13 +91,12 @@ BEGIN
       phone = nullif(trim(coalesce(p_phone, '')), ''),
       email = nullif(trim(coalesce(p_email, '')), ''),
       website = nullif(trim(coalesce(p_website, '')), '')
-  WHERE id = p_church_id
-  RETURNING * INTO v_church;
+  WHERE id = p_church_id;
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Church not found';
   END IF;
-  RETURN v_church;
+  RETURN;
 END;
 $$;
 

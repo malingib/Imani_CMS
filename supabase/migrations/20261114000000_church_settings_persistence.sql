@@ -50,7 +50,7 @@ $$;
 
 DROP TRIGGER IF EXISTS touch_church_settings_updated_at ON public.church_settings;
 CREATE TRIGGER touch_church_settings_updated_at
-  BEFORE UPDATE ON public.church_settings
+  BEFORE INSERT OR UPDATE ON public.church_settings
   FOR EACH ROW EXECUTE FUNCTION public.touch_church_settings();
 
 CREATE OR REPLACE FUNCTION public.church_update_profile(

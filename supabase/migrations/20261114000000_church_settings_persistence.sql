@@ -67,7 +67,6 @@ SECURITY DEFINER
 SET search_path = public, pg_catalog
 AS $$
 DECLARE
-  v_updated boolean := false;
 BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Authentication required';

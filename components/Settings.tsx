@@ -73,9 +73,13 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
   useEffect(() => {
     let alive = true;
     if (!churchId) return () => { alive = false; };
+    const canReadPreferences = currentUserRole === UserRole.ADMIN || currentUserRole === UserRole.PASTOR;
+    const preferencesRequest = canReadPreferences
+      ? churchSettingsService.getNotificationPreferences(churchId)
+      : Promise.resolve(DEFAULT_CHURCH_NOTIFICATION_PREFERENCES);
     void Promise.all([
       churchSettingsService.getChurchProfile(churchId),
-      churchSettingsService.getNotificationPreferences(churchId),
+      preferencesRequest,
     ]).then(([profile, preferences]) => {
       if (!alive) return;
       setChurchInfo(profile);
@@ -87,7 +91,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
       });
     });
     return () => { alive = false; };
-  }, [churchId]);
+  }, [churchId, currentUserRole]);
 
   return (
     <div className="imani-page imani-page--settings space-y-6 sm:space-y-8 animate-in fade-in duration-500 max-w-[1200px] mx-auto pb-12">

@@ -179,6 +179,8 @@ describe("createChurchAppDataService", () => {
     expect(result.totalRecurringExpenses).toBe(1);
     expect(result.totalAuditLogs).toBe(1);
     expect(calls).toContain("members.eq:church_id:church-1");
+    expect(calls).toContain("members.is:deleted_at:null");
+    expect(calls).toContain("transactions.is:deleted_at:null");
     expect(calls).toContain("budgets.eq:church_id:church-1");
     expect(calls).toContain("recurring_expenses.eq:church_id:church-1");
     expect(calls).toContain("event_attendance.select:event_id, member_id");

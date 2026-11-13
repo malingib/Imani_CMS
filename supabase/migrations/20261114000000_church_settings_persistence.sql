@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.church_settings (
 ALTER TABLE public.church_settings ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.church_settings FROM PUBLIC, anon;
 GRANT SELECT, INSERT, UPDATE ON TABLE public.church_settings TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON TABLE public.church_settings TO service_role;
 
 DROP POLICY IF EXISTS church_settings_select ON public.church_settings;
 CREATE POLICY church_settings_select ON public.church_settings

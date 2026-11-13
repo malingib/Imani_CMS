@@ -210,6 +210,13 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                         </div>
                         {notificationPrefs.memberJoinsSMS ? <ToggleRight className="text-brand-emerald" size={32}/> : <ToggleLeft className="text-slate-300" size={32}/>}
                      </div>
+                     <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl group cursor-pointer hover:bg-white hover:shadow-md transition-all border border-transparent hover:border-slate-100" onClick={() => togglePref('mpesaConfirmationsSMS')}>
+                        <div className="flex items-center gap-3">
+                           <SmartphoneNfc size={18} className="text-slate-400"/>
+                           <span className="font-bold text-slate-700 text-xs sm:text-sm">M-Pesa receipt SMS</span>
+                        </div>
+                        {notificationPrefs.mpesaConfirmationsSMS ? <ToggleRight className="text-brand-emerald" size={32}/> : <ToggleLeft className="text-slate-300" size={32}/>}
+                     </div>
                   </div>
                </div>
 

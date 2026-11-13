@@ -64,7 +64,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
       await save();
       setSaveFeedback({ ok: true, message: `${label} saved.` });
     } catch (error) {
-      setSaveFeedback({ ok: false, message: error instanceof Error ? error.message : `${label} could not be saved. Check your access and connection, then try again.` });
+      setSaveFeedback({ ok: false, message: error instanceof Error ? `${label} could not be saved. ${error.message}` : `${label} could not be saved. Check your access and connection, then try again.` });
     } finally {
       setIsSaving(false);
     }

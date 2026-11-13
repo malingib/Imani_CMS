@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
 import { createPlatformSettingsService, DEFAULT_PLATFORM_FLAGS, type PlatformFlags } from '../src/lib/platform-settings-service';
 import { Save, ToggleLeft, ToggleRight, CheckCircle2, Loader2 } from 'lucide-react';
+import IntegrationSettingsPanel from './IntegrationSettingsPanel';
 
 const platformSettingsService = createPlatformSettingsService(supabase);
 
@@ -16,12 +17,18 @@ const PlatformSettings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    let alive = true;
     platformSettingsService.getPlatformSettings().then((settings) => {
-      setFlags(settings.flags);
-      setLoading(false);
+      if (alive) setFlags(settings.flags);
+    }).catch((loadError) => {
+      if (alive) setError(loadError instanceof Error ? loadError.message : 'Platform settings could not be loaded.');
+    }).finally(() => {
+      if (alive) setLoading(false);
     });
+    return () => { alive = false; };
   }, []);
 
   const toggle = (key: keyof PlatformFlags) => {
@@ -31,10 +38,16 @@ const PlatformSettings: React.FC = () => {
 
   const save = async () => {
     setSaving(true);
-    await platformSettingsService.savePlatformSettings(flags);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-    setSaving(false);
+    setError('');
+    setSaved(false);
+    try {
+      await platformSettingsService.savePlatformSettings(flags);
+      setSaved(true);
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Platform settings could not be saved.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const ToggleSwitch = ({ flag, label, desc }: { flag: keyof PlatformFlags; label: string; desc: string }) => (
@@ -67,6 +80,13 @@ const PlatformSettings: React.FC = () => {
         <ToggleSwitch flag="allow_self_signup" label="Allow Self-Signup" desc="Let churches sign up without super admin invitation" />
         <ToggleSwitch flag="maintenance_mode" label="Maintenance Mode" desc="Block access for all non-super-admin users" />
       </div>
+
+      {error && <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{error}</p>}
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-semibold text-slate-600">Platform provider credentials</h2>
+        <IntegrationSettingsPanel scope="platform" role="SUPER_ADMIN" />
+      </section>
 
       <div className="space-y-4">
         <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest">Default Limits</h2>

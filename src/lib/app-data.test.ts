@@ -15,6 +15,10 @@ function createQuery(data: unknown[], table: string, calls: string[]) {
       calls.push(`${table}.eq:${column}:${value}`);
       return query;
     },
+    is(column: string, value: string | null) {
+      calls.push(`${table}.is:${column}:${value}`);
+      return query;
+    },
     order(column: string, { ascending }: { ascending: boolean }) {
       calls.push(`${table}.order:${column}:${ascending ? "asc" : "desc"}`);
       return query;
@@ -41,6 +45,9 @@ function createFailingQuery(errorMessage: string) {
       return this;
     },
     eq(_column: string, _value: string) {
+      return this;
+    },
+    is(_column: string, _value: string | null) {
       return this;
     },
     order() {
@@ -200,6 +207,7 @@ describe("createChurchAppDataService", () => {
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("ledger-1");
     expect(calls).toContain("transactions.eq:church_id:church-1");
+    expect(calls).toContain("transactions.is:deleted_at:null");
     expect(calls).toContain("transactions.order:date:desc");
     expect(calls).toContain("transactions.order:created_at:desc");
     expect(calls).toContain("transactions.range:0:999");
@@ -218,10 +226,33 @@ describe("createChurchAppDataService", () => {
     const result = await service.loadDashboardTransactions("church-1", "2026-10-20", "2026-10-26");
     expect(result).toHaveLength(1);
     expect(result[0].type).toBe("Tithe");
+    expect(calls).toContain("transactions.is:deleted_at:null");
     expect(calls).toContain("transactions.gte:date:2026-10-20");
     expect(calls).toContain("transactions.lte:date:2026-10-26");
     expect(calls).toContain("transactions.eq:church_id:church-1");
     expect(calls).not.toContain("transactions.range:0:99");
+  });
+
+  it("filters deleted tithe records from the lifetime chart data", async () => {
+    const calls: string[] = [];
+    const rowsByTable: Record<string, unknown[]> = {
+      transactions: [{
+        id: "tithe-1", member_name: "Ada Lovelace", amount: 12000, type: "Tithe",
+        payment_method: "M-Pesa", date: "2024-05-18", reference: "T-1",
+        category: "Income", source: "MANUAL",
+      }],
+    };
+    const service = createChurchAppDataService({
+      from(table: string) { return createQuery(rowsByTable[table] ?? [], table, calls); },
+      rpc() { return { then() { return Promise.resolve({ data: null, error: null }); } }; },
+    });
+
+    const result = await service.loadLifetimeTitheTransactions("church-1");
+    expect(result).toHaveLength(1);
+    expect(result[0].amount).toBe(12000);
+    expect(calls).toContain("transactions.is:deleted_at:null");
+    expect(calls).toContain("transactions.eq:type:Tithe");
+    expect(calls).toContain("transactions.eq:category:Income");
   });
 
   it("writes audit logs with the supplied church scope", async () => {

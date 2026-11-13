@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
-import { createPlatformSettingsService, DEFAULT_PLATFORM_FLAGS, type PlatformFlags } from '../src/lib/platform-settings-service';
+import { createPlatformSettingsService, DEFAULT_PLATFORM_FLAGS, type PlatformFlags, type PlatformLimits } from '../src/lib/platform-settings-service';
 import { Save, ToggleLeft, ToggleRight, CheckCircle2, Loader2 } from 'lucide-react';
 import IntegrationSettingsPanel from './IntegrationSettingsPanel';
 
 const platformSettingsService = createPlatformSettingsService(supabase);
 
-const DEFAULT_LIMITS = {
+const DEFAULT_LIMITS: PlatformLimits = {
   max_members_basic: 200,
   max_members_pro: 99999,
   trial_days: 14,
@@ -14,6 +14,7 @@ const DEFAULT_LIMITS = {
 
 const PlatformSettings: React.FC = () => {
   const [flags, setFlags] = useState<PlatformFlags>(DEFAULT_PLATFORM_FLAGS);
+  const [limits, setLimits] = useState<PlatformLimits>(DEFAULT_LIMITS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -23,7 +24,11 @@ const PlatformSettings: React.FC = () => {
   useEffect(() => {
     let alive = true;
     platformSettingsService.getPlatformSettings().then((settings) => {
-      if (alive) setFlags(settings.flags);
+      if (alive) {
+        const { default_limits: savedLimits, ...featureFlags } = settings.flags;
+        setFlags(featureFlags);
+        setLimits({ ...DEFAULT_LIMITS, ...(savedLimits || {}) });
+      }
     }).catch((loadError) => {
       if (alive) {
         setLoadFailed(true);
@@ -42,11 +47,17 @@ const PlatformSettings: React.FC = () => {
 
   const save = async () => {
     if (loadFailed) return;
+    if (!Number.isSafeInteger(limits.max_members_basic) || limits.max_members_basic < 1
+      || !Number.isSafeInteger(limits.max_members_pro) || limits.max_members_pro < limits.max_members_basic
+      || !Number.isSafeInteger(limits.trial_days) || limits.trial_days < 0 || limits.trial_days > 90) {
+      setError('Check the member limits and trial duration. Pro capacity must be at least the Basic capacity; trial duration must be 0–90 days.');
+      return;
+    }
     setSaving(true);
     setError('');
     setSaved(false);
     try {
-      await platformSettingsService.savePlatformSettings(flags);
+      await platformSettingsService.savePlatformSettings({ ...flags, default_limits: limits });
       setSaved(true);
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : 'Platform settings could not be saved.');
@@ -96,18 +107,18 @@ const PlatformSettings: React.FC = () => {
       <div className="space-y-4">
         <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest">Default Limits</h2>
         <div className="bg-white rounded-2xl border border-slate-100 p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Basic Max Members</p>
-            <p className="text-2xl font-black text-brand-primary mt-1">{DEFAULT_LIMITS.max_members_basic.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pro Max Members</p>
-            <p className="text-2xl font-black text-brand-primary mt-1">{DEFAULT_LIMITS.max_members_pro.toLocaleString()}</p>
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Trial Period</p>
-            <p className="text-2xl font-black text-brand-primary mt-1">{DEFAULT_LIMITS.trial_days} days</p>
-          </div>
+          <label className="block space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Basic max members</span>
+            <input type="number" min="1" step="1" value={limits.max_members_basic} onChange={e => setLimits(old => ({ ...old, max_members_basic: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-lg font-semibold text-brand-primary" />
+          </label>
+          <label className="block space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pro max members</span>
+            <input type="number" min={limits.max_members_basic} step="1" value={limits.max_members_pro} onChange={e => setLimits(old => ({ ...old, max_members_pro: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-lg font-semibold text-brand-primary" />
+          </label>
+          <label className="block space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Trial duration (days)</span>
+            <input type="number" min="0" max="90" step="1" value={limits.trial_days} onChange={e => setLimits(old => ({ ...old, trial_days: Number(e.target.value) }))} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-lg font-semibold text-brand-primary" />
+          </label>
         </div>
       </div>
 

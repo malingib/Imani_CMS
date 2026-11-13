@@ -12,7 +12,7 @@ Deno.serve(async(req:Request)=>{
  if(body?.Result){
   const query=new URL(req.url).searchParams,paymentId=query.get('payment_id')||'',token=query.get('token')||'';
   if(!/^[0-9a-f-]{36}$/i.test(paymentId)||token.length<32)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});
-  const {data:intent,error}=await admin.from('mpesa_payment_intents').select('id,church_id,amount,phone_number,payer_name,purpose,status,reconciliation_status,mpesa_receipt_number,reconcile_token_hash').eq('id',paymentId).maybeSingle();
+  const {data:intent,error}=await admin.from('mpesa_payment_intents').select('id,church_id,amount,phone_number,payer_name,purpose,status,reconciliation_status,mpesa_receipt_number,reconcile_token_hash,transaction_date').eq('id',paymentId).maybeSingle();
   if(error||!intent)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});
   if(intent.status==='succeeded'||(!intent.reconcile_token_hash&&intent.reconciliation_status&&intent.reconciliation_status!=='requested'&&intent.reconciliation_status!=='requesting'))return json(200,{ResultCode:0,ResultDesc:'Reconciliation callback already processed.'});
   if(!intent.reconcile_token_hash||await digest(token)!==intent.reconcile_token_hash)return json(401,{ResultCode:1,ResultDesc:'Invalid callback token.'});
@@ -21,8 +21,8 @@ Deno.serve(async(req:Request)=>{
   const receipt=String(value('ReceiptNo')||result.TransactionID||''),amount=Number(value('Amount')),txStatus=String(value('TransactionStatus')||'').toLowerCase(),resultCode=Number(result.ResultCode);
   const confirmed=resultCode===0&&txStatus==='completed'&&receipt===String(intent.mpesa_receipt_number||'')&&Number.isFinite(amount)&&amount===Number(intent.amount);
   const failed=resultCode===0&&['cancelled','declined','expired','reversed','failed'].includes(txStatus);
-  const nextStatus=confirmed?'succeeded':failed?'failed':'verification_required';
-  const {data:claimed,error:updateError}=await admin.from('mpesa_payment_intents').update({status:nextStatus,reconciliation_status:confirmed?'confirmed':failed?'failed':'mismatch',result_code:Number.isFinite(resultCode)?resultCode:null,result_description:confirmed?'Safaricom transaction status confirmed the receipt.':String(result.ResultDesc||'Transaction status requires manual review.').slice(0,500),reconcile_token_hash:null}).eq('id',paymentId).neq('status','succeeded').select('id').maybeSingle();
+  const nextStatus=confirmed?'reconciliation_pending':failed?'failed':'verification_required';
+  const {data:claimed,error:updateError}=await admin.from('mpesa_payment_intents').update({status:nextStatus,reconciliation_status:confirmed?'posting':failed?'failed':'mismatch',result_code:Number.isFinite(resultCode)?resultCode:null,result_description:confirmed?'Safaricom transaction status confirmed the receipt.':String(result.ResultDesc||'Transaction status requires manual review.').slice(0,500),reconcile_token_hash:null}).eq('id',paymentId).neq('status','succeeded').select('id').maybeSingle();
   if(updateError)return json(500,{ResultCode:1,ResultDesc:'Reconciliation callback could not be saved.'});
   if(!claimed)return json(200,{ResultCode:0,ResultDesc:'Reconciliation callback already processed.'});
   if(confirmed){try{await postConfirmedPayment(admin,intent,receipt);}catch{return json(500,{ResultCode:1,ResultDesc:'Confirmed payment could not be posted to the ledger.'});}}

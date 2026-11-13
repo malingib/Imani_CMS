@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { Home, Shield, Bell, Smartphone, Save, Camera, ToggleRight, ToggleLeft, Plus, Loader2, Mail, MessageSquare, UserPlus, Calendar, CheckCircle2, Lock, SmartphoneNfc } from 'lucide-react';
+import { Home, Bell, Smartphone, Save, Camera, ToggleRight, ToggleLeft, Loader2, Mail, MessageSquare, UserPlus, Calendar, CheckCircle2, Lock, SmartphoneNfc } from 'lucide-react';
 import { UserRole } from '../types';
 import { createChurchSettingsService, DEFAULT_CHURCH_NOTIFICATION_PREFERENCES, EMPTY_CHURCH_PROFILE } from '../src/lib/church-settings-service';
 import { supabase } from '../src/lib/supabase';
@@ -146,6 +146,14 @@ const Settings: React.FC<SettingsProps> = ({ currentUserRole, churchId }) => {
                       value={churchInfo.email} 
                       onChange={e => setChurchInfo({...churchInfo, email: e.target.value})} 
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-2 tracking-widest">Phone</label>
+                    <input disabled={!isAdmin} type="tel" value={churchInfo.phone} onChange={e => setChurchInfo({...churchInfo, phone: e.target.value})} className="w-full p-4 border border-slate-100 rounded-xl font-bold text-sm bg-slate-50 text-slate-700 disabled:bg-slate-100 disabled:text-slate-400" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-2 tracking-widest">Website</label>
+                    <input disabled={!isAdmin} type="url" value={churchInfo.website} onChange={e => setChurchInfo({...churchInfo, website: e.target.value})} className="w-full p-4 border border-slate-100 rounded-xl font-bold text-sm bg-slate-50 text-slate-700 disabled:bg-slate-100 disabled:text-slate-400" />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <label className="text-[10px] font-black uppercase text-slate-400 ml-2 tracking-widest">Address</label>

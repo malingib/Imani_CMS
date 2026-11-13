@@ -66,7 +66,7 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public, pg_catalog
-AS $
+AS $function$
 BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'Authentication required';
@@ -97,7 +97,7 @@ BEGIN
   END IF;
   RETURN;
 END;
-$$;
+$function$;
 
 REVOKE ALL ON FUNCTION public.church_update_profile(uuid, text, text, text, text, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.church_update_profile(uuid, text, text, text, text, text) TO authenticated;

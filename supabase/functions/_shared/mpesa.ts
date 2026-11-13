@@ -45,6 +45,11 @@ export async function requestTransactionStatus(admin:AdminClient,supabaseUrl:str
  }catch(error){await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'request_failed',reconcile_token_hash:null}).eq('id',intent.id).eq('status','reconciliation_pending').eq('reconciliation_status','requesting');throw error;}
 }
 async function sendReceiptSms(admin:AdminClient,churchId:string,intent:Record<string,any>,receipt:string){
+ const {data:churchSettings,error:settingsError}=await admin.from('church_settings')
+  .select('notification_preferences').eq('church_id',churchId).maybeSingle();
+ if(settingsError)return {status:'failed' as const,error:'Church SMS preferences could not be loaded.'};
+ const preferences=churchSettings?.notification_preferences as Record<string,unknown>|undefined;
+ if(preferences?.mpesaConfirmationsSMS===false)return {status:'not_sent' as const};
  const config=await loadProviderConfig(admin,'church',churchId,'mobiwave')||await loadProviderConfig(admin,'platform',null,'mobiwave');if(!config)return {status:'not_configured' as const};
  const token=String(config.secrets.apiToken||''),sender=String(config.settings.senderId||'');if(!token||!sender)return {status:'not_configured' as const};
  const name=String(intent.payer_name||'').trim(),amount=Number(intent.amount).toLocaleString('en-KE');

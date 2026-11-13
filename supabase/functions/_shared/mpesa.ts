@@ -24,7 +24,7 @@ async function getDarajaAccess(config:Pick<MpesaConfig,'key'|'secret'|'environme
 }
 export async function requestTransactionStatus(admin:AdminClient,supabaseUrl:string,intent:Record<string,any>,config:MpesaConfig){
  if(!config.initiatorName||!config.securityCredential||!intent.mpesa_receipt_number){
-  await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'not_configured',result_description:'STK callback received. Add the Daraja transaction-status initiator and encrypted security credential to enable automated reconciliation.'}).eq('id',intent.id);
+  await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'not_configured',reconcile_token_hash:null,result_description:'STK callback received. Add the Daraja transaction-status initiator and encrypted security credential to enable automated reconciliation.'}).eq('id',intent.id);
   return {status:'verification_required',message:'Transaction-status credentials are not configured. Add them in Integrations before reconciling.'};
  }
  const callbackToken=crypto.randomUUID(),callbackUrl=new URL(supabaseUrl.replace(/\/$/,'')+'/functions/v1/mpesa-status');

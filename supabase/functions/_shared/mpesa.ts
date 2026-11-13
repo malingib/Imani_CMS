@@ -45,6 +45,10 @@ export async function requestTransactionStatus(admin:AdminClient,supabaseUrl:str
  }catch(error){await admin.from('mpesa_payment_intents').update({status:'verification_required',reconciliation_status:'request_failed',reconcile_token_hash:null}).eq('id',intent.id).eq('status','reconciliation_pending').eq('reconciliation_status','requesting');throw error;}
 }
 async function sendReceiptSms(admin:AdminClient,churchId:string,intent:Record<string,any>,receipt:string){
+ const {data:platformSettings,error:platformSettingsError}=await admin.from('platform_settings')
+  .select('flags').eq('id','global').maybeSingle();
+ if(platformSettingsError)return {status:'failed' as const,error:'Platform SMS settings could not be loaded.'};
+ if(platformSettings?.flags?.sms_integration===false)return {status:'not_sent' as const};
  const {data:churchSettings,error:settingsError}=await admin.from('church_settings')
   .select('notification_preferences').eq('church_id',churchId).maybeSingle();
  if(settingsError)return {status:'failed' as const,error:'Church SMS preferences could not be loaded.'};

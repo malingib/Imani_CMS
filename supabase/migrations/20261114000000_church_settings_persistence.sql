@@ -65,7 +65,7 @@ CREATE OR REPLACE FUNCTION public.church_update_profile(
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public, pg_catalog
+SET search_path = pg_catalog, public
 AS $function$
 BEGIN
   IF auth.uid() IS NULL THEN

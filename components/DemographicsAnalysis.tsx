@@ -96,7 +96,7 @@ const DemographicsAnalysis: React.FC<DemographicsAnalysisProps> = ({ members, ev
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="imani-page imani-page--analytics space-y-8 animate-in fade-in duration-700">
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-2">

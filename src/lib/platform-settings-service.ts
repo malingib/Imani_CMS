@@ -1,10 +1,17 @@
 type SupabaseLikeClient = { from(table: string): any };
 
+export type PlatformLimits = {
+  max_members_basic: number;
+  max_members_pro: number;
+  trial_days: number;
+};
+
 export type PlatformFlags = {
   sms_integration: boolean;
   ai_features: boolean;
   allow_self_signup: boolean;
   maintenance_mode: boolean;
+  default_limits?: PlatformLimits;
 };
 
 export const DEFAULT_PLATFORM_FLAGS: PlatformFlags = {
@@ -18,9 +25,10 @@ export function createPlatformSettingsService(client: SupabaseLikeClient) {
   return {
     async getPlatformSettings(): Promise<{ id?: string; flags: PlatformFlags }> {
       const { data, error } = await client.from('platform_settings').select('*').single();
-      if (error && data == null) {
+      if (error?.code === 'PGRST116') {
         return { flags: DEFAULT_PLATFORM_FLAGS };
       }
+      if (error) throw new Error(error.message);
       return {
         ...(data || {}),
         flags: { ...DEFAULT_PLATFORM_FLAGS, ...(data?.flags || {}) },

@@ -169,6 +169,7 @@ describe("createPersistenceService", () => {
       update: vi.fn(() => builder),
       delete: vi.fn(() => builder),
       eq: vi.fn(() => builder),
+      is: vi.fn(() => builder),
       order: vi.fn(() => builder),
       limit: vi.fn(() => builder),
       single: vi.fn(() => builder),
@@ -223,6 +224,18 @@ describe("createPersistenceService", () => {
     const members = await service.getMembers(churchId);
     expect(members).toHaveLength(1);
     expect(members[0].firstName).toBe("John");
+  });
+
+  it("excludes soft-deleted records from church finance and member data", async () => {
+    const { client, builder } = mockClient();
+    const service = createPersistenceService(client);
+
+    await service.getMembers(churchId);
+    expect(builder.is).toHaveBeenCalledWith("deleted_at", null);
+
+    builder.is.mockClear();
+    await service.getTransactions(churchId);
+    expect(builder.is).toHaveBeenCalledWith("deleted_at", null);
   });
 
   it("creates multiple members", async () => {

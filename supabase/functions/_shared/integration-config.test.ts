@@ -19,8 +19,8 @@ Deno.test('validates Daraja and MobiWave fields from provider docs', () => {
 });
 
 Deno.test('requires every secret for a provider before saving', () => {
-  if (!validateProviderSecrets('mpesa', { consumerKey: 'key', consumerSecret: 'secret', passkey: 'passkey' })) throw new Error('valid Daraja credentials rejected');
-  if (validateProviderSecrets('mpesa', { consumerKey: 'key', consumerSecret: 'secret' })) throw new Error('incomplete Daraja credentials accepted');
+  if (!validateProviderSecrets('mpesa', { consumerKey: 'key', consumerSecret: 'secret', passkey: 'passkey', initiatorName: 'operator', securityCredential: 'encrypted-credential' })) throw new Error('valid Daraja credentials rejected');
+  if (validateProviderSecrets('mpesa', { consumerKey: 'key', consumerSecret: 'secret', passkey: 'passkey' })) throw new Error('incomplete Daraja credentials accepted');
   if (!validateProviderSecrets('mobiwave', { apiToken: 'token' })) throw new Error('valid MobiWave token rejected');
   if (validateProviderSecrets('mobiwave', {})) throw new Error('missing MobiWave token accepted');
 });

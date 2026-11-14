@@ -440,6 +440,7 @@ export function createPersistenceService(client: SupabaseLikeClient) {
         .from("members")
         .select("*")
         .eq("church_id", churchId)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
       return (data || []).map(mapMember);
@@ -450,6 +451,7 @@ export function createPersistenceService(client: SupabaseLikeClient) {
         .from("transactions")
         .select("*")
         .eq("church_id", churchId)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
       return (data || []).map(mapTransaction);

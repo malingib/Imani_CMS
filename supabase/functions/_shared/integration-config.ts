@@ -39,8 +39,8 @@ export function validateProviderSecrets(provider: IntegrationProvider, value: un
   if (!value || typeof value !== 'object') return false;
   const secrets = value as Record<string, unknown>;
   const validSecret = (key: string) => typeof secrets[key] === 'string' && (secrets[key] as string).length > 0 && (secrets[key] as string).length <= 4096;
-  const optionalMpesaSecretsValid = ['initiatorName', 'securityCredential'].every(key => secrets[key] === undefined || (typeof secrets[key] === 'string' && (secrets[key] as string).length <= 4096));
+  const validMpesaReconciliationSecrets = validSecret('initiatorName') && validSecret('securityCredential');
   return provider === 'mpesa'
-    ? validSecret('consumerKey') && validSecret('consumerSecret') && validSecret('passkey') && optionalMpesaSecretsValid
+    ? validSecret('consumerKey') && validSecret('consumerSecret') && validSecret('passkey') && validMpesaReconciliationSecrets
     : validSecret('apiToken');
 }

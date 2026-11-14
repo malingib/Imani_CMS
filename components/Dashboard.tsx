@@ -69,9 +69,9 @@ const Dashboard: React.FC<DashboardProps> = ({
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       monthly.set(key, (monthly.get(key) || 0) + transaction.amount);
     });
-    return Array.from(monthly.entries()).sort(([a], [b]) => a.localeCompare(b)).slice(-12).map(([key, tithes]) => {
+    return Array.from(monthly.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([key, tithes]) => {
       const [year, month] = key.split('-').map(Number);
-      return { name: new Date(year, month - 1, 1).toLocaleDateString('en-KE', { month: 'short' }), tithes };
+      return { name: new Date(year, month - 1, 1).toLocaleDateString('en-KE', { month: 'short', year: '2-digit' }), tithes };
     });
   }, [lifetimeTitheTransactions]);
 
@@ -157,8 +157,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         <section className="min-w-0 rounded-xl border border-slate-200 bg-white p-5 xl:col-span-3" aria-labelledby="giving-trend-heading">
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 id="giving-trend-heading" className="text-base font-semibold text-slate-900">Tithe income trend</h2>
-              <p className="mt-1 text-sm text-slate-500">Monthly totals from recorded tithe income</p>
+              <h2 id="giving-trend-heading" className="text-base font-semibold text-slate-900">Lifetime tithe income</h2>
+              <p className="mt-1 text-sm text-slate-500">Monthly totals across all recorded tithe payments</p>
             </div>
             <button onClick={() => onNavigate('REPORTS')} className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary hover:underline">View reports <ChevronRight size={15} /></button>
           </div>

@@ -6,7 +6,6 @@ import {
   ArrowLeft, CheckCircle2, Globe
 } from 'lucide-react';
 import { User as UserType, AppView } from '../types';
-import { generateDailyVerse } from '../services/geminiService';
 import { ImaniLogoIcon } from './Sidebar';
 import { useAuth } from '../src/lib/supabase-auth';
 import { mapSupabaseUserToAppUser } from '../src/lib/app-user';
@@ -59,31 +58,29 @@ const Login: React.FC<LoginProps> = ({ onLogin, onNavigateLegal }) => {
   const [fade, setFade] = useState(true);
   const [progress, setProgress] = useState(0);
 
-  const fetchAiVerse = async () => {
-    setFade(false);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    try {
-      const raw = await generateDailyVerse();
-      if (raw) {
-        const parts = raw.split('|');
-        if (parts.length >= 2) {
-          setCurrentVerse({ text: parts[0].trim(), ref: parts[1].trim() });
-        }
-      } else throw new Error();
-    } catch (e) {
-      setCurrentVerse(FALLBACK_VERSES[Math.floor(Math.random() * FALLBACK_VERSES.length)]);
-    }
-    setProgress(0);
-    setFade(true);
-  };
-
   useEffect(() => {
-    fetchAiVerse();
-    const vInterval = setInterval(fetchAiVerse, VERSE_INTERVAL);
-    const pInterval = setInterval(() => {
-      setProgress(prev => (prev >= 100 ? 100 : prev + (100 / (VERSE_INTERVAL / 100))));
+    let transitionTimer: ReturnType<typeof setTimeout> | undefined;
+    const verseInterval = setInterval(() => {
+      setFade(false);
+      transitionTimer = setTimeout(() => {
+        setCurrentVerse(previous => {
+          const currentIndex = FALLBACK_VERSES.findIndex(verse => verse.ref === previous.ref);
+          return FALLBACK_VERSES[(currentIndex + 1) % FALLBACK_VERSES.length];
+        });
+        setProgress(0);
+        setFade(true);
+      }, 350);
+    }, VERSE_INTERVAL);
+
+    const progressInterval = setInterval(() => {
+      setProgress(previous => previous >= 100 ? 100 : previous + (100 / (VERSE_INTERVAL / 100)));
     }, 100);
-    return () => { clearInterval(vInterval); clearInterval(pInterval); };
+
+    return () => {
+      clearInterval(verseInterval);
+      clearInterval(progressInterval);
+      if (transitionTimer) clearTimeout(transitionTimer);
+    };
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {

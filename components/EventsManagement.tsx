@@ -145,9 +145,9 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
           <p className="text-slate-500 mt-2 text-lg">Manage church events and track attendance.</p>
         </div>
         <div className="flex gap-3">
-          {currentUser?.role !== UserRole.MEMBER && (
-            {!isReadOnly && <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 text-xs sm:text-sm">
-               <Plus size={20} /> Schedule Event
+          {!isReadOnly && currentUser?.role !== UserRole.MEMBER && (
+            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 text-xs sm:text-sm">
+              <Plus size={20} /> Schedule Event
             </button>
           )}
         </div>

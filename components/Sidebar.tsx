@@ -19,6 +19,7 @@ interface SidebarProps {
   churches?: { id: string; name: string }[];
   activeChurchId?: string | null;
   onChurchSwitch?: (id: string | null) => void;
+  activeContext?: 'workspace' | 'platform';
 }
 
 export const ImaniLogoIcon = ({ className = "w-full h-full" }: { className?: string }) => (
@@ -48,10 +49,12 @@ const adminItems = [
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
-  currentView, setView, currentUser, branches, onBranchChange, onLogout, isOpen, onClose,
+  currentView, setView, currentUser, branches, onBranchChange, onLogout, isOpen, onClose, activeContext = 'workspace',
 }) => {
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
-  const filteredItems = adminItems.filter(item => item.roles.includes(currentUser.role));
+  const platformOnlyViews: AppView[] = ['PLATFORM_DASHBOARD', 'TENANTS', 'INVITATIONS', 'PLATFORM_SETTINGS'];
+  const filteredItems = adminItems.filter(item => item.roles.includes(currentUser.role)
+    && (activeContext === 'platform' || !platformOnlyViews.includes(item.id as AppView)));
 
   return (
     <aside className={`imani-sidebar

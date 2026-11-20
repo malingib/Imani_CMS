@@ -67,19 +67,28 @@ Deno.serve(async (req: Request) => {
   if (!apiKey) return respond(503, { error: "AI service is not configured." });
 
   try {
-    const upstream = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({ contents: [{ parts: [{ text: message.trim() }] }] }),
-        signal: AbortSignal.timeout(25_000),
-      },
-    );
-    if (!upstream.ok) {
-      console.error("Gemini upstream returned", upstream.status);
-      return respond(upstream.status === 429 ? 429 : 502, {
-        error: upstream.status === 429 ? "AI provider rate limit reached. Try again shortly." : "AI provider request failed.",
+    let upstream: Response | null = null;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      upstream = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: message.trim() }] }],
+            generationConfig: { maxOutputTokens: 1_000, temperature: 0.2 },
+          }),
+          signal: AbortSignal.timeout(25_000),
+        },
+      );
+      if (upstream.status !== 503 || attempt === 2) break;
+      await new Promise(resolve => setTimeout(resolve, 300 * (2 ** attempt)));
+    }
+    if (!upstream?.ok) {
+      const status = upstream?.status ?? 502;
+      console.error("Gemini upstream returned", status);
+      return respond(status === 429 ? 429 : 502, {
+        error: status === 429 ? "AI provider rate limit reached. Try again shortly." : "AI provider request failed.",
       });
     }
     const data = await upstream.json();

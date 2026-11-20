@@ -93,7 +93,6 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
         let query = client.from("transactions").select("*").is("deleted_at", null);
         if (churchId) query = query.eq("church_id", churchId);
         if (signal && typeof query.abortSignal === "function") query = query.abortSignal(signal);
-        if (signal && typeof query.abortSignal === "function") query = query.abortSignal(signal);
         const { data, error } = await query
           .order("date", { ascending: false })
           .order("created_at", { ascending: false })
@@ -115,6 +114,7 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
           .eq("category", "Income")
           .is("deleted_at", null);
         if (churchId) query = query.eq("church_id", churchId);
+        if (signal && typeof query.abortSignal === "function") query = query.abortSignal(signal);
         const { data, error } = await query
           .order("date", { ascending: false })
           .range(start, start + pageSize - 1);

@@ -405,3 +405,9 @@ verify_jwt = false
 
 [functions.invite-claim]
 verify_jwt = false
+
+
+# Gemini requests require a valid Supabase access token; the handler also
+# verifies the user and enforces a distributed per-user application limit.
+[functions.gemini]
+verify_jwt = true

@@ -1,97 +1,147 @@
-import { handleCors, corsHeaders } from '../_shared/cors.ts';
+import { handleCors, corsHeaders } from "../_shared/cors.ts";
 
-const SUPABASE_URL = Deno.env.get('VITE_SUPABASE_URL') ?? Deno.env.get('SUPABASE_URL');
-const SERVICE_ROLE_KEY = Deno.env.get('SERVICE_ROLE_KEY');
-const EMAILJS_PUBLIC_KEY = Deno.env.get('EMAILJS_PUBLIC_KEY');
-const EMAILJS_SERVICE_ID = Deno.env.get('EMAILJS_SERVICE_ID');
-const EMAILJS_TEMPLATE_PASSWORD_RESET_ID = Deno.env.get('EMAILJS_TEMPLATE_PASSWORD_RESET_ID');
-const APP_URL = Deno.env.get('VITE_APP_URL') ?? Deno.env.get('APP_URL');
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SERVICE_ROLE_KEY") ?? "";
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
+const EMAIL_FROM = Deno.env.get("EMAIL_FROM") ?? "";
+const APP_URL = Deno.env.get("APP_URL") ?? "";
 
-const JSON_HEADERS = { 'Content-Type': 'application/json', ...corsHeaders };
+const JSON_HEADERS = { "Content-Type": "application/json", ...corsHeaders };
 
-function badRequest(message: string) {
-  return new Response(JSON.stringify({ error: message }), { status: 400, headers: JSON_HEADERS });
+function respond(status: number, body: Record<string, unknown>) {
+  return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
 }
 
-function serverError(message: string) {
-  return new Response(JSON.stringify({ error: message }), { status: 500, headers: JSON_HEADERS });
+async function hashKey(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
 }
 
-Deno.serve(async (req) => {
+async function consumeRateLimit(key: string, limit: number): Promise<boolean> {
+  const response = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/rpc/consume_password_reset_rate_limit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+    },
+    body: JSON.stringify({
+      p_key_hash: await hashKey(key),
+      p_limit: limit,
+      p_window_seconds: 900,
+    }),
+    signal: AbortSignal.timeout(5_000),
+  });
+  if (!response.ok) throw new Error("Password reset rate-limit check failed.");
+  return (await response.json()) === true;
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  })[char] ?? char);
+}
+
+Deno.serve(async (req: Request) => {
   const cors = handleCors(req);
   if (cors) return cors;
-
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: JSON_HEADERS });
+  if (req.method !== "POST") return respond(405, { error: "Method not allowed." });
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !RESEND_API_KEY || !EMAIL_FROM || !APP_URL) {
+    return respond(503, { success: false, error: "Password reset email service is not configured." });
   }
 
-  if (!SUPABASE_URL || !SERVICE_ROLE_KEY || !EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_PASSWORD_RESET_ID || !APP_URL) {
-    return serverError('Server email reset configuration is incomplete');
-  }
-
+  const declaredLength = Number(req.headers.get("content-length") ?? 0);
+  if (declaredLength > 4_096) return respond(413, { success: false, error: "Request is too large." });
   let payload: unknown;
   try {
-    payload = await req.json();
+    const raw = await req.text();
+    if (new TextEncoder().encode(raw).byteLength > 4_096) return respond(413, { success: false, error: "Request is too large." });
+    payload = JSON.parse(raw);
   } catch {
-    return badRequest('Invalid JSON body');
+    return respond(400, { success: false, error: "Invalid request body." });
   }
 
-  const email = typeof payload === 'object' && payload !== null && 'email' in payload ? (payload as any).email : null;
-  if (!email || typeof email !== 'string') {
-    return badRequest('A valid email is required');
+  const rawEmail = typeof payload === "object" && payload !== null && "email" in payload
+    ? (payload as { email?: unknown }).email
+    : null;
+  if (typeof rawEmail !== "string" || rawEmail.length > 254) {
+    return respond(400, { success: false, error: "A valid email is required." });
+  }
+  const email = rawEmail.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return respond(400, { success: false, error: "A valid email is required." });
+  }
+
+  const ip = req.headers.get("cf-connecting-ip")
+    || req.headers.get("x-real-ip")
+    || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || "unknown";
+  try {
+    const [emailAllowed, ipAllowed] = await Promise.all([
+      consumeRateLimit(`email:${email}`, 5),
+      consumeRateLimit(`ip:${ip}`, 20),
+    ]);
+    if (!emailAllowed || !ipAllowed) {
+      return respond(429, { success: false, error: "Too many reset requests. Please wait 15 minutes before trying again." });
+    }
+  } catch (error) {
+    console.error("Password reset rate-limit check failed", error instanceof Error ? error.message : "Unknown error");
+    return respond(503, { success: false, error: "Unable to process the reset request right now. Please try again later." });
   }
 
   try {
-    const resetResponse = await fetch(`${SUPABASE_URL.replace(/\/$/, '')}/auth/v1/admin/generate_link`, {
-      method: 'POST',
+    const resetResponse = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/auth/v1/admin/generate_link`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         apikey: SERVICE_ROLE_KEY,
         Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
       },
-      body: JSON.stringify({
-        type: 'recovery',
-        email,
-        redirect_to: `${APP_URL}/login`,
-      }),
+      body: JSON.stringify({ type: "recovery", email, redirect_to: `${APP_URL.replace(/\/$/, "")}/login` }),
+      signal: AbortSignal.timeout(10_000),
     });
 
-    const resetJson = await resetResponse.json();
     if (!resetResponse.ok) {
-      // Return generic success to prevent account enumeration
-      console.warn('password-reset: generate_link failed for', email, resetJson?.error || resetJson?.msg);
-      return new Response(JSON.stringify({ success: true, message: 'If an account exists, a reset link has been sent.' }), { headers: JSON_HEADERS });
+      // Keep the same response for unknown addresses to prevent account enumeration.
+      return respond(200, { success: true, message: "If an account exists, reset instructions will be sent." });
     }
 
+    const resetJson = await resetResponse.json();
     const actionLink = resetJson?.data?.properties?.action_link || resetJson?.properties?.action_link;
-    if (!actionLink || typeof actionLink !== 'string') {
-      console.warn('password-reset: no action_link in response for', email);
-      return new Response(JSON.stringify({ success: true, message: 'If an account exists, a reset link has been sent.' }), { headers: JSON_HEADERS });
+    if (typeof actionLink !== "string" || !actionLink.startsWith("https://")) {
+      return respond(200, { success: true, message: "If an account exists, reset instructions will be sent." });
     }
 
-    const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const safeEmail = escapeHtml(email);
+    const safeLink = escapeHtml(actionLink);
+    const html = `<!doctype html><html><body style="margin:0;background:#f4f7f6;font-family:Arial,sans-serif;color:#173b3a"><main style="max-width:560px;margin:40px auto;background:#fff;padding:36px;border:1px solid #dfe9e5;border-radius:12px"><p style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#58726d">Imani CMS</p><h1 style="font-size:24px">Reset your password</h1><p>A password reset was requested for ${safeEmail}.</p><p style="margin:28px 0"><a href="${safeLink}" style="display:inline-block;padding:13px 20px;background:#173b3a;color:#fff;text-decoration:none;border-radius:7px">Reset password</a></p><p style="font-size:12px;color:#58726d">If you did not request this, you can ignore this email. The link is single-use and expires automatically.</p></main></body></html>`;
+    const text = `A password reset was requested for ${email}. Reset your password using this link: ${actionLink}. If you did not request this, ignore this email.`;
+
+    const emailResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": `imani-password-reset-${crypto.randomUUID()}`,
+      },
       body: JSON.stringify({
-        service_id: EMAILJS_SERVICE_ID,
-        template_id: EMAILJS_TEMPLATE_PASSWORD_RESET_ID,
-        user_id: EMAILJS_PUBLIC_KEY,
-        template_params: {
-          to_email: email,
-          reset_link: actionLink,
-        },
+        from: EMAIL_FROM,
+        to: [email],
+        subject: "Reset your Imani CMS password",
+        html,
+        text,
       }),
+      signal: AbortSignal.timeout(15_000),
     });
 
     if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error('EmailJS error', errorText);
-      return serverError('Failed to send password reset email');
+      console.error("Password reset email provider failed", emailResponse.status);
+      return respond(503, { success: false, error: "Unable to send reset instructions right now. Please try again later." });
     }
 
-    return new Response(JSON.stringify({ success: true }), { headers: JSON_HEADERS });
+    return respond(200, { success: true, message: "If an account exists, reset instructions will be sent." });
   } catch (error) {
-    console.error('Password reset function failed', error);
-    return serverError('Unable to process password reset request');
+    console.error("Password reset request failed", error instanceof Error ? error.message : "Unknown error");
+    return respond(503, { success: false, error: "Unable to process the reset request right now. Please try again later." });
   }
 });

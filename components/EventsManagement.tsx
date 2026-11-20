@@ -32,6 +32,7 @@ const EVENT_TYPE_CONFIG: Record<ChurchEventType, { icon: any, color: string, lab
 };
 
 const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, currentUser, onAddEvent, onUpdateEvent, onDeleteEvent, onUpdateAttendance }) => {
+  const isReadOnly = currentUser?.role === UserRole.STAFF;
   const [viewMode, setViewMode] = useState<'GRID' | 'CALENDAR'>('GRID');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState<string | null>(null);
@@ -144,9 +145,9 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
           <p className="text-slate-500 mt-2 text-lg">Manage church events and track attendance.</p>
         </div>
         <div className="flex gap-3">
-          {currentUser?.role !== UserRole.MEMBER && (
+          {!isReadOnly && currentUser?.role !== UserRole.MEMBER && (
             <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 text-xs sm:text-sm">
-               <Plus size={20} /> Schedule Event
+              <Plus size={20} /> Schedule Event
             </button>
           )}
         </div>
@@ -271,15 +272,15 @@ const EventsManagement: React.FC<EventsManagementProps> = ({ events, members, cu
                       <Eye size={14} className="mr-1.5 inline" aria-hidden="true" />Details
                     </button>
                     {currentUser?.role !== UserRole.MEMBER && <>
-                      <button type="button" onClick={() => { setEditingEvent(event); setNewEvent({ ...event }); }} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
+                      {!isReadOnly && <button type="button" onClick={() => { setEditingEvent(event); setNewEvent({ ...event }); }} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
                         <Edit2 size={14} className="mr-1.5 inline" aria-hidden="true" />Edit
-                      </button>
-                      <button type="button" onClick={() => setShowAttendanceModal(event.id)} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
+                      </button>}
+                      {!isReadOnly && <button type="button" onClick={() => setShowAttendanceModal(event.id)} className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary">
                         <UserCheck size={14} className="mr-1.5 inline" aria-hidden="true" />Attendance
-                      </button>
-                      <button type="button" onClick={() => void handleDeleteEvent(event.id)} className="min-h-10 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700">
+                      </button>}
+                      {!isReadOnly && <button type="button" onClick={() => void handleDeleteEvent(event.id)} className="min-h-10 rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700">
                         <Trash2 size={14} className="mr-1.5 inline" aria-hidden="true" />Delete
-                      </button>
+                      </button>}
                     </>}
                   </div>
                 </div>

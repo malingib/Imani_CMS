@@ -93,7 +93,16 @@ export function createChurchAdministrationService(client: SupabaseClient) {
     async setRole(membershipId: string, role: MembershipAdminRow['role']) {
       const { data, error } = await client.rpc('admin_set_membership_role', { p_membership_id: membershipId, p_role: role });
       if (error) throw new Error(error.message);
-      return data as MembershipAdminRow;
+      const updated = data as MembershipAdminRow;
+      const { data: authData } = await client.auth.getUser();
+      if (authData.user?.id === updated.user_id) {
+        const { error: refreshError } = await client.auth.refreshSession();
+        if (refreshError) {
+          await client.auth.signOut({ scope: 'local' });
+          throw new Error('Role changed successfully. Please sign in again to refresh your access.');
+        }
+      }
+      return updated;
     },
 
     async setStatus(membershipId: string, status: MembershipAdminRow['status']) {

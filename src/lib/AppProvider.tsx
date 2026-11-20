@@ -27,6 +27,7 @@ interface AppState {
   loading: LoadingState;
   currentUser: User | null;
   members: Member[];
+  allMembers: Member[];
   transactions: Transaction[];
   dashboardTransactions: Transaction[];
   lifetimeTitheTransactions: Transaction[];
@@ -90,6 +91,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loading: 'auth-loading',
     currentUser: null,
     members: [],
+    allMembers: [],
     transactions: [],
     dashboardTransactions: [],
     lifetimeTitheTransactions: [],
@@ -198,16 +200,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
     const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     Promise.all([
-      appDataService.loadChurchAppData(churchId),
-      appDataService.loadAllTransactions(churchId),
-      appDataService.loadDashboardTransactions(churchId, dateKey(start), dateKey(end)),
-      appDataService.loadLifetimeTitheTransactions(churchId),
+      appDataService.loadChurchAppData(churchId, 0, 100, controller.signal),
+      appDataService.loadAllMembers(churchId, controller.signal),
+      appDataService.loadAllTransactions(churchId, controller.signal),
+      appDataService.loadDashboardTransactions(churchId, dateKey(start), dateKey(end), controller.signal),
+      appDataService.loadLifetimeTitheTransactions(churchId, controller.signal),
     ])
-      .then(([data, transactions, dashboardTransactions, lifetimeTitheTransactions]) => {
+      .then(([data, allMembers, transactions, dashboardTransactions, lifetimeTitheTransactions]) => {
         if (!controller.signal.aborted) {
           setState(prev => ({
             ...prev,
             ...data,
+            allMembers,
             transactions,
             dashboardTransactions,
             lifetimeTitheTransactions,

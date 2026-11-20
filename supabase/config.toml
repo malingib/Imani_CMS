@@ -405,3 +405,19 @@ verify_jwt = false
 
 [functions.invite-claim]
 verify_jwt = false
+
+
+# Gemini requests require a valid Supabase access token; the handler also
+# verifies the user and enforces a distributed per-user application limit.
+[functions.gemini]
+verify_jwt = true
+
+
+# Invitation delivery is authenticated and authorised against current server-side membership.
+[functions.send-invitation]
+verify_jwt = true
+
+
+# Public recovery endpoint: no user session is required; the handler validates input and rate-limits.
+[functions.password-reset]
+verify_jwt = false

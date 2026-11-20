@@ -19,8 +19,7 @@ npm run dev
 | `npm run build` | Production build |
 | `npm run typecheck` | TypeScript type checking |
 | `npm run test:run` | Run Vitest unit tests |
-| `npm run lint` | Lint check |
-
+| 
 ## Architecture
 
 - **Frontend:** React 19 + TypeScript + Vite
@@ -37,27 +36,29 @@ See `.env.example` for required variables.
 
 | Role | Scope | Capabilities |
 |------|-------|-------------|
-| SUPER_ADMIN | Configured installation | Technical/support access to the configured church; no platform-wide tenant browsing |
+| SUPER_ADMIN | Platform-wide | Manage client registry, subscriptions, restrictions, suspensions, platform integrations and enter authorised church workspaces |
 | ADMIN | Church-wide | Manage members, events, finances, groups, settings |
 | PASTOR | Church-wide (limited) | Manage members, sermons, groups; view finance |
 | TREASURER | Finance | Finance workflows and reports |
 | SECRETARY | Operations | Manage members, events, communications |
+| STAFF | Limited church workspace | Read-only calendar and group directory; no member, finance or communications access |
 | MEMBER | No dashboard access | Member records are managed by authorised church staff; member self-service is not available |
 
-Database RLS and server-side role checks remain enabled. The database retains church ownership IDs and membership-backed policies for compatibility and defense in depth; the application does not provide tenant switching.
+Database RLS and server-side role checks remain enabled. Church staff are resolved through active `church_memberships`; browser-supplied tenant IDs are not trusted. Platform owners can enter client workspaces through a server-authorised tenant selection flow. Platform navigation and routes are restricted to platform context and are not exposed inside a tenant workspace.
 
-## Single-Church Deployment
+## Multi-Tenant Deployment
 
-- Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-- Set `VITE_CHURCH_ID` to the church record assigned to this installation when using a `SUPER_ADMIN` account or when an account has more than one active church membership.
-- If a normal user has exactly one active church membership, Imani resolves that church automatically.
-- The platform owner console manages client workspaces; authorised church staff operate within their church/client workspace.
-- Removing member self-service does not delete church member records, financial history, or historical database rows.
+- Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for the connected Imani Supabase project.
+- Platform owners sign in to the platform console and manage clients through the Tenant Registry.
+- Church staff resolve their tenant from trusted user app metadata plus an active `church_memberships` row; the browser cannot select an arbitrary tenant ID.
+- Suspended and archived clients are blocked from church operations. Platform owners can review account status and restore eligible clients from the platform console.
+- Member self-service is disabled. Member records, financial history and historical records remain managed by authorised church staff.
+- New staff access is invitation-based; do not enable public self-registration in production.
 
 ## Provider Setup
 
 1. **Supabase** — Create a project at supabase.com, copy your URL + anon key
-2. **Gemini AI** (optional) — Get an API key from Google AI Studio, store it as a Supabase secret
+2. **Gemini AI** (optional) — Get an API key from Google AI Studio, store it as the `GEMINI_API_KEY` Supabase secret; the Edge Function uses `gemini-3.5-flash-lite` with bounded output and transient-503 backoff
 3. **M-Pesa** (optional) — Configure via the Settings page after login
 
 ```env
@@ -65,14 +66,24 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+### Authentication hardening
+
+Before production rollout, enable Supabase Auth leaked-password protection in the project Auth security settings. The live Security Advisor currently reports this control as disabled; this is a dashboard-level setting and is not changed by the repository migrations.
+
+### Transactional email (Edge Functions)
+
+Invitation and password-reset messages are sent server-side through Resend. Configure these as Supabase Edge Function secrets; never expose them as Vite/browser variables:
+
+```sh
+supabase secrets set RESEND_API_KEY=... EMAIL_FROM="Imani CMS <no-reply@your-verified-domain>"
+supabase secrets set APP_URL=https://your-imani-domain
+```
+
+The sending domain must be verified with Resend. The password-reset endpoint is public by design, returns non-enumerating responses, and applies hashed per-email and per-IP rate limits. Staff invitation delivery requires a valid JWT and a current active ADMIN membership or current SUPER_ADMIN role. Deploy `send-invitation` and `password-reset` after applying their migrations.
+
 ## Admin User Setup
 
-1. Sign up at the app URL — the first user is auto-assigned as church admin
-2. Subsequent users are invited by existing admins
-3. Or create manually via the Supabase Dashboard SQL Editor:
-
-```sql
--- Insert into auth.users first, then:
-INSERT INTO church_members (church_id, user_id, role)
-VALUES ('church-uuid', 'user-uuid', 'ADMIN');
-```
+1. Provision the initial platform owner through the secured Supabase administration process.
+2. Platform owners create client workspaces and invite the first church administrator.
+3. Church administrators invite additional staff using the supported invitation workflow.
+4. Membership roles are managed through the server-authorised membership RPCs; do not write role claims or membership rows directly from a browser client.

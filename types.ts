@@ -29,6 +29,7 @@ export enum UserRole {
   PASTOR = 'PASTOR',
   TREASURER = 'TREASURER',
   SECRETARY = 'SECRETARY',
+  STAFF = 'STAFF',
   MEMBER = 'MEMBER'
 }
 

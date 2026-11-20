@@ -215,6 +215,30 @@ describe("createChurchAppDataService", () => {
     expect(calls).toContain("transactions.range:0:999");
   });
 
+  it("loads every active member for aggregate dashboards", async () => {
+    const calls: string[] = [];
+    const rowsByTable: Record<string, unknown[]> = {
+      members: [{
+        id: "member-101", first_name: "Ada", last_name: "Lovelace",
+        phone: "0700000000", email: "ada@example.invalid", location: "Nairobi",
+        groups: [], status: "Active", join_date: "2026-01-01",
+      }],
+    };
+    const service = createChurchAppDataService({
+      from(table: string) { return createQuery(rowsByTable[table] ?? [], table, calls); },
+      rpc() { return { then() { return Promise.resolve({ data: null, error: null }); } }; },
+    });
+
+    const result = await service.loadAllMembers("church-1");
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("member-101");
+    expect(calls).toContain("members.eq:church_id:church-1");
+    expect(calls).toContain("members.is:deleted_at:null");
+    expect(calls).toContain("members.order:created_at:desc");
+    expect(calls).toContain("members.range:0:999");
+  });
+
   it("loads all dashboard transactions within the date window, scoped to the church", async () => {
     const calls: string[] = [];
     const rowsByTable: Record<string, unknown[]> = { transactions: [{

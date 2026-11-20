@@ -5,6 +5,7 @@ import {
   Building2, ChevronDown, ShieldCheck, CreditCard, Receipt, Globe, Network
 } from 'lucide-react';
 import { AppView, User, UserRole } from '../types';
+import { getVisibleViewsForContext } from '../src/lib/view-routing';
 
 interface SidebarProps {
   currentView: AppView;
@@ -19,6 +20,7 @@ interface SidebarProps {
   churches?: { id: string; name: string }[];
   activeChurchId?: string | null;
   onChurchSwitch?: (id: string | null) => void;
+  activeContext?: 'workspace' | 'platform';
 }
 
 export const ImaniLogoIcon = ({ className = "w-full h-full" }: { className?: string }) => (
@@ -36,9 +38,9 @@ const adminItems = [
   { id: 'DASHBOARD', label: 'Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.TREASURER, UserRole.SECRETARY] },
   { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
   { id: 'FINANCE', label: 'Finance Hub', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER, UserRole.SUPER_ADMIN] },
-  { id: 'EVENTS', label: 'Calendar', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
+  { id: 'EVENTS', label: 'Calendar', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN, UserRole.STAFF] },
   { id: 'COMMUNICATION', label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
-  { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
+  { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.STAFF] },
   { id: 'REPORTS', label: 'Reports', icon: BarChart3, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.TREASURER] },
   { id: 'ANALYTICS', label: 'Analytics', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
   { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
@@ -48,10 +50,11 @@ const adminItems = [
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({
-  currentView, setView, currentUser, branches, onBranchChange, onLogout, isOpen, onClose,
+  currentView, setView, currentUser, branches, onBranchChange, onLogout, isOpen, onClose, activeContext = 'workspace',
 }) => {
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
-  const filteredItems = adminItems.filter(item => item.roles.includes(currentUser.role));
+  const visibleViews = new Set(getVisibleViewsForContext(adminItems.map(item => item.id as AppView), activeContext));
+  const filteredItems = adminItems.filter(item => item.roles.includes(currentUser.role) && visibleViews.has(item.id as AppView));
 
   return (
     <aside className={`imani-sidebar

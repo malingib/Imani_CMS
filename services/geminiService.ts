@@ -1,4 +1,5 @@
 import { supabase } from "../src/lib/supabase";
+import { buildFinanceAnalysisPayload } from "../src/lib/finance-ai-payload";
 
 type GeminiResponse = {
   response?: string;
@@ -93,7 +94,13 @@ export const analyzeFinances = async (transactions: unknown[]) => {
   if (!Array.isArray(transactions)) throw new Error("Transactions must be an array");
   if (transactions.length === 0) return { summary: "No transactions to analyze", recommendations: [] };
 
-  const text = await invokeGemini(`Analyze these church transactions from a Kenyan context. Return strict JSON with keys "summary" and "recommendations" where recommendations is an array of strings. Transactions: ${JSON.stringify(transactions)}`);
+  // Never send names, phone numbers, member IDs, references or notes to the AI provider.
+  const aggregate = buildFinanceAnalysisPayload(transactions);
+  if (aggregate.transactionCount === 0) {
+    return { summary: "No valid financial transactions to analyze", recommendations: [] };
+  }
+
+  const text = await invokeGemini(`Analyze this anonymised, aggregated church finance summary in a Kenyan context. Do not attempt to identify individuals or infer personal details. Return strict JSON with keys "summary" and "recommendations" where recommendations is an array of strings. Financial summary: ${JSON.stringify(aggregate)}`);
   try {
     const parsed = JSON.parse(text);
     if (!parsed.summary || !Array.isArray(parsed.recommendations)) {

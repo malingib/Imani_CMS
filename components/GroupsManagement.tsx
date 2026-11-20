@@ -13,13 +13,14 @@ import { Member, Group } from '../types';
 interface GroupsManagementProps {
   members: Member[];
   groups: Group[];
+  readOnly?: boolean;
   onCreateGroup?: (group: Group) => void;
   onUpdateGroup?: (group: Group) => Promise<void>;
   onDeleteGroup?: (id: string) => Promise<void>;
   onOpenCommunications?: () => void;
 }
 
-const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: propGroups, onCreateGroup, onUpdateGroup, onDeleteGroup, onOpenCommunications }) => {
+const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: propGroups, readOnly = false, onCreateGroup, onUpdateGroup, onDeleteGroup, onOpenCommunications }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewingMembersGroup, setViewingMembersGroup] = useState<Group | null>(null);
@@ -96,12 +97,12 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
           <p className="text-slate-500 mt-2 text-lg">Manage groups and fellowships.</p>
         </div>
         <div className="flex gap-3">
-          <button 
+          {!readOnly && <button 
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-2 px-6 py-2.5 bg-brand-primary text-white rounded-xl font-black hover:bg-slate-800 transition-all shadow-sm shadow-indigo-100"
           >
             <Plus size={20} /> Create Group
-          </button>
+          </button>}
         </div>
       </header>
 
@@ -120,7 +121,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredGroups.map(group => {
-          const groupMemberCount = getMemberCount(group.name);
+          const groupMemberCount = readOnly ? (group.memberCount || 0) : getMemberCount(group.name);
           const target = Math.max(group.memberCount || 10, 10);
           const progress = Math.min((groupMemberCount / target) * 100, 100);
 
@@ -132,12 +133,12 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
                     {getCategoryIcon(group.name)}
                   </div>
                   <div className="flex gap-1">
-                    {onUpdateGroup && (
+                    {!readOnly && onUpdateGroup && (
                       <button onClick={() => { setEditingGroup(group); setEditGroupName(group.name); setEditGroupDesc(group.description); }} className="p-2 text-slate-300 hover:text-brand-primary transition-colors" title="Edit Group">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                       </button>
                     )}
-                    {onDeleteGroup && (
+                    {!readOnly && onDeleteGroup && (
                       <button onClick={() => { onDeleteGroup(group.id); }} className="p-2 text-slate-300 hover:text-rose-500 transition-colors" title="Delete Group">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                       </button>
@@ -168,7 +169,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
                 </div>
               </div>
 
-              <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex gap-2">
+              {!readOnly && <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex gap-2">
                  <button 
                   onClick={() => setViewingMembersGroup(group)}
                   className="flex-1 py-3 bg-white border border-slate-200 text-brand-primary rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-all shadow-sm"
@@ -181,7 +182,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
                  >
                    <MessageSquare size={18}/>
                  </button>
-              </div>
+              </div>}
             </div>
           );
         })}

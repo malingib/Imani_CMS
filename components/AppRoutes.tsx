@@ -7,6 +7,7 @@ import { useChurch } from '../src/lib/church-context';
 import { ROUTES, pathToView } from '../src/lib/router';
 import { AppView, UserRole } from '../types';
 import { getDefaultViewForUserRole } from '../src/lib/app-user';
+import { isPlatformOnlyView } from '../src/lib/view-routing';
 import { SkeletonBlock, ToastContainer, ErrorFallback } from './shared';
 import NotificationsPanel from './NotificationsPanel';
 import PlatformShell from './PlatformShell';
@@ -21,11 +22,19 @@ const ROLE_VIEWS: Record<UserRole, AppView[]> = {
   PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS', 'SETTINGS'],
   TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS', 'SETTINGS'],
   SECRETARY: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'SETTINGS'],
+  STAFF: ['EVENTS', 'GROUPS'],
   MEMBER: [],
 };
 
-function canAccess(view: AppView, role: UserRole, _viewingPlatform: boolean): boolean {
+function canAccess(view: AppView, role: UserRole, activeContext: 'platform' | 'workspace'): boolean {
+  if (isPlatformOnlyView(view)) return role === UserRole.SUPER_ADMIN && activeContext === 'platform';
   return (ROLE_VIEWS[role] || []).includes(view);
+}
+
+function PlatformGuard({ children }: { children: React.ReactNode }) {
+  const { currentUser, viewingChurch } = useApp();
+  if (currentUser?.role !== UserRole.SUPER_ADMIN || viewingChurch) return <Navigate to={ROUTES.DASHBOARD.path} replace />;
+  return <>{children}</>;
 }
 
 const Login = lazy(() => import('./Login'));
@@ -61,7 +70,7 @@ function Protected({ children }: { children: React.ReactNode }) {
 }
 
 const AccountShell = () => {
-  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, dashboardTransactions, lifetimeTitheTransactions, events, budgets, recurringExpenses, communications, groups, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
+  const { currentUser, toasts, viewingChurch, handleSelectChurch, members, allMembers, handleAddMember, handleAddMembersBulk, handleUpdateMember, handleDeleteMember, transactions, dashboardTransactions, lifetimeTitheTransactions, events, budgets, recurringExpenses, communications, groups, auditLogs, handleAddTransaction, handleUpdateTransaction, handleDeleteTransaction, handleSetBudget, handleAddRecurring, handleSendBroadcast, handleAddEvent, handleUpdateEvent, handleDeleteEvent, handleUpdateAttendance, addToast, createAudit, notifications, handleAddGroup, handleUpdateGroup, handleDeleteGroup, handleMarkNotificationRead, handleMarkAllNotificationsRead, handleDeleteNotification } = useApp();
   const { activeChurchId, activeChurch } = useChurch();
   const location = useLocation();
   const navigateToPath = useNavigate();
@@ -99,7 +108,8 @@ const AccountShell = () => {
 
   const navigate = (v: AppView) => navigateToPath(ROUTES[v].path);
   const currentView = pathToView(location.pathname) || 'DASHBOARD';
-  const viewAllowed = canAccess(currentView, currentUser.role, false);
+  const activeContext: 'platform' | 'workspace' = currentUser.role === UserRole.SUPER_ADMIN && !viewingChurch ? 'platform' : 'workspace';
+  const viewAllowed = canAccess(currentView, currentUser.role, activeContext);
   const restrictionKeyByView: Partial<Record<AppView, string>> = {
     MEMBERS: 'members', FINANCE: 'finance', COMMUNICATION: 'communications',
     EVENTS: 'events', GROUPS: 'events',
@@ -153,7 +163,7 @@ const AccountShell = () => {
   return (
     <>
       <div className={`fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`} onClick={() => setSidebarOpen(false)} />
-      <Sidebar currentView={pathToView(location.pathname) || 'DASHBOARD'} setView={(v) => { navigate(v); setSidebarOpen(false); }} currentUser={currentUser} branches={[]} onBranchChange={() => {}} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar activeContext="workspace" currentView={pathToView(location.pathname) || 'DASHBOARD'} setView={(v) => { navigate(v); setSidebarOpen(false); }} currentUser={currentUser} branches={[]} onBranchChange={() => {}} onLogout={handleLogout} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main className="imani-workspace flex-1 min-h-screen lg:ml-64 transition-all bg-[#f4f7f6]">
         <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-4 backdrop-blur-md sm:h-20 sm:px-6 lg:px-10">
           <div className="flex items-center gap-4"><button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg" aria-label="Open navigation"><Menu size={22} /></button><div className="lg:hidden w-8 h-8"><ImaniLogoIcon /></div><div className="hidden lg:block">
@@ -179,16 +189,16 @@ const AccountShell = () => {
             {(!viewAllowed || !featureAllowed) ? <div className="flex flex-col items-center justify-center py-20"><div className="bg-white rounded-[2.5rem] shadow-xl p-12 max-w-md text-center"><h2 className="text-2xl font-black text-brand-primary mb-2">Access Restricted</h2><p className="text-slate-500 font-medium">{!featureAllowed ? 'This module has been disabled by the platform administrator for this client.' : 'Your role does not have permission to view this page.'}</p><button onClick={() => navigate(getDefaultViewForUserRole(currentUser.role))} className="mt-6 px-6 py-3 bg-brand-primary text-white rounded-full font-black text-sm hover:bg-brand-primary/90 transition-all">Go to your dashboard</button></div></div> : (
               <Routes>
 
-                  <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <PlatformDashboard onOpenClient={() => { if (activeChurchId) { handleSelectChurch(activeChurchId); navigate('DASHBOARD'); } else navigate('TENANTS'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
-                  <Route path={ROUTES.TENANTS.path} element={currentUser.role === UserRole.SUPER_ADMIN ? <TenantRegistry onImpersonate={(id) => { handleSelectChurch(id); navigate('DASHBOARD'); }} /> : <Navigate to={ROUTES.DASHBOARD.path} replace />} />
-                  <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={members} transactions={transactions} dashboardTransactions={dashboardTransactions} lifetimeTitheTransactions={lifetimeTitheTransactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
+                  <Route path={ROUTES.PLATFORM_DASHBOARD.path} element={<PlatformGuard><PlatformDashboard onOpenClient={() => { if (activeChurchId) { handleSelectChurch(activeChurchId); navigate('DASHBOARD'); } else navigate('TENANTS'); }} /></PlatformGuard>} />
+                  <Route path={ROUTES.TENANTS.path} element={<PlatformGuard><TenantRegistry onImpersonate={(id) => { handleSelectChurch(id); navigate('DASHBOARD'); }} /></PlatformGuard>} />
+                  <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={allMembers} transactions={transactions} dashboardTransactions={dashboardTransactions} lifetimeTitheTransactions={lifetimeTitheTransactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
                   <Route path={ROUTES.FINANCE.path} element={<FinanceReporting churchId={churchId || ''} transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
-                  <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} onOpenCommunications={() => navigate('COMMUNICATION')} />} />
+                  <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} readOnly={currentUser.role === UserRole.STAFF} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} onOpenCommunications={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
                   <Route path={ROUTES.COMMUNICATION.path} element={<CommunicationCenter members={members} churchId={churchId || ''} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} addToast={addToast} />} />
                   <Route path={ROUTES.REPORTS.path} element={<ReportsCenter transactions={transactions} members={members} events={events} />} />
-                  <Route path={ROUTES.ANALYTICS.path} element={<DemographicsAnalysis members={members} events={events} />} />
+                  <Route path={ROUTES.ANALYTICS.path} element={<DemographicsAnalysis members={allMembers} events={events} />} />
                   <Route path={ROUTES.SETTINGS.path} element={currentUser.role === UserRole.ADMIN || currentUser.role === UserRole.SUPER_ADMIN ? <ChurchAdministration currentUserRole={currentUser.role} churchId={churchId || ''} /> : <Settings currentUserRole={currentUser.role} churchId={churchId || ''} />} />
                   <Route path={ROUTES.AUDIT_LOGS.path} element={<AuditLogs logs={auditLogs} />} />
                   <Route path={ROUTES.BILLING.path} element={<Billing churchId={churchId || ''} />} />

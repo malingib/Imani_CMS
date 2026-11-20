@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePlatformView, createToastRecord } from "./view-routing";
+import { normalizePlatformView, createToastRecord, getVisibleViewsForContext, isPlatformOnlyView } from "./view-routing";
 
 describe("normalizePlatformView", () => {
   it("keeps non-platform views when viewing church", () => {
@@ -12,7 +12,7 @@ describe("normalizePlatformView", () => {
     expect(normalizePlatformView(true, "PLATFORM_DASHBOARD")).toBe("DASHBOARD");
     expect(normalizePlatformView(true, "TENANTS")).toBe("DASHBOARD");
     expect(normalizePlatformView(true, "INVITATIONS")).toBe("DASHBOARD");
-    expect(normalizePlatformView(true, "BILLING")).toBe("DASHBOARD");
+    expect(normalizePlatformView(true, "BILLING")).toBe("BILLING");
     expect(normalizePlatformView(true, "PLATFORM_SETTINGS")).toBe("DASHBOARD");
   });
 
@@ -36,5 +36,19 @@ describe("createToastRecord", () => {
   it("accepts different toast types", () => {
     expect(createToastRecord("t2", "Error!", "error").type).toBe("error");
     expect(createToastRecord("t3", "Info", "info").type).toBe("info");
+  });
+});
+
+describe("workspace context navigation", () => {
+  it("never exposes platform-only views in a tenant workspace", () => {
+    const views = ["DASHBOARD", "MEMBERS", "PLATFORM_DASHBOARD", "TENANTS", "INVITATIONS", "PLATFORM_SETTINGS"] as const;
+    const visible = getVisibleViewsForContext([...views], "workspace");
+    expect(visible).toEqual(["DASHBOARD", "MEMBERS"]);
+    expect(visible.some(isPlatformOnlyView)).toBe(false);
+  });
+
+  it("retains platform navigation only in platform context", () => {
+    const views = ["PLATFORM_DASHBOARD", "TENANTS", "DASHBOARD"] as const;
+    expect(getVisibleViewsForContext([...views], "platform")).toEqual([...views]);
   });
 });

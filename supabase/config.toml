@@ -411,3 +411,8 @@ verify_jwt = false
 # verifies the user and enforces a distributed per-user application limit.
 [functions.gemini]
 verify_jwt = true
+
+
+# Invitation delivery is authenticated and authorised against current server-side membership.
+[functions.send-invitation]
+verify_jwt = true

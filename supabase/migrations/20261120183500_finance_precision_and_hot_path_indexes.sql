@@ -25,6 +25,8 @@ BEGIN
 END;
 $$;
 
+DROP VIEW public.active_transactions;
+
 ALTER TABLE public.transactions
   ALTER COLUMN amount TYPE numeric(14,2) USING amount::numeric(14,2);
 ALTER TABLE public.budgets
@@ -32,6 +34,17 @@ ALTER TABLE public.budgets
   ALTER COLUMN spent TYPE numeric(14,2) USING spent::numeric(14,2);
 ALTER TABLE public.recurring_expenses
   ALTER COLUMN amount TYPE numeric(14,2) USING amount::numeric(14,2);
+
+-- Restore the security-invoker view after the underlying amount type change.
+CREATE VIEW public.active_transactions
+WITH (security_invoker = true)
+AS
+SELECT id, member_id, member_name, amount, type, payment_method, date,
+       reference, category, notes, phone_number, source, created_at,
+       updated_at, church_id, deleted_at
+FROM public.transactions
+WHERE deleted_at IS NULL;
+GRANT ALL ON public.active_transactions TO anon, authenticated, service_role;
 
 CREATE INDEX IF NOT EXISTS members_church_created_active_idx
   ON public.members (church_id, created_at DESC)

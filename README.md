@@ -58,7 +58,7 @@ Database RLS and server-side role checks remain enabled. Church staff are resolv
 ## Provider Setup
 
 1. **Supabase** — Create a project at supabase.com, copy your URL + anon key
-2. **Gemini AI** (optional) — Get an API key from Google AI Studio, store it as a Supabase secret
+2. **Gemini AI** (optional) — Get an API key from Google AI Studio, store it as the `GEMINI_API_KEY` Supabase secret; the Edge Function uses `gemini-3.5-flash-lite` with bounded output and transient-503 backoff
 3. **M-Pesa** (optional) — Configure via the Settings page after login
 
 ```env

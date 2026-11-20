@@ -7,6 +7,7 @@ import { useChurch } from '../src/lib/church-context';
 import { ROUTES, pathToView } from '../src/lib/router';
 import { AppView, UserRole } from '../types';
 import { getDefaultViewForUserRole } from '../src/lib/app-user';
+import { isPlatformOnlyView } from '../src/lib/view-routing';
 import { SkeletonBlock, ToastContainer, ErrorFallback } from './shared';
 import NotificationsPanel from './NotificationsPanel';
 import PlatformShell from './PlatformShell';
@@ -24,10 +25,8 @@ const ROLE_VIEWS: Record<UserRole, AppView[]> = {
   MEMBER: [],
 };
 
-const PLATFORM_ONLY_VIEWS: AppView[] = ['PLATFORM_DASHBOARD', 'TENANTS', 'INVITATIONS', 'PLATFORM_SETTINGS'];
-
 function canAccess(view: AppView, role: UserRole, activeContext: 'platform' | 'workspace'): boolean {
-  if (PLATFORM_ONLY_VIEWS.includes(view)) return role === UserRole.SUPER_ADMIN && activeContext === 'platform';
+  if (isPlatformOnlyView(view)) return role === UserRole.SUPER_ADMIN && activeContext === 'platform';
   return (ROLE_VIEWS[role] || []).includes(view);
 }
 

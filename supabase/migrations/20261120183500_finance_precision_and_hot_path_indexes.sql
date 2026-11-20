@@ -44,5 +44,3 @@ CREATE INDEX IF NOT EXISTS members_church_created_active_idx
   WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS church_events_church_date_idx
   ON public.church_events (church_id, date DESC);
-CREATE INDEX IF NOT EXISTS audit_logs_church_created_idx
-  ON public.audit_logs (church_id, created_at DESC);

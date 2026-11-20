@@ -36,8 +36,6 @@ ALTER TABLE public.recurring_expenses
 CREATE INDEX IF NOT EXISTS members_church_created_active_idx
   ON public.members (church_id, created_at DESC)
   WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS budgets_church_month_idx
-  ON public.budgets (church_id, month);
 CREATE INDEX IF NOT EXISTS recurring_expenses_church_next_date_idx
   ON public.recurring_expenses (church_id, next_date);
 CREATE INDEX IF NOT EXISTS audit_logs_church_created_idx

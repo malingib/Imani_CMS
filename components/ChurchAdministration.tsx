@@ -37,6 +37,7 @@ const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) =>
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<InvitationRole>('STAFF');
   const [inviteSaving, setInviteSaving] = useState(false);
+  const [pendingInvitationId, setPendingInvitationId] = useState<string | null>(null);
   const [profile, setProfile] = useState({ name: '', address: '', phone: '', email: '', website: '', logoUrl: '' });
 
   const isAdmin = currentUserRole === UserRole.ADMIN || currentUserRole === UserRole.SUPER_ADMIN;
@@ -93,11 +94,28 @@ const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) =>
     if (!churchId || !inviteEmail.trim()) return;
     setInviteSaving(true); setMessage('');
     try {
-      await service.createInvitation({ churchId, email: inviteEmail, role: inviteRole, expiresDays: 7 });
+      let invitationId = pendingInvitationId;
+      if (!invitationId) {
+        const created = await service.createInvitation({ churchId, email: inviteEmail, role: inviteRole, expiresDays: 7 }) as { id?: string };
+        if (!created?.id) throw new Error('Invitation was created without a usable identifier.');
+        invitationId = created.id;
+        setPendingInvitationId(invitationId);
+      }
+
+      const { data, error } = await supabase.functions.invoke('send-invitation', {
+        body: { invitationId, churchId },
+      });
+      if (error) throw new Error(error.message);
+      if (!data?.success) throw new Error(data?.error || 'Invitation email delivery failed.');
+
+      setPendingInvitationId(null);
       setInviteEmail(''); setInviteRole('STAFF'); setInviteOpen(false);
-      setMessage('Invitation created. The recipient can complete account setup from the invitation link.');
-    } catch (error) { setMessage(error instanceof Error ? error.message : 'Unable to create invitation.'); }
-    finally { setInviteSaving(false); }
+      setMessage('Invitation email sent successfully. The recipient can complete account setup using the secure link.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to send invitation email.');
+    } finally {
+      setInviteSaving(false);
+    }
   };
 
   const changeRole = async (row: MembershipAdminRow, role: InvitationRole) => {
@@ -164,7 +182,7 @@ const ChurchAdministration: React.FC<Props> = ({ currentUserRole, churchId }) =>
 
       {tab === 'SYSTEM' && <Settings currentUserRole={currentUserRole} churchId={churchId} />}
 
-      {inviteOpen && <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-5" onMouseDown={() => setInviteOpen(false)}><form onSubmit={createInvite} onMouseDown={e => e.stopPropagation()} className="w-full max-w-lg bg-white rounded-xl p-7 sm:p-9 shadow-sm space-y-6"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Team invitation</p><h3 className="text-2xl font-black text-slate-800 mt-1">Invite someone</h3></div><button type="button" onClick={() => setInviteOpen(false)} className="p-2 rounded-xl hover:bg-slate-100"><X /></button></div><label className="block space-y-2"><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email address</span><input required type="email" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="person@example.com" className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none focus:ring-2 focus:ring-brand-primary/20" /></label><label className="block space-y-2"><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Role</span><select value={inviteRole} onChange={e => setInviteRole(e.target.value as InvitationRole)} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold">{(Object.keys(ROLE_LABELS) as InvitationRole[]).map(role => <option key={role} value={role}>{ROLE_LABELS[role]}</option>)}</select></label><div className="p-4 rounded-2xl bg-slate-50 text-xs text-slate-500 leading-relaxed flex gap-3"><Shield size={17} className="shrink-0 text-brand-primary"/>Invitation records are created through the protected server-side administration function and audited.</div><button disabled={inviteSaving} className="w-full py-4 rounded-2xl bg-brand-primary text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">{inviteSaving ? <Loader2 className="animate-spin" size={17}/> : <UserPlus size={17}/>} {inviteSaving ? 'Creating invitation…' : 'Create invitation'}</button></form></div>}
+      {inviteOpen && <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-5" onMouseDown={() => setInviteOpen(false)}><form onSubmit={createInvite} onMouseDown={e => e.stopPropagation()} className="w-full max-w-lg bg-white rounded-xl p-7 sm:p-9 shadow-sm space-y-6"><div className="flex items-center justify-between"><div><p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Team invitation</p><h3 className="text-2xl font-black text-slate-800 mt-1">Invite someone</h3></div><button type="button" onClick={() => setInviteOpen(false)} className="p-2 rounded-xl hover:bg-slate-100"><X /></button></div><label className="block space-y-2"><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email address</span><input required type="email" value={inviteEmail} onChange={e => { setInviteEmail(e.target.value); setPendingInvitationId(null); }} placeholder="person@example.com" className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none focus:ring-2 focus:ring-brand-primary/20" /></label><label className="block space-y-2"><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Role</span><select value={inviteRole} onChange={e => { setInviteRole(e.target.value as InvitationRole); setPendingInvitationId(null); }} className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold">{(Object.keys(ROLE_LABELS) as InvitationRole[]).map(role => <option key={role} value={role}>{ROLE_LABELS[role]}</option>)}</select></label><div className="p-4 rounded-2xl bg-slate-50 text-xs text-slate-500 leading-relaxed flex gap-3"><Shield size={17} className="shrink-0 text-brand-primary"/>Invitation records are created through the protected server-side administration function and audited.</div><button disabled={inviteSaving} className="w-full py-4 rounded-2xl bg-brand-primary text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50">{inviteSaving ? <Loader2 className="animate-spin" size={17}/> : <UserPlus size={17}/>} {inviteSaving ? 'Creating invitation…' : 'Create invitation'}</button></form></div>}
     </div>
   );
 };

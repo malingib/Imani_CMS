@@ -33,14 +33,12 @@ ALTER TABLE public.budgets
 ALTER TABLE public.recurring_expenses
   ALTER COLUMN amount TYPE numeric(14,2) USING amount::numeric(14,2);
 
-CREATE INDEX IF NOT EXISTS transactions_church_date_active_idx
-  ON public.transactions (church_id, date DESC)
-  WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS transactions_church_created_active_idx
-  ON public.transactions (church_id, created_at DESC)
-  WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS members_church_created_active_idx
   ON public.members (church_id, created_at DESC)
   WHERE deleted_at IS NULL;
-CREATE INDEX IF NOT EXISTS church_events_church_date_idx
-  ON public.church_events (church_id, date DESC);
+CREATE INDEX IF NOT EXISTS budgets_church_month_idx
+  ON public.budgets (church_id, month);
+CREATE INDEX IF NOT EXISTS recurring_expenses_church_next_date_idx
+  ON public.recurring_expenses (church_id, next_date);
+CREATE INDEX IF NOT EXISTS audit_logs_church_created_idx
+  ON public.audit_logs (church_id, created_at DESC);

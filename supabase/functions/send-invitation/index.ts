@@ -58,7 +58,9 @@ Deno.serve(async (req: Request) => {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const isPlatformOwner = user.app_metadata?.role === "SUPER_ADMIN";
+  const { data: currentUserData, error: currentUserError } = await admin.auth.admin.getUserById(user.id);
+  if (currentUserError || !currentUserData.user) return respond(401, { error: "Your account could not be verified." });
+  const isPlatformOwner = currentUserData.user.app_metadata?.role === "SUPER_ADMIN";
   if (!isPlatformOwner) {
     const { data: membership, error: membershipError } = await admin
       .from("church_memberships")

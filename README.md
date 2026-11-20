@@ -65,6 +65,17 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+### Transactional email (Edge Functions)
+
+Invitation and password-reset messages are sent server-side through Resend. Configure these as Supabase Edge Function secrets; never expose them as Vite/browser variables:
+
+```sh
+supabase secrets set RESEND_API_KEY=... EMAIL_FROM="Imani CMS <no-reply@your-verified-domain>"
+supabase secrets set APP_URL=https://your-imani-domain
+```
+
+The sending domain must be verified with Resend. The password-reset endpoint is public by design, returns non-enumerating responses, and applies hashed per-email and per-IP rate limits. Staff invitation delivery requires a valid JWT and a current active ADMIN membership or current SUPER_ADMIN role. Deploy `send-invitation` and `password-reset` after applying their migrations.
+
 ## Admin User Setup
 
 1. Provision the initial platform owner through the secured Supabase administration process.

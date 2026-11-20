@@ -198,10 +198,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
     const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     Promise.all([
-      appDataService.loadChurchAppData(churchId),
-      appDataService.loadAllTransactions(churchId),
-      appDataService.loadDashboardTransactions(churchId, dateKey(start), dateKey(end)),
-      appDataService.loadLifetimeTitheTransactions(churchId),
+      appDataService.loadChurchAppData(churchId, 0, 100, controller.signal),
+      appDataService.loadAllTransactions(churchId, controller.signal),
+      appDataService.loadDashboardTransactions(churchId, dateKey(start), dateKey(end), controller.signal),
+      appDataService.loadLifetimeTitheTransactions(churchId, controller.signal),
     ])
       .then(([data, transactions, dashboardTransactions, lifetimeTitheTransactions]) => {
         if (!controller.signal.aborted) {

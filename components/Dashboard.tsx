@@ -88,7 +88,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     .slice(0, 6), [transactions]);
 
   return (
-    <div className="imani-dashboard space-y-6 pb-8 text-slate-900">
+    <div className="imani-page imani-page--dashboard imani-dashboard space-y-6 pb-8 text-slate-900">
       <header className="flex flex-col justify-between gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center">
         <div>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">

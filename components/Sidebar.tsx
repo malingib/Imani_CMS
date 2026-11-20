@@ -36,11 +36,11 @@ export const ImaniLogoIcon = ({ className = "w-full h-full" }: { className?: str
 
 const adminItems = [
   { id: 'DASHBOARD', label: 'Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.TREASURER, UserRole.SECRETARY] },
-  { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
+  { id: 'MEMBERS', label: 'Congregation', icon: Users, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN, UserRole.STAFF] },
   { id: 'FINANCE', label: 'Finance Hub', icon: Receipt, roles: [UserRole.ADMIN, UserRole.TREASURER, UserRole.SUPER_ADMIN] },
   { id: 'EVENTS', label: 'Calendar', icon: CalendarDays, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
   { id: 'COMMUNICATION', label: 'Outreach', icon: MessageSquare, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SECRETARY, UserRole.SUPER_ADMIN] },
-  { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
+  { id: 'GROUPS', label: 'Departments', icon: Layers, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.STAFF] },
   { id: 'REPORTS', label: 'Reports', icon: BarChart3, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN, UserRole.TREASURER] },
   { id: 'ANALYTICS', label: 'Analytics', icon: PieChart, roles: [UserRole.ADMIN, UserRole.PASTOR, UserRole.SUPER_ADMIN] },
   { id: 'AUDIT_LOGS', label: 'System Audit', icon: ShieldCheck, roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },

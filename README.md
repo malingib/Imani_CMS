@@ -41,6 +41,7 @@ See `.env.example` for required variables.
 | PASTOR | Church-wide (limited) | Manage members, sermons, groups; view finance |
 | TREASURER | Finance | Finance workflows and reports |
 | SECRETARY | Operations | Manage members, events, communications |
+| STAFF | Limited church workspace | Read-only calendar and group directory; no member, finance or communications access |
 | MEMBER | No dashboard access | Member records are managed by authorised church staff; member self-service is not available |
 
 Database RLS and server-side role checks remain enabled. Church staff are resolved through active `church_memberships`; browser-supplied tenant IDs are not trusted. Platform owners can enter client workspaces through a server-authorised tenant selection flow. Platform navigation and routes are restricted to platform context and are not exposed inside a tenant workspace.

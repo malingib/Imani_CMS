@@ -12,6 +12,30 @@ function respond(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
 }
 
+async function hashKey(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function consumeRateLimit(key: string, limit: number): Promise<boolean> {
+  const response = await fetch(`${SUPABASE_URL.replace(/\/$/, "")}/rest/v1/rpc/consume_password_reset_rate_limit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+    },
+    body: JSON.stringify({
+      p_key_hash: await hashKey(key),
+      p_limit: limit,
+      p_window_seconds: 900,
+    }),
+    signal: AbortSignal.timeout(5_000),
+  });
+  if (!response.ok) throw new Error("Password reset rate-limit check failed.");
+  return (await response.json()) === true;
+}
+
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, char => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -46,6 +70,23 @@ Deno.serve(async (req: Request) => {
   const email = rawEmail.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return respond(400, { success: false, error: "A valid email is required." });
+  }
+
+  const ip = req.headers.get("cf-connecting-ip")
+    || req.headers.get("x-real-ip")
+    || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || "unknown";
+  try {
+    const [emailAllowed, ipAllowed] = await Promise.all([
+      consumeRateLimit(`email:${email}`, 5),
+      consumeRateLimit(`ip:${ip}`, 20),
+    ]);
+    if (!emailAllowed || !ipAllowed) {
+      return respond(429, { success: false, error: "Too many reset requests. Please wait 15 minutes before trying again." });
+    }
+  } catch (error) {
+    console.error("Password reset rate-limit check failed", error instanceof Error ? error.message : "Unknown error");
+    return respond(503, { success: false, error: "Unable to process the reset request right now. Please try again later." });
   }
 
   try {

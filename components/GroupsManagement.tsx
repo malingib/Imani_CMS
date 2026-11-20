@@ -121,7 +121,7 @@ const GroupsManagement: React.FC<GroupsManagementProps> = ({ members, groups: pr
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredGroups.map(group => {
-          const groupMemberCount = getMemberCount(group.name);
+          const groupMemberCount = readOnly ? (group.memberCount || 0) : getMemberCount(group.name);
           const target = Math.max(group.memberCount || 10, 10);
           const progress = Math.min((groupMemberCount / target) * 100, 100);
 

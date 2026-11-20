@@ -5,6 +5,7 @@ import {
   Building2, ChevronDown, ShieldCheck, CreditCard, Receipt, Globe, Network
 } from 'lucide-react';
 import { AppView, User, UserRole } from '../types';
+import { getVisibleViewsForContext } from '../src/lib/view-routing';
 
 interface SidebarProps {
   currentView: AppView;
@@ -52,9 +53,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   currentView, setView, currentUser, branches, onBranchChange, onLogout, isOpen, onClose, activeContext = 'workspace',
 }) => {
   const [isBranchMenuOpen, setIsBranchMenuOpen] = useState(false);
-  const platformOnlyViews: AppView[] = ['PLATFORM_DASHBOARD', 'TENANTS', 'INVITATIONS', 'PLATFORM_SETTINGS'];
-  const filteredItems = adminItems.filter(item => item.roles.includes(currentUser.role)
-    && (activeContext === 'platform' || !platformOnlyViews.includes(item.id as AppView)));
+  const visibleViews = new Set(getVisibleViewsForContext(adminItems.map(item => item.id as AppView), activeContext));
+  const filteredItems = adminItems.filter(item => item.roles.includes(currentUser.role) && visibleViews.has(item.id as AppView));
 
   return (
     <aside className={`imani-sidebar

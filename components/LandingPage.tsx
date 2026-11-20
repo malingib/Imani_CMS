@@ -15,89 +15,117 @@ const areas = [
   { number: '06', title: 'Access control', detail: 'Assign workspace access according to each person’s role.' },
 ];
 
+const navigation = [
+  { label: 'Home', href: '#home' },
+  { label: 'Platform', href: '#platform' },
+  { label: 'Church operations', href: '#operations' },
+  { label: 'Accountability', href: '#stewardship' },
+  { label: 'About Imani', href: '#about' },
+];
+
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMenu = () => setMobileOpen(false);
 
   return (
     <main id="home" className="min-h-screen bg-white font-sans text-[#0c243c] antialiased">
-      <header className="sticky top-0 z-50 border-b border-[#e8e8ef] bg-white">
-        <div className="mx-auto flex min-h-[72px] max-w-7xl items-center justify-between gap-5 px-5 sm:px-8 lg:px-10">
-          <a href="#home" onClick={closeMenu} className="flex items-center gap-3" aria-label="Imani home">
+      <header className="sticky top-0 z-50 border-b border-[#e8e8ef] bg-white/95 backdrop-blur-md">
+        <div className="mx-auto flex min-h-[78px] max-w-7xl items-center justify-between gap-6 px-5 sm:px-8 lg:px-10">
+          <a href="#home" onClick={closeMenu} className="flex shrink-0 items-center gap-3" aria-label="Imani home">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#5955d1] p-2"><ImaniLogoIcon /></span>
             <span>
               <span className="block font-[Outfit] text-[22px] font-bold leading-none tracking-[-0.04em]">Imani</span>
-              <span className="mt-1 block text-[10px] text-[#696981]">Church management</span>
+              <span className="mt-1 block text-[10px] font-medium tracking-[0.02em] text-[#696981]">Church Management System</span>
             </span>
           </a>
 
-          <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
-            <a href="#platform" className="text-[13px] font-medium text-[#55566b] hover:text-[#5955d1]">Platform</a>
-            <a href="#stewardship" className="text-[13px] font-medium text-[#55566b] hover:text-[#5955d1]">Stewardship</a>
+          <nav className="hidden items-center gap-7 xl:flex" aria-label="Main navigation">
+            {navigation.map((item) => (
+              <a key={item.label} href={item.href} className="whitespace-nowrap text-[13px] font-medium text-[#55566b] transition-colors hover:text-[#5955d1]">
+                {item.label}
+              </a>
+            ))}
             <button onClick={onGetStarted} className="inline-flex h-11 items-center gap-2 rounded-full bg-[#5955d1] px-6 text-[13px] font-semibold text-white transition-colors hover:bg-[#4945bd]">
-              Sign in <ArrowRight size={15} />
+              Sign in <ArrowUpRight size={15} />
             </button>
           </nav>
 
-          <button type="button" onClick={() => setMobileOpen((open) => !open)} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#e3e4ec] lg:hidden" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen}>
+          <button type="button" onClick={() => setMobileOpen((open) => !open)} className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#e3e4ec] text-[#0c243c] xl:hidden" aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={mobileOpen}>
             {mobileOpen ? <X size={19} /> : <Menu size={19} />}
           </button>
         </div>
         {mobileOpen && (
-          <nav className="border-t border-[#e8e8ef] bg-white px-5 py-4 lg:hidden" aria-label="Mobile navigation">
-            <div className="flex flex-col gap-1">
-              <a onClick={closeMenu} href="#platform" className="rounded-lg px-3 py-3 text-sm text-[#55566b]">Platform</a>
-              <a onClick={closeMenu} href="#stewardship" className="rounded-lg px-3 py-3 text-sm text-[#55566b]">Stewardship</a>
-              <button onClick={() => { closeMenu(); onGetStarted(); }} className="mt-2 h-11 rounded-full bg-[#5955d1] px-5 text-sm font-semibold text-white">Sign in</button>
+          <nav className="border-t border-[#e8e8ef] bg-white px-5 py-4 shadow-sm xl:hidden" aria-label="Mobile navigation">
+            <div className="mx-auto flex max-w-7xl flex-col gap-1">
+              {navigation.map((item) => (
+                <a key={item.label} onClick={closeMenu} href={item.href} className="rounded-lg px-3 py-3 text-sm font-medium text-[#55566b] transition-colors hover:bg-[#f7f6ff] hover:text-[#5955d1]">{item.label}</a>
+              ))}
+              <button onClick={() => { closeMenu(); onGetStarted(); }} className="mt-2 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#5955d1] px-5 text-sm font-semibold text-white">
+                Sign in <ArrowUpRight size={15} />
+              </button>
             </div>
           </nav>
         )}
       </header>
 
-      <section className="bg-[#f7f5ff]">
-        <div className="mx-auto grid max-w-7xl gap-14 px-5 py-20 sm:px-8 sm:py-28 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-20 lg:px-10">
+      <section className="overflow-hidden bg-[#f7f5ff]">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1fr_0.94fr] lg:gap-16 lg:px-10 lg:py-24">
           <div>
-            <p className="mb-7 text-[12px] font-semibold tracking-[0.04em] text-[#5955d1]">CHURCH MANAGEMENT SOFTWARE</p>
-            <h1 className="max-w-[13ch] font-[Outfit] text-[clamp(3rem,6vw,5.4rem)] font-semibold leading-[0.99] tracking-[-0.055em] text-[#0c243c]">
-              The work of your church, <span className="text-[#5955d1]">in good order.</span>
+            <p className="mb-7 inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.13em] text-[#5955d1]">
+              <span className="h-px w-8 bg-[#5955d1]" /> Church management, made clearer
+            </p>
+            <h1 className="max-w-[13ch] font-[Outfit] text-[clamp(3rem,5.8vw,5.2rem)] font-semibold leading-[0.99] tracking-[-0.055em] text-[#0c243c]">
+              Bring your church operations <span className="text-[#5955d1]">together.</span>
             </h1>
             <p className="mt-7 max-w-xl text-[16px] leading-8 text-[#62647a]">
-              Manage member information, attendance, giving, events and church finances in one workspace. Imani gives your team a shared place to keep records current and responsibilities clear.
+              Manage members, attendance, giving, events and church finances from one organised workspace. Give your team the tools to keep records accurate and everyday responsibilities clear.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-4">
               <button onClick={onGetStarted} className="inline-flex min-h-12 items-center gap-3 rounded-full bg-[#5955d1] px-7 text-sm font-semibold text-white transition-colors hover:bg-[#4945bd]">
-                Open your workspace <ArrowRight size={16} />
+                Get started <ArrowRight size={16} />
               </button>
-              <a href="#platform" className="px-2 py-3 text-sm font-semibold text-[#34354d] underline decoration-[#c7c4ec] underline-offset-4 hover:text-[#5955d1]">See what Imani manages</a>
+              <a href="#platform" className="inline-flex min-h-12 items-center px-3 text-sm font-semibold text-[#34354d] transition-colors hover:text-[#5955d1]">
+                Explore the platform <ArrowUpRight size={15} className="ml-2" />
+              </a>
             </div>
           </div>
 
-          <div className="border-l border-[#d9d5f0] pl-7 sm:pl-10 lg:ml-4">
-            <p className="mb-8 text-[11px] font-semibold tracking-[0.08em] text-[#5955d1]">ONE CHURCH WORKSPACE</p>
-            <div className="space-y-0">
-              {areas.slice(0, 4).map((area) => (
-                <div key={area.number} className="flex gap-5 border-t border-[#dedbed] py-5">
-                  <span className="pt-1 font-mono text-[11px] text-[#8886a2]">{area.number}</span>
-                  <div>
-                    <h2 className="font-[Outfit] text-[19px] font-semibold tracking-[-0.02em]">{area.title}</h2>
-                    <p className="mt-1 text-[13px] leading-6 text-[#696981]">{area.detail}</p>
-                  </div>
-                </div>
-              ))}
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-[2rem] bg-[#dcd8fa] opacity-60 blur-2xl" aria-hidden="true" />
+            <div className="relative overflow-hidden rounded-[1.5rem] border border-white bg-white p-2.5 shadow-[0_24px_70px_-34px_rgba(27,25,74,0.32)]">
+              <img
+                src="https://images.unsplash.com/photo-1765947382559-93260e5d6c89?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000"
+                alt="A congregation gathered together inside a church"
+                className="aspect-[5/4] w-full rounded-[1.1rem] object-cover"
+                loading="eager"
+                fetchPriority="high"
+              />
             </div>
-            <p className="mt-6 text-[12px] leading-6 text-[#77778b]">Designed for the people responsible for running your church, from administrators to finance teams and ministry leaders.</p>
+            <p className="mt-4 text-right text-[11px] font-medium tracking-[0.04em] text-[#77778b]">ONE CONNECTED WORKSPACE FOR CHURCH LIFE</p>
           </div>
         </div>
       </section>
 
-      <section id="platform" className="bg-white py-20 sm:py-28">
+      <section id="operations" className="bg-white py-16 sm:py-20">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 md:grid-cols-[0.8fr_1.2fr] md:items-center md:gap-16 lg:px-10">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.06em] text-[#5955d1]">BUILT AROUND YOUR WORK</p>
+            <h2 className="mt-4 max-w-md font-[Outfit] text-[clamp(2.1rem,3.8vw,3.2rem)] font-semibold leading-[1.06] tracking-[-0.045em]">The details behind a well-run church.</h2>
+          </div>
+          <p className="max-w-2xl text-[15px] leading-8 text-[#696981]">
+            From the first member record to weekly giving and financial reports, Imani brings essential administration into one place. Your teams can work from shared information instead of disconnected notebooks and spreadsheets.
+          </p>
+        </div>
+      </section>
+
+      <section id="platform" className="bg-[#f8f8fc] py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
           <div className="grid gap-8 border-b border-[#e8e8ef] pb-12 md:grid-cols-[0.8fr_1.2fr] md:items-end md:gap-16">
             <div>
-              <p className="text-[11px] font-semibold tracking-[0.06em] text-[#5955d1]">THE PLATFORM</p>
-              <h2 className="mt-4 max-w-md font-[Outfit] text-[clamp(2.2rem,4vw,3.5rem)] font-semibold leading-[1.04] tracking-[-0.045em]">The records your team works with every week.</h2>
+              <p className="text-[11px] font-semibold tracking-[0.06em] text-[#5955d1]">THE IMANI PLATFORM</p>
+              <h2 className="mt-4 max-w-md font-[Outfit] text-[clamp(2.2rem,4vw,3.5rem)] font-semibold leading-[1.04] tracking-[-0.045em]">The tools your church needs to stay organised.</h2>
             </div>
-            <p className="max-w-xl text-[15px] leading-8 text-[#696981]">Imani brings core church administration into one place. Each area has a clear purpose, so teams spend less time reconciling separate records and more time following through.</p>
+            <p className="max-w-xl text-[15px] leading-8 text-[#696981]">A connected set of practical tools for church administration, financial stewardship and day-to-day coordination.</p>
           </div>
           <div className="grid gap-x-14 sm:grid-cols-2">
             {areas.map((area) => (
@@ -128,13 +156,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      <footer className="border-t border-[#e8e8ef] bg-white">
+      <footer id="about" className="border-t border-[#e8e8ef] bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-8 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10">
           <a href="#home" className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#5955d1] p-2"><ImaniLogoIcon /></span>
             <span className="font-[Outfit] text-xl font-bold tracking-[-0.04em]">Imani</span>
           </a>
-          <p className="text-[12px] text-[#696981]">Church management software</p>
+          <p className="text-[12px] text-[#696981]">Church management software by MobiWave Innovations</p>
           <a href="mailto:support@imani.co.ke" className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#5955d1] hover:text-[#4945bd]">Contact support <ArrowUpRight size={13} /></a>
         </div>
       </footer>

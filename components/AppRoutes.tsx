@@ -22,6 +22,7 @@ const ROLE_VIEWS: Record<UserRole, AppView[]> = {
   PASTOR: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'GROUPS', 'REPORTS', 'ANALYTICS', 'SETTINGS'],
   TREASURER: ['DASHBOARD', 'FINANCE', 'REPORTS', 'SETTINGS'],
   SECRETARY: ['DASHBOARD', 'MEMBERS', 'EVENTS', 'COMMUNICATION', 'SETTINGS'],
+  STAFF: ['EVENTS', 'GROUPS'],
   MEMBER: [],
 };
 
@@ -193,7 +194,7 @@ const AccountShell = () => {
                   <Route path={ROUTES.DASHBOARD.path} element={<Dashboard members={allMembers} transactions={transactions} dashboardTransactions={dashboardTransactions} lifetimeTitheTransactions={lifetimeTitheTransactions} events={events} onNavigate={navigate} onAddMember={() => navigate('MEMBERS')} onSendSMS={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.MEMBERS.path} element={<Membership members={members} onAddMember={handleAddMember} onAddMembersBulk={handleAddMembersBulk} onUpdateMember={handleUpdateMember} onDeleteMember={handleDeleteMember} transactions={transactions} events={events} currentUserRole={currentUser.role} />} />
                   <Route path={ROUTES.FINANCE.path} element={<FinanceReporting churchId={churchId || ''} transactions={transactions} members={members} onAddTransaction={handleAddTransaction} onUpdateTransaction={handleUpdateTransaction} onDeleteTransaction={handleDeleteTransaction} budgets={budgets} onSetBudget={handleSetBudget} recurringExpenses={recurringExpenses} onAddRecurring={handleAddRecurring} currentUserRole={currentUser.role} />} />
-                  <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} onOpenCommunications={() => navigate('COMMUNICATION')} />} />
+                  <Route path={ROUTES.GROUPS.path} element={<GroupsManagement members={members} groups={groups} readOnly={currentUser.role === UserRole.STAFF} onCreateGroup={handleAddGroup} onUpdateGroup={handleUpdateGroup} onDeleteGroup={handleDeleteGroup} onOpenCommunications={() => navigate('COMMUNICATION')} />} />
                   <Route path={ROUTES.EVENTS.path} element={<EventsManagement events={events} members={members} currentUser={currentUser} onAddEvent={handleAddEvent} onUpdateEvent={handleUpdateEvent} onDeleteEvent={handleDeleteEvent} onUpdateAttendance={handleUpdateAttendance} />} />
                   <Route path={ROUTES.COMMUNICATION.path} element={<CommunicationCenter members={members} churchId={churchId || ''} logs={communications} onSendBroadcast={handleSendBroadcast} currentUser={currentUser} addToast={addToast} />} />
                   <Route path={ROUTES.REPORTS.path} element={<ReportsCenter transactions={transactions} members={members} events={events} />} />

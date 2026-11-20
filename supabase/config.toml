@@ -416,3 +416,8 @@ verify_jwt = true
 # Invitation delivery is authenticated and authorised against current server-side membership.
 [functions.send-invitation]
 verify_jwt = true
+
+
+# Public recovery endpoint: no user session is required; the handler validates input and rate-limits.
+[functions.password-reset]
+verify_jwt = false

@@ -66,6 +66,10 @@ VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
 
+### Authentication hardening
+
+Before production rollout, enable Supabase Auth leaked-password protection in the project Auth security settings. The live Security Advisor currently reports this control as disabled; this is a dashboard-level setting and is not changed by the repository migrations.
+
 ### Transactional email (Edge Functions)
 
 Invitation and password-reset messages are sent server-side through Resend. Configure these as Supabase Edge Function secrets; never expose them as Vite/browser variables:

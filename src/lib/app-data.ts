@@ -45,13 +45,14 @@ function scopedQuery(
   table: string,
   churchId?: string | null,
   select = "*",
-  options?: { range?: { start: number; end: number }; order?: { column: string; ascending: boolean } }
+  options?: { range?: { start: number; end: number }; order?: { column: string; ascending: boolean }; signal?: AbortSignal }
 ): PromiseLike<QueryResult<unknown>> {
   let query = client.from(table).select(select);
   if (churchId) query = query.eq("church_id", churchId);
   if (table === "members" || table === "transactions") query = query.is("deleted_at", null);
   if (options?.order) query = query.order(options.order.column, { ascending: options.order.ascending });
   if (options?.range) query = query.range(options.range.start, options.range.end);
+  if (options?.signal && typeof query.abortSignal === "function") query = query.abortSignal(options.signal);
   return query;
 }
 
@@ -61,10 +62,11 @@ async function runQuery<T>(query: PromiseLike<QueryResult<unknown>>, mapRow: (ro
   return (data || []).map(mapRow);
 }
 
-async function getCount(client: SupabaseLikeClient, table: string, churchId?: string | null): Promise<number> {
+async function getCount(client: SupabaseLikeClient, table: string, churchId?: string | null, signal?: AbortSignal): Promise<number> {
   let query = client.from(table).select("*", { count: "exact", head: true });
   if (churchId) query = query.eq("church_id", churchId);
   if (table === "members" || table === "transactions") query = query.is("deleted_at", null);
+  if (signal && typeof query.abortSignal === "function") query = query.abortSignal(signal);
   const { count, error } = await query;
   if (error) throw new Error(error.message);
   return count ?? 0;
@@ -84,12 +86,14 @@ function mergeEventAttendance(events: ChurchEvent[], attendanceRows: unknown[]) 
 
 export function createChurchAppDataService(client: SupabaseLikeClient) {
   return {
-    async loadAllTransactions(churchId: string): Promise<Transaction[]> {
+    async loadAllTransactions(churchId: string, signal?: AbortSignal): Promise<Transaction[]> {
       const pageSize = 1000;
       const rows: unknown[] = [];
       for (let start = 0; ; start += pageSize) {
         let query = client.from("transactions").select("*").is("deleted_at", null);
         if (churchId) query = query.eq("church_id", churchId);
+        if (signal && typeof query.abortSignal === "function") query = query.abortSignal(signal);
+        if (signal && typeof query.abortSignal === "function") query = query.abortSignal(signal);
         const { data, error } = await query
           .order("date", { ascending: false })
           .order("created_at", { ascending: false })
@@ -102,7 +106,7 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       return rows.map(mapTransaction);
     },
 
-    async loadLifetimeTitheTransactions(churchId: string): Promise<Transaction[]> {
+    async loadLifetimeTitheTransactions(churchId: string, signal?: AbortSignal): Promise<Transaction[]> {
       const pageSize = 1000;
       const rows: unknown[] = [];
       for (let start = 0; ; start += pageSize) {
@@ -122,18 +126,19 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       return rows.map(mapTransaction);
     },
 
-    async loadDashboardTransactions(churchId: string, startDate: string, endDate: string): Promise<Transaction[]> {
+    async loadDashboardTransactions(churchId: string, startDate: string, endDate: string, signal?: AbortSignal): Promise<Transaction[]> {
       let query = client.from("transactions").select("*").is("deleted_at", null).gte("date", startDate).lte("date", endDate);
       if (churchId) query = query.eq("church_id", churchId);
+      if (signal && typeof query.abortSignal === "function") query = query.abortSignal(signal);
       const { data, error } = await query.order("date", { ascending: true });
       if (error) throw new Error(error.message);
       return (data || []).map(mapTransaction);
     },
 
-    async loadChurchAppData(churchId?: string | null, page = 0, pageSize = 100): Promise<PaginatedChurchAppData> {
+    async loadChurchAppData(churchId?: string | null, page = 0, pageSize = 100, signal?: AbortSignal): Promise<PaginatedChurchAppData> {
       const start = page * pageSize;
       const end = start + pageSize - 1;
-      const paginationOpts = { range: { start, end }, order: { column: "created_at", ascending: false } };
+      const paginationOpts = { range: { start, end }, order: { column: "created_at", ascending: false }, signal };
 
       const members = runQuery(scopedQuery(client, "members", churchId, "*", paginationOpts), mapMember);
       const transactions = runQuery(scopedQuery(client, "transactions", churchId, "*", paginationOpts), mapTransaction);
@@ -146,15 +151,15 @@ export function createChurchAppDataService(client: SupabaseLikeClient) {
       const auditLogs = runQuery(scopedQuery(client, "audit_logs", churchId, "*", paginationOpts), mapAuditLog);
       const groups = runQuery(scopedQuery(client, "groups", churchId, "*", paginationOpts), mapGroup);
 
-      const countMembers = getCount(client, "members", churchId);
-      const countTransactions = getCount(client, "transactions", churchId);
-      const countEvents = getCount(client, "church_events", churchId);
-      const countBudgets = getCount(client, "budgets", churchId);
-      const countRecurringExpenses = getCount(client, "recurring_expenses", churchId);
-      const countCommunications = getCount(client, "communications", churchId);
-      const countNotifications = getCount(client, "notifications", churchId);
-      const countAuditLogs = getCount(client, "audit_logs", churchId);
-      const countGroups = getCount(client, "groups", churchId);
+      const countMembers = getCount(client, "members", churchId, signal);
+      const countTransactions = getCount(client, "transactions", churchId, signal);
+      const countEvents = getCount(client, "church_events", churchId, signal);
+      const countBudgets = getCount(client, "budgets", churchId, signal);
+      const countRecurringExpenses = getCount(client, "recurring_expenses", churchId, signal);
+      const countCommunications = getCount(client, "communications", churchId, signal);
+      const countNotifications = getCount(client, "notifications", churchId, signal);
+      const countAuditLogs = getCount(client, "audit_logs", churchId, signal);
+      const countGroups = getCount(client, "groups", churchId, signal);
 
       const [loadedMembers, loadedTransactions, loadedEvents, attendanceResult, loadedBudgets, loadedRecurringExpenses, loadedCommunications, loadedNotifications, loadedAuditLogs, loadedGroups, totalMembers, totalTransactions, totalEvents, totalBudgets, totalRecurringExpenses, totalCommunications, totalNotifications, totalAuditLogs, totalGroups] = await Promise.all([
         members,

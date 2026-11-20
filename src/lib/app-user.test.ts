@@ -15,16 +15,4 @@ describe("limited staff role", () => {
     expect(getDefaultViewForUserRole(UserRole.STAFF)).toBe("EVENTS");
   });
 
-  it("does not grant member, finance or communication views to STAFF", () => {
-    const roleViews: Record<UserRole, string[]> = {
-      [UserRole.SUPER_ADMIN]: [],
-      [UserRole.ADMIN]: [],
-      [UserRole.PASTOR]: [],
-      [UserRole.TREASURER]: [],
-      [UserRole.SECRETARY]: [],
-      [UserRole.STAFF]: ["EVENTS", "GROUPS"],
-      [UserRole.MEMBER]: [],
-    };
-    expect(roleViews[UserRole.STAFF]).toEqual(["EVENTS", "GROUPS"]);
-  });
 });

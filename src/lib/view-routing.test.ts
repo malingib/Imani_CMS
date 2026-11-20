@@ -12,7 +12,7 @@ describe("normalizePlatformView", () => {
     expect(normalizePlatformView(true, "PLATFORM_DASHBOARD")).toBe("DASHBOARD");
     expect(normalizePlatformView(true, "TENANTS")).toBe("DASHBOARD");
     expect(normalizePlatformView(true, "INVITATIONS")).toBe("DASHBOARD");
-    expect(normalizePlatformView(true, "BILLING")).toBe("DASHBOARD");
+    expect(normalizePlatformView(true, "BILLING")).toBe("BILLING");
     expect(normalizePlatformView(true, "PLATFORM_SETTINGS")).toBe("DASHBOARD");
   });
 
